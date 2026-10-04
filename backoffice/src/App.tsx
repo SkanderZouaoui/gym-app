@@ -5,6 +5,7 @@ import { MembersPage } from './pages/MembersPage'
 import { PlansPage } from './pages/PlansPage'
 import { PlanningPage } from './pages/PlanningPage'
 import { AttendancePage } from './pages/AttendancePage'
+import { StatsPage } from './pages/StatsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AppLayout } from './layouts/AppLayout'
 import { RequireAuth } from './components/RequireAuth'
@@ -25,6 +26,7 @@ function App() {
         <Route path="/plans" element={<PlansPage />} />
         <Route path="/planning" element={<PlanningPage />} />
         <Route path="/attendance" element={<AttendancePage />} />
+        <Route path="/stats" element={<StatsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

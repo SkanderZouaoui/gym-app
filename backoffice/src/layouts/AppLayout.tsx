@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { to: '/plans', label: 'Abonnements', icon: 'card_membership' },
   { to: '/planning', label: 'Planning', icon: 'calendar_month' },
   { to: '/attendance', label: 'Présences', icon: 'qr_code_scanner' },
+  { to: '/stats', label: 'Statistiques', icon: 'monitoring' },
   { to: '/settings', label: 'Paramètres', icon: 'settings' },
 ]
 

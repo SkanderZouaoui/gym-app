@@ -22,6 +22,7 @@ import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
 import { LoyaltyModule } from './loyalty/loyalty.module.js';
 import { MessagingModule } from './messaging/messaging.module.js';
 import { ShopModule } from './shop/shop.module.js';
+import { StatsModule } from './stats/stats.module.js';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ShopModule } from './shop/shop.module.js';
     LoyaltyModule,
     MessagingModule,
     ShopModule,
+    StatsModule,
   ],
 })
 export class AppModule {}

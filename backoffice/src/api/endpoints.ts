@@ -156,3 +156,38 @@ export const attendanceApi = {
   getLogs: (branchId: string) =>
     api.get<AttendanceScanLog[]>('/v1/admin/attendance/logs', { params: { branchId } }).then((r) => r.data),
 };
+
+export interface StatsOverview {
+  attendance: {
+    sessionsCount: number;
+    totalCapacity: number;
+    totalBooked: number;
+    fillRate: number;
+    attended: number;
+    noShow: number;
+    noShowRate: number;
+  };
+  revenue: {
+    total: number;
+    byMethod: { method: string; amount: number; count: number }[];
+  };
+  newMembers: {
+    total: number;
+    byDay: { date: string; count: number }[];
+  };
+  retention: {
+    cohortSize: number;
+    retainedCount: number;
+    retentionRate: number;
+    churnRate: number;
+  };
+}
+
+export const statsApi = {
+  getOverview: (branchId: string, from: string, to: string) =>
+    api.get<StatsOverview>('/v1/admin/stats/overview', { params: { branchId, from, to } }).then((r) => r.data),
+  exportPaymentsCsv: (branchId: string, from: string, to: string) =>
+    api
+      .get('/v1/admin/stats/export/payments.csv', { params: { branchId, from, to }, responseType: 'blob' })
+      .then((r) => r.data as Blob),
+};
