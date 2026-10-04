@@ -12,43 +12,44 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model OrganizationSettings {
-  id                 String   @id @default(uuid())
-  name               String
-  branding           Json     @default("{}")
-  features           Json     @default("{}")
-  multiBranchPolicy  Json     @map("multi_branch_policy")
-  attendancePolicy   Json     @map("attendance_policy")
-  version            Int      @default(1)
-  updatedBy          String?  @map("updated_by")
-  updatedAt          DateTime @updatedAt @map("updated_at")
-  createdAt          DateTime @default(now()) @map("created_at")
+  id                String   @id @default(uuid())
+  name              String
+  branding          Json     @default("{}")
+  features          Json     @default("{}")
+  multiBranchPolicy Json     @map("multi_branch_policy")
+  attendancePolicy  Json     @map("attendance_policy")
+  version           Int      @default(1)
+  updatedBy         String?  @map("updated_by")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  createdAt         DateTime @default(now()) @map("created_at")
 
   @@map("organization_settings")
 }
 
 model Branch {
-  id          String   @id @default(uuid())
-  name        String
-  address     String?
-  timezone    String   @default("Africa/Tunis")
-  phone       String?
-  email       String?
-  openingHours Json    @default("{}") @map("opening_hours")
-  maxCapacity Int?     @map("max_capacity")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  name         String
+  address      String?
+  timezone     String   @default("Africa/Tunis")
+  phone        String?
+  email        String?
+  openingHours Json     @default("{}") @map("opening_hours")
+  maxCapacity  Int?     @map("max_capacity")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  rooms             Room[]
-  userBranchRoles   UserBranchRole[]
-  coachBranches     CoachBranch[]
+  rooms               Room[]
+  userBranchRoles     UserBranchRole[]
+  coachBranches       CoachBranch[]
   coachAvailabilities CoachAvailability[]
-  planBranches      PlanBranch[]
-  memberships       Membership[] @relation("HomeBranch")
-  payments          Payment[]
-  classSessions     ClassSession[]
-  coachingSessions  CoachingSession[]
-  users             User[] @relation("HomeBranchUsers")
+  planBranches        PlanBranch[]
+  memberships         Membership[]        @relation("HomeBranch")
+  payments            Payment[]
+  classTemplates      ClassTemplate[]
+  classSessions       ClassSession[]
+  coachingSessions    CoachingSession[]
+  users               User[]              @relation("HomeBranchUsers")
 
   @@map("branches")
 }
@@ -59,8 +60,9 @@ model Room {
   name     String
   capacity Int
 
-  branch        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  classSessions ClassSession[]
+  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  classTemplates ClassTemplate[]
+  classSessions  ClassSession[]
 
   @@index([branchId])
   @@map("rooms")
@@ -84,28 +86,30 @@ enum UserStatus {
 }
 
 model User {
-  id            String     @id @default(uuid())
-  email         String?    @unique
-  phone         String?    @unique
-  passwordHash  String     @map("password_hash")
-  firstName     String     @map("first_name")
-  lastName      String     @map("last_name")
-  photoKey      String?    @map("photo_key")
-  homeBranchId  String?    @map("home_branch_id")
-  status        UserStatus @default(ACTIVE)
-  consents      Json       @default("{}")
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  deletedAt     DateTime?  @map("deleted_at")
+  id           String     @id @default(uuid())
+  email        String?    @unique
+  phone        String?    @unique
+  passwordHash String     @map("password_hash")
+  firstName    String     @map("first_name")
+  lastName     String     @map("last_name")
+  photoKey     String?    @map("photo_key")
+  homeBranchId String?    @map("home_branch_id")
+  status       UserStatus @default(ACTIVE)
+  consents     Json       @default("{}")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
 
-  homeBranch        Branch?            @relation("HomeBranchUsers", fields: [homeBranchId], references: [id])
-  branchRoles       UserBranchRole[]
-  coachProfile      CoachProfile?
-  deviceTokens      DeviceToken[]
-  memberships       Membership[]
-  recordedPayments  Payment[]          @relation("RecordedByUser")
-  bookings          Booking[]
-  refreshTokens     RefreshToken[]
+  homeBranch               Branch?           @relation("HomeBranchUsers", fields: [homeBranchId], references: [id])
+  branchRoles              UserBranchRole[]
+  coachProfile             CoachProfile?
+  deviceTokens             DeviceToken[]
+  memberships              Membership[]
+  recordedPayments         Payment[]         @relation("RecordedByUser")
+  bookings                 Booking[]
+  checkedInBookings        Booking[]         @relation("CheckedInByUser")
+  coachingSessionsAsMember CoachingSession[] @relation("CoachingMember")
+  refreshTokens            RefreshToken[]
 
   @@map("users")
 }
@@ -126,13 +130,16 @@ model UserBranchRole {
 }
 
 model CoachProfile {
-  userId       String  @id @map("user_id")
-  bio          String?
-  specialties  String[]
+  userId      String   @id @map("user_id")
+  bio         String?
+  specialties String[]
 
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coachBranches     CoachBranch[]
-  availabilities    CoachAvailability[]
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coachBranches    CoachBranch[]
+  availabilities   CoachAvailability[]
+  classTemplates   ClassTemplate[]
+  classSessions    ClassSession[]
+  coachingSessions CoachingSession[]
 
   @@map("coach_profiles")
 }
@@ -150,14 +157,14 @@ model CoachBranch {
 }
 
 model CoachAvailability {
-  id          String   @id @default(uuid())
-  coachId     String   @map("coach_id")
-  branchId    String   @map("branch_id")
-  dayOfWeek   Int?     @map("day_of_week") // récurrent: 0-6
-  startsAt    DateTime? @map("starts_at")  // ponctuel
-  endsAt      DateTime? @map("ends_at")
-  startTime   String?  @map("start_time")  // récurrent "HH:mm"
-  endTime     String?  @map("end_time")
+  id        String    @id @default(uuid())
+  coachId   String    @map("coach_id")
+  branchId  String    @map("branch_id")
+  dayOfWeek Int?      @map("day_of_week") // récurrent: 0-6
+  startsAt  DateTime? @map("starts_at") // ponctuel
+  endsAt    DateTime? @map("ends_at")
+  startTime String?   @map("start_time") // récurrent "HH:mm"
+  endTime   String?   @map("end_time")
 
   coach  CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
   branch Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -180,12 +187,12 @@ model DeviceToken {
 }
 
 model RefreshToken {
-  id         String    @id @default(uuid())
-  userId     String    @map("user_id")
-  tokenHash  String    @unique @map("token_hash")
-  revokedAt  DateTime? @map("revoked_at")
-  expiresAt  DateTime  @map("expires_at")
-  createdAt  DateTime  @default(now()) @map("created_at")
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  revokedAt DateTime? @map("revoked_at")
+  expiresAt DateTime  @map("expires_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -225,8 +232,8 @@ model MembershipPlan {
   createdAt               DateTime               @default(now()) @map("created_at")
   updatedAt               DateTime               @updatedAt @map("updated_at")
 
-  branches     PlanBranch[]
-  memberships  Membership[]
+  branches    PlanBranch[]
+  memberships Membership[]
 
   @@map("membership_plans")
 }
@@ -251,21 +258,21 @@ enum MembershipStatus {
 }
 
 model Membership {
-  id                  String            @id @default(uuid())
-  userId              String            @map("user_id")
-  planId              String            @map("plan_id")
-  homeBranchId         String?           @map("home_branch_id")
-  startDate           DateTime          @map("start_date")
-  endDate             DateTime          @map("end_date")
-  status              MembershipStatus  @default(ACTIVE)
-  frozenAccessScope   AccessScope?      @map("frozen_access_scope")
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
+  id                String           @id @default(uuid())
+  userId            String           @map("user_id")
+  planId            String           @map("plan_id")
+  homeBranchId      String?          @map("home_branch_id")
+  startDate         DateTime         @map("start_date")
+  endDate           DateTime         @map("end_date")
+  status            MembershipStatus @default(ACTIVE)
+  frozenAccessScope AccessScope?     @map("frozen_access_scope")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
 
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan     MembershipPlan @relation(fields: [planId], references: [id])
-  homeBranch Branch?      @relation("HomeBranch", fields: [homeBranchId], references: [id])
-  payments Payment[]
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan       MembershipPlan @relation(fields: [planId], references: [id])
+  homeBranch Branch?        @relation("HomeBranch", fields: [homeBranchId], references: [id])
+  payments   Payment[]
 
   @@index([userId])
   @@index([status])
@@ -280,16 +287,16 @@ enum PaymentMethod {
 }
 
 model Payment {
-  id                   String        @id @default(uuid())
-  membershipId         String        @map("membership_id")
-  branchId             String        @map("branch_id")
-  amount               Decimal       @db.Decimal(10, 2)
-  method               PaymentMethod
-  recordedById         String        @map("recorded_by")
-  recordedAt           DateTime      @default(now()) @map("recorded_at")
-  reference            String?
-  externalProviderRef  String?       @map("external_provider_ref")
-  deletedAt            DateTime?     @map("deleted_at")
+  id                  String        @id @default(uuid())
+  membershipId        String        @map("membership_id")
+  branchId            String        @map("branch_id")
+  amount              Decimal       @db.Decimal(10, 2)
+  method              PaymentMethod
+  recordedById        String        @map("recorded_by")
+  recordedAt          DateTime      @default(now()) @map("recorded_at")
+  reference           String?
+  externalProviderRef String?       @map("external_provider_ref")
+  deletedAt           DateTime?     @map("deleted_at")
 
   membership Membership @relation(fields: [membershipId], references: [id])
   branch     Branch     @relation(fields: [branchId], references: [id])
@@ -301,22 +308,84 @@ model Payment {
 }
 
 // ---------------------------------------------------------------------------
-// Cours et réservations (socle minimal — modèle complet en phase 2)
+// Cours, réservations et présence (section 8.4)
 // ---------------------------------------------------------------------------
 
-model ClassSession {
-  id          String   @id @default(uuid())
-  branchId    String   @map("branch_id")
-  roomId      String?  @map("room_id")
-  startsAt    DateTime @map("starts_at")
-  endsAt      DateTime @map("ends_at")
-  capacity    Int
+model ClassType {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  level       String?
+  imageKey    String? @map("image_key")
+  isActive    Boolean @default(true) @map("is_active")
 
-  branch   Branch    @relation(fields: [branchId], references: [id])
-  room     Room?     @relation(fields: [roomId], references: [id])
-  bookings Booking[]
+  templates ClassTemplate[]
+  sessions  ClassSession[]
+
+  @@map("class_types")
+}
+
+enum RecurrenceFrequency {
+  WEEKLY
+}
+
+model ClassTemplate {
+  id          String              @id @default(uuid())
+  classTypeId String              @map("class_type_id")
+  branchId    String              @map("branch_id")
+  roomId      String?             @map("room_id")
+  coachId     String?             @map("coach_id")
+  capacity    Int
+  frequency   RecurrenceFrequency @default(WEEKLY)
+  dayOfWeek   Int                 @map("day_of_week") // 0 (dimanche) à 6
+  startTime   String              @map("start_time") // "HH:mm"
+  durationMin Int                 @map("duration_min")
+  isActive    Boolean             @default(true) @map("is_active")
+  createdAt   DateTime            @default(now()) @map("created_at")
+
+  classType ClassType      @relation(fields: [classTypeId], references: [id])
+  branch    Branch         @relation(fields: [branchId], references: [id])
+  room      Room?          @relation(fields: [roomId], references: [id])
+  coach     CoachProfile?  @relation(fields: [coachId], references: [userId])
+  sessions  ClassSession[]
+
+  @@index([branchId])
+  @@map("class_templates")
+}
+
+enum ClassSessionStatus {
+  SCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+model ClassSession {
+  id                  String             @id @default(uuid())
+  templateId          String?            @map("template_id")
+  classTypeId         String             @map("class_type_id")
+  branchId            String             @map("branch_id")
+  roomId              String?            @map("room_id")
+  coachId             String?            @map("coach_id")
+  startsAt            DateTime           @map("starts_at")
+  endsAt              DateTime           @map("ends_at")
+  capacity            Int
+  status              ClassSessionStatus @default(SCHEDULED)
+  openToOtherBranches Boolean            @default(false) @map("open_to_other_branches")
+  cancelledAt         DateTime?          @map("cancelled_at")
+  cancelledReason     String?            @map("cancelled_reason")
+  noShowProcessedAt   DateTime?          @map("no_show_processed_at")
+  createdAt           DateTime           @default(now()) @map("created_at")
+
+  template  ClassTemplate?      @relation(fields: [templateId], references: [id])
+  classType ClassType           @relation(fields: [classTypeId], references: [id])
+  branch    Branch              @relation(fields: [branchId], references: [id])
+  room      Room?               @relation(fields: [roomId], references: [id])
+  coach     CoachProfile?       @relation(fields: [coachId], references: [userId])
+  bookings  Booking[]
+  scanLogs  AttendanceScanLog[]
 
   @@index([branchId, startsAt])
+  @@index([coachId, startsAt])
   @@map("class_sessions")
 }
 
@@ -328,28 +397,92 @@ enum BookingStatus {
   NO_SHOW
 }
 
+enum CheckInMethod {
+  QR
+  MANUAL
+  WALK_IN
+}
+
 model Booking {
-  id         String        @id @default(uuid())
-  sessionId  String        @map("session_id")
-  userId     String        @map("user_id")
-  status     BookingStatus @default(CONFIRMED)
-  createdAt  DateTime      @default(now()) @map("created_at")
+  id               String         @id @default(uuid())
+  sessionId        String         @map("session_id")
+  userId           String         @map("user_id")
+  status           BookingStatus  @default(CONFIRMED)
+  waitlistPosition Int?           @map("waitlist_position")
+  bookingCode      String         @unique @map("booking_code") // 6 caractères
+  attendedAt       DateTime?      @map("attended_at")
+  checkedInBy      String?        @map("checked_in_by")
+  checkInMethod    CheckInMethod? @map("check_in_method")
+  isCrossBranch    Boolean        @default(false) @map("is_cross_branch")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  cancelledAt      DateTime?      @map("cancelled_at")
 
-  session ClassSession @relation(fields: [sessionId], references: [id])
-  user    User         @relation(fields: [userId], references: [id])
+  session         ClassSession @relation(fields: [sessionId], references: [id])
+  user            User         @relation(fields: [userId], references: [id])
+  checkedInByUser User?        @relation("CheckedInByUser", fields: [checkedInBy], references: [id])
 
+  @@unique([sessionId, userId], map: "booking_session_user_active_unique")
   @@index([sessionId])
+  @@index([userId])
+  @@index([bookingCode])
   @@map("bookings")
 }
 
+model AttendanceScanLog {
+  id         String   @id @default(uuid())
+  sessionId  String   @map("session_id")
+  userId     String?  @map("user_id")
+  scannedBy  String   @map("scanned_by")
+  result     String // GRANTED | DENIED
+  reasonCode String   @map("reason_code")
+  offline    Boolean  @default(false)
+  scannedAt  DateTime @default(now()) @map("scanned_at")
+
+  session ClassSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, scannedAt])
+  @@map("attendance_scan_logs")
+}
+
+enum QrSigningKeyStatus {
+  ACTIVE
+  ROTATED
+  REVOKED
+}
+
+model QrSigningKey {
+  kid           String             @id
+  publicKey     String             @map("public_key")
+  privateKeyEnc String             @map("private_key_enc") // chiffrée au repos
+  status        QrSigningKeyStatus @default(ACTIVE)
+  createdAt     DateTime           @default(now()) @map("created_at")
+  rotatedAt     DateTime?          @map("rotated_at")
+
+  @@map("qr_signing_keys")
+}
+
+model UsedQrToken {
+  jti       String   @id
+  expiresAt DateTime @map("expires_at")
+
+  @@index([expiresAt])
+  @@map("used_qr_tokens")
+}
+
 model CoachingSession {
-  id        String   @id @default(uuid())
-  branchId  String   @map("branch_id")
-  startsAt  DateTime @map("starts_at")
-  endsAt    DateTime @map("ends_at")
+  id       String   @id @default(uuid())
+  branchId String   @map("branch_id")
+  coachId  String   @map("coach_id")
+  memberId String   @map("member_id")
+  startsAt DateTime @map("starts_at")
+  endsAt   DateTime @map("ends_at")
+  status   String   @default("CONFIRMED") // CONFIRMED | CANCELLED | COMPLETED
 
-  branch Branch @relation(fields: [branchId], references: [id])
+  branch Branch       @relation(fields: [branchId], references: [id])
+  coach  CoachProfile @relation(fields: [coachId], references: [userId])
+  member User         @relation("CoachingMember", fields: [memberId], references: [id])
 
+  @@index([coachId, startsAt])
   @@map("coaching_sessions")
 }
 
@@ -358,15 +491,15 @@ model CoachingSession {
 // ---------------------------------------------------------------------------
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  actorId    String?  @map("actor_id")
-  action     String
-  entity     String
-  entityId   String?  @map("entity_id")
-  branchId   String?  @map("branch_id")
-  oldValue   Json?    @map("old_value")
-  newValue   Json?    @map("new_value")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id        String   @id @default(uuid())
+  actorId   String?  @map("actor_id")
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  branchId  String?  @map("branch_id")
+  oldValue  Json?    @map("old_value")
+  newValue  Json?    @map("new_value")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([entity, entityId])
   @@index([actorId])

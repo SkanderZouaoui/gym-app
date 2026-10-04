@@ -28,7 +28,7 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea/
-.claude/settings.json
+**/.claude/settings.json
 
 # Prisma
 backend/prisma/migrations/dev-*

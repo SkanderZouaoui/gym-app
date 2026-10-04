@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { OrganizationModule } from './organization/organization.module.js';
@@ -7,10 +8,15 @@ import { BranchesModule } from './branches/branches.module.js';
 import { UsersModule } from './users/users.module.js';
 import { MembershipsModule } from './memberships/memberships.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
+import { AccessPolicyModule } from './access-policy/access-policy.module.js';
+import { ClassesModule } from './classes/classes.module.js';
+import { BookingsModule } from './bookings/bookings.module.js';
+import { AttendanceModule } from './attendance/attendance.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
     OrganizationModule,
@@ -18,6 +24,10 @@ import { PaymentsModule } from './payments/payments.module.js';
     UsersModule,
     MembershipsModule,
     PaymentsModule,
+    AccessPolicyModule,
+    ClassesModule,
+    BookingsModule,
+    AttendanceModule,
   ],
 })
 export class AppModule {}
