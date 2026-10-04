@@ -109,7 +109,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        <View style={styles.statsRow}>
+        <Pressable style={styles.statsRow} onPress={() => router.push('/(member)/loyalty')}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{points?.points ?? 0}</Text>
             <Text style={styles.statLabel}>Points</Text>
@@ -120,9 +120,35 @@ export default function HomeScreen() {
             </Text>
             <Text style={styles.statLabel}>Séances suivies</Text>
           </View>
+        </Pressable>
+
+        <View style={styles.quickLinksGrid}>
+          <QuickLink icon="emoji-events" label="Fidélité" onPress={() => router.push('/(member)/loyalty')} />
+          <QuickLink icon="sports" label="Coaching" onPress={() => router.push('/(member)/coaching')} />
+          <QuickLink icon="forum" label="Communauté" onPress={() => router.push('/(member)/community')} />
+          <QuickLink icon="storefront" label="Boutique" onPress={() => router.push('/(member)/shop')} />
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function QuickLink({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable style={styles.quickLink} onPress={onPress}>
+      <View style={styles.quickLinkIcon}>
+        <MaterialIcons name={icon} size={22} color={colors.primaryInk} />
+      </View>
+      <Text style={styles.quickLinkLabel}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -177,4 +203,14 @@ const styles = StyleSheet.create({
   },
   statValue: { fontFamily: fonts.head, fontSize: 24, color: colors.secondary },
   statLabel: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+  quickLinksGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  quickLink: {
+    width: '47%', backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1,
+    borderColor: colors.border, padding: spacing.md, alignItems: 'center', gap: 8,
+  },
+  quickLinkIcon: {
+    width: 44, height: 44, borderRadius: radii.sm, backgroundColor: colors.primarySoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  quickLinkLabel: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
 });

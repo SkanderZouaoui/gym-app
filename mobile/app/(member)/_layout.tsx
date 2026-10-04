@@ -54,6 +54,10 @@ export default function MemberTabsLayout() {
           tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,
         }}
       />
+      <Tabs.Screen name="loyalty" options={{ href: null }} />
+      <Tabs.Screen name="coaching" options={{ href: null }} />
+      <Tabs.Screen name="community" options={{ href: null }} />
+      <Tabs.Screen name="shop" options={{ href: null }} />
     </Tabs>
   );
 }
