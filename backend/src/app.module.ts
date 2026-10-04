@@ -16,6 +16,8 @@ import { StaffModule } from './staff/staff.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { AnnouncementsModule } from './announcements/announcements.module.js';
 import { SocialModule } from './social/social.module.js';
+import { CoachingModule } from './coaching/coaching.module.js';
+import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { SocialModule } from './social/social.module.js';
     AdminModule,
     AnnouncementsModule,
     SocialModule,
+    CoachingModule,
+    BodyMetricsModule,
   ],
 })
 export class AppModule {}

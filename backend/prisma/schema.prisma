@@ -117,6 +117,11 @@ model User {
   reportsResolved          Report[]          @relation("ReportResolvedBy")
   notesReceived            MemberNote[]      @relation("MemberNoteUser")
   notesAuthored            MemberNote[]      @relation("MemberNoteAuthor")
+  exercisesCreated         Exercise[]        @relation("ExerciseCreatedBy")
+  programsCreated          Program[]         @relation("ProgramCreatedBy")
+  programsAssigned         Program[]         @relation("ProgramAssignedTo")
+  workoutLogs              WorkoutLog[]
+  bodyMetrics              BodyMetric[]
 
   @@map("users")
 }
@@ -477,14 +482,22 @@ model UsedQrToken {
   @@map("used_qr_tokens")
 }
 
+enum CoachingSessionStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
 model CoachingSession {
-  id       String   @id @default(uuid())
-  branchId String   @map("branch_id")
-  coachId  String   @map("coach_id")
-  memberId String   @map("member_id")
-  startsAt DateTime @map("starts_at")
-  endsAt   DateTime @map("ends_at")
-  status   String   @default("CONFIRMED") // CONFIRMED | CANCELLED | COMPLETED
+  id        String                @id @default(uuid())
+  branchId  String                @map("branch_id")
+  coachId   String                @map("coach_id")
+  memberId  String                @map("member_id")
+  startsAt  DateTime              @map("starts_at")
+  endsAt    DateTime              @map("ends_at")
+  status    CoachingSessionStatus @default(PENDING)
+  createdAt DateTime              @default(now()) @map("created_at")
 
   branch Branch       @relation(fields: [branchId], references: [id])
   coach  CoachProfile @relation(fields: [coachId], references: [userId])
@@ -492,6 +505,122 @@ model CoachingSession {
 
   @@index([coachId, startsAt])
   @@map("coaching_sessions")
+}
+
+// ---------------------------------------------------------------------------
+// Coaching et entraînement (section 8.5)
+// ---------------------------------------------------------------------------
+
+model Exercise {
+  id           String  @id @default(uuid())
+  name         String
+  muscleGroup  String? @map("muscle_group")
+  mediaKey     String? @map("media_key")
+  instructions String?
+  createdById  String? @map("created_by")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdBy        User?             @relation("ExerciseCreatedBy", fields: [createdById], references: [id])
+  programExercises ProgramExercise[]
+  workoutSets      WorkoutSet[]
+
+  @@map("exercises")
+}
+
+model Program {
+  id           String    @id @default(uuid())
+  name         String
+  createdById  String    @map("created_by")
+  assignedToId String    @map("assigned_to")
+  startDate    DateTime? @map("start_date")
+  endDate      DateTime? @map("end_date")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  createdBy  User         @relation("ProgramCreatedBy", fields: [createdById], references: [id])
+  assignedTo User         @relation("ProgramAssignedTo", fields: [assignedToId], references: [id])
+  days       ProgramDay[]
+
+  @@index([assignedToId])
+  @@map("programs")
+}
+
+model ProgramDay {
+  id        String  @id @default(uuid())
+  programId String  @map("program_id")
+  dayOfWeek Int     @map("day_of_week") // 0-6
+  label     String?
+
+  program   Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  exercises ProgramExercise[]
+
+  @@index([programId])
+  @@map("program_days")
+}
+
+model ProgramExercise {
+  id           String  @id @default(uuid())
+  programDayId String  @map("program_day_id")
+  exerciseId   String  @map("exercise_id")
+  order        Int     @default(0)
+  sets         Int
+  reps         String // ex. "8-12" ou "AMRAP"
+  restSeconds  Int?    @map("rest_seconds")
+  notes        String?
+
+  programDay ProgramDay @relation(fields: [programDayId], references: [id], onDelete: Cascade)
+  exercise   Exercise   @relation(fields: [exerciseId], references: [id])
+
+  @@index([programDayId])
+  @@map("program_exercises")
+}
+
+model WorkoutLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  date      DateTime @default(now())
+  feeling   String? // ressenti libre
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sets WorkoutSet[]
+
+  @@index([userId, date])
+  @@map("workout_logs")
+}
+
+model WorkoutSet {
+  id           String   @id @default(uuid())
+  workoutLogId String   @map("workout_log_id")
+  exerciseId   String   @map("exercise_id")
+  setNumber    Int      @map("set_number")
+  weightKg     Decimal? @map("weight_kg") @db.Decimal(6, 2)
+  reps         Int?
+  rpe          Int? // ressenti d'effort 1-10
+
+  workoutLog WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  exercise   Exercise   @relation(fields: [exerciseId], references: [id])
+
+  @@index([workoutLogId])
+  @@map("workout_sets")
+}
+
+/**
+ * Mesures et photos de progression — accès restreint (section 13).
+ */
+model BodyMetric {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  date         DateTime @default(now())
+  weightKg     Decimal? @map("weight_kg") @db.Decimal(5, 2)
+  measurements Json?    @default("{}")
+  photoKey     String?  @map("photo_key")
+  visibility   String   @default("PRIVATE") // PRIVATE | SHARED_WITH_COACH
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+  @@map("body_metrics")
 }
 
 // ---------------------------------------------------------------------------
