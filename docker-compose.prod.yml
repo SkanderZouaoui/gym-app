@@ -1,0 +1,44 @@
+# Déploiement de production pour un client (section 14.1) : un déploiement
+# indépendant par client, avec son propre fichier .env (voir deploy/clients/<nom>).
+#
+# Usage :
+#   docker compose -f docker-compose.prod.yml --env-file deploy/clients/<nom>/.env up -d
+#
+# Inclut l'infra (postgres/redis/minio) définie dans leurs dossiers respectifs
+# et ajoute le service api construit depuis backend/Dockerfile.
+
+include:
+  - postgres/docker-compose.yml
+  - redis/docker-compose.yml
+  - minio/docker-compose.yml
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      garage:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-muscleup}:${POSTGRES_PASSWORD:-muscleup}@postgres:5432/${POSTGRES_DB:-muscleup}?schema=public
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-30d}
+      QR_KEY_ENCRYPTION_SECRET: ${QR_KEY_ENCRYPTION_SECRET}
+      S3_ENDPOINT: http://garage:3900
+      S3_REGION: garage
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      S3_BUCKET: ${S3_BUCKET:-muscleup}
+      S3_FORCE_PATH_STYLE: "true"
+      PORT: 3000
+    ports:
+      - "${API_PORT:-3000}:3000"

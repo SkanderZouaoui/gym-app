@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.turbo
+**/.expo
+**/.git
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+backoffice
+mobile
+Design System

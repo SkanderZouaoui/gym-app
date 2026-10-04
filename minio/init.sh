@@ -3,9 +3,9 @@
 # le premier démarrage du conteneur. À relancer uniquement sur un volume vide.
 set -euo pipefail
 
-CONTAINER=muscleup-garage-1
-BUCKET=muscleup
-KEY_NAME=muscleup-backend
+CONTAINER="${CONTAINER:-muscleup-garage-1}"
+BUCKET="${BUCKET:-muscleup}"
+KEY_NAME="${KEY_NAME:-muscleup-backend}"
 
 echo "Attente que Garage soit prêt..."
 until docker exec "$CONTAINER" /garage status >/dev/null 2>&1; do
