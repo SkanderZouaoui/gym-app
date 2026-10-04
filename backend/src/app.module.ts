@@ -20,6 +20,8 @@ import { SocialModule } from './social/social.module.js';
 import { CoachingModule } from './coaching/coaching.module.js';
 import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
 import { LoyaltyModule } from './loyalty/loyalty.module.js';
+import { MessagingModule } from './messaging/messaging.module.js';
+import { ShopModule } from './shop/shop.module.js';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { LoyaltyModule } from './loyalty/loyalty.module.js';
     CoachingModule,
     BodyMetricsModule,
     LoyaltyModule,
+    MessagingModule,
+    ShopModule,
   ],
 })
 export class AppModule {}

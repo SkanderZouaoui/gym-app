@@ -15,6 +15,7 @@ export interface BookingAttendedEvent {
   bookingId: string;
   userId: string;
   sessionId: string;
+  classTypeName?: string;
 }
 
 export interface BookingNoShowEvent {

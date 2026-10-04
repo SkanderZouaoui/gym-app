@@ -204,7 +204,10 @@ export class AttendanceService {
     offline: boolean,
     knownBookingId?: string,
   ): Promise<ScanOutcome> {
-    const session = await this.prisma.classSession.findUnique({ where: { id: sessionId } });
+    const session = await this.prisma.classSession.findUnique({
+      where: { id: sessionId },
+      include: { classType: true },
+    });
     if (!session) throw new NotFoundException('SESSION_NOT_FOUND');
 
     const booking = knownBookingId
@@ -243,6 +246,7 @@ export class AttendanceService {
       bookingId: updatedBooking.id,
       userId,
       sessionId,
+      classTypeName: session.classType.name,
     } satisfies BookingAttendedEvent);
 
     const member = await this.prisma.user.findUnique({
