@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { AttendanceService } from './attendance.service.js';
@@ -8,6 +8,7 @@ import { ManualCheckinDto } from './dto/manual-checkin.dto.js';
 import { WalkInDto } from './dto/walk-in.dto.js';
 import { SyncDto } from './dto/sync.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
+import { BranchScope } from '../auth/decorators/branch-scope.decorator.js';
 import { Public } from '../auth/decorators/public.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
@@ -71,5 +72,13 @@ export class AttendanceController {
   @Post('attendance/sync')
   sync(@Body() dto: SyncDto, @CurrentUser() user: AuthenticatedUser) {
     return this.attendanceService.sync(dto, user.userId);
+  }
+
+  /** Journal des scans pour le back-office (section 11). */
+  @Roles(Role.ADMIN)
+  @BranchScope({ source: 'query', field: 'branchId' })
+  @Get('admin/attendance/logs')
+  getScanLogs(@Query('branchId') branchId: string) {
+    return this.attendanceService.getScanLogsForBranch(branchId);
   }
 }

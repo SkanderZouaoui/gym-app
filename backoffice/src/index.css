@@ -7,13 +7,33 @@
   --color-text: #111827;
   --color-muted: #5b6270;
   --color-border: #e3e4e7;
+  --color-border-strong: #c5c8ce;
+
   --color-primary: #ff5a1f;
   --color-primary-hover: #e6511c;
+  --color-primary-soft: #ffeee9;
+  --color-primary-border: #ffc6b1;
+  --color-primary-ink: #b83a0c;
+
   --color-secondary: #14213d;
+  --color-secondary-soft: #e8e9ec;
+  --color-secondary-ink: #14213d;
+
   --color-accent: #fca311;
+  --color-accent-soft: #fff6e7;
+  --color-accent-ink: #8a5600;
+
   --color-success: #16a34a;
+  --color-success-soft: #e8f6ed;
+  --color-success-ink: #11793a;
+
   --color-warning: #f59e0b;
+  --color-warning-soft: #fef5e7;
+  --color-warning-ink: #8a5600;
+
   --color-danger: #dc2626;
+  --color-danger-soft: #fce9e9;
+  --color-danger-ink: #b91c1c;
 }
 
 body {
@@ -22,6 +42,21 @@ body {
   color: var(--color-text);
   font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-head {
+  font-family: 'Sora', system-ui, sans-serif;
+}
+
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
 }
 
 #root {

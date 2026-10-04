@@ -158,6 +158,27 @@ export class AttendanceService {
     });
   }
 
+  /** Journal des scans acceptés/refusés pour le back-office (section 11). */
+  async getScanLogsForBranch(branchId: string, take = 100) {
+    const logs = await this.prisma.attendanceScanLog.findMany({
+      where: { session: { branchId } },
+      include: {
+        session: { select: { startsAt: true, classType: { select: { name: true } } } },
+      },
+      orderBy: { scannedAt: 'desc' },
+      take,
+    });
+
+    const userIds = [...new Set(logs.map((l) => l.userId).filter((id): id is string => !!id))];
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    const userById = new Map(users.map((u) => [u.id, u]));
+
+    return logs.map((log) => ({ ...log, user: log.userId ? userById.get(log.userId) ?? null : null }));
+  }
+
   /** Job planifié : clôture les cours passés et marque les absences (section 6.7). */
   async processNoShows(graceMinutesDefault = 15) {
     const cutoff = new Date(Date.now() - graceMinutesDefault * 60_000);

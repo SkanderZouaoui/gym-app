@@ -1,11 +1,34 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { LoginPage } from './pages/LoginPage'
+import { DashboardPage } from './pages/DashboardPage'
+import { MembersPage } from './pages/MembersPage'
+import { PlansPage } from './pages/PlansPage'
+import { PlanningPage } from './pages/PlanningPage'
+import { AttendancePage } from './pages/AttendancePage'
+import { SettingsPage } from './pages/SettingsPage'
+import { AppLayout } from './layouts/AppLayout'
+import { RequireAuth } from './components/RequireAuth'
+
 function App() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        <h1 className="font-bold text-3xl text-[--color-secondary]">MuscleUP</h1>
-        <p className="mt-2 text-[--color-muted]">Back-office — écrans à venir.</p>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <RequireAuth>
+            <AppLayout />
+          </RequireAuth>
+        }
+      >
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/members" element={<MembersPage />} />
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="/planning" element={<PlanningPage />} />
+        <Route path="/attendance" element={<AttendancePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
