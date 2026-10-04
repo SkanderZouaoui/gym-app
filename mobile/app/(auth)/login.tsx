@@ -9,6 +9,7 @@ import { authApi, meApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
 import { useSessionStore } from '../../src/store/session';
 import { ApiError } from '../../src/api/client';
+import { rootRouteForRole } from '../../src/navigation/roleRoutes';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ export default function LoginScreen() {
       const user = await meApi.getMe();
       const activeRole = user.branchRoles[0]?.role ?? 'MEMBER';
       setSession(user, user.branchRoles, activeRole);
-      router.replace('/(member)');
+      router.replace(rootRouteForRole(activeRole) as any);
     } catch (e) {
       setError(e instanceof ApiError ? traduireErreur(e.code) : 'Une erreur est survenue');
     } finally {

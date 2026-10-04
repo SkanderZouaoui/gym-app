@@ -133,7 +133,11 @@ export class ClassesService {
             }
           : {}),
       },
-      include: { classType: true, room: true },
+      include: {
+        classType: true,
+        room: true,
+        _count: { select: { bookings: { where: { status: { in: ['CONFIRMED', 'ATTENDED'] } } } } },
+      },
       orderBy: { startsAt: 'asc' },
     });
   }

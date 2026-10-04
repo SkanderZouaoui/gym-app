@@ -32,7 +32,13 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-font",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MuscleUP a besoin de la caméra pour scanner les QR de présence aux cours."
+        }
+      ]
     ]
   }
 }
