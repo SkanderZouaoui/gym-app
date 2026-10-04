@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+:root{--bg:#F7F7F9;--surface:#FFFFFF;--surface-2:#F1F2F4;--text:#111827;--muted:#5B6270;--border:#E3E4E7;--border-strong:#C5C8CE;--border-input:#8A909B;--primary:#FF5A1F;--primary-hover:#E6511C;--primary-pressed:#CC4819;--primary-soft:#FFEEE9;--primary-border:#FFC6B1;--primary-ink:#B83A0C;--primary-contrast:#FFFFFF;--secondary:#14213D;--secondary-hover:#121E37;--secondary-pressed:#101A31;--secondary-soft:#E8E9EC;--secondary-border:#B9BCC5;--secondary-ink:#14213D;--on-secondary:#FFFFFF;--accent:#FCA311;--accent-soft:#FFF6E7;--accent-border:#FEDCA6;--accent-ink:#8A5600;--on-accent:#111111;--success:#16A34A;--success-soft:#E8F6ED;--success-ink:#11793A;--success-border:#B1E0C2;--warning:#F59E0B;--warning-soft:#FEF5E7;--warning-ink:#8A5600;--warning-border:#FCDDA6;--danger:#DC2626;--danger-soft:#FCE9E9;--danger-ink:#B91C1C;--danger-border:#F3B7B7;--info:#2563EB;--info-soft:#E9EFFD;--info-ink:#1D4ED8;--info-border:#B6CBF8;--focus:#E04E18;--overlay:rgba(14,17,23,.45);--r:16px;--r-xs:4px;--r-sm:8px;--r-lg:24px;--pad:16px;--gap:16px;--ctl:48px;--row:56px;--bo-ctl:40px;--bo-row:52px;--f-head:'Sora',system-ui,sans-serif;--f-body:'DM Sans',system-ui,sans-serif;--f-mono:'JetBrains Mono',ui-monospace,monospace;--sh1:0 1px 2px rgba(17,24,39,.06),0 1px 3px rgba(17,24,39,.08);--sh2:0 6px 16px rgba(17,24,39,.08);--sh3:0 20px 48px rgba(17,24,39,.18)}
+*{box-sizing:border-box}
+body{margin:0;background:#F7F7F9;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button,select{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fzSpin{to{transform:rotate(360deg)}}
+@keyframes fzIn{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</helmet>
+<div dir="{{ dir }}" style="{{ rootStyle }}">
+
+<header style="position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border)">
+  <div style="max-width:1560px;margin:0 auto;padding:12px 40px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div>
+      <div style="font-family:var(--f-head);font-weight:700;font-size:16px;display:flex;gap:6px">{{ brand }}<span style="color:var(--muted);font-weight:500">Design System</span></div>
+    </div>
+    <nav style="display:flex;gap:4px;flex-wrap:wrap;font-size:14px;font-weight:600">
+      <a href="#apercu" style="padding:8px 12px;border-radius:var(--r-sm);color:var(--text)" style-hover="background:var(--surface-2);text-decoration:none">Aperçu</a>
+      <a href="#tokens" style="padding:8px 12px;border-radius:var(--r-sm);color:var(--text)" style-hover="background:var(--surface-2);text-decoration:none">Tokens</a>
+      <a href="#mobile" style="padding:8px 12px;border-radius:var(--r-sm);color:var(--text)" style-hover="background:var(--surface-2);text-decoration:none">Mobile</a>
+      <a href="#backoffice" style="padding:8px 12px;border-radius:var(--r-sm);color:var(--text)" style-hover="background:var(--surface-2);text-decoration:none">Back-office</a>
+    </nav>
+    <div style="margin-inline-start:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600">
+      <sc-if value="{{ hasAlerts }}" hint-placeholder-val="{{ true }}">
+        <a href="#apercu" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">warning</span>Contraste AA : {{ alertCount }} alerte(s)</a>
+      </sc-if>
+      <sc-if value="{{ noAlerts }}" hint-placeholder-val="{{ false }}">
+        <span style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:1px solid var(--success-border)"><span style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">check_circle</span>Contraste AA conforme</span>
+      </sc-if>
+    </div>
+  </div>
+</header>
+
+<main style="max-width:1560px;margin:0 auto;padding:48px 40px 120px">
+
+<section id="apercu" data-screen-label="01 Aperçu">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:40px;align-items:end;margin-bottom:32px">
+    <div>
+      <div style="font-family:var(--f-mono);font-size:12px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px">v1.0 · Marque blanche · iOS · Android · Web</div>
+      <h1 style="margin:0;font-family:var(--f-head);font-size:56px;line-height:1.02;letter-spacing:-.035em;font-weight:800;text-wrap:balance">Un seul système, toutes les salles.</h1>
+      <p style="margin:16px 0 0;max-width:560px;color:var(--muted);font-size:17px;text-wrap:pretty">Chaque couleur, rayon, densité et police est une variable. Modifiez-les dans le panneau Tweaks : les tokens, les composants et les deux écrans ci-dessous se mettent à jour en direct.</p>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh1)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <h3 style="margin:0;font-family:var(--f-head);font-size:15px;font-weight:700">Audit de contraste (WCAG AA)</h3>
+        <span style="font-family:var(--f-mono);font-size:11px;color:var(--muted)">thème {{ themeLabel }}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px">
+        <sc-for list="{{ audit }}" as="a" hint-placeholder-count="8">
+          <div style="display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:32px;height:32px;flex:none;border-radius:var(--r-xs);display:grid;place-items:center;font-weight:700;font-size:13px;border:1px solid var(--border);background:{{ a.bg }};color:{{ a.fg }}">Aa</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12.5px;font-weight:600;line-height:1.25">{{ a.label }}</div>
+                <div style="font-family:var(--f-mono);font-size:10.5px;color:var(--muted)">{{ a.ratio }}:1 · min {{ a.min }}:1</div>
+              </div>
+              <span style="flex:none;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ a.badgeBg }};color:{{ a.badgeFg }}">{{ a.level }}</span>
+            </div>
+            <sc-if value="{{ a.hasFix }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:11.5px;color:var(--danger-ink);line-height:1.35">{{ a.fix }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:32px;overflow-x:auto;padding:8px 4px 24px;align-items:flex-start">
+
+    <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:#0B0D12;box-shadow:var(--sh3)" data-screen-label="Accueil adhérent">
+      <div dir="{{ dir }}" style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text)">
+        <div style="height:46px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;direction:ltr">
+          <span>9:41</span>
+          <span style="display:flex;gap:4px;font-family:'Material Symbols Rounded';font-size:18px;line-height:1"><span>signal_cellular_alt</span><span>wifi</span><span>battery_full</span></span>
+        </div>
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 120px;display:flex;flex-direction:column;gap:var(--gap)">
+          <sc-if value="{{ logoLeft }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:8px;min-height:48px">
+              <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+                <div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div>
+                <sc-if value="{{ showName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em">{{ brand }}</span></sc-if>
+              </div>
+              <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ false }}">
+                <button style="height:36px;padding:0 10px 0 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:var(--primary-ink)">location_on</span>{{ siteName }}<span style="font-family:'Material Symbols Rounded';font-size:18px">expand_more</span></button>
+              </sc-if>
+              <button aria-label="Notifications" style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">notifications</span><span style="position:absolute;top:10px;inset-inline-end:11px;width:8px;height:8px;border-radius:99px;background:var(--danger);border:2px solid var(--surface)"></span></button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ logoCenter }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:48px">
+              <div style="display:flex">
+                <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ false }}">
+                  <button style="height:36px;padding:0 8px 0 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:2px;font-size:12.5px;font-weight:600;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:var(--primary-ink)">location_on</span>{{ siteName }}</button>
+                </sc-if>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div>
+                <sc-if value="{{ showName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em">{{ brand }}</span></sc-if>
+              </div>
+              <div style="display:flex;justify-content:flex-end"><button aria-label="Notifications" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">notifications</span></button></div>
+            </div>
+          </sc-if>
+
+          <div style="padding-top:4px">
+            <h1 style="margin:0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800">{{ t.hello }}</h1>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13.5px;color:var(--muted)">
+              <span style="font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">{{ t.active }}</span>{{ t.sub }}
+            </div>
+          </div>
+
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:20px;display:flex;align-items:center;gap:16px">
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <div style="font-family:var(--f-head);font-weight:700;font-size:19px;letter-spacing:-.02em">{{ t.qrTitle }}</div>
+              <div style="font-size:13px;opacity:.85">{{ t.qrSub }}</div>
+              <button style="margin-top:10px;align-self:flex-start;height:44px;padding:0 16px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--on-secondary);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">qr_code_scanner</span>{{ t.qrBtn }}</button>
+            </div>
+            <div style="width:92px;height:92px;flex:none;border-radius:var(--r);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:64px;line-height:1">qr_code_2</span></div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);box-shadow:var(--sh1);display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">{{ t.next }}</span>
+              <span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink)">{{ t.spotsLeft3 }}</span>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:52px;height:52px;flex:none;border-radius:var(--r-sm);background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:28px">local_fire_department</span></div>
+              <div style="min-width:0">
+                <div style="font-family:var(--f-head);font-weight:700;font-size:18px;letter-spacing:-.02em">HIIT Express</div>
+                <div style="font-size:13px;color:var(--muted)">{{ t.nextMeta }}</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <button style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--surface-2)" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ t.details }}</button>
+              <button style="height:44px;border-radius:var(--r-sm);border:0;background:transparent;color:var(--danger-ink);font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--danger-soft)" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ t.cancel }}</button>
+            </div>
+          </div>
+
+          <div style="background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:var(--r);padding:var(--pad);display:flex;gap:14px;align-items:center">
+            <div style="width:48px;height:48px;flex:none;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px;font-variation-settings:'FILL' 1">emoji_events</span></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em">{{ t.challenge }}</div>
+              <div style="font-weight:700;font-size:15px;margin:2px 0 8px">{{ t.challengeName }}</div>
+              <div style="height:8px;border-radius:99px;background:var(--surface);overflow:hidden"><div style="width:70%;height:100%;border-radius:99px;background:var(--accent)"></div></div>
+            </div>
+            <div style="font-family:var(--f-head);font-weight:800;font-size:18px;color:var(--accent-ink);direction:ltr">14/20</div>
+          </div>
+
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);box-shadow:var(--sh1)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+              <div><div style="font-size:13px;color:var(--muted)">{{ t.week }}</div><div style="font-family:var(--f-head);font-weight:800;font-size:24px;letter-spacing:-.02em">4 <span style="font-size:14px;font-weight:600;color:var(--muted)">{{ t.sessions }}</span></div></div>
+              <a href="#apercu" style="font-size:13.5px;font-weight:700">{{ t.seeAll }}</a>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:96px">
+              <sc-for list="{{ weekBars }}" as="b" hint-placeholder-count="7">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end">
+                  <div style="width:100%;max-width:24px;border-radius:6px;height:{{ b.h }}%;background:{{ b.bg }}"></div>
+                  <span style="font-size:11px;font-weight:600;color:{{ b.fg }}">{{ b.d }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">
+            <h2 style="margin:0;font-family:var(--f-head);font-size:19px;font-weight:700;letter-spacing:-.02em">{{ t.suggest }}</h2>
+            <a href="#apercu" style="font-size:13.5px;font-weight:700">{{ t.seeAll }}</a>
+          </div>
+          <sc-for list="{{ homeCourses }}" as="c" hint-placeholder-count="3">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:12px">
+              <div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--surface-2);display:grid;place-items:center;color:var(--secondary-ink)"><span style="font-family:'Material Symbols Rounded';font-size:26px">{{ c.icon }}</span></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:700;font-size:15px">{{ c.n }}</div>
+                <div style="font-size:12.5px;color:var(--muted)">{{ c.time }}</div>
+                <div style="font-size:12px;font-weight:700;margin-top:2px;color:var(--{{ c.tone }}-ink)">{{ c.spots }}</div>
+              </div>
+              <button onClick="{{ c.onBook }}" style="height:44px;min-width:44px;padding:0 14px;border-radius:var(--r-sm);font-weight:700;font-size:13.5px;cursor:pointer;border:1.5px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ c.cta }}</button>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+          <div role="status" style="position:absolute;top:54px;left:16px;right:16px;z-index:5;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3);animation:fzIn .25s ease-out">
+            <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span>{{ t.toastBooked }}
+          </div>
+        </sc-if>
+
+        <nav style="position:absolute;left:0;right:0;bottom:0;height:88px;padding:0 8px 22px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);align-items:center">
+          <sc-for list="{{ navL }}" as="n" hint-placeholder-count="2">
+            <button onClick="{{ n.on }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:11px;font-weight:700">{{ n.label }}</span></button>
+          </sc-for>
+          <div style="display:grid;place-items:center"><button aria-label="QR" style="width:60px;height:60px;margin-top:-26px;border-radius:999px;border:4px solid var(--surface);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;box-shadow:var(--sh2);cursor:pointer" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:28px">qr_code_2</span></button></div>
+          <sc-for list="{{ navR }}" as="n" hint-placeholder-count="2">
+            <button onClick="{{ n.on }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:11px;font-weight:700">{{ n.label }}</span></button>
+          </sc-for>
+        </nav>
+      </div>
+    </div>
+
+    <div dir="{{ dir }}" data-screen-label="Tableau de bord" style="flex:1 0 1080px;min-width:1080px;height:864px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);display:flex;background:var(--bg);box-shadow:var(--sh2)">
+      <aside style="width:{{ sbW }}px;flex:none;background:var(--secondary);color:var(--on-secondary);display:flex;flex-direction:column;padding:16px 12px;gap:4px;transition:width .2s ease">
+        <div style="display:flex;align-items:center;gap:10px;height:44px;padding:0 6px;margin-bottom:12px">
+          <div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div>
+          <sc-if value="{{ sbShowName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:18px;letter-spacing:-.02em;white-space:nowrap">{{ brand }}</span></sc-if>
+        </div>
+        <sc-for list="{{ sbItems }}" as="it" hint-placeholder-count="7">
+          <button onClick="{{ it.on }}" title="{{ it.label }}" style="height:44px;border:0;border-radius:var(--r-sm);display:flex;align-items:center;gap:12px;padding:0 12px;cursor:pointer;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;background:{{ it.bg }};color:{{ it.fg }}" style-focus="outline:2px solid var(--on-secondary);outline-offset:-2px"><span style="font-family:'Material Symbols Rounded';font-size:22px;flex:none;font-variation-settings:'FILL' {{ it.fill }}">{{ it.icon }}</span><sc-if value="{{ sbOpen }}" hint-placeholder-val="{{ true }}"><span>{{ it.label }}</span></sc-if></button>
+        </sc-for>
+        <div style="flex:1"></div>
+        <button onClick="{{ toggleSb }}" style="height:44px;border:1px solid rgba(255,255,255,.18);border-radius:var(--r-sm);display:flex;align-items:center;gap:12px;padding:0 12px;cursor:pointer;background:transparent;color:inherit;font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden" style-hover="background:rgba(255,255,255,.08)" style-focus="outline:2px solid var(--on-secondary)"><span style="font-family:'Material Symbols Rounded';font-size:22px;flex:none">{{ sbIcon }}</span><sc-if value="{{ sbOpen }}" hint-placeholder-val="{{ true }}"><span>{{ t.collapse }}</span></sc-if></button>
+      </aside>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <div style="height:64px;flex:none;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 24px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)"><span>{{ brand }}</span><span style="font-family:'Material Symbols Rounded';font-size:16px">{{ chevFwd }}</span><span style="color:var(--text);font-weight:600">{{ t.dashboard }}</span></div>
+          <div style="flex:1"></div>
+          <div style="position:relative;width:260px">
+            <span style="position:absolute;inset-inline-start:10px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">search</span>
+            <input placeholder="{{ t.search }}" style="width:100%;height:var(--bo-ctl);border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);padding-inline-start:36px;padding-inline-end:10px;font-size:13.5px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)">
+          </div>
+          <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ false }}">
+            <div style="position:relative">
+              <button onClick="{{ toggleSite }}" style="height:var(--bo-ctl);padding:0 10px 0 12px;border-radius:var(--r-sm);border:1px solid var(--border-input);background:var(--surface);display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--primary-ink)">location_on</span>{{ boSiteName }}<span style="font-family:'Material Symbols Rounded';font-size:20px">expand_more</span></button>
+              <sc-if value="{{ siteOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:calc(100% + 6px);inset-inline-end:0;z-index:10;width:220px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);box-shadow:var(--sh3);padding:6px">
+                  <sc-for list="{{ siteOpts }}" as="s" hint-placeholder-count="4">
+                    <button onClick="{{ s.on }}" style="width:100%;height:40px;border:0;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:13.5px;cursor:pointer;text-align:start;background:{{ s.bg }};color:{{ s.fg }};font-weight:{{ s.fw }}" style-hover="background:var(--surface-2)">{{ s.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <button aria-label="Notifications" style="position:relative;width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:20px">notifications</span><span style="position:absolute;top:8px;inset-inline-end:9px;width:7px;height:7px;border-radius:99px;background:var(--danger)"></span></button>
+          <div style="width:36px;height:36px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:13px">AK</div>
+        </div>
+        <div style="flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;gap:var(--gap)">
+          <div style="display:flex;align-items:flex-end;gap:16px">
+            <div style="flex:1">
+              <h1 style="margin:0;font-family:var(--f-head);font-size:26px;font-weight:800;letter-spacing:-.03em">{{ t.hello2 }}</h1>
+              <div style="font-size:13.5px;color:var(--muted)">{{ t.overview }}</div>
+            </div>
+            <button style="height:var(--bo-ctl);padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--border-input);background:var(--surface);font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:6px;cursor:pointer" style-hover="background:var(--surface-2)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px">download</span>{{ t.export }}</button>
+            <button style="height:var(--bo-ctl);padding:0 14px;border-radius:var(--r-sm);border:0;background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:6px;cursor:pointer" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px">person_add</span>{{ t.newMember }}</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gap)">
+            <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:600"><span style="width:30px;height:30px;border-radius:var(--r-xs);display:grid;place-items:center;background:var(--{{ k.tone }}-soft);color:var(--{{ k.tone }}-ink);font-family:'Material Symbols Rounded';font-size:18px">{{ k.icon }}</span>{{ k.label }}</div>
+                <div style="font-family:var(--f-head);font-size:26px;font-weight:800;letter-spacing:-.03em;direction:ltr;text-align:start">{{ k.value }}</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;direction:ltr;background:var(--{{ k.dTone }}-soft);color:var(--{{ k.dTone }}-ink)">{{ k.delta }}</span>
+                  <svg width="88" height="28" viewBox="0 0 88 28" style="overflow:visible"><polyline points="{{ k.spark }}" fill="none" stroke="var(--{{ k.dTone }})" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:var(--gap)">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+                <div><div style="font-weight:700;font-size:15px">{{ t.revenueTitle }}</div><div style="font-size:12.5px;color:var(--muted)">{{ t.last12 }}</div></div>
+                <div style="font-family:var(--f-head);font-weight:800;font-size:18px;direction:ltr">{{ revTotal }}</div>
+              </div>
+              <div style="position:relative;height:190px;direction:ltr">
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between"><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px solid var(--border)"></div></div>
+                <svg width="100%" height="190" viewBox="0 0 600 190" preserveAspectRatio="none" style="position:absolute;inset:0;overflow:visible"><path d="{{ revArea }}" fill="var(--primary)" fill-opacity="0.1"></path><polyline points="{{ revLine }}" fill="none" stroke="var(--primary)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(12,1fr);margin-top:8px;font-size:11px;color:var(--muted);text-align:center;direction:ltr"><sc-for list="{{ months }}" as="m" hint-placeholder-count="12"><span>{{ m }}</span></sc-for></div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+              <div style="font-weight:700;font-size:15px;margin-bottom:4px">{{ t.occupancyTitle }}</div>
+              <sc-for list="{{ occ }}" as="o" hint-placeholder-count="6">
+                <div style="display:grid;grid-template-columns:72px 1fr 40px;align-items:center;gap:10px;font-size:13px">
+                  <span style="font-weight:600">{{ o.n }}</span>
+                  <div style="height:10px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;width:{{ o.v }}%;background:{{ o.c }}"></div></div>
+                  <span style="text-align:end;font-weight:700;direction:ltr">{{ o.v }}%</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:var(--gap)">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+              <div style="padding:14px var(--pad);font-weight:700;font-size:15px;border-bottom:1px solid var(--border)">{{ t.today }}</div>
+              <sc-for list="{{ todayClasses }}" as="c" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:56px 1fr 120px;align-items:center;gap:12px;padding:0 var(--pad);height:var(--bo-row);border-bottom:1px solid var(--border);font-size:13.5px">
+                  <span style="font-family:var(--f-mono);font-size:12.5px;color:var(--muted);direction:ltr">{{ c.t }}</span>
+                  <div style="min-width:0"><span style="font-weight:700">{{ c.n }}</span> <span style="color:var(--muted)">· {{ c.coach }}</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;width:{{ c.pct }}%;background:var(--{{ c.tone }})"></div></div><span style="font-size:12px;font-weight:700;direction:ltr;color:var(--{{ c.tone }}-ink)">{{ c.fill }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+              <div style="padding:14px var(--pad);font-weight:700;font-size:15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">{{ t.expiring }}<span style="font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink)">4</span></div>
+              <sc-for list="{{ expiring }}" as="e" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:0 var(--pad);height:var(--bo-row);border-bottom:1px solid var(--border);font-size:13.5px">
+                  <div style="width:32px;height:32px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-size:12px;font-weight:700">{{ e.ini }}</div>
+                  <div style="flex:1;min-width:0"><div style="font-weight:600">{{ e.n }}</div><div style="font-size:12px;color:var(--muted)">{{ e.plan }} · {{ e.when }}</div></div>
+                  <button style="height:32px;padding:0 12px;border-radius:var(--r-xs);border:1px solid var(--border-input);background:transparent;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:var(--surface-2)" style-focus="outline:2px solid var(--focus)">{{ t.remind }}</button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;primaryContrast&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#16A34A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;warning&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F59E0B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;danger&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#DC2626&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;info&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2563EB&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;bgLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F7F7F9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#111827&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;bgDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0E1117&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#1A1F2B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F3F4F6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clair&quot;,&quot;Sombre&quot;,&quot;Auto&quot;],&quot;default&quot;:&quot;Clair&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;FR&quot;,&quot;AR (RTL)&quot;],&quot;default&quot;:&quot;FR&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;logoMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Logo + nom&quot;,&quot;Logo seul&quot;],&quot;default&quot;:&quot;Logo + nom&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;logoPosition&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Gauche&quot;,&quot;Centré&quot;],&quot;default&quot;:&quot;Gauche&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const linePts=(arr,w,h,p)=>{const mx=Math.max(...arr),mn=Math.min(...arr),sx=(w-2*p)/(arr.length-1);return arr.map((v,i)=>[+(p+i*sx).toFixed(1),+(h-p-(v-mn)/((mx-mn)||1)*(h-2*p)).toFixed(1)]);};
+const ptsStr=p=>p.map(q=>q.join(',')).join(' ');
+const areaD=(p,h)=>'M'+p[0][0]+','+h+' L'+p.map(q=>q.join(',')).join(' L')+' L'+p[p.length-1][0]+','+h+' Z';
+const ini=n=>n.split(' ').map(w=>w[0]).slice(0,2).join('');
+const T={
+FR:{hello:'Bonjour, Sarra',active:'Actif',sub:'Premium · jusqu’au 30/11',qrTitle:'Accès salle',qrSub:'Présentez ce code à l’entrée',qrBtn:'Afficher mon QR',next:'Prochaine séance',spotsLeft3:'Plus que 3 places',nextMeta:'Aujourd’hui · 18:30 · Salle 2 · Yassine',details:'Détails',cancel:'Annuler',challenge:'Défi du mois',challengeName:'20 séances en octobre',week:'Cette semaine',sessions:'séances',seeAll:'Tout voir',suggest:'Cours à venir',book:'Réserver',waitlist:'Liste d’attente',spots:'places',full:'Complet',almost:'Plus que {n} places',toastBooked:'Réservation confirmée',nav:['Accueil','Planning','Progrès','Profil'],days:['L','M','M','J','V','S','D'],tomorrow:'Demain',collapse:'Réduire',dashboard:'Tableau de bord',search:'Rechercher un adhérent…',allSites:'Tous les sites',hello2:'Bonjour Amine',overview:'Vue d’ensemble · samedi 3 octobre 2026',export:'Exporter',newMember:'Nouvel adhérent',sb:['Tableau de bord','Adhérents','Planning','Abonnements','Paiements','Équipe','Rapports'],kpi:['Revenus du mois','Adhérents actifs','Taux de remplissage','Entrées aujourd’hui'],revenueTitle:'Revenus',last12:'12 derniers mois',occupancyTitle:'Remplissage par cours',today:'Cours du jour',expiring:'Abonnements à renouveler',remind:'Relancer',inDays:'expire dans {n} j',plans:{Annuel:'Annuel',Mensuel:'Mensuel',Trimestriel:'Trimestriel',Premium:'Premium'},sites:['Lac 2','La Marsa','Centre-ville'],months:['N','D','J','F','M','A','M','J','J','A','S','O']},
+AR:{hello:'مرحبًا، سارة',active:'نشط',sub:'بريميوم · حتى 30/11',qrTitle:'الدخول إلى القاعة',qrSub:'اعرض هذا الرمز عند المدخل',qrBtn:'عرض رمز QR',next:'الحصة القادمة',spotsLeft3:'3 أماكن متبقية فقط',nextMeta:'اليوم · 18:30 · القاعة 2 · ياسين',details:'التفاصيل',cancel:'إلغاء',challenge:'تحدّي الشهر',challengeName:'20 حصة في أكتوبر',week:'هذا الأسبوع',sessions:'حصص',seeAll:'عرض الكل',suggest:'الحصص القادمة',book:'احجز',waitlist:'قائمة الانتظار',spots:'أماكن',full:'مكتمل',almost:'{n} أماكن متبقية فقط',toastBooked:'تم تأكيد الحجز',nav:['الرئيسية','الجدول','التقدّم','حسابي'],days:['ن','ث','ر','خ','ج','س','ح'],tomorrow:'غدًا',collapse:'طيّ القائمة',dashboard:'لوحة التحكم',search:'ابحث عن مشترك…',allSites:'كل الفروع',hello2:'مرحبًا أمين',overview:'نظرة عامة · السبت 3 أكتوبر 2026',export:'تصدير',newMember:'مشترك جديد',sb:['لوحة التحكم','المشتركون','الجدول','الاشتراكات','المدفوعات','الفريق','التقارير'],kpi:['إيرادات الشهر','المشتركون النشطون','نسبة الامتلاء','دخول اليوم'],revenueTitle:'الإيرادات',last12:'آخر 12 شهرًا',occupancyTitle:'نسبة الامتلاء حسب الحصة',today:'حصص اليوم',expiring:'اشتراكات للتجديد',remind:'تذكير',inDays:'ينتهي خلال {n} أيام',plans:{Annuel:'سنوي',Mensuel:'شهري',Trimestriel:'فصلي',Premium:'بريميوم'},sites:['البحيرة 2','المرسى','وسط المدينة'],months:['N','D','J','F','M','A','M','J','J','A','S','O']}};
+const MEMBERS=[{n:'Sarra Ben Ali',e:'sarra.benali@mail.tn',plan:'Premium',site:0,st:'Actif',d:'2026-09-28',amt:180},{n:'Youssef Trabelsi',e:'y.trabelsi@mail.tn',plan:'Mensuel',site:1,st:'Actif',d:'2026-09-25',amt:90},{n:'Ines Gharbi',e:'ines.g@mail.tn',plan:'Trimestriel',site:2,st:'En attente',d:'2026-09-24',amt:240},{n:'Mehdi Jaziri',e:'m.jaziri@mail.tn',plan:'Annuel',site:0,st:'Gelé',d:'2026-08-14',amt:850},{n:'Amira Chaouch',e:'amira.c@mail.tn',plan:'Mensuel',site:1,st:'Expiré',d:'2026-07-02',amt:90},{n:'Karim Mansour',e:'k.mansour@mail.tn',plan:'Premium',site:2,st:'Actif',d:'2026-09-19',amt:180},{n:'Nour Hammami',e:'nour.h@mail.tn',plan:'Mensuel',site:0,st:'Actif',d:'2026-09-15',amt:90},{n:'Walid Bouazizi',e:'w.bouazizi@mail.tn',plan:'Annuel',site:1,st:'Actif',d:'2026-06-30',amt:850},{n:'Rania Mejri',e:'rania.m@mail.tn',plan:'Trimestriel',site:2,st:'Expiré',d:'2026-05-21',amt:240},{n:'Omar Saidi',e:'omar.s@mail.tn',plan:'Mensuel',site:0,st:'En attente',d:'2026-09-30',amt:90},{n:'Lina Ferchichi',e:'lina.f@mail.tn',plan:'Premium',site:1,st:'Actif',d:'2026-09-08',amt:180},{n:'Hedi Karoui',e:'h.karoui@mail.tn',plan:'Mensuel',site:2,st:'Gelé',d:'2026-04-11',amt:90}];
+const TONE={'Actif':'success','Expiré':'danger','En attente':'warning','Gelé':'info'};
+
+class Component extends DCLogic {
+  state={sysDark:false,mNav:0,cNav:1,seg:1,sw:true,sw2:false,chk:true,radio:1,chips:['HIIT','Yoga'],tab:0,ptab:1,sb:true,sbActive:0,siteOpen:false,site:0,sortK:'d',sortDir:-1,filter:'Tous',q:'',page:0,toast:false};
+  componentDidMount(){this.mq=window.matchMedia('(prefers-color-scheme: dark)');this.onMq=()=>this.setState({sysDark:this.mq.matches});this.onMq();this.mq.addEventListener('change',this.onMq);}
+  componentWillUnmount(){this.mq&&this.mq.removeEventListener('change',this.onMq);clearTimeout(this.tt);}
+  book(){this.setState({toast:true});clearTimeout(this.tt);this.tt=setTimeout(()=>this.setState({toast:false}),2600);}
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};
+    for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const dark=P.theme==='Sombre'||(P.theme==='Auto'&&S.sysDark);
+    const neu=d=>{const bg=d?C.bgDark:C.bgLight,surface=d?C.surfaceDark:C.surfaceLight,text=d?C.textDark:C.textLight;return{bg,surface,text,surface2:mix(surface,text,d?.06:.045),muted:ensure(mix(text,surface,.42),surface,4.5),border:mix(surface,text,d?.14:.11),borderStrong:mix(surface,text,d?.3:.24),borderInput:ensure(mix(surface,text,.35),surface,3)};};
+    const N=neu(dark);const F={};
+    ['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],N.surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",'IBM Plex Sans Arabic',system-ui,sans-serif";
+    const v={'--bg':N.bg,'--surface':N.surface,'--surface-2':N.surface2,'--text':N.text,'--muted':N.muted,'--border':N.border,'--border-strong':N.borderStrong,'--border-input':N.borderInput,'--primary-contrast':C.primaryContrast,'--focus':ensure(C.primary,N.bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px','--row':compact?'48px':'56px','--bo-ctl':compact?'34px':'40px','--bo-row':compact?'42px':'52px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    [1,2,3,4,5,6,8,10,12,16].forEach(n=>v['--space-'+n]=n*4+'px');
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    const rootStyle={...v,background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5};
+    // contrast audit
+    const lvl=(x,min)=>x>=4.5?'AA':x>=3?(min>=4.5?'AA grand texte':'AA (UI)'):'Échec';
+    const audit=[['Bouton primaire',C.primaryContrast,C.primary,4.5],['Texte / fond',N.text,N.bg,4.5],['Texte / surface',N.text,N.surface,4.5],['Texte atténué (dérivé)',N.muted,N.surface,4.5],['Texte sur secondaire',F.secondary.on,C.secondary,4.5],['Texte sur accent',F.accent.on,C.accent,4.5],['Primaire / surface (UI)',C.primary,N.surface,3],['Accent / surface (UI)',C.accent,N.surface,3]].map(([label,fg,bg,min])=>{const x=cr(fg,bg),ok=x>=min;let fix='';if(!ok){fix=label==='Bouton primaire'?('Suggestion : texte '+onColor(C.primary)+' ('+cr(onColor(C.primary),C.primary).toFixed(2)+':1) ou primaire '+ensure(C.primary,C.primaryContrast,4.5)):('Suggestion : '+ensure(fg,bg,min));}return{label,fg,bg,min,ratio:x.toFixed(2),level:lvl(x,min),hasFix:!ok,fix,badgeBg:ok?'var(--success-soft)':(x>=3?'var(--warning-soft)':'var(--danger-soft)'),badgeFg:ok?'var(--success-ink)':(x>=3?'var(--warning-ink)':'var(--danger-ink)')};});
+    const alertCount=audit.filter(a=>a.hasFix).length;
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';
+    const caps=brand.match(/[A-Z]/g);const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):brand.slice(0,2)).toUpperCase();
+    const ar=P.lang==='AR (RTL)';const t=T[ar?'AR':'FR'];
+    const cur=P.currency==='€'?'€':'DT';const k=cur==='€'?0.3:1;
+    const money=n=>Math.round(n*k).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ')+' '+cur;
+    const multiSite=String(P.sites??'1')==='3';
+    const logoOnly=P.logoMode==='Logo seul';
+    const fg2=(on)=>on?'var(--primary-ink)':'var(--muted)';
+    const navItems=[['home',0],['calendar_month',1],['monitoring',2],['person',3]].map(([icon,i])=>({icon,label:t.nav[i],fg:fg2(S.mNav===i),fill:S.mNav===i?1:0,on:()=>this.setState({mNav:i})}));
+    const wk=[45,0,60,50,0,75,30];const wmax=75;
+    const weekBars=wk.map((m,i)=>({d:t.days[i],h:Math.max(4,m/wmax*100),bg:i===5?'var(--primary)':(m?'var(--secondary-border)':'var(--surface-2)'),fg:i===5?'var(--primary-ink)':'var(--muted)'}));
+    const hc=[['Yoga Flow','07:30',4,'self_improvement'],['Cycling','19:00',0,'directions_bike'],['Pilates','12:15',9,'sports_gymnastics']];
+    const homeCourses=hc.map(([n,h,left,icon])=>{const full=left===0,few=left>0&&left<=4;return{n,icon,time:t.tomorrow+' · '+h,spots:full?t.full:(few?t.almost.replace('{n}',left):left+' '+t.spots),tone:full?'danger':(few?'warning':'success'),cta:full?t.waitlist:t.book,bg:full?'transparent':'var(--primary)',fg:full?'var(--text)':'var(--primary-contrast)',bd:full?'var(--border-strong)':'var(--primary)',onBook:()=>this.book()};});
+    const sbIcons=['space_dashboard','group','calendar_month','credit_card','payments','badge','bar_chart'];
+    const sbItems=sbIcons.map((icon,i)=>({icon,label:t.sb[i],fill:S.sbActive===i?1:0,bg:S.sbActive===i?'var(--primary)':'transparent',fg:S.sbActive===i?'var(--primary-contrast)':'var(--on-secondary)',on:()=>this.setState({sbActive:i})}));
+    const siteLabels=[t.allSites,...t.sites];
+    const siteOpts=siteLabels.map((label,i)=>({label,bg:S.site===i?'var(--primary-soft)':'transparent',fg:S.site===i?'var(--primary-ink)':'var(--text)',fw:S.site===i?700:500,on:()=>this.setState({site:i,siteOpen:false})}));
+    const sf=[1,.42,.33,.25][S.site];
+    const spark=a=>ptsStr(linePts(a,88,28,2));
+    const kpis=[{icon:'payments',tone:'primary',label:t.kpi[0],value:money(48250*sf),delta:'+8,2 %',dTone:'success',spark:spark([31,34,33,38,36,41,39,44,48])},{icon:'group',tone:'info',label:t.kpi[1],value:Math.round(1284*sf).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' '),delta:'+3,1 %',dTone:'success',spark:spark([10,11,11,12,12,12.5,13,12.8,13.4])},{icon:'event_seat',tone:'accent',label:t.kpi[2],value:'78 %',delta:'−2,4 %',dTone:'danger',spark:spark([82,84,80,81,79,80,77,79,78])},{icon:'login',tone:'success',label:t.kpi[3],value:String(Math.round(342*sf)),delta:'+12 %',dTone:'success',spark:spark([20,28,25,30,27,33,31,36,34])}];
+    const rev=[31,34,33,38,36,41,39,43,45,44,47,48.25];const rp=linePts(rev,600,190,6);
+    const occ=[['HIIT',92],['Cycling',88],['Yoga',81],['Pilates',74],['Boxe',63],['Stretch',52]].map(([n,v])=>({n,v,c:v>=85?'var(--primary)':(v>=70?'var(--secondary)':'var(--secondary-border)')}));
+    const tcs=[['07:00','Cycling','Rim',18,20],['09:30','Pilates','Sami',12,14],['12:15','HIIT Express','Yassine',20,20],['18:30','Yoga Flow','Lina',9,16],['19:45','Boxe','Hatem',14,18]];
+    const todayClasses=tcs.map(([tt,n,coach,b,c])=>{const p=b/c;return{t:tt,n,coach,fill:b+'/'+c,pct:Math.round(p*100),tone:p>=1?'danger':(p>=.85?'warning':'success')};});
+    const expiring=[['Mehdi Jaziri','Annuel',3],['Amira Chaouch','Mensuel',5],['Rania Mejri','Trimestriel',6],['Hedi Karoui','Mensuel',9]].map(([n,p,d])=>({n,ini:ini(n),plan:t.plans[p],when:t.inDays.replace('{n}',d)}));
+    return {rootStyle,dir:ar?'rtl':'ltr',brand,mono,audit,alertCount,hasAlerts:alertCount>0,noAlerts:alertCount===0,themeLabel:dark?'sombre':'clair',t,
+      logoLeft:P.logoPosition!=='Centré',logoCenter:P.logoPosition==='Centré',showName:!logoOnly,multiSite,siteName:t.sites[0],
+      navL:navItems.slice(0,2),navR:navItems.slice(2),weekBars,homeCourses,toast:S.toast,
+      sbW:S.sb?248:76,sbOpen:S.sb,sbShowName:S.sb&&!logoOnly,sbIcon:S.sb?(ar?'left_panel_open':'left_panel_close'):(ar?'left_panel_close':'left_panel_open'),toggleSb:()=>this.setState({sb:!S.sb}),sbItems,
+      chevFwd:ar?'chevron_left':'chevron_right',toggleSite:()=>this.setState({siteOpen:!S.siteOpen}),siteOpen:S.siteOpen,siteOpts,boSiteName:siteLabels[S.site],
+      kpis,revLine:ptsStr(rp),revArea:areaD(rp,190),revTotal:money(480250*sf),months:t.months,occ,todayClasses:todayClasses.slice(0,4),expiring,
+      _C:C,_N:N,_F:F,_money:money,_dark:dark,_r:r,_fp:fp,_neu:neu};
+  }
+}
+</script>
+</body>
+</html>

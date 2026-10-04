@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:56px 64px 120px;display:flex;flex-direction:column;gap:64px">
+
+<div style="max-width:1000px">
+  <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Staff d’accueil</div>
+  <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:56px;line-height:1;letter-spacing:-.035em;font-weight:800">Rôle staff : pointage des cours</h1>
+  <p style="margin:14px 0 0;font-size:17px;color:var(--muted);text-wrap:pretty">Le QR de l’adhérent ne sert pas à entrer dans la salle : il valide sa présence à un cours collectif. Le staff le scanne avec la caméra de son téléphone. Navigation : Aujourd’hui · Adhérents · Scanner · Planning · Profil. Les cadres suivent les Tweaks ; ceux marqués « sombre » forcent le thème sombre.</p>
+</div>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">01</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Aujourd’hui</h2><span style="color:var(--muted);font-size:14px">Cours du site, cours en cours, alertes · 3 sites et site unique</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+    <sc-for list="{{ todayV }}" as="v" hint-placeholder-count="2">
+    <div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ v.id }}</span><span style="font-weight:700;font-size:14px">{{ v.label }}</span></div>
+      <div style="{{ v.st }}"><div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:8px;min-height:48px">
+            <div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div>
+            <sc-if value="{{ showName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:18px;letter-spacing:-.02em">{{ brand }}</span></sc-if>
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--secondary);color:var(--on-secondary)">Staff</span>
+            <span style="flex:1"></span>
+            <sc-if value="{{ v.multi }}" hint-placeholder-val="{{ true }}"><span style="height:36px;padding:0 8px 0 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:2px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:var(--primary-ink)">location_on</span>Lac 2<span style="font-family:'Material Symbols Rounded';font-size:18px">expand_more</span></span></sc-if>
+            <span style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">notifications</span><span style="position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:99px;background:var(--danger);border:2px solid var(--surface)"></span></span>
+          </div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800">Aujourd’hui</h1><div style="font-size:13.5px;color:var(--muted);margin-top:2px">{{ v.sub }}</div></div>
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase"><span style="width:8px;height:8px;border-radius:99px;background:var(--primary);animation:fzPulse 1.4s infinite"></span>En cours · 09:15 – 10:00</span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--success);color:var(--on-success)">Pointage ouvert</span></div>
+            <div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">Pilates</div><div style="font-size:13px;opacity:.85">Lina · Studio 2 · ferme à 09:30</div></div>
+            <div style="display:flex;align-items:baseline;gap:6px"><span style="font-family:var(--f-head);font-weight:800;font-size:30px;line-height:1">9</span><span style="font-size:14px;opacity:.85">/ 12 inscrits présents</span></div>
+            <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.2);overflow:hidden"><div style="width:75%;height:100%;border-radius:99px;background:var(--primary)"></div></div>
+            <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:8px"><span style="height:44px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">qr_code_scanner</span>Scanner</span><span style="height:44px;border-radius:var(--r-sm);border:1.5px solid rgba(255,255,255,.4);font-weight:700;font-size:14px;display:grid;place-items:center">Détail</span></div>
+          </div>
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+            <div role="alert" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-sm);background:var(--{{ a.tone }}-soft);border:1px solid var(--{{ a.tone }}-border)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--{{ a.tone }}-ink)">{{ a.icon }}</span><div style="flex:1;font-size:13px"><div style="font-weight:700;color:var(--{{ a.tone }}-ink)">{{ a.t }}</div><div>{{ a.s }}</div></div></div>
+          </sc-for>
+          <sc-for list="{{ others }}" as="c" hint-placeholder-count="4">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center;opacity:{{ c.op }}">
+              <div style="width:48px;flex:none"><div style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ c.t }}</div><div style="font-size:11px;color:var(--muted)">{{ c.d }}</div></div>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px"><div style="display:flex;justify-content:space-between;gap:6px"><span style="font-weight:700;font-size:15px">{{ c.n }}</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ c.tone }}-soft);color:var(--{{ c.tone }}-ink)">{{ c.st }}</span></div><div style="height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;width:{{ c.pct }}%;background:{{ c.bar }}"></div></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>{{ c.meta }}</span><strong style="color:var(--text)">{{ c.count }}</strong></div></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div></div>
+    </div>
+    </sc-for>
+
+    <div id="1c" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">1c</span><span style="font-weight:700;font-size:14px">Chargement (skeleton)</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div aria-busy="true" style="position:absolute;top:46px;left:0;right:0;bottom:0;padding:4px 20px;display:flex;flex-direction:column;gap:12px;animation:fzPulse 1.6s infinite">
+          <div style="display:flex;gap:8px;align-items:center;min-height:48px"><span style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface-2)"></span><span style="width:110px;height:16px;border-radius:var(--r-xs);background:var(--surface-2)"></span><span style="flex:1"></span><span style="width:44px;height:44px;border-radius:999px;background:var(--surface-2)"></span></div>
+          <span style="width:170px;height:28px;border-radius:var(--r-xs);background:var(--surface-2)"></span><span style="width:230px;height:14px;border-radius:var(--r-xs);background:var(--surface-2)"></span>
+          <span style="height:196px;border-radius:var(--r-lg);background:var(--surface-2)"></span>
+          <span style="height:58px;border-radius:var(--r-sm);background:var(--surface-2)"></span>
+          <span style="height:76px;border-radius:var(--r);background:var(--surface-2)"></span><span style="height:76px;border-radius:var(--r);background:var(--surface-2)"></span><span style="height:76px;border-radius:var(--r);background:var(--surface-2)"></span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="1d" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">1d</span><span style="font-weight:700;font-size:14px">Erreur de chargement / journée vide</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:88px;padding:4px 20px;display:flex;flex-direction:column;gap:14px">
+          <div style="min-height:48px;display:flex;align-items:center"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Aujourd’hui</h1></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:0 12px">
+            <div style="width:84px;height:84px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:44px">sync_problem</span></div>
+            <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Impossible de charger les cours</h2>
+            <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Le serveur ne répond pas. Le scanner reste utilisable : les présences seront gardées sur le téléphone.</p>
+            <span style="height:44px;padding:0 18px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</span>
+            <span style="font-family:var(--f-mono);font-size:11.5px;color:var(--muted)">Erreur 503 · 09:41</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:14px;border-radius:var(--r);border:1.5px dashed var(--border-strong);margin-bottom:16px"><span style="font-family:'Material Symbols Rounded';font-size:26px;color:var(--muted)">event_available</span><div style="font-size:13px"><div style="font-weight:700">État vide (dimanche 4 octobre)</div><div style="color:var(--muted)">Aucun cours collectif programmé sur ce site aujourd’hui.</div></div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">02</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Scanner</h2><span style="color:var(--muted);font-size:14px">Choix du cours, caméra avec cadre de visée, torche, compteur, saisie de code</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="2a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">2a</span><span style="font-weight:700;font-size:14px">Choix du cours à pointer</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--cam);color:var(--on-cam);font-family:var(--f-body)">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--cam) 0 14px,var(--cam-2) 14px 28px)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="dialog" aria-label="Choisir un cours" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);color:var(--text);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Quel cours pointez-vous ?</h2><div style="font-size:13px;color:var(--muted)">Cours du jour{{ siteLine }} · pointage de 30 min avant à 15 min après le début</div></div>
+          <sc-for list="{{ scanCourses }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;gap:12px;align-items:center;min-height:60px;padding:8px 12px;border-radius:var(--r-sm);border:{{ c.bd }};background:{{ c.bg }};opacity:{{ c.op }}">
+              <span style="font-family:var(--f-head);font-weight:800;font-size:15px;width:44px">{{ c.t }}</span>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ c.n }} <span style="font-weight:500;color:var(--muted);font-size:12.5px">· {{ c.m }}</span></div><div style="font-size:12px;font-weight:700;color:var(--{{ c.tone }}-ink)">{{ c.w }}</div></div>
+              <span style="width:24px;height:24px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ c.rbd }}"><span style="width:12px;height:12px;border-radius:99px;background:{{ c.dot }}"></span></span>
+            </div>
+          </sc-for>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Ouvrir la caméra · Pilates</span>
+        </div>
+      </div></div>
+    </div>
+
+    <sc-for list="{{ camV }}" as="v" hint-placeholder-count="2">
+    <div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ v.id }}</span><span style="font-weight:700;font-size:14px">{{ v.label }}</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--cam);color:var(--on-cam);font-family:var(--f-body)">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--cam) 0 14px,var(--cam-2) 14px 28px)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="{{ v.net }}" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;top:52px;left:16px;right:16px;display:flex;gap:8px;align-items:center;z-index:2">
+          <span style="width:44px;height:44px;border-radius:999px;background:rgba(0,0,0,.45);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span>
+          <span style="flex:1;height:44px;border-radius:999px;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:14px">Pilates · 09:15 · Studio 2<span style="font-family:'Material Symbols Rounded';font-size:20px">expand_more</span></span>
+          <span style="width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:{{ v.torchBg }};color:{{ v.torchFg }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ v.torchIcon }}</span></span>
+        </div>
+        <sc-if value="{{ v.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="position:absolute;top:108px;left:16px;right:16px;z-index:2;display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning);color:var(--on-warning);font-size:13.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px">cloud_off</span><span style="flex:1">Hors ligne, 3 présences à synchroniser</span></div></sc-if>
+        <sc-if value="{{ v.denied }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:var(--cam);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding:40px 32px">
+            <div style="width:84px;height:84px;border-radius:999px;background:var(--danger);color:var(--on-danger);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">no_photography</span></div>
+            <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800">Caméra non autorisée</h2>
+            <p style="margin:0;font-size:14.5px;opacity:.85;text-wrap:pretty">Autorisez l’accès à la caméra dans Réglages pour scanner les QR. En attendant, saisissez le code de réservation.</p>
+            <span style="height:var(--ctl);padding:0 20px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;display:grid;place-items:center">Ouvrir les Réglages</span>
+            <span style="height:var(--ctl);padding:0 20px;border-radius:var(--r-sm);border:1.5px solid var(--on-cam);font-weight:700;display:grid;place-items:center">Saisir un code</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ v.live }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;top:220px;left:50%;width:250px;height:250px;margin-left:-125px">
+            <span style="position:absolute;top:0;left:0;width:48px;height:48px;border-top:5px solid var(--primary);border-left:5px solid var(--primary);border-top-left-radius:var(--r)"></span>
+            <span style="position:absolute;top:0;right:0;width:48px;height:48px;border-top:5px solid var(--primary);border-right:5px solid var(--primary);border-top-right-radius:var(--r)"></span>
+            <span style="position:absolute;bottom:0;left:0;width:48px;height:48px;border-bottom:5px solid var(--primary);border-left:5px solid var(--primary);border-bottom-left-radius:var(--r)"></span>
+            <span style="position:absolute;bottom:0;right:0;width:48px;height:48px;border-bottom:5px solid var(--primary);border-right:5px solid var(--primary);border-bottom-right-radius:var(--r)"></span>
+            <span style="position:absolute;left:16px;right:16px;top:50%;height:2px;background:var(--primary);box-shadow:0 0 12px var(--primary);animation:fzPulse 1.2s infinite"></span>
+          </div>
+          <div style="position:absolute;top:486px;left:0;right:0;text-align:center;font-size:14px;font-weight:600">{{ v.hint }}</div>
+          <div style="position:absolute;left:16px;right:16px;bottom:110px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);background:var(--surface);color:var(--text)">
+              <div style="flex:1"><div style="font-size:12px;color:var(--muted);font-weight:600">Présents</div><div style="font-family:var(--f-head);font-weight:800;font-size:24px;line-height:1.1">{{ v.count }} <span style="font-size:14px;color:var(--muted);font-weight:600">/ 12 inscrits</span></div></div>
+              <div style="width:96px;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;background:var(--success);width:{{ v.pct }}%"></div></div>
+            </div>
+            <span style="height:var(--ctl);border-radius:var(--r-sm);background:rgba(0,0,0,.5);border:1.5px solid var(--on-cam);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">keyboard</span>Saisir un code</span>
+          </div>
+        </sc-if>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px;color:var(--text)"><dc-import name="FZ StaffTabBar" active="{{ 2 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">03</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Résultats du scan</h2><span style="color:var(--muted);font-size:14px">Plein écran, vibration indiquée · accepté, inscription sur place, 8 motifs de refus</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <sc-for list="{{ okV }}" as="v" hint-placeholder-count="2">
+    <div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ v.id }}</span><span style="font-weight:700;font-size:14px">{{ v.label }}</span></div>
+      <div style="{{ v.st }}"><div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--success);color:var(--on-success);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div role="status" style="position:absolute;inset:46px 0 0 0;padding:16px 24px 36px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+          <span style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;border:1.5px solid var(--on-success);font-size:12.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:18px">vibration</span>Vibration courte · 1 impulsion</span>
+          <div style="position:relative;margin-top:18px"><div style="width:148px;height:148px;border-radius:999px;border:5px solid var(--on-success);background:repeating-linear-gradient(135deg,var(--success-soft) 0 8px,var(--surface) 8px 16px);display:grid;place-items:center;color:var(--success-ink);font-family:var(--f-head);font-weight:800;font-size:40px">SB</div><span style="position:absolute;right:-4px;bottom:4px;width:52px;height:52px;border-radius:999px;background:var(--surface);color:var(--success-ink);display:grid;place-items:center;border:4px solid var(--success)"><span style="font-family:'Material Symbols Rounded';font-size:32px;font-variation-settings:'FILL' 1">check_circle</span></span></div>
+          <div><div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Présence confirmée</div><h2 style="margin:4px 0 0;font-family:var(--f-head);font-size:34px;letter-spacing:-.03em;font-weight:800;line-height:1.05">Sarra Ben Ali</h2><div style="font-size:14px;margin-top:4px">Premium · réservation confirmée</div></div>
+          <div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:start">
+            <div style="padding:12px;border-radius:var(--r-sm);background:var(--surface);color:var(--text)"><div style="font-size:11.5px;color:var(--muted)">Cours</div><div style="font-weight:700">Pilates · Studio 2</div></div>
+            <div style="padding:12px;border-radius:var(--r-sm);background:var(--surface);color:var(--text)"><div style="font-size:11.5px;color:var(--muted)">Validé à</div><div style="font-weight:700">09:18</div></div>
+          </div>
+          <div style="width:100%;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface);color:var(--text);display:flex;align-items:center;gap:12px"><span style="font-family:var(--f-head);font-weight:800;font-size:22px">10<span style="font-size:13px;color:var(--muted);font-weight:600"> / 12 présents</span></span><span style="flex:1;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden"><span style="display:block;width:83%;height:100%;border-radius:99px;background:var(--success)"></span></span></div>
+          <div style="flex:1"></div>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);background:var(--surface);color:var(--success-ink);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">qr_code_scanner</span>Scanner le suivant</span>
+          <span style="font-size:12.5px">Retour automatique au scanner dans 2 s</span>
+        </div>
+      </div></div></div>
+    </div>
+    </sc-for>
+
+    <div id="3c" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">3c</span><span style="font-weight:700;font-size:14px">Refus : pas de réservation → inscription sur place</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--danger);color:var(--on-danger);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div role="alert" style="position:absolute;inset:46px 0 0 0;padding:16px 24px 36px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+          <span style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;border:1.5px solid var(--on-danger);font-size:12.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:18px">vibration</span>Vibration longue · 3 impulsions</span>
+          <div style="width:112px;height:112px;margin-top:10px;border-radius:999px;background:var(--surface);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:64px;font-variation-settings:'FILL' 1">event_busy</span></div>
+          <div><div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Refusé</div><h2 style="margin:4px 0 0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800;line-height:1.05">Pas de réservation</h2></div>
+          <div style="width:100%;display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);background:var(--surface);color:var(--text);text-align:start"><div style="width:48px;height:48px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700">KM</div><div style="flex:1"><div style="font-weight:700">Karim Mansour</div><div style="font-size:12.5px;color:var(--muted)">Premium · actif · non inscrit à Pilates</div></div></div>
+          <div style="width:100%;display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--surface);color:var(--text);text-align:start"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--success-ink)">event_seat</span><div style="flex:1;font-size:13.5px"><div style="font-weight:700">2 places restantes sur 14</div><div style="color:var(--muted)">Règles vérifiées : formule valable à Lac 2, aucun quota.</div></div></div>
+          <div style="flex:1"></div>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);background:var(--surface);color:var(--danger-ink);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">how_to_reg</span>Inscrire et valider</span>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--on-danger);font-weight:700;font-size:15px;display:grid;place-items:center">Scanner le suivant</span>
+        </div>
+      </div></div>
+    </div>
+
+    <sc-for list="{{ refusals }}" as="r" hint-placeholder-count="8">
+    <div id="{{ r.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ r.id }}</span><span style="font-weight:700;font-size:14px">Refus : {{ r.motif }}</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--danger);color:var(--on-danger);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div role="alert" style="position:absolute;inset:46px 0 0 0;padding:16px 24px 36px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+          <span style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;border:1.5px solid var(--on-danger);font-size:12.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:18px">vibration</span>Vibration longue · 3 impulsions</span>
+          <div style="width:112px;height:112px;margin-top:10px;border-radius:999px;background:var(--surface);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:64px;font-variation-settings:'FILL' 1">{{ r.icon }}</span></div>
+          <div><div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Refusé</div><h2 style="margin:4px 0 0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800;line-height:1.05;text-wrap:balance">{{ r.motif }}</h2></div>
+          <div style="width:100%;display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);background:var(--surface);color:var(--text);text-align:start"><div style="width:48px;height:48px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700">{{ r.ini }}</div><div style="flex:1"><div style="font-weight:700">{{ r.who }}</div><div style="font-size:12.5px;color:var(--muted)">{{ r.plan }}</div></div></div>
+          <p style="margin:0;font-size:15px;text-wrap:pretty">{{ r.detail }}</p>
+          <div style="flex:1"></div>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);background:var(--surface);color:var(--danger-ink);font-weight:700;font-size:15px;display:grid;place-items:center">{{ r.cta }}</span>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--on-danger);font-weight:700;font-size:15px;display:grid;place-items:center">Scanner le suivant</span>
+        </div>
+      </div></div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">04 · 05</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Saisie manuelle &amp; hors ligne</h2><span style="color:var(--muted);font-size:14px">Code à 6 caractères · bandeau hors ligne en <a href="#2d">2d</a> · synchronisation et conflit</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <sc-for list="{{ codeV }}" as="v" hint-placeholder-count="2">
+    <div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ v.id }}</span><span style="font-weight:700;font-size:14px">{{ v.label }}</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:4px 20px 0;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><span style="font-weight:700">Pilates · 09:15 · Studio 2</span></div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Saisir un code</h1><p style="margin:4px 0 0;color:var(--muted);font-size:14.5px">Le code de réservation (6 caractères) est affiché sous le QR de l’adhérent.</p></div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px"><sc-for list="{{ v.chars }}" as="c" hint-placeholder-count="6"><span style="height:62px;border-radius:var(--r-sm);background:var(--surface);display:grid;place-items:center;font-family:var(--f-mono);font-size:26px;font-weight:500;border:{{ c.bd }}">{{ c.ch }}</span></sc-for></div>
+          <sc-if value="{{ v.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-sm);background:var(--danger-soft);border:1px solid var(--danger-border);color:var(--danger-ink);font-size:13.5px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">error</span>Code introuvable pour ce cours. Vérifiez les caractères (0 et O, 1 et I) ou choisissez un autre cours.</div></sc-if>
+          <sc-if value="{{ v.ok }}" hint-placeholder-val="{{ true }}"><div style="font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:18px">info</span>Majuscules et chiffres · sans espaces</div></sc-if>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Valider la présence</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:292px;background:var(--surface-2);border-top:1px solid var(--border);padding:10px 6px 30px;display:grid;grid-template-columns:repeat(10,1fr);grid-auto-rows:46px;gap:6px">
+          <sc-for list="{{ keys }}" as="k" hint-placeholder-count="30"><span style="border-radius:var(--r-xs);background:var(--surface);box-shadow:var(--sh1);display:grid;place-items:center;font-size:17px;font-weight:500">{{ k }}</span></sc-for>
+        </div>
+      </div></div>
+    </div>
+    </sc-for>
+
+    <div id="5a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">5a</span><span style="font-weight:700;font-size:14px">Synchronisation réussie</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 88px 0;padding:24px 20px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+            <div style="width:96px;height:96px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:50px">cloud_done</span></div>
+            <h2 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Synchronisation réussie</h2>
+            <p style="margin:0;color:var(--muted)">2 présences envoyées · 1 conflit à résoudre</p>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ synced }}" as="s" hint-placeholder-count="3"><div style="display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--{{ s.tone }}-ink)">{{ s.icon }}</span><div style="flex:1"><div style="font-weight:700;font-size:14.5px">{{ s.n }}</div><div style="font-size:12px;color:var(--muted)">{{ s.m }}</div></div><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--{{ s.tone }}-soft);color:var(--{{ s.tone }}-ink)">{{ s.st }}</span></div></sc-for>
+          </div>
+          <div style="flex:1"></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Résoudre le conflit</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 2 }}" hint-size="100%,88px"></dc-import></div>
+        <div role="status" style="position:absolute;left:16px;right:16px;bottom:104px;z-index:9;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:none"></div>
+      </div></div>
+    </div>
+
+    <div id="5b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">5b</span><span style="font-weight:700;font-size:14px">Conflit à résoudre</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;background:var(--surface-2)"></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="alertdialog" aria-label="Conflit" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">sync_problem</span></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Présence en conflit</h2>
+          <div style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:44px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700">KM</div><div><div style="font-weight:700">Karim Mansour</div><div style="font-size:12.5px;color:var(--muted)">Pilates · 09:15 · Studio 2</div></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="padding:10px 12px;border-radius:var(--r-sm);border:1px solid var(--border)"><div style="font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Ce téléphone</div><div style="font-weight:700;font-size:14px;color:var(--success-ink)">Présent</div><div style="font-size:12px;color:var(--muted)">Scanné hors ligne à 09:20</div></div>
+            <div style="padding:10px 12px;border-radius:var(--r-sm);border:1px solid var(--border)"><div style="font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em">Serveur</div><div style="font-weight:700;font-size:14px;color:var(--danger-ink)">Réservation annulée</div><div style="font-size:12px;color:var(--muted)">Par l’adhérent à 09:05</div></div>
+          </div>
+          <div style="font-size:13px;color:var(--muted)">Il est venu malgré l’annulation ? Gardez la présence : sa place sera recréée s’il en reste (2 places).</div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Garder la présence</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--danger-border);color:var(--danger-ink);font-weight:700;font-size:15px;display:grid;place-items:center">Annuler la présence</span>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">06 · 07 · 08</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Cours, adhérents, fiche</h2><span style="color:var(--muted);font-size:14px">Pointage manuel, recherche par nom ou téléphone, actions rapides</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="6a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">6a</span><span style="font-weight:700;font-size:14px">Détail d’un cours · inscrits &amp; liste d’attente</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><span style="flex:1"></span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">En cours</span></div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Pilates</h1><div style="font-size:13.5px;color:var(--muted)">09:15 – 10:00 · Studio 2 · Lina{{ siteLine }}</div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:20px;color:var(--success-ink)">4</div><div style="font-size:11.5px;color:var(--muted)">présents</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:20px">3</div><div style="font-size:11.5px;color:var(--muted)">attendus</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:20px;color:var(--danger-ink)">1</div><div style="font-size:11.5px;color:var(--muted)">absent</div></div>
+          </div>
+          <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--primary-ink);border-bottom:2.5px solid var(--primary);margin-bottom:-1px">Inscrits · 8/14</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Liste d’attente · 1</span></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ roster }}" as="r" hint-placeholder-count="8">
+              <div style="display:flex;gap:10px;align-items:center;padding:7px 10px 7px 14px;border-bottom:1px solid var(--border);min-height:56px">
+                <div style="width:36px;height:36px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:12.5px">{{ r.ini }}</div>
+                <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ r.n }}</div><div style="font-size:11.5px;color:var(--muted)">{{ r.m }}</div></div>
+                <sc-if value="{{ r.done }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--{{ r.tone }}-soft);color:var(--{{ r.tone }}-ink)">{{ r.label }}</span></sc-if>
+                <sc-if value="{{ r.todo }}" hint-placeholder-val="{{ false }}"><span style="height:40px;padding:0 12px;border-radius:var(--r-sm);border:1.5px solid var(--success);color:var(--success-ink);font-weight:700;font-size:13px;display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:18px">check</span>Pointer</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:var(--r);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--warning-ink)">hourglass_top</span><span style="flex:1"><strong>Youssef Trabelsi</strong> · 1er en attente</span><span style="font-weight:700;color:var(--warning-ink)">Promouvoir</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1.2fr;gap:8px;z-index:3">
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">person_add</span>Ajouter</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">qr_code_scanner</span>Scanner</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="7a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">7a</span><span style="font-weight:700;font-size:14px">Adhérents · recherche et statuts</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Adhérents</h1><span style="font-size:13px;color:var(--muted);font-weight:600">612{{ siteLine }}</span></div>
+          <div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Rechercher" placeholder="Nom ou téléphone" style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px 0 44px;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="height:34px;padding:0 12px;border-radius:999px;background:var(--secondary);color:var(--on-secondary);font-size:13px;font-weight:700;display:flex;align-items:center">Tous</span><span style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">Expire bientôt · 14</span><span style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">Expirés · 38</span></div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Consultés récemment</div>
+          <sc-for list="{{ members }}" as="m" hint-placeholder-count="5">
+            <div style="display:flex;gap:12px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)">
+              <div style="width:44px;height:44px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:14px">{{ m.ini }}</div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ m.n }}</div><div style="font-size:12px;color:var(--muted)">+216 {{ m.ph }} · {{ m.plan }}</div></div>
+              <span style="display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ m.tone }}-soft);color:var(--{{ m.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:14px">{{ m.icon }}</span>{{ m.st }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 1 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="7b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">7b</span><span style="font-weight:700;font-size:14px">Recherche sans résultat</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 88px 0;padding:4px 20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Adhérents</h1></div>
+          <div style="display:flex;align-items:center;height:var(--ctl);border-radius:var(--r-sm);border:2px solid var(--focus);background:var(--surface);padding:0 14px;gap:10px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><span style="flex:1;font-size:15px">98 765 432</span><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">cancel</span></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px">
+            <div style="width:84px;height:84px;border-radius:999px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:44px">person_search</span></div>
+            <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucun adhérent trouvé</h2>
+            <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Aucune fiche pour « 98 765 432 »{{ siteLine }}. Vérifiez le numéro ou cherchez par nom.</p>
+            <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><span style="height:44px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;display:grid;place-items:center">Chercher dans tous les sites</span></sc-if>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 1 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="8a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">8a</span><span style="font-weight:700;font-size:14px">Fiche adhérent · actions rapides</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:44px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span></div>
+          <div style="display:flex;gap:14px;align-items:center"><div style="width:60px;height:60px;flex:none;border-radius:999px;background:var(--info);color:var(--on-info);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:20px">YT</div><div><h1 style="margin:0;font-family:var(--f-head);font-size:23px;letter-spacing:-.03em;font-weight:800">Youssef Trabelsi</h1><div style="font-size:13px;color:var(--muted)">+216 98 112 640 · membre depuis 2024</div></div></div>
+          <div style="background:var(--surface);border:1px solid var(--warning-border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700">Mensuel Multi</span><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink)">Expire dans 4 j</span></div>
+            <div style="font-size:13px;color:var(--muted)">Du 08/09 au 07/10 · réglé en espèces le 08/09</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px"><sc-for list="{{ sites }}" as="s" hint-placeholder-count="3"><span style="display:flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--{{ s.tone }}-soft);color:var(--{{ s.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:14px">{{ s.icon }}</span>{{ s.n }}</span></sc-for></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+            <sc-for list="{{ quick }}" as="q" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:var(--r-sm);background:{{ q.bg }};color:{{ q.fg }};border:1px solid {{ q.bd }};min-height:68px"><span style="font-family:'Material Symbols Rounded';font-size:24px">{{ q.icon }}</span><span style="font-size:11.5px;font-weight:700;text-align:center;line-height:1.2">{{ q.l }}</span></div></sc-for>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <div style="padding:10px 14px 4px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Réservations à venir</div>
+            <div style="display:flex;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border)"><span style="font-family:var(--f-head);font-weight:800;font-size:14px;width:44px">12:15</span><span style="flex:1;font-size:14px;font-weight:600">HIIT Express</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink)">Attente · 2e</span></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:8px 14px"><span style="font-family:var(--f-head);font-weight:800;font-size:14px;width:44px">Lun.</span><span style="flex:1;font-size:14px;font-weight:600">Cycling · 07:00</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">Confirmé</span></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;gap:14px;align-items:center"><div style="flex:1"><div style="font-weight:700;font-size:14px">Présence · 8 semaines</div><div style="font-size:12.5px;color:var(--muted)">11 cours ce mois · 1 absence</div></div><div style="display:grid;grid-template-columns:repeat(8,10px);gap:4px;align-items:end;height:36px"><sc-for list="{{ pres }}" as="b" hint-placeholder-count="8"><div style="border-radius:3px;height:{{ b.h }}%;background:{{ b.bg }}"></div></sc-for></div></div>
+          <div style="display:flex;gap:10px;padding:10px 14px;border-radius:var(--r);background:var(--info-soft);border:1px solid var(--info-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">sticky_note_2</span><span><strong>Note :</strong> préfère être rappelé par SMS. Genou droit fragile.</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 1 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">09 · 10</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Inscription sur place &amp; encaissement</h2><span style="color:var(--muted);font-size:14px">Règles vérifiées avant inscription · encaissement manuel, aucun paiement en ligne</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="9a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">9a</span><span style="font-weight:700;font-size:14px">Inscrire à un cours · choix &amp; vérification</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="font-weight:700">Inscrire Youssef Trabelsi</span></div>
+          <h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Choisir un cours</h1>
+          <sc-for list="{{ enroll }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);border:{{ c.bd }};background:{{ c.bg }}">
+              <div style="width:58px;flex:none;font-family:var(--f-head);font-weight:800;font-size:13.5px;line-height:1.2">{{ c.t }}</div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ c.n }}</div><div style="font-size:12px;color:var(--muted)">{{ c.m }}</div><div style="font-size:12px;font-weight:700;color:var(--{{ c.tone }}-ink);margin-top:2px">{{ c.r }}</div></div>
+              <span style="width:24px;height:24px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ c.rbd }}"><span style="width:12px;height:12px;border-radius:99px;background:{{ c.dot }}"></span></span>
+            </div>
+          </sc-for>
+          <div style="background:var(--success-soft);border:1px solid var(--success-border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;gap:6px;align-items:center;font-weight:700;color:var(--success-ink);font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:20px">rule</span>Règles vérifiées pour Boxe</div>
+            <sc-for list="{{ checks }}" as="k" hint-placeholder-count="3"><div style="display:flex;gap:6px;align-items:center;font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--success-ink)">check</span>{{ k }}</div></sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Inscrire à Boxe · 19:45</span></div>
+      </div></div>
+    </div>
+
+    <sc-for list="{{ enrollRefus }}" as="v" hint-placeholder-count="2">
+    <div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ v.id }}</span><span style="font-weight:700;font-size:14px">{{ v.label }}</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2)"><span style="height:28px;width:180px;border-radius:var(--r-xs);background:var(--border)"></span><span style="height:84px;border-radius:var(--r);background:var(--border)"></span><span style="height:84px;border-radius:var(--r);background:var(--border)"></span></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="alertdialog" aria-label="Inscription refusée" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">{{ v.icon }}</span></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Inscription refusée</h2>
+          <div style="padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border);font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">{{ v.motif }}</div><div>{{ v.detail }}</div></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">{{ v.cta }}</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:15px;display:grid;place-items:center">Choisir un autre cours</span>
+        </div>
+      </div></div>
+    </div>
+    </sc-for>
+
+    <div id="10a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">10a</span><span style="font-weight:700;font-size:14px">Encaissement · formule, montant, mode</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="font-weight:700">Encaisser · Youssef Trabelsi</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Formule</span>
+            <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;align-items:center;min-height:48px;padding:0 14px;border-radius:var(--r-sm);border:{{ p.bd }};background:{{ p.bg }}"><span style="font-weight:700;font-size:14.5px">{{ p.n }}</span><span style="font-weight:700">{{ p.p }}</span></div></sc-for>
+            <span style="font-size:12.5px;color:var(--muted)">Renouvellement · du 08/10 au 07/11</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Mode de règlement</span>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ modes }}" as="m" hint-placeholder-count="3"><span style="height:56px;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12.5px;font-weight:700;background:{{ m.bg }};color:{{ m.fg }};border:1.5px solid {{ m.bd }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ m.icon }}</span>{{ m.l }}</span></sc-for></div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--muted)">À payer</span><strong style="font-family:var(--f-head);font-size:20px">{{ amount }}</strong></div>
+            <label style="display:flex;justify-content:space-between;align-items:center;font-size:14px;gap:12px"><span style="color:var(--muted)">Montant reçu</span><span style="height:44px;min-width:130px;padding:0 12px;border-radius:var(--r-xs);border:1.5px solid var(--border-input);display:flex;align-items:center;justify-content:flex-end;font-weight:700">{{ received }}</span></label>
+            <div style="display:flex;justify-content:space-between;font-size:14px;padding-top:6px;border-top:1px solid var(--border)"><span style="color:var(--muted)">À rendre</span><strong style="color:var(--success-ink)">{{ change }}</strong></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:18px">info</span>Aucun paiement en ligne : l’encaissement est enregistré au nom de Leila M. et apparaît dans la caisse du jour.</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Confirmer l’encaissement · {{ amount }}</span></div>
+      </div></div>
+    </div>
+
+    <div id="10b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">10b</span><span style="font-weight:700;font-size:14px">Confirmation &amp; reçu partageable · sombre</span></div>
+      <div style="{{ darkSt }}"><div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:16px 20px 34px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px"><div style="width:80px;height:80px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:5px solid var(--success-border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px;font-variation-settings:'FILL' 1">check_circle</span></div><h1 style="margin:0;font-family:var(--f-head);font-size:25px;letter-spacing:-.03em;font-weight:800">Encaissement enregistré</h1><div style="font-size:13.5px;color:var(--muted)">Abonnement prolongé jusqu’au 07/11</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px;border-top:4px solid var(--primary)">
+            <div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;gap:8px;align-items:center"><span style="width:28px;height:28px;border-radius:var(--r-xs);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:11px">{{ mono }}</span><strong>Reçu</strong></div><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">REC-2026-0418</span></div>
+            <sc-for list="{{ receipt }}" as="r" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;font-size:13.5px;gap:10px"><span style="color:var(--muted)">{{ r.k }}</span><span style="font-weight:600;text-align:end">{{ r.v }}</span></div></sc-for>
+            <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px dashed var(--border-strong)"><strong>Total réglé</strong><strong style="font-family:var(--f-head);font-size:20px">{{ amount }}</strong></div>
+          </div>
+          <div style="font-size:13px;font-weight:600">Partager le reçu</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ share }}" as="s" hint-placeholder-count="3"><span style="height:56px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ s.icon }}</span>{{ s.l }}</span></sc-for></div>
+          <div style="flex:1"></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Terminé</span>
+        </div>
+      </div></div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">11 · 12</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Planning, infos pratiques, profil</h2><span style="color:var(--muted);font-size:14px">Consultation · sélecteur de rôle pour les comptes cumulés</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="11a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">11a</span><span style="font-weight:700;font-size:14px">Planning du site (consultation)</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Planning</h1><span style="height:40px;padding:0 12px;border-radius:var(--r-sm);border:1px solid var(--border-strong);background:var(--surface);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:18px">info</span>Infos pratiques</span></div>
+          <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:6px"><span style="height:34px;padding:0 12px;border-radius:999px;background:var(--secondary);color:var(--on-secondary);font-size:13px;font-weight:700;display:flex;align-items:center">Lac 2</span><span style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">La Marsa</span><span style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">Centre-ville</span></div></sc-if>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"><sc-for list="{{ days }}" as="d" hint-placeholder-count="7"><span style="height:58px;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);background:{{ d.bg }};color:{{ d.fg }}"><span style="font-size:11px;font-weight:600">{{ d.w }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:17px">{{ d.n }}</span></span></sc-for></div>
+          <sc-for list="{{ planning }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)">
+              <span style="font-family:var(--f-head);font-weight:800;font-size:15px;width:44px">{{ c.t }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;gap:6px"><span style="font-weight:700">{{ c.n }}</span><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--{{ c.tone }}-soft);color:var(--{{ c.tone }}-ink)">{{ c.st }}</span></div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>{{ c.m }}</span><strong style="color:var(--text)">{{ c.f }}</strong></div><div style="height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;background:var(--{{ c.tone }});width:{{ c.pct }}%"></div></div></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="11b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">11b</span><span style="font-weight:700;font-size:14px">Infos pratiques du site</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Infos pratiques{{ siteLine }}</h1></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:6px;align-items:center;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--primary-ink)">schedule</span>Horaires</div><sc-for list="{{ hours }}" as="h" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--muted)">{{ h.d }}</span><strong>{{ h.h }}</strong></div></sc-for></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:6px;align-items:center;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--primary-ink)">sell</span>Tarifs · réglés à l’accueil</div><sc-for list="{{ prices }}" as="p" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--muted)">{{ p.n }}</span><strong>{{ p.p }}</strong></div></sc-for></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:6px;align-items:center;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--primary-ink)">gavel</span>Règlement</div><sc-for list="{{ rules }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:6px;font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:var(--muted);margin-top:2px">chevron_right</span>{{ r }}</div></sc-for></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="12a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">12a</span><span style="font-weight:700;font-size:14px">Profil staff · rôle cumulé</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Profil</h1></div>
+          <div style="display:flex;gap:14px;align-items:center"><div style="width:64px;height:64px;flex:none;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:21px">LM</div><div><div style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em">Leila Mansouri</div><div style="font-size:13px;color:var(--muted)">Accueil{{ siteLine }} · depuis mars 2025</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Rôle actif</span><div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><span style="flex:1;height:44px;border-radius:var(--r-xs);background:var(--surface);box-shadow:var(--sh1);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:18px">badge</span>Staff accueil</span><span style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:14px;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:18px">sports</span>Coach</span></div><span style="font-size:12px;color:var(--muted)">Vous cumulez deux rôles : la barre d’onglets change selon le rôle actif.</span></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ profRows }}" as="r" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center;min-height:52px;padding:0 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">{{ r.icon }}</span><span style="flex:1;font-weight:600;font-size:14.5px">{{ r.l }}</span><span style="font-size:13px;color:var(--muted)">{{ r.v }}</span><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">chevron_right</span></div></sc-for>
+          </div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--danger-border);color:var(--danger-ink);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">logout</span>Se déconnecter</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ StaffTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="12b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">12b</span><span style="font-weight:700;font-size:14px">Déconnexion avec présences non synchronisées</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="off" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;background:var(--surface-2)"></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="alertdialog" aria-label="Se déconnecter" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">cloud_off</span></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">3 présences pas encore envoyées</h2>
+          <p style="margin:0;font-size:14px;color:var(--muted);text-wrap:pretty">Vous êtes hors ligne. Si vous vous déconnectez maintenant, les présences scannées à Pilates seront perdues. Reconnectez-vous au Wi-Fi de la salle pour les envoyer.</p>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Rester connecté</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--danger-border);color:var(--danger-ink);font-weight:700;font-size:15px;display:grid;place-items:center">Se déconnecter quand même</span>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clair&quot;,&quot;Sombre&quot;,&quot;Auto&quot;],&quot;default&quot;:&quot;Clair&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;logoMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Logo + nom&quot;,&quot;Logo seul&quot;],&quot;default&quot;:&quot;Logo + nom&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const ini=n=>n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const COURSES=[{t:'07:00',d:'45 min',n:'Cycling',coach:'Rim',room:'Studio 1',b:18,cap:20,p:17,st:'Terminé',tone:'secondary',done:true},{t:'12:15',d:'30 min',n:'HIIT Express',coach:'Yassine',room:'Salle 2',b:20,cap:20,p:0,st:'Complet · 3 en attente',tone:'danger'},{t:'18:00',d:'60 min',n:'Yoga Flow',coach:'Nadia',room:'Studio A',b:9,cap:14,p:0,st:'Annulé',tone:'danger',cancel:true},{t:'19:45',d:'60 min',n:'Boxe',coach:'Hatem',room:'Ring',b:8,cap:12,p:0,st:'Coach absent',tone:'warning'}];
+const REF=[['En liste d’attente','hourglass_top','Youssef Trabelsi','Mensuel Multi','Il est 2e sur la liste d’attente de Pilates. Il sera validé automatiquement si une place se libère.','Voir la liste d’attente'],
+['Abonnement expiré','event_busy','Amira Chaouch','Mensuel','Son abonnement a expiré le 02/07. Proposez un renouvellement avant le cours.','Encaisser un renouvellement'],
+['Abonnement suspendu','pause_circle','Hedi Karoui','Trimestriel','Abonnement gelé jusqu’au 15/10 à sa demande. Il peut le réactiver à l’accueil.','Voir la fiche'],
+['Formule non valable dans ce site','location_off','Mehdi Jaziri','Annuel · La Marsa','Sa formule donne accès à La Marsa uniquement, pas à Lac 2.','Voir ses sites d’accès'],
+['Déjà pointé','done_all','Nour Hammami','Mensuel','Présence déjà validée à 09:12 pour ce cours. Rien à faire.','Scanner le suivant'],
+['Hors de la fenêtre de scan','schedule','Karim Mansour','Premium','Le pointage de HIIT Express ouvre à 11:45 (30 min avant) et ferme à 12:30.','Changer de cours'],
+['Cours annulé','cancel','Ines Gharbi','Trimestriel','Yoga Flow de 18:00 est annulé (coach absente). L’adhérente a été prévenue.','Proposer un autre cours'],
+['QR expiré','qr_code_2','','','Ce QR a plus de 30 secondes. Demandez à l’adhérent d’actualiser son QR dans l’app, ou saisissez son code.','Saisir un code']];
+const ROSTER=[['Sarra Ben Ali','p','09:18 · QR'],['Nour Hammami','p','09:12 · QR'],['Omar Saidi','p','09:14 · manuel'],['Sami Ayari','p','09:16 · QR'],['Karim Mansour','e','Réservé'],['Ines Gharbi','e','Réservé'],['Lina Ferchichi','a','Absente · prévenue'],['Rim Kefi','e','Réservé']];
+const MEMBERS=[['Sarra Ben Ali','22 345 678','Premium','Actif','success','check_circle'],['Youssef Trabelsi','98 112 640','Mensuel Multi','Expire dans 4 j','warning','schedule'],['Amira Chaouch','55 901 223','Mensuel','Expiré le 02/07','danger','event_busy'],['Hedi Karoui','24 770 018','Trimestriel','Suspendu','secondary','pause_circle'],['Karim Mansour','21 404 552','Premium','Actif','success','check_circle']];
+class Component extends DCLogic {
+  state={sysDark:false};
+  componentDidMount(){this.mq=window.matchMedia('(prefers-color-scheme: dark)');this.onMq=()=>this.setState({sysDark:this.mq.matches});this.onMq();this.mq.addEventListener('change',this.onMq);}
+  componentWillUnmount(){this.mq&&this.mq.removeEventListener('change',this.onMq);}
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--focus':ensure(C.primary,bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--bezel':mix(C.bgDark,'#000000',.35),'--cam':C.bgDark,'--cam-2':mix(C.bgDark,C.textDark,.07),'--on-cam':C.textDark,
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const dark=P.theme==='Sombre'||(P.theme==='Auto'&&S.sysDark);
+    const rootStyle={...this.vars(dark,C,P),background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const darkSt={...this.vars(true,C,P),color:'var(--text)',fontFamily:'var(--f-body)'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';const caps=brand.match(/[A-Z]/g);const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):brand.slice(0,2)).toUpperCase();
+    const multi=String(P.sites??'3')==='3';
+    const km=P.currency==='€'?0.3:1;const cur=P.currency==='€'?'€':'DT';
+    const money=n=>Math.round(n*km).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ')+' '+cur;
+    const todayV=[{id:'1a',label:'3 sites · thème des Tweaks',multi:true,st:{},sub:'Samedi 3 octobre · Lac 2 · 5 cours · 26 présents'},{id:'1b',label:'Site unique (sélecteur masqué) · sombre',multi:false,st:darkSt,sub:'Samedi 3 octobre · 5 cours · 26 présents'}];
+    const others=COURSES.map(c=>({...c,pct:Math.round(c.b/c.cap*100),bar:c.cancel?'var(--border-strong)':(c.b>=c.cap?'var(--danger)':'var(--primary)'),meta:c.coach+' · '+c.room,count:c.cancel?'9 prévenus':(c.done?c.p+' présents':c.b+'/'+c.cap+' inscrits'),op:c.cancel?.7:1}));
+    const alerts=[{icon:'event_busy',tone:'danger',t:'Yoga Flow 18:00 annulé',s:'Nadia absente · 9 inscrits prévenus par notification'},{icon:'person_off',tone:'warning',t:'Coach absent · Boxe 19:45',s:'Hatem indisponible · remplaçant à confirmer par l’admin'}];
+    const scanCourses=[['09:15','Pilates','Studio 2','Pointage ouvert · ferme à 09:30','success',true],['12:15','HIIT Express','Salle 2','Ouvre à 11:45','secondary'],['07:00','Cycling','Studio 1','Fermé depuis 07:15','secondary'],['18:00','Yoga Flow','Studio A','Annulé','danger'],['19:45','Boxe','Ring','Ouvre à 19:15','secondary']].map(([t,n,m,w,tone,sel],i)=>({t,n,m,w,tone,bd:sel?'2px solid var(--primary)':'1px solid var(--border)',bg:sel?'var(--primary-soft)':'transparent',rbd:sel?'var(--primary)':'var(--border-input)',dot:sel?'var(--primary)':'transparent',op:(i===2||i===3)?.6:1}));
+    const camV=[{id:'2b',label:'Caméra · cadre de visée, torche allumée',net:'ok',offline:false,denied:false,live:true,count:9,pct:75,hint:'Placez le QR de l’adhérent dans le cadre',torchBg:'var(--accent)',torchFg:'var(--on-accent)',torchIcon:'flashlight_on'},{id:'2c',label:'Refus : caméra non autorisée',net:'ok',offline:false,denied:true,live:false,count:9,pct:75,hint:'',torchBg:'rgba(0,0,0,.45)',torchFg:'var(--on-cam)',torchIcon:'flashlight_off'},{id:'2d',label:'Hors ligne · bandeau de synchronisation',net:'off',offline:true,denied:false,live:true,count:11,pct:92,hint:'Les QR sont vérifiés hors ligne (signature)',torchBg:'rgba(0,0,0,.45)',torchFg:'var(--on-cam)',torchIcon:'flashlight_off'}];
+    const okV=[{id:'3a',label:'Présence confirmée · thème des Tweaks',st:{}},{id:'3b',label:'Présence confirmée · sombre',st:darkSt}];
+    const refusals=REF.map(([motif,icon,who,plan,detail,cta],i)=>({id:'3'+'defghijk'[i],motif,icon,who:who||'Adhérent non identifié',plan:plan||'QR illisible ou périmé',ini:who?ini(who):'?',detail,cta}));
+    const roster=ROSTER.map(([n,s,m])=>({n,ini:ini(n),m,label:s==='p'?'Présent':(s==='a'?'Absent':'Attendu'),tone:s==='p'?'success':(s==='a'?'danger':'secondary'),todo:s==='e',done:s!=='e'}));
+    const members=MEMBERS.map(([n,ph,plan,st,tone,icon])=>({n,ini:ini(n),ph,plan,st,tone,icon}));
+    const sites=multi?[{n:'Lac 2',s:'Site d’origine · accès illimité',tone:'success',icon:'home_pin'},{n:'La Marsa',s:'Inclus · 4 cours/mois hors site · 3/4 utilisés',tone:'warning',icon:'location_on'},{n:'Centre-ville',s:'Non inclus',tone:'danger',icon:'location_off'}]:[{n:'FitZone',s:'Accès illimité',tone:'success',icon:'home_pin'}];
+    const pres=[3,2,3,4,2,3,3,2].map((v,i)=>({h:v/4*100,bg:i===7?'var(--primary)':'var(--secondary)'}));
+    const enroll=[{t:'Auj. 19:45',n:'Boxe',m:'Hatem · Ring'+(multi?' · Lac 2':''),r:'4 places · règles OK',tone:'success',sel:true},{t:'Auj. 12:15',n:'HIIT Express',m:'Yassine · Salle 2',r:'Complet · liste d’attente proposée (4e)',tone:'danger'},...(multi?[{t:'Auj. 19:00',n:'Cycling',m:'Rim · Studio B · La Marsa',r:'Hors site · quota 3/4 → dernier cours',tone:'warning'}]:[]),{t:'Lun. 07:00',n:'Cycling',m:'Rim · Studio 1',r:'6 places · règles OK',tone:'success'}].map(c=>({...c,bd:c.sel?'2px solid var(--primary)':'1px solid var(--border)',bg:c.sel?'var(--primary-soft)':'var(--surface)',rbd:c.sel?'var(--primary)':'var(--border-input)',dot:c.sel?'var(--primary)':'transparent'}));
+    const plans=[['Mensuel',90],['Mensuel Multi',120],['Premium',180]].map(([n,p],i)=>({n,p:money(p),bd:i===1?'2px solid var(--primary)':'1px solid var(--border)',bg:i===1?'var(--primary-soft)':'var(--surface)'}));
+    const modes=[['payments','Espèces'],['account_balance','Virement'],['edit_note','Chèque']].map(([icon,l],i)=>({icon,l,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)',bd:i===0?'var(--secondary)':'var(--border-input)'}));
+    const days=[['Sam','3'],['Dim','4'],['Lun','5'],['Mar','6'],['Mer','7'],['Jeu','8'],['Ven','9']].map(([w,n],i)=>({w,n,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)'}));
+    const planning=[{t:'07:00',n:'Cycling',m:'Rim · Studio 1',f:'18/20',pct:90,tone:'secondary',st:'Terminé'},{t:'09:15',n:'Pilates',m:'Lina · Studio 2',f:'12/14',pct:86,tone:'primary',st:'En cours'},{t:'12:15',n:'HIIT Express',m:'Yassine · Salle 2',f:'20/20',pct:100,tone:'danger',st:'Complet'},{t:'18:00',n:'Yoga Flow',m:'Nadia · Studio A',f:'—',pct:0,tone:'danger',st:'Annulé'},{t:'19:45',n:'Boxe',m:'Hatem · Ring',f:'8/12',pct:67,tone:'warning',st:'Coach absent'}];
+    const hours=[['Lun – Ven','06:00 – 22:30'],['Samedi','08:00 – 20:00'],['Dimanche','09:00 – 14:00']].map(([d,h])=>({d,h}));
+    const prices=[['Séance découverte',15],['Mensuel',90],['Mensuel Multi',120],['Premium (tous sites)',180],['Trimestriel',240]].map(([n,p])=>({n,p:money(p)}));
+    const rules=['Réservation obligatoire pour les cours collectifs','Pointage du QR de 30 min avant à 15 min après le début','Annulation gratuite jusqu’à 2 h avant le cours','Serviette et chaussures propres exigées'];
+    const mk=(s,err)=>s.split('').map((ch,i)=>({ch:ch==='_'?'':ch,bd:err?'2px solid var(--danger)':(i===s.indexOf('_')?'2px solid var(--primary)':'1.5px solid var(--border-input)')}));
+    const codeV=[{id:'4a',label:'Saisie manuelle · en cours',chars:mk('K7Q2M_'),err:false,ok:true},{id:'4b',label:'Erreur : code introuvable',chars:mk('K7Q2M8',true),err:true,ok:false}];
+    const keys='1234567890AZERTYUIOPQSDFGHJKLMWXCVBN⌫'.split('').slice(0,30);
+    const synced=[{n:'Sarra Ben Ali',m:'Pilates · scanné à 09:18',st:'Envoyée',tone:'success',icon:'cloud_done'},{n:'Sami Ayari',m:'Pilates · scanné à 09:16',st:'Envoyée',tone:'success',icon:'cloud_done'},{n:'Karim Mansour',m:'Pilates · scanné à 09:20',st:'Conflit',tone:'warning',icon:'sync_problem'}];
+    const quick=[['event_available','Inscrire à un cours',0],['how_to_reg','Pointer',0],['payments','Encaisser',1],['autorenew','Renouveler',0]].map(([icon,l,p])=>({icon,l,bg:p?'var(--primary)':'var(--surface)',fg:p?'var(--primary-contrast)':'var(--text)',bd:p?'var(--primary)':'var(--border)'}));
+    const checks=['Abonnement actif jusqu’au 07/10','Formule valable'+(multi?' à Lac 2':' sur ce site'),'1 seule réservation sur ce créneau'];
+    const enrollRefus=[...(multi?[{id:'9b',label:'Refus : quota hors site atteint',icon:'data_usage',motif:'Quota hors site d’origine atteint',detail:'Youssef a utilisé ses 4 cours du mois hors de Lac 2 (4/4). Nouveau quota le 1er novembre. Les cours « Ouvert à tous les sites » restent possibles.',cta:'Voir les cours ouverts à tous'}]:[]),{id:'9c',label:'Refus : cours complet',icon:'event_busy',motif:'HIIT Express est complet (20/20)',detail:'Aucune place disponible. Vous pouvez l’ajouter en liste d’attente : il serait 4e et confirmé automatiquement si une place se libère.',cta:'Ajouter en liste d’attente'}];
+    const receipt=[{k:'Adhérent',v:'Youssef Trabelsi'},{k:'Formule',v:'Mensuel Multi'},{k:'Période',v:'08/10 → 07/11'},{k:'Mode',v:'Espèces · rendu '+money(30)},{k:'Encaissé par',v:'Leila M.'+(multi?' · Lac 2':'')},{k:'Date',v:'03/10/2026 · 09:44'}];
+    const share=[['chat','WhatsApp'],['sms','SMS'],['mail','E-mail']].map(([icon,l])=>({icon,l}));
+    const profRows=[...(multi?[{icon:'location_on',l:'Site de travail',v:'Lac 2'}]:[]),{icon:'point_of_sale',l:'Ma caisse du jour',v:money(840)},{icon:'notifications',l:'Notifications',v:'Activées'},{icon:'dark_mode',l:'Thème',v:'Auto'},{icon:'translate',l:'Langue',v:'Français'}];
+    return {checks,enrollRefus,receipt,share,profRows,darkSt,quick,codeV,keys,synced,rootStyle,brand,mono,showName:P.logoMode!=='Logo seul',multiSite:multi,siteLine:multi?' · Lac 2':'',todayV,others,alerts,scanCourses,camV,okV,refusals,roster,members,sites,pres,enroll,plans,modes,days,planning,hours,prices,rules,
+      amount:money(120),received:money(150),change:money(30),premium:money(180)};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+:root{--bg:#F7F7F9;--surface:#FFFFFF;--surface-2:#F1F2F4;--text:#111827;--muted:#5B6270;--border:#E3E4E7;--border-strong:#C5C8CE;--border-input:#8A909B;--primary:#FF5A1F;--primary-hover:#E6511C;--primary-pressed:#CC4819;--primary-soft:#FFEEE9;--primary-border:#FFC6B1;--primary-ink:#B83A0C;--primary-contrast:#FFFFFF;--secondary:#14213D;--secondary-soft:#E8E9EC;--secondary-border:#B9BCC5;--secondary-ink:#14213D;--on-secondary:#FFFFFF;--accent:#FCA311;--accent-soft:#FFF6E7;--accent-border:#FEDCA6;--accent-ink:#8A5600;--on-accent:#111111;--success:#16A34A;--success-soft:#E8F6ED;--success-ink:#11793A;--success-border:#B1E0C2;--warning:#F59E0B;--warning-soft:#FEF5E7;--warning-ink:#8A5600;--warning-border:#FCDDA6;--danger:#DC2626;--danger-soft:#FCE9E9;--danger-ink:#B91C1C;--danger-border:#F3B7B7;--info:#2563EB;--info-soft:#E9EFFD;--info-ink:#1D4ED8;--info-border:#B6CBF8;--focus:#E04E18;--overlay:rgba(14,17,23,.45);--r:16px;--r-xs:5px;--r-sm:9px;--r-lg:22px;--pad:16px;--gap:16px;--ctl:48px;--f-head:'Sora',system-ui,sans-serif;--f-body:'DM Sans',system-ui,sans-serif;--f-mono:'JetBrains Mono',ui-monospace,monospace;--sh1:0 1px 3px rgba(17,24,39,.07);--sh2:0 6px 16px rgba(17,24,39,.08);--sh3:0 20px 48px rgba(17,24,39,.18)}
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fzSpin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:64px 72px 140px;display:flex;flex-direction:column;gap:96px">
+
+<div style="max-width:880px">
+  <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Rôle adhérent · Entraînement</div>
+  <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:64px;line-height:1;letter-spacing:-.035em;font-weight:800">Entraînement &amp; progression</h1>
+  <p style="margin:16px 0 0;font-size:18px;color:var(--muted);text-wrap:pretty">Programmes, séance guidée, historique, bibliothèque, progression, coaching et affluence. Chaque écran est montré en thème clair et sombre ; les pastilles changent d’état.</p>
+</div>
+
+<section data-screen-label="D Programmes et séance" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">D</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Programmes &amp; séance</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">D1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Mes programmes</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.progs }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Entraînement</h1><button aria-label="Bibliothèque" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">menu_book</span></button></div>
+                <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--primary-ink);border-bottom:2.5px solid var(--primary);margin-bottom:-1px">Programmes</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Historique</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Progression</span></div>
+                <sc-if value="{{ PG.loading }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:12px;animation:fzPulse 1.4s ease-in-out infinite"><div style="height:176px;border-radius:var(--r-lg);background:var(--surface-2)"></div><div style="height:84px;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:84px;border-radius:var(--r);background:var(--surface-2)"></div></div>
+                </sc-if>
+                <sc-if value="{{ PG.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">fitness_center</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Pas encore de programme</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Demandez un programme à un coach ou créez le vôtre à partir de la bibliothèque d’exercices.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer" style-hover="background:var(--primary-hover)">Demander à un coach</button>
+                    <button style="height:44px;padding:0 18px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">Créer mon programme</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ PG.error }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">cloud_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Programmes indisponibles</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Une erreur est survenue. Vos programmes téléchargés restent utilisables.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ PG.normal }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85">En cours · semaine 2/4</span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--accent);color:var(--on-accent)">Coach Yassine</span></div>
+                    <div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">Force — Haut du corps</div><div style="font-size:13px;opacity:.85">3 jours / semaine · 45–60 min</div></div>
+                    <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden"><div style="width:42%;height:100%;border-radius:99px;background:var(--primary)"></div></div>
+                    <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;font-size:13px"><span style="opacity:.85">Aujourd’hui :</span> <strong>J1 · Poussée</strong> · 5 exercices</div><button style="height:44px;padding:0 16px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--on-secondary);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">play_arrow</span>Démarrer</button></div>
+                  </div>
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px">Autres programmes</div>
+                  <sc-for list="{{ programs }}" as="p" hint-placeholder-count="2">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center">
+                      <div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--{{ p.tone }}-soft);color:var(--{{ p.tone }}-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px">{{ p.icon }}</span></div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ p.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ p.meta }}</div></div>
+                      <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+                    </div>
+                  </sc-for>
+                  <button style="height:var(--ctl);border-radius:var(--r);border:1.5px dashed var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text)"><span style="font-family:'Material Symbols Rounded';font-size:20px">add</span>Créer un programme</button>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">D2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Détail du programme</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.pdet }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ pdetNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><span style="flex:1"></span><button aria-label="Plus" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">more_horiz</span></button></div>
+                <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Force — Haut du corps</h1><div style="font-size:13.5px;color:var(--muted)">Par Yassine · 4 semaines · 3 jours / semaine</div></div>
+                <sc-if value="{{ PD.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">download_done</span><span style="flex:1">Hors ligne · programme téléchargé, médias indisponibles</span></div></sc-if>
+                <div role="tablist" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ dayTabs }}" as="d" hint-placeholder-count="3"><button role="tab" onClick="{{ d.on }}" style="height:56px;border-radius:var(--r-sm);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:{{ d.bg }};color:{{ d.fg }};border:1px solid {{ d.bd }}"><span style="font-size:11.5px;font-weight:600;opacity:.85">{{ d.k }}</span><span style="font-weight:700;font-size:14px">{{ d.n }}</span></button></sc-for></div>
+                <div style="display:flex;gap:16px;font-size:13px;color:var(--muted)"><span style="display:flex;gap:4px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:18px">timer</span>{{ day.dur }}</span><span style="display:flex;gap:4px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:18px">format_list_numbered</span>{{ day.count }} exercices</span><span style="display:flex;gap:4px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:18px">target</span>{{ day.muscles }}</span></div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                  <sc-for list="{{ day.ex }}" as="e" hint-placeholder-count="5">
+                    <div style="display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)">
+                      <span style="width:24px;font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ e.i }}</span>
+                      <div style="width:44px;height:44px;flex:none;border-radius:var(--r-xs);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px);border:1px solid var(--border)"></div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ e.n }}</div><div style="display:flex;gap:10px;font-size:12.5px;color:var(--muted)"><span><strong style="color:var(--text)">{{ e.sets }}</strong></span><span>repos {{ e.rest }}</span><span>{{ e.load }}</span></div></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--info-soft);border:1px solid var(--info-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">forum</span><div><strong style="color:var(--info-ink)">Note du coach</strong><div>Gardez 1 à 2 répétitions en réserve sur la dernière série. Augmentez de 2,5 kg quand les 4 séries passent.</div></div></div>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">play_arrow</span>Démarrer {{ day.k }}</button></div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">D3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Séance en cours</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.sess }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ sessNet }}" hint-size="100%,46px"></dc-import>
+              <div style="display:flex;align-items:center;gap:8px;padding:0 12px;height:52px">
+                <button aria-label="Quitter" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></button>
+                <div style="flex:1;text-align:center"><div style="font-weight:700;font-size:14.5px">J1 · Poussée</div><div style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">24:18 écoulées</div></div>
+                <button style="height:36px;padding:0 12px;border-radius:999px;border:0;background:var(--danger-soft);color:var(--danger-ink);font-weight:700;font-size:13px;cursor:pointer">Terminer</button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:0 20px"><sc-for list="{{ exProg }}" as="p" hint-placeholder-count="5"><span style="height:4px;border-radius:99px;background:{{ p }}"></span></sc-for></div>
+              <div style="position:absolute;top:110px;left:0;right:0;bottom:0;overflow-y:auto;padding:12px 20px 170px;display:flex;flex-direction:column;gap:12px">
+                <sc-if value="{{ SS.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">cloud_off</span><span style="flex:1">Hors ligne · séance enregistrée sur le téléphone, synchronisée au retour du réseau</span></div></sc-if>
+                <div style="display:flex;gap:12px;align-items:center">
+                  <div style="width:72px;height:72px;flex:none;border-radius:var(--r-sm);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px);border:1px solid var(--border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px;color:var(--muted)">play_circle</span></div>
+                  <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Exercice 1 sur 5</div><div style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em;line-height:1.15">Développé couché</div><div style="font-size:13px;color:var(--muted)">4 × 8 · repos 90 s · objectif 52,5 kg</div></div>
+                </div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                  <div style="display:grid;grid-template-columns:40px 1fr 76px 64px 44px;gap:8px;align-items:center;padding:8px 12px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)"><span>Série</span><span>Précédent</span><span>kg</span><span>Rép.</span><span></span></div>
+                  <sc-for list="{{ sets }}" as="s" hint-placeholder-count="4">
+                    <div style="display:grid;grid-template-columns:40px 1fr 76px 64px 44px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);background:{{ s.rowBg }}">
+                      <span style="font-family:var(--f-head);font-weight:800;font-size:15px">{{ s.i }}</span>
+                      <span style="font-size:13px;color:var(--muted)">{{ s.prev }}</span>
+                      <sc-if value="{{ s.edit }}" hint-placeholder-val="{{ false }}"><input aria-label="Charge en kg" inputMode="decimal" defaultValue="{{ s.kg }}" style="width:100%;height:44px;border-radius:var(--r-xs);border:1.5px solid var(--border-input);background:var(--surface);text-align:center;font-weight:700;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></sc-if>
+                      <sc-if value="{{ s.edit }}" hint-placeholder-val="{{ false }}"><input aria-label="Répétitions" inputMode="numeric" defaultValue="{{ s.reps }}" style="width:100%;height:44px;border-radius:var(--r-xs);background:var(--surface);text-align:center;font-weight:700;font-size:15px;outline:none;border:1.5px solid {{ s.repBd }}" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></sc-if>
+                      <sc-if value="{{ s.ro }}" hint-placeholder-val="{{ true }}"><span style="text-align:center;font-weight:700;font-size:15px;color:{{ s.fg }}">{{ s.kg }}</span></sc-if>
+                      <sc-if value="{{ s.ro }}" hint-placeholder-val="{{ true }}"><span style="text-align:center;font-weight:700;font-size:15px;color:{{ s.fg }}">{{ s.reps }}</span></sc-if>
+                      <span role="checkbox" aria-checked="{{ s.done }}" style="width:44px;height:44px;border-radius:var(--r-xs);display:grid;place-items:center;background:{{ s.chkBg }};color:{{ s.chkFg }};border:1.5px solid {{ s.chkBd }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">check</span></span>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ SS.error }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:6px;align-items:center;padding:10px 12px;color:var(--danger-ink);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">error</span>Saisissez un nombre de répétitions (1 à 50).</div></sc-if>
+                  <button style="width:100%;height:44px;border:0;background:transparent;font-weight:700;font-size:13.5px;color:var(--primary-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">add</span>Ajouter une série</button>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">skip_next</span><div style="flex:1;font-size:13.5px"><div style="color:var(--muted);font-size:12px">Ensuite</div><div style="font-weight:700">Développé incliné haltères · 3 × 10</div></div></div>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:8px;z-index:3">
+                <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">check</span>Valider la série 3</button>
+                <button aria-label="Exercice suivant" style="width:var(--ctl);height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_forward</span></button>
+              </div>
+              <sc-if value="{{ SS.rest }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Repos" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:16px">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong)"></div>
+                    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Repos · série 3 validée</div>
+                    <div style="position:relative;width:200px;height:200px">
+                      <svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--surface-2)" stroke-width="12"></circle><circle cx="100" cy="100" r="88" fill="none" stroke="var(--primary)" stroke-width="12" stroke-linecap="round" stroke-dasharray="{{ restDash }}" transform="rotate(-90 100 100)"></circle></svg>
+                      <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:var(--f-head);font-weight:800;font-size:52px;letter-spacing:-.03em;line-height:1">{{ restLabel }}</span><span style="font-size:13px;color:var(--muted)">sur 1:30</span></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;width:100%">
+                      <button style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">−15 s</button>
+                      <button style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">+15 s</button>
+                      <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer" style-hover="background:var(--primary-hover)">Passer</button>
+                    </div>
+                    <div style="font-size:13px;color:var(--muted)">Prochaine : série 4 · 52,5 kg × 8</div>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">D4</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Fin de séance</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.end }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:16px 20px 160px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:8px">
+                  <div style="width:88px;height:88px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:48px;font-variation-settings:'FILL' 1">emoji_events</span></div>
+                  <h1 style="margin:4px 0 0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Séance terminée</h1>
+                  <div style="font-size:14px;color:var(--muted)">J1 · Poussée · samedi 3 octobre</div>
+                </div>
+                <sc-if value="{{ EN.sync }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--danger-soft);color:var(--danger-ink);border:1px solid var(--danger-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">sync_problem</span><span style="flex:1">Synchronisation échouée. Séance gardée sur le téléphone.</span><span style="font-weight:700;text-decoration:underline">Réessayer</span></div></sc-if>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                  <sc-for list="{{ endStats }}" as="s" hint-placeholder-count="4"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px"><div style="font-size:12px;color:var(--muted)">{{ s.l }}</div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">{{ s.v }}</div><div style="font-size:12px;font-weight:700;color:var(--{{ s.tone }}-ink)">{{ s.d }}</div></div></sc-for>
+                </div>
+                <div style="background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:12px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em">2 records personnels</div>
+                  <div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Développé couché</span><strong>52,5 kg × 8</strong></div>
+                  <div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Dips</span><strong>3 × 14</strong></div>
+                </div>
+                <div><div style="font-weight:700;font-size:14px;margin-bottom:8px">Ressenti</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ feel }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.on }}" style="height:44px;border-radius:var(--r-sm);font-weight:700;font-size:13.5px;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }}">{{ f.l }}</button></sc-for></div></div>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;z-index:3">
+                <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Enregistrer la séance</button>
+                <button style="height:44px;border:0;border-radius:var(--r-sm);background:transparent;font-weight:700;font-size:14px;color:var(--primary-ink);cursor:pointer">Partager avec mon coach</button>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="E Historique et bibliothèque" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">E</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Historique &amp; bibliothèque</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">E1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Historique des séances</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.hist }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Entraînement</h1></div>
+                <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Programmes</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--primary-ink);border-bottom:2.5px solid var(--primary);margin-bottom:-1px">Historique</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Progression</span></div>
+                <sc-if value="{{ HI.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;animation:fzPulse 1.4s ease-in-out infinite"><div style="height:72px;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:14px;width:40%;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="height:180px;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:120px;border-radius:var(--r);background:var(--surface-2)"></div></div></sc-if>
+                <sc-if value="{{ HI.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">history</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune séance enregistrée</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Démarrez une séance depuis un programme : charges, répétitions et durée seront gardées ici.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Démarrer une séance</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ HI.normal }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ histStats }}" as="s" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:20px;letter-spacing:-.02em">{{ s.v }}</div><div style="font-size:12px;color:var(--muted)">{{ s.l }}</div></div></sc-for></div>
+                  <sc-for list="{{ histGroups }}" as="g" hint-placeholder-count="2">
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:4px"><span>{{ g.w }}</span><span>{{ g.sum }}</span></div>
+                      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                        <sc-for list="{{ g.items }}" as="h" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:12px;padding:0 14px;min-height:64px;border-bottom:1px solid var(--border)">
+                            <div style="width:44px;text-align:center;flex:none"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">{{ h.dw }}</div><div style="font-family:var(--f-head);font-weight:800;font-size:18px;line-height:1.1">{{ h.dn }}</div></div>
+                            <div style="flex:1;min-width:0"><div style="display:flex;gap:6px;align-items:center"><span style="font-weight:700;font-size:14.5px">{{ h.n }}</span><sc-if value="{{ h.pr }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:999px;background:var(--accent);color:var(--on-accent)">RECORD</span></sc-if></div><div style="font-size:12.5px;color:var(--muted)">{{ h.meta }}</div></div>
+                            <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">E2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Bibliothèque d’exercices</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.lib }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ libNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Bibliothèque</h1></div>
+                <div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Rechercher un exercice" placeholder="Rechercher un exercice" defaultValue="{{ libQuery }}" style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px 0 44px;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></div>
+                <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ muscles }}" as="m" hint-placeholder-count="7"><button onClick="{{ m.on }}" style="height:36px;flex:none;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.l }}</button></sc-for></div>
+                <sc-if value="{{ LB.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · fiches disponibles, vidéos non chargées</span></div></sc-if>
+                <sc-if value="{{ LB.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel5 }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center;animation:fzPulse 1.4s ease-in-out infinite"><div style="width:64px;height:64px;border-radius:var(--r-sm);background:var(--surface-2)"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div style="height:14px;width:70%;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="height:12px;width:45%;border-radius:var(--r-xs);background:var(--surface-2)"></div></div></div></sc-for></sc-if>
+                <sc-if value="{{ LB.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">search_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucun résultat pour « kettlebel »</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Vérifiez l’orthographe ou essayez « kettlebell ».</p>
+                    <button style="height:44px;padding:0 18px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">Effacer la recherche</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ libList }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-size:12.5px;color:var(--muted)">{{ exCount }} exercices</div>
+                  <sc-for list="{{ exList }}" as="e" hint-placeholder-count="6">
+                    <div style="display:flex;gap:12px;align-items:center;padding:6px 0;min-height:64px">
+                      <div style="width:64px;height:64px;flex:none;border-radius:var(--r-sm);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px);border:1px solid var(--border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">{{ e.mediaIcon }}</span></div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ e.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ e.m }} · {{ e.eq }}</div></div>
+                      <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">E3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Fiche exercice</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.exf }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ exfNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 40px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><span style="flex:1"></span><button aria-label="Favori" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--primary-ink)"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1">bookmark</span></button></div>
+                <div style="position:relative;aspect-ratio:16/10;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center">
+                  <sc-if value="{{ XF.normal }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:64px;height:64px;border-radius:999px;background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:36px;font-variation-settings:'FILL' 1">play_arrow</span><span style="font-family:var(--f-mono);font-size:11.5px;color:var(--muted)">vidéo · démonstration 0:42</span></div></sc-if>
+                  <sc-if value="{{ XF.loading }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:40px;color:var(--muted);animation:fzSpin 1s linear infinite">progress_activity</span></sc-if>
+                  <sc-if value="{{ XF.error }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:16px;background:var(--surface);border-radius:var(--r-sm)"><span style="font-family:'Material Symbols Rounded';font-size:32px;color:var(--danger-ink)">videocam_off</span><span style="font-weight:700;font-size:14px">Vidéo indisponible hors ligne</span><span style="font-size:12.5px;color:var(--muted)">Les consignes restent lisibles ci-dessous.</span></div></sc-if>
+                </div>
+                <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Développé couché</h1><div style="font-size:13.5px;color:var(--muted)">Barre · banc plat · intermédiaire</div></div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Pectoraux · principal</span><span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink)">Triceps</span><span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink)">Épaules</span></div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:14px">
+                  <div style="flex:1"><div style="font-size:12px;color:var(--muted)">Mon record</div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">52,5 kg × 8</div><div style="font-size:12px;font-weight:700;color:var(--success-ink)">+5 kg en 6 semaines</div></div>
+                  <svg width="120" height="44" viewBox="0 0 120 44" style="overflow:visible"><polyline points="{{ prSpark }}" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+                </div>
+                <div style="font-weight:700;font-size:15px">Consignes</div>
+                <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4"><div style="display:flex;gap:12px;font-size:14.5px"><span style="width:26px;height:26px;flex:none;border-radius:999px;background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center;font-weight:700;font-size:12.5px">{{ s.i }}</span><span style="padding-top:2px;text-wrap:pretty">{{ s.t }}</span></div></sc-for>
+                <div style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--warning-ink)">warning</span><span>Utilisez des pinces et un pareur au-delà de 80 % de votre maximum.</span></div>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="F Progression" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">F</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Progression</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">F1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Poids, mesures &amp; régularité</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.prog }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ progNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Entraînement</h1><button style="height:40px;padding:0 12px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:4px;cursor:pointer" style-hover="background:var(--primary-hover)"><span style="font-family:'Material Symbols Rounded';font-size:20px">add</span>Mesure</button></div>
+                <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Programmes</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Historique</span><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--primary-ink);border-bottom:2.5px solid var(--primary);margin-bottom:-1px">Progression</span></div>
+                <sc-if value="{{ PR.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · nouvelles mesures envoyées au retour du réseau</span></div></sc-if>
+                <sc-if value="{{ PR.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px;animation:fzPulse 1.4s ease-in-out infinite"><div style="height:230px;border-radius:var(--r);background:var(--surface-2)"></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px"><div style="height:76px;border-radius:var(--r-sm);background:var(--surface-2)"></div><div style="height:76px;border-radius:var(--r-sm);background:var(--surface-2)"></div><div style="height:76px;border-radius:var(--r-sm);background:var(--surface-2)"></div></div><div style="height:130px;border-radius:var(--r);background:var(--surface-2)"></div></div></sc-if>
+                <sc-if value="{{ PR.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">monitoring</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Votre courbe commence ici</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Ajoutez une première mesure (poids, tour de taille…) pour suivre votre évolution semaine après semaine.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Ajouter ma première mesure</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ prContent }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                      <div><div style="font-size:13px;color:var(--muted)">Poids</div><div style="font-family:var(--f-head);font-weight:800;font-size:28px;letter-spacing:-.03em;line-height:1.1">{{ wNow }} <span style="font-size:15px;font-weight:600;color:var(--muted)">kg</span></div><div style="font-size:12.5px;font-weight:700;color:var(--success-ink)">{{ wDelta }}</div></div>
+                      <div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><sc-for list="{{ periods }}" as="p" hint-placeholder-count="4"><button role="tab" onClick="{{ p.on }}" style="height:32px;min-width:36px;padding:0 8px;border:0;border-radius:var(--r-xs);font-weight:700;font-size:12px;cursor:pointer;background:{{ p.bg }};color:{{ p.fg }}">{{ p.l }}</button></sc-for></div>
+                    </div>
+                    <div style="position:relative;height:130px">
+                      <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between"><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px solid var(--border)"></div></div>
+                      <svg width="100%" height="130" viewBox="0 0 300 130" preserveAspectRatio="none" style="position:absolute;inset:0;overflow:visible"><path d="{{ wArea }}" fill="var(--primary)" fill-opacity="0.1"></path><polyline points="{{ wLine }}" fill="none" stroke="var(--primary)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="{{ wLastX }}" cy="{{ wLastY }}" r="5" fill="var(--surface)" stroke="var(--primary)" stroke-width="3"></circle></svg>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><sc-for list="{{ wLabels }}" as="l" hint-placeholder-count="4"><span>{{ l }}</span></sc-for></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ measures }}" as="m" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-size:11.5px;color:var(--muted)">{{ m.l }}</div><div style="font-family:var(--f-head);font-weight:800;font-size:18px;letter-spacing:-.02em">{{ m.v }}</div><div style="font-size:11.5px;font-weight:700;color:var(--{{ m.tone }}-ink)">{{ m.d }}</div></div></sc-for></div>
+                  <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);align-items:center">
+                    <div style="width:64px;height:64px;border-radius:var(--r);background:var(--accent);color:var(--on-accent);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1;line-height:1">local_fire_department</span><span style="font-family:var(--f-head);font-weight:800;font-size:18px;line-height:1.1">6</span></div>
+                    <div><div style="font-weight:700;font-size:15px">6 semaines d’affilée</div><div style="font-size:12.5px;color:var(--muted)">Objectif : 3 séances / semaine · record : 9</div>
+                      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:32px;margin-top:8px"><sc-for list="{{ regBars }}" as="b" hint-placeholder-count="8"><div title="{{ b.t }}" style="border-radius:3px;height:{{ b.h }}%;background:{{ b.bg }}"></div></sc-for></div>
+                    </div>
+                  </div>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;align-items:center;justify-content:space-between"><button aria-label="Mois précédent" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">chevron_left</span></button><div style="font-weight:700;font-size:15px">Septembre 2026 · 13 présences</div><button aria-label="Mois suivant" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">chevron_right</span></button></div>
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center"><sc-for list="{{ calHead }}" as="h" hint-placeholder-count="7"><span style="font-size:11px;font-weight:700;color:var(--muted)">{{ h }}</span></sc-for><sc-for list="{{ calCells }}" as="c" hint-placeholder-count="35"><span style="height:34px;border-radius:var(--r-xs);display:grid;place-items:center;font-size:13px;font-weight:{{ c.fw }};background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.n }}</span></sc-for></div>
+                    <div style="display:flex;gap:14px;font-size:12px;color:var(--muted)"><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary)"></span>Séance</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary-soft);border:1px solid var(--primary-border)"></span>Cours collectif</span></div>
+                  </div>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">F2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Saisie d’une mesure</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.mes }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:20px;right:20px;display:flex;flex-direction:column;gap:12px;opacity:.5"><div style="height:48px"></div><div style="height:230px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"></div><div style="height:76px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"></div></div>
+              <sc-if value="{{ ME.success }}" hint-placeholder-val="{{ false }}">
+                <div role="status" style="position:absolute;top:56px;left:16px;right:16px;z-index:6;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span><span style="flex:1">Mesure enregistrée · 71,8 kg</span><span style="font-weight:700;color:var(--primary-border)">Annuler</span></div>
+              </sc-if>
+              <sc-if value="{{ meSheet }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Nouvelle mesure" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:16px">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Nouvelle mesure</h2><button aria-label="Fermer" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--surface-2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">close</span></button></div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px"><sc-for list="{{ mesTypes }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.on }}" style="height:64px;border-radius:var(--r-sm);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:{{ t.bg }};color:{{ t.fg }};border:1px solid {{ t.bd }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ t.icon }}</span><span style="font-size:11.5px;font-weight:700">{{ t.l }}</span></button></sc-for></div>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">{{ mesLabel }}
+                      <div style="display:flex;align-items:center;height:72px;border-radius:var(--r-sm);background:var(--surface);padding:0 16px;border:1.5px solid {{ mesBd }}"><input aria-label="{{ mesLabel }}" inputMode="decimal" defaultValue="{{ mesVal }}" style="flex:1;min-width:0;border:0;background:transparent;font-family:var(--f-head);font-weight:800;font-size:34px;letter-spacing:-.02em;outline:none"><span style="font-size:17px;font-weight:700;color:var(--muted)">{{ mesUnit }}</span></div>
+                      <sc-if value="{{ ME.error }}" hint-placeholder-val="{{ false }}"><span style="display:flex;gap:4px;align-items:center;color:var(--danger-ink);font-weight:600;font-size:12.5px"><span style="font-family:'Material Symbols Rounded';font-size:16px">error</span>{{ mesErr }}</span></sc-if>
+                      <sc-if value="{{ ME.form }}" hint-placeholder-val="{{ true }}"><span style="font-size:12.5px;color:var(--muted);font-weight:500">Dernière mesure : {{ mesLast }}</span></sc-if>
+                    </label>
+                    <div style="display:flex;align-items:center;gap:10px;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);padding:0 14px;font-size:15px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">calendar_today</span><span style="flex:1">Aujourd’hui, 3 octobre</span><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">expand_more</span></div>
+                    <div style="font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:16px">lightbulb</span>Conseil : pesez-vous le matin, à jeun, même balance.</div>
+                    <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Enregistrer</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">F3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Photos de progression</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.photo }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;flex:1;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Mes photos</h1><span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink)"><span style="font-family:'Material Symbols Rounded';font-size:16px">lock</span>Privé</span></div>
+                <div style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--info-soft);border:1px solid var(--info-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--info-ink)">shield_lock</span><div><strong style="color:var(--info-ink)">Visibles par vous uniquement</strong><div>Stockées chiffrées, jamais partagées avec la salle ni votre coach sans votre accord. Supprimables à tout moment.</div></div></div>
+                <sc-if value="{{ PH.locked }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:40px">face</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Galerie verrouillée</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Déverrouillez avec Face ID ou votre code pour afficher vos photos.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Déverrouiller</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ PH.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:40px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:40px">add_a_photo</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune photo</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Une photo par mois, même lumière et même pose : le meilleur moyen de voir des progrès que la balance ne montre pas.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Prendre une photo</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ phGrid }}" hint-placeholder-val="{{ true }}">
+                  <sc-if value="{{ PH.error }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--danger-soft);color:var(--danger-ink);border:1px solid var(--danger-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">error</span><span style="flex:1">Envoi de la photo du 03/10 échoué.</span><span style="font-weight:700;text-decoration:underline">Réessayer</span></div></sc-if>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div style="display:flex;flex-direction:column;gap:6px"><div style="aspect-ratio:3/4;border-radius:var(--r);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:11px;color:var(--muted)">photo · juillet</span></div><span style="font-size:12.5px;font-weight:700;text-align:center">03/07 · 74,6 kg</span></div>
+                    <div style="display:flex;flex-direction:column;gap:6px"><div style="aspect-ratio:3/4;border-radius:var(--r);border:2px solid var(--primary);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:11px;color:var(--muted)">photo · octobre</span></div><span style="font-size:12.5px;font-weight:700;text-align:center;color:var(--primary-ink)">03/10 · 71,8 kg</span></div>
+                  </div>
+                  <button style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">compare</span>Comparer avant / après</button>
+                  <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Toutes les photos</div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ photos }}" as="p" hint-placeholder-count="6"><div style="position:relative;aspect-ratio:3/4;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 8px,var(--surface) 8px 16px);opacity:{{ p.op }}"><span style="position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;padding:2px 6px;border-radius:999px;background:var(--surface);color:var(--text)">{{ p.d }}</span><sc-if value="{{ p.fail }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:999px;background:var(--danger);color:var(--on-danger);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:16px">priority_high</span></sc-if></div></sc-for></div>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="G Coaching" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">G</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Coaching individuel</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">G1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Liste des coachs</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.coachs }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Coachs</h1></div>
+                <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--accent-soft);border:1px solid var(--accent-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--accent-ink)">confirmation_number</span><span style="flex:1"><strong>2 séances individuelles</strong> incluses ce mois-ci dans votre formule Premium.</span></div>
+                <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ coachFilters }}" as="m" hint-placeholder-count="5"><span style="height:36px;flex:none;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;display:flex;align-items:center;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.l }}</span></sc-for></div>
+                <sc-if value="{{ CL.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel4 }}" as="k" hint-placeholder-count="4"><div style="height:96px;border-radius:var(--r);background:var(--surface-2);animation:fzPulse 1.4s ease-in-out infinite"></div></sc-for></sc-if>
+                <sc-if value="{{ CL.error }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">cloud_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Coachs indisponibles</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Impossible de charger la liste. Vérifiez votre connexion.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ CL.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">person_search</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucun coach en Boxe à La Marsa</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Essayez un autre site ou une autre spécialité.</p>
+                    <button style="height:44px;padding:0 18px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">Réinitialiser les filtres</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ CL.normal }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ coaches }}" as="c" hint-placeholder-count="5">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center">
+                      <div style="width:56px;height:56px;flex:none;border-radius:var(--r-sm);background:var(--{{ c.tone }});color:var(--on-{{ c.tone }});display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:17px">{{ c.ini }}</div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15.5px">{{ c.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ c.spec }}</div><div style="display:flex;gap:8px;align-items:center;margin-top:3px;font-size:12px;font-weight:700"><span style="display:flex;align-items:center;gap:2px;color:var(--accent-ink)"><span style="font-family:'Material Symbols Rounded';font-size:15px;font-variation-settings:'FILL' 1">star</span>{{ c.rate }}</span><span style="color:var(--{{ c.avTone }}-ink)">{{ c.av }}</span></div></div>
+                      <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">G2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Fiche coach &amp; disponibilités</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.coach }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ coachNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 130px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button></div>
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="width:80px;height:80px;flex:none;border-radius:var(--r);background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:26px">YA</div>
+                  <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Yassine</h1><div style="font-size:13.5px;color:var(--muted)">Force · HIIT · Perte de poids</div><div style="display:flex;gap:4px;align-items:center;font-size:13px;font-weight:700;color:var(--accent-ink)"><span style="font-family:'Material Symbols Rounded';font-size:16px;font-variation-settings:'FILL' 1">star</span>4,9 · 128 avis</div></div>
+                </div>
+                <p style="margin:0;font-size:14.5px;color:var(--muted);text-wrap:pretty">Préparateur physique diplômé, 8 ans d’expérience. Programmes de force progressifs et suivi nutritionnel simple.</p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ coachFacts }}" as="f" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px;text-align:center"><div style="font-weight:700;font-size:14px">{{ f.v }}</div><div style="font-size:11.5px;color:var(--muted)">{{ f.l }}</div></div></sc-for></div>
+                <div style="font-weight:700;font-size:16px;margin-top:2px">Disponibilités</div>
+                <sc-if value="{{ CO.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · créneaux non vérifiés, réservation désactivée</span></div></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px"><sc-for list="{{ cDays }}" as="d" hint-placeholder-count="6"><button onClick="{{ d.on }}" style="height:60px;border-radius:var(--r-sm);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:{{ d.bg }};color:{{ d.fg }};border:1px solid {{ d.bd }}"><span style="font-size:11px;font-weight:600;opacity:.85">{{ d.w }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ d.n }}</span><span style="width:5px;height:5px;border-radius:99px;background:{{ d.dot }}"></span></button></sc-for></div>
+                <sc-if value="{{ CO.none }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:24px 12px;border:1.5px dashed var(--border-strong);border-radius:var(--r)">
+                    <span style="font-family:'Material Symbols Rounded';font-size:32px;color:var(--muted)">event_busy</span>
+                    <div style="font-weight:700">Aucun créneau mardi 6</div>
+                    <div style="font-size:13px;color:var(--muted)">Prochaine disponibilité : jeudi 8 à 10:00</div>
+                    <button style="height:44px;padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer;margin-top:4px">Voir jeudi 8</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ slotsVisible }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ slots }}" as="s" hint-placeholder-count="9"><button onClick="{{ s.on }}" disabled="{{ s.dis }}" style="height:48px;border-radius:var(--r-sm);font-weight:700;font-size:14px;background:{{ s.bg }};color:{{ s.fg }};border:1.5px solid {{ s.bd }};text-decoration:{{ s.td }};cursor:{{ s.cur }}">{{ s.t }}</button></sc-for></div>
+                  <div style="display:flex;gap:14px;font-size:12px;color:var(--muted)"><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;border:1.5px solid var(--border-input)"></span>Libre</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--surface-2)"></span>Pris</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary)"></span>Sélectionné</span></div>
+                </sc-if>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;z-index:3">
+                <div style="flex:1"><div style="font-size:12px;color:var(--muted)">{{ coachSel }}</div><div style="font-weight:700;font-size:14.5px">1 crédit · ou {{ coachPrice }} à l’accueil</div></div>
+                <button disabled="{{ coachDis }}" style="height:var(--ctl);padding:0 20px;border:0;border-radius:var(--r-sm);font-weight:700;font-size:15px;background:{{ coachBtnBg }};color:{{ coachBtnFg }};cursor:{{ coachCur }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">Réserver</button>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">G3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Réservation &amp; confirmation</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.cbook }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <sc-if value="{{ CB.success }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:46px;left:0;right:0;bottom:0;padding:48px 24px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px">
+                  <div style="width:112px;height:112px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:60px;font-variation-settings:'FILL' 1">event_available</span></div>
+                  <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Séance confirmée</h1><p style="margin:6px 0 0;color:var(--muted)">Yassine a été prévenu. Rappel la veille et 1 h avant.</p></div>
+                  <div style="width:100%;text-align:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden"><sc-for list="{{ recap }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">{{ r.icon }}</span><span style="flex:1;font-size:13px;color:var(--muted)">{{ r.l }}</span><span style="font-weight:700;font-size:14px">{{ r.v }}</span></div></sc-for></div>
+                  <div style="flex:1"></div>
+                  <button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer">Ajouter au calendrier</button>
+                  <button style="width:100%;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--primary-ink);cursor:pointer">Voir mes réservations</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ cbSheet }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;top:46px;left:20px;right:20px;display:flex;flex-direction:column;gap:12px;opacity:.5"><div style="height:48px"></div><div style="height:90px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"></div><div style="height:200px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"></div></div>
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Confirmer la séance" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:14px">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Confirmer la séance</h2>
+                    <sc-if value="{{ CB.refus }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">block</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Créneau plus disponible</div><div>Ce créneau vient d’être réservé par un autre adhérent. Choisissez-en un autre.</div></div></div></sc-if>
+                    <sc-if value="{{ CB.credits }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--warning-soft);border:1px solid var(--warning-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--warning-ink)">confirmation_number</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--warning-ink)">Plus de crédit ce mois-ci</div><div>La séance sera à régler à l’accueil ({{ coachPrice }}) avant de commencer. Aucun paiement dans l’app.</div></div></div></sc-if>
+                    <div style="background:var(--surface-2);border-radius:var(--r);overflow:hidden"><sc-for list="{{ recap }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">{{ r.icon }}</span><span style="flex:1;font-size:13px;color:var(--muted)">{{ r.l }}</span><span style="font-weight:700;font-size:14px;text-decoration:{{ r.td }}">{{ r.v }}</span></div></sc-for></div>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Objectif de la séance (facultatif)<input placeholder="Ex. : technique du squat" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+                    <div style="font-size:12.5px;color:var(--muted)">Annulation gratuite jusqu’à 24 h avant. Au-delà, le crédit est décompté.</div>
+                    <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);font-weight:700;font-size:15px;cursor:pointer;background:{{ cbBtnBg }};color:{{ cbBtnFg }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ cbBtn }}</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="H Affluence" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">H</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Affluence</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">H1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Affluence en direct</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.aff }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ affNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;flex:1;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Affluence</h1><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)"><span style="width:8px;height:8px;border-radius:99px;background:{{ affDot }}"></span>{{ affLive }}</span></div>
+                <sc-if value="{{ AF.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · tendances habituelles affichées, pas de direct</span></div></sc-if>
+                <sc-if value="{{ AF.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;animation:fzPulse 1.4s ease-in-out infinite"><div style="height:66px;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:66px;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:66px;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:220px;border-radius:var(--r);background:var(--surface-2)"></div></div></sc-if>
+                <sc-if value="{{ AF.error }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">sensors_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Capteurs d’entrée muets</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">L’affluence de Lac 2 n’est pas transmise pour le moment. Réessayez dans quelques minutes.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ affContent }}" hint-placeholder-val="{{ true }}">
+                  <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}">
+                    <sc-for list="{{ affSites }}" as="s" hint-placeholder-count="3">
+                      <button onClick="{{ s.on }}" style="text-align:start;display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:var(--r);cursor:pointer;background:var(--surface);border:{{ s.bd }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+                        <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;font-size:15px">{{ s.n }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:17px;color:var(--{{ s.tone }}-ink)">{{ s.v }} %</span></div>
+                          <div style="height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin:6px 0 4px"><div style="height:100%;border-radius:99px;width:{{ s.v }}%;background:{{ s.bar }}"></div></div>
+                          <div style="font-size:12px;color:var(--muted)">{{ s.label }} · {{ s.ppl }} personnes · cap. {{ s.cap }}</div></div>
+                      </button>
+                    </sc-for>
+                  </sc-if>
+                  <sc-if value="{{ singleSite }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;align-items:center;gap:16px"><div style="font-family:var(--f-head);font-weight:800;font-size:40px;letter-spacing:-.03em;color:var(--warning-ink)">46 %</div><div><div style="font-weight:700">Modérée</div><div style="font-size:12.5px;color:var(--muted)">46 personnes · capacité 100</div></div></div>
+                  </sc-if>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;font-size:15px">{{ affSiteName }} · samedi</span><span style="font-size:12px;color:var(--muted)">{{ affChartSub }}</span></div>
+                    <div style="display:grid;grid-template-columns:repeat(18,1fr);gap:3px;align-items:end;height:130px;border-bottom:1px solid var(--border)"><sc-for list="{{ hourBars }}" as="b" hint-placeholder-count="18"><div title="{{ b.t }}" style="border-radius:3px 3px 0 0;height:{{ b.h }}%;background:{{ b.bg }};outline:{{ b.ol }};outline-offset:1px"></div></sc-for></div>
+                    <div style="display:grid;grid-template-columns:repeat(6,1fr);font-size:11px;color:var(--muted)"><sc-for list="{{ hourLabels }}" as="l" hint-placeholder-count="6"><span>{{ l }}</span></sc-for></div>
+                    <div style="display:flex;gap:14px;font-size:12px;color:var(--muted)"><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary)"></span>Maintenant</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--success)"></span>Meilleur créneau</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--secondary-border)"></span>Habituel</span></div>
+                  </div>
+                  <div style="display:flex;gap:12px;align-items:center;padding:14px;border-radius:var(--r);background:var(--success-soft);border:1px solid var(--success-border)">
+                    <div style="width:48px;height:48px;flex:none;border-radius:999px;background:var(--success);color:var(--on-success);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px">schedule</span></div>
+                    <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--success-ink);text-transform:uppercase;letter-spacing:.05em">Meilleur moment aujourd’hui</div><div style="font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em">{{ bestTime }}</div><div style="font-size:12.5px">Environ {{ bestPct }} % de remplissage, machines libres.</div></div>
+                  </div>
+                  <button style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">notifications</span>M’alerter quand c’est calme</button>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;frames&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Les deux&quot;,&quot;Clair&quot;,&quot;Sombre&quot;],&quot;default&quot;:&quot;Les deux&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;primaryContrast&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#16A34A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;warning&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F59E0B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;danger&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#DC2626&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;info&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2563EB&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;bgLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F7F7F9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#111827&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;bgDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0E1117&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#1A1F2B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F3F4F6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const linePts=(arr,w,h,p,mn,mx)=>{mx=mx??Math.max(...arr);mn=mn??Math.min(...arr);const sx=(w-2*p)/(arr.length-1);return arr.map((v,i)=>[+(p+i*sx).toFixed(1),+(h-p-(v-mn)/((mx-mn)||1)*(h-2*p)).toFixed(1)]);};
+const ptsStr=p=>p.map(q=>q.join(',')).join(' ');
+const areaD=(p,h)=>'M'+p[0][0]+','+h+' L'+p.map(q=>q.join(',')).join(' L')+' L'+p[p.length-1][0]+','+h+' Z';
+const DAYS=[{k:'J1',n:'Poussée',dur:'≈ 55 min',muscles:'Pecs, épaules, triceps',ex:[['Développé couché','4 × 8','90 s','52,5 kg'],['Développé incliné haltères','3 × 10','75 s','2 × 18 kg'],['Dips','3 × 12','60 s','Poids du corps'],['Élévations latérales','3 × 15','45 s','2 × 7 kg'],['Extensions triceps poulie','3 × 12','45 s','25 kg']]},{k:'J2',n:'Tirage',dur:'≈ 50 min',muscles:'Dos, biceps',ex:[['Tractions assistées','4 × 6','120 s','−20 kg'],['Rowing barre','4 × 8','90 s','45 kg'],['Tirage poitrine','3 × 10','75 s','50 kg'],['Face pull','3 × 15','45 s','15 kg'],['Curl haltères','3 × 12','45 s','2 × 10 kg']]},{k:'J3',n:'Jambes',dur:'≈ 60 min',muscles:'Quadriceps, fessiers',ex:[['Squat barre','4 × 6','120 s','60 kg'],['Fentes marchées','3 × 10','75 s','2 × 12 kg'],['Presse à cuisses','3 × 12','90 s','110 kg'],['Leg curl','3 × 12','60 s','30 kg']]}];
+
+class Component extends DCLogic {
+  state={progs:'normal',pdet:'normal',pday:0,sess:'saisie',end:'ok',feel:1,tick:0,hist:'normal',lib:'normal',muscle:'Tous',exf:'normal',prog:'normal',period:'3M',mes:'form',mesType:0,photo:'normal',cal:'normal',coachs:'normal',coach:'dispo',slot:2,cday:2,cbook:'confirm',aff:'normal',affSite:0};
+  componentDidMount(){this.iv=setInterval(()=>this.setState(s=>({tick:s.tick+1})),1000);}
+  componentWillUnmount(){clearInterval(this.iv);}
+  chips(key,opts){const S=this.state;return opts.map(([v,l])=>({l,on:()=>this.setState({[key]:v}),bg:S[key]===v?'var(--secondary)':'var(--surface)',fg:S[key]===v?'var(--on-secondary)':'var(--text)',bd:S[key]===v?'var(--secondary)':'var(--border-strong)'}));}
+  flags(key,list){const o={};list.forEach(k=>o[k]=this.state[key]===k);return o;}
+  pick(sel,on){return{bg:sel?'var(--secondary)':'var(--surface)',fg:sel?'var(--on-secondary)':'var(--text)',bd:sel?'var(--secondary)':'var(--border)',on};}
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--focus':ensure(C.primary,bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const light=this.vars(false,C,P),dark=this.vars(true,C,P);
+    const frame=v=>({...v,width:'390px',height:'844px',flex:'none',borderRadius:'54px',padding:'10px',background:'#0B0D12',boxShadow:'var(--sh3)'});
+    const show=P.frames||'Les deux';const themes=[];
+    if(show!=='Sombre')themes.push({label:'Clair',frame:frame(light)});if(show!=='Clair')themes.push({label:'Sombre',frame:frame(dark)});
+    const rootStyle={...light,background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';
+    const multiSite=String(P.sites??'3')==='3';
+    const k=P.currency==='€'?0.3:1;const cur=P.currency==='€'?'€':'DT';
+    const money=n=>Math.round(n*k).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ')+' '+cur;
+    const ch={
+      progs:this.chips('progs',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['error','Erreur']]),
+      pdet:this.chips('pdet',[['normal','Normal'],['offline','Hors ligne']]),
+      sess:this.chips('sess',[['saisie','Saisie'],['rest','Minuteur de repos'],['error','Erreur de saisie'],['offline','Hors ligne']]),
+      end:this.chips('end',[['ok','Succès'],['sync','Échec de synchro']])};
+    const programs=[{n:'Remise en forme',meta:'Lina · 6 semaines · terminé',icon:'directions_run',tone:'success'},{n:'Mobilité express',meta:'Personnel · 15 min · 4 exercices',icon:'self_improvement',tone:'info'}];
+    const d=DAYS[S.pday];
+    const dayTabs=DAYS.map((x,i)=>({k:x.k,n:x.n,...this.pick(S.pday===i,()=>this.setState({pday:i}))}));
+    const day={...d,count:d.ex.length,ex:d.ex.map((e,i)=>({i:String(i+1).padStart(2,'0'),n:e[0],sets:e[1],rest:e[2],load:e[3]}))};
+    const SS=this.flags('sess',['saisie','rest','error','offline']);
+    const restDone=SS.rest;
+    const sets=[{i:1,prev:'50 × 8',kg:'52,5',reps:'8',st:'done'},{i:2,prev:'50 × 8',kg:'52,5',reps:'8',st:'done'},{i:3,prev:'50 × 7',kg:'52,5',reps:SS.error?'':'7',st:restDone?'done':'cur'},{i:4,prev:'50 × 6',kg:'52,5',reps:'8',st:'todo'}].map(s=>({...s,done:s.st==='done',edit:s.st==='cur',ro:s.st!=='cur',fg:s.st==='todo'?'var(--muted)':'var(--text)',rowBg:s.st==='cur'?'var(--primary-soft)':'transparent',chkBg:s.st==='done'?'var(--success)':'transparent',chkFg:s.st==='done'?'var(--on-success)':'var(--muted)',chkBd:s.st==='done'?'var(--success)':'var(--border-input)',repBd:SS.error?'var(--danger)':'var(--border-input)'}));
+    const rest=90-(S.tick%90);const RC=2*Math.PI*88;
+    const EN=this.flags('end',['ok','sync']);
+    const endStats=[{l:'Durée',v:'52 min',d:'−4 min vs J1 précédent',tone:'success'},{l:'Volume',v:'6 240 kg',d:'+8 %',tone:'success'},{l:'Séries',v:'16 / 16',d:'Programme complet',tone:'success'},{l:'Repos moyen',v:'1:24',d:'Objectif 1:30',tone:'secondary'}];
+    const feel=['Facile','Correct','Difficile'].map((l,i)=>({l,...this.pick(S.feel===i,()=>this.setState({feel:i}))}));
+    return {rootStyle,themes,brand,multiSite,ch,PG:this.flags('progs',['normal','loading','empty','error']),programs,
+      PD:this.flags('pdet',['normal','offline']),pdetNet:S.pdet==='offline'?'off':'ok',dayTabs,day,
+      SS,sessNet:SS.offline?'off':'ok',sets,exProg:[1,2,3,4,5].map(i=>i===1?'var(--primary)':'var(--border)'),restLabel:Math.floor(rest/60)+':'+String(rest%60).padStart(2,'0'),restDash:(rest/90*RC).toFixed(1)+' '+RC.toFixed(1),
+      EN,endStats,feel,...this.partE(S,ch),...this.partF(S,ch),...this.partG(S,ch,money,multiSite),...this.partH(S,ch,multiSite)};
+  }
+  partE(S,ch){
+    ch.hist=this.chips('hist',[['normal','Normal'],['loading','Chargement'],['empty','Vide']]);
+    ch.lib=this.chips('lib',[['normal','Normal'],['loading','Chargement'],['empty','Aucun résultat'],['offline','Hors ligne']]);
+    ch.exf=this.chips('exf',[['normal','Normal'],['loading','Chargement média'],['error','Média hors ligne']]);
+    const histGroups=[{w:'Cette semaine',sum:'3 séances · 2 h 41',items:[{dw:'Sam',dn:'3',n:'J1 · Poussée',meta:'52 min · 6 240 kg · 16 séries',pr:true},{dw:'Jeu',dn:'1',n:'Pilates (cours)',meta:'50 min · Lac 2 · Sami'},{dw:'Mar',dn:'29',n:'J3 · Jambes',meta:'59 min · 8 910 kg · 13 séries'}]},{w:'Semaine du 21/09',sum:'4 séances · 3 h 18',items:[{dw:'Sam',dn:'26',n:'J2 · Tirage',meta:'48 min · 5 120 kg · 17 séries'},{dw:'Jeu',dn:'24',n:'J1 · Poussée',meta:'55 min · 5 780 kg · 16 séries'},{dw:'Mar',dn:'22',n:'HIIT Express (cours)',meta:'30 min · Lac 2 · Yassine'}]}];
+    const LB=this.flags('lib',['normal','loading','empty','offline']);
+    const EX=[['Développé couché','Pectoraux','Barre'],['Développé incliné haltères','Pectoraux','Haltères'],['Rowing barre','Dos','Barre'],['Tractions assistées','Dos','Machine'],['Squat barre','Jambes','Barre'],['Fentes marchées','Jambes','Haltères'],['Élévations latérales','Épaules','Haltères'],['Curl haltères','Bras','Haltères'],['Gainage planche','Abdos','Poids du corps'],['Kettlebell swing','Jambes','Kettlebell']];
+    const f=EX.filter(e=>S.muscle==='Tous'||e[1]===S.muscle);
+    const muscles=['Tous','Pectoraux','Dos','Jambes','Épaules','Bras','Abdos'].map(l=>({l,...this.pick(S.muscle===l,()=>this.setState({muscle:l}))}));
+    const XF=this.flags('exf',['normal','loading','error']);
+    const steps=['Allongé, pieds au sol, omoplates serrées et légère cambrure.','Mains un peu plus larges que les épaules, poignets alignés.','Descendez la barre au bas des pectoraux en 2 secondes.','Poussez en expirant, sans décoller les fessiers du banc.'].map((t,i)=>({i:i+1,t}));
+    return {HI:this.flags('hist',['normal','loading','empty']),histGroups,histStats:[{v:'38',l:'séances (3 mois)'},{v:'3,2',l:'par semaine'},{v:'41 h',l:'au total'}],
+      LB,libNet:LB.offline?'off':'ok',libQuery:LB.empty?'kettlebel':'',muscles,libList:LB.normal||LB.offline,exCount:f.length,exList:f.map(e=>({n:e[0],m:e[1],eq:e[2],mediaIcon:LB.offline?'videocam_off':'play_circle'})),skel5:[1,2,3,4,5],
+      XF,exfNet:XF.error?'off':'ok',steps,prSpark:ptsStr(linePts([47.5,47.5,50,50,50,52.5,52.5],120,44,3))};
+  }
+  partF(S,ch){
+    ch.prog=this.chips('prog',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['offline','Hors ligne']]);
+    ch.mes=this.chips('mes',[['form','Saisie'],['error','Erreur'],['success','Succès']]);
+    ch.photo=this.chips('photo',[['normal','Normal'],['empty','Vide'],['locked','Verrouillé'],['error','Échec d’envoi']]);
+    const PR=this.flags('prog',['normal','loading','empty','offline']);
+    const SER={'1M':{v:[72.6,72.4,72.5,72.1,72.0,71.8],l:['5/09','15/09','25/09','3/10']},'3M':{v:[74.6,74.2,73.9,73.8,73.3,73.0,72.8,72.6,72.5,72.1,71.9,71.8],l:['juil.','août','sept.','oct.']},'6M':{v:[76.8,76.1,75.7,75.2,74.6,74.0,73.4,72.9,72.4,71.8],l:['avr.','juin','août','oct.']},'1A':{v:[78.2,77.9,77.4,77.0,76.8,76.1,75.2,74.6,73.8,73.0,72.4,71.8],l:['oct.','janv.','avr.','oct.']}};
+    const s=SER[S.period];const mn=Math.min(...s.v)-0.5,mx=Math.max(...s.v)+0.5;const p=linePts(s.v,300,130,4,mn,mx);const last=p[p.length-1];
+    const fr=n=>n.toFixed(1).replace('.',',');const dl=s.v[s.v.length-1]-s.v[0];
+    const periods=['1M','3M','6M','1A'].map(l=>({l,on:()=>this.setState({period:l}),bg:S.period===l?'var(--surface)':'transparent',fg:S.period===l?'var(--text)':'var(--muted)'}));
+    const reg=[3,2,3,4,3,3,4,3];
+    const regBars=reg.map((v,i)=>({h:v/4*100,t:v+' séances',bg:v>=3?(i===7?'var(--primary)':'var(--secondary)'):'var(--secondary-border)'}));
+    const pres=[1,3,5,8,10,12,15,17,19,22,24,26,29],cls=[3,10,17,24];
+    const calCells=[];for(let i=0;i<1;i++)calCells.push({n:'',bg:'transparent',fg:'var(--muted)',bd:'transparent',fw:500});
+    for(let d=1;d<=30;d++){const pr=pres.includes(d),c=cls.includes(d);calCells.push({n:d,fw:pr?700:500,bg:c?'var(--primary-soft)':(pr?'var(--primary)':'transparent'),fg:c?'var(--primary-ink)':(pr?'var(--primary-contrast)':'var(--muted)'),bd:c?'var(--primary-border)':'transparent'});}
+    while(calCells.length%7)calCells.push({n:'',bg:'transparent',fg:'var(--muted)',bd:'transparent',fw:500});
+    const ME=this.flags('mes',['form','error','success']);
+    const MT=[['monitor_weight','Poids','kg','71,8','72,1 kg · 26/09','Valeur hors plage : 30 à 250 kg.'],['straighten','Taille','cm','78','80 cm · 01/09','Valeur hors plage : 40 à 200 cm.'],['fitness_center','Bras','cm','31','30,5 cm · 01/09','Valeur hors plage : 15 à 70 cm.'],['percent','Masse grasse','%','24','25,2 % · 01/09','Valeur hors plage : 3 à 60 %.']];
+    const mt=MT[S.mesType];
+    const mesTypes=MT.map((m,i)=>({icon:m[0],l:m[1],...this.pick(S.mesType===i,()=>this.setState({mesType:i}))}));
+    const PH=this.flags('photo',['normal','empty','locked','error']);
+    const photos=['03/10','03/09','03/08','03/07','03/06','03/05'].map((d,i)=>({d,fail:PH.error&&i===0,op:PH.error&&i===0?.6:1}));
+    return {PR,progNet:PR.offline?'off':'ok',prContent:PR.normal||PR.offline,periods,wNow:fr(s.v[s.v.length-1]),wDelta:(dl<=0?'−':'+')+fr(Math.abs(dl))+' kg sur la période',wLine:ptsStr(p),wArea:areaD(p,130),wLastX:last[0],wLastY:last[1],wLabels:s.l,
+      measures:[{l:'Tour de taille',v:'78 cm',d:'−2 cm',tone:'success'},{l:'Masse grasse',v:'24 %',d:'−1,2 pt',tone:'success'},{l:'Tour de bras',v:'31 cm',d:'+0,5 cm',tone:'info'}],regBars,calHead:['L','M','M','J','V','S','D'],calCells,
+      ME,meSheet:!ME.success,mesTypes,mesLabel:mt[1]+' ('+mt[2]+')',mesUnit:mt[2],mesVal:ME.error?(S.mesType===0?'718':'0'):mt[3],mesLast:mt[4],mesErr:mt[5],mesBd:ME.error?'var(--danger)':'var(--border-input)',
+      PH,phGrid:PH.normal||PH.error,photos,skel4:[1,2,3,4]};
+  }
+  partG(S,ch,money,multiSite){
+    ch.coachs=this.chips('coachs',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['error','Erreur']]);
+    ch.coach=this.chips('coach',[['dispo','Créneaux'],['none','Aucun créneau'],['offline','Hors ligne']]);
+    ch.cbook=this.chips('cbook',[['confirm','Confirmation'],['credits','Sans crédit'],['refus','Refus : créneau pris'],['success','Succès']]);
+    const CL=this.flags('coachs',['normal','loading','empty','error']);
+    const coaches=[['Yassine','Force · HIIT · Perte de poids','4,9','Dispo aujourd’hui','success','accent'],['Lina','Yoga · Mobilité','4,8','Dispo demain','success','primary'],['Sami','Pilates · Posture','4,7','Complet cette semaine','danger','secondary'],['Rim','Cycling · Endurance','4,8','Dispo jeudi','warning','info'],['Hatem','Boxe · Cardio','4,6','Dispo aujourd’hui','success','success']].map(c=>({n:c[0],ini:c[0].slice(0,2).toUpperCase(),spec:c[1],rate:c[2],av:c[3],avTone:c[4],tone:c[5]}));
+    const coachFilters=[...(multiSite?['Lac 2']:[]),'Toutes spécialités','Force','Yoga','Cardio'].map((l,i)=>({l,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)',bd:i===0?'var(--secondary)':'var(--border-strong)'}));
+    const CO=this.flags('coach',['dispo','none','offline']);
+    const cd=[['Sam','3',true],['Dim','4',false],['Lun','5',true],['Mar','6',!CO.none],['Mer','7',true],['Jeu','8',true]];
+    const cDays=cd.map(([w,n,av],i)=>({w,n,dot:av?'var(--success)':'transparent',...this.pick(S.cday===i,()=>this.setState({cday:i}))}));
+    const ST=[['07:00',1],['08:00',0],['10:00',0],['12:00',1],['14:00',0],['16:00',0],['17:00',1],['18:00',1],['19:00',0]];
+    const slots=ST.map(([t,taken],i)=>{const sel=S.slot===i&&!taken;const dis=!!taken||CO.offline;return{t,dis,on:()=>!dis&&this.setState({slot:i}),bg:sel?'var(--primary)':(taken?'var(--surface-2)':'var(--surface)'),fg:sel?'var(--primary-contrast)':(taken?'var(--muted)':'var(--text)'),bd:sel?'var(--primary)':(taken?'var(--surface-2)':'var(--border-input)'),td:taken?'line-through':'none',cur:dis?'not-allowed':'pointer'};});
+    const can=CO.dispo&&!ST[S.slot][1];
+    const CB=this.flags('cbook',['confirm','credits','refus','success']);
+    const recap=[{icon:'person',l:'Coach',v:'Yassine'},{icon:'event',l:'Date',v:'Lun. 5 oct. · 10:00'},{icon:'location_on',l:'Lieu',v:'Lac 2 · Plateau muscu'},{icon:'confirmation_number',l:CB.credits?'À régler à l’accueil':'Crédit utilisé',v:CB.credits?money(45):'1 sur 2'}].map(r=>({td:'none',...r}));
+    if(CB.refus)recap[1].td='line-through';
+    return {CL,coaches,coachFilters,CO,coachNet:CO.offline?'off':'ok',cDays,slots,slotsVisible:!CO.none,coachFacts:[{v:'8 ans',l:'expérience'},{v:'60 min',l:'séance'},{v:'Lac 2',l:'site'}],
+      coachSel:can?('Lun. 5 oct. · '+ST[S.slot][0]):'Choisissez un créneau',coachPrice:money(45),coachDis:!can,coachBtnBg:can?'var(--primary)':'var(--surface-2)',coachBtnFg:can?'var(--primary-contrast)':'var(--muted)',coachCur:can?'pointer':'not-allowed',
+      CB,cbSheet:!CB.success,recap,cbBtn:CB.refus?'Choisir un autre créneau':(CB.credits?'Réserver, régler à l’accueil':'Confirmer avec 1 crédit'),cbBtnBg:CB.refus?'var(--secondary)':'var(--primary)',cbBtnFg:CB.refus?'var(--on-secondary)':'var(--primary-contrast)'};
+  }
+  partH(S,ch,multiSite){
+    ch.aff=this.chips('aff',[['normal','Normal'],['loading','Chargement'],['offline','Hors ligne'],['error','Erreur']]);
+    const AF=this.flags('aff',['normal','loading','offline','error']);
+    const SI=[{n:'Lac 2',v:46,ppl:46,cap:100,curve:[15,30,45,40,30,25,30,22,18,20,28,46,62,78,85,70,45,20],best:'14:00 – 16:00',bp:20},{n:'La Marsa',v:22,ppl:18,cap:80,curve:[10,22,35,30,20,15,18,14,12,15,20,22,40,58,66,52,30,12],best:'13:00 – 15:00',bp:14},{n:'Centre-ville',v:81,ppl:97,cap:120,curve:[25,45,60,55,48,52,70,60,40,38,55,81,88,92,90,75,50,25],best:'15:00 – 16:00',bp:38}];
+    const site=SI[multiSite?S.affSite:0];
+    const lvl=v=>v>=75?['Forte','danger']:(v>=40?['Modérée','warning']:['Calme','success']);
+    const affSites=SI.map((s,i)=>{const[l,t]=lvl(s.v);return{...s,label:AF.offline?'Habituellement '+l.toLowerCase():l,tone:AF.offline?'secondary':t,bar:AF.offline?'var(--border-strong)':'var(--'+t+')',on:()=>this.setState({affSite:i}),bd:S.affSite===i?'2px solid var(--primary)':'1px solid var(--border)'};});
+    const now=11;const bestIdx=site.curve.map((v,i)=>[v,i]).filter(([v,i])=>i>now).sort((a,b)=>a[0]-b[0])[0][1];
+    const hourBars=site.curve.map((v,i)=>({h:v,t:(6+i)+'h · '+v+' %',bg:i===now&&!AF.offline?'var(--primary)':((i===bestIdx||i===bestIdx+1)?'var(--success)':'var(--secondary-border)'),ol:i===now?'2px solid var(--focus)':'none'}));
+    return {AF,affNet:AF.offline?'off':'ok',affContent:AF.normal||AF.offline,singleSite:!multiSite,affSites,affSiteName:site.n,hourBars,hourLabels:['6h','9h','12h','15h','18h','21h'],
+      affChartSub:AF.offline?'tendance habituelle':'en direct · 17:00',affDot:AF.offline?'var(--border-strong)':'var(--success)',affLive:AF.offline?'Tendances':'En direct',bestTime:site.best,bestPct:site.bp};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button,textarea{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:56px 64px 120px;display:flex;flex-direction:column;gap:64px">
+
+<div style="max-width:1040px">
+  <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Admin</div>
+  <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:56px;line-height:1;letter-spacing:-.035em;font-weight:800">Admin : piloter au quotidien</h1>
+  <p style="margin:14px 0 0;font-size:17px;color:var(--muted);text-wrap:pretty">Navigation : Tableau de bord · Planning · Scanner · Adhérents · Plus. La configuration lourde (formules, règles multi-sites, branding, modules, statistiques détaillées, audit) reste dans le back-office web. Deux profils : <strong style="color:var(--text)">admin réseau</strong> (Mourad, sélecteur avec « Tous les sites ») et <strong style="color:var(--text)">admin de site</strong> (Salma, Lac 2 uniquement). Les cadres « sombre » forcent le thème sombre ; les autres suivent les Tweaks.</p>
+</div>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">01</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Tableau de bord</h2><span style="color:var(--muted);font-size:14px">Tous les sites · un site · admin de site · réseau à un seul site</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+    <sc-for list="{{ dashV }}" as="v" hint-placeholder-count="4">
+    <div id="{{ v.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ v.id }}</span><span style="font-weight:700;font-size:14px">{{ v.label }}</span></div>
+      <div style="{{ v.st }}"><div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:8px;min-height:48px">
+            <div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div>
+            <span style="flex:1"></span>
+            <sc-if value="{{ v.selShow }}" hint-placeholder-val="{{ true }}"><span style="flex:none;white-space:nowrap;height:38px;padding:0 8px 0 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:3px;font-size:13px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:var(--primary-ink)">{{ v.selPin }}</span>{{ v.selLabel }}<span style="font-family:'Material Symbols Rounded';font-size:17px;color:var(--muted)">{{ v.selIcon }}</span></span></sc-if>
+            <span style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">notifications</span><span style="position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:99px;background:var(--danger);border:2px solid var(--surface)"></span></span>
+          </div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;line-height:1.1;letter-spacing:-.03em;font-weight:800">Bonjour, {{ v.who }}</h1><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px"><span style="flex:none;white-space:nowrap;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--secondary);color:var(--on-secondary)">{{ v.role }}</span><span style="font-size:13px;color:var(--muted)">{{ v.sub }}</span></div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <sc-for list="{{ v.kpis }}" as="k" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--primary-ink)">{{ k.icon }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em;line-height:1.1">{{ k.v }}</span><span style="font-size:11px;color:var(--muted);line-height:1.25">{{ k.l }}</span><span style="font-size:11px;font-weight:700;color:var(--{{ k.tone }}-ink)">{{ k.d }}</span></div></sc-for>
+          </div>
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><div style="font-size:11.5px;opacity:.85">Encaissé aujourd’hui</div><div style="font-family:var(--f-head);font-weight:800;font-size:22px">{{ v.revJ }}</div></div>
+            <div><div style="font-size:11.5px;opacity:.85">Encaissé en octobre</div><div style="font-family:var(--f-head);font-weight:800;font-size:22px">{{ v.revM }}</div></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;font-size:14px">Présences · 7 jours</span><span style="font-size:12px;font-weight:700;color:var(--success-ink)">{{ v.trend }}</span></div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:64px"><sc-for list="{{ v.bars }}" as="b" hint-placeholder-count="7"><div style="border-radius:4px 4px 2px 2px;height:{{ b.h }}%;background:{{ b.bg }}"></div></sc-for></div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;font-size:10.5px;color:var(--muted);font-weight:600"><sc-for list="{{ weekL }}" as="w" hint-placeholder-count="7"><span>{{ w }}</span></sc-for></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700;font-size:15px">Alertes</span><span style="font-size:13px;font-weight:700;color:var(--primary-ink)">Tout voir · {{ v.alertN }}</span></div>
+          <sc-for list="{{ v.alerts }}" as="a" hint-placeholder-count="2">
+            <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--border)"><span style="width:36px;height:36px;flex:none;border-radius:var(--r-sm);display:grid;place-items:center;background:var(--{{ a.tone }}-soft);color:var(--{{ a.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:20px">{{ a.icon }}</span></span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px">{{ a.t }}</div><div style="font-size:12px;color:var(--muted)">{{ a.site }}</div></div><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">chevron_right</span></div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div></div>
+    </div>
+    </sc-for>
+
+    <div id="1e" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">1e</span><span style="font-weight:700;font-size:14px">Sélecteur de site (admin réseau)</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2)"><span style="height:28px;width:200px;border-radius:var(--r-xs);background:var(--border)"></span><span style="height:110px;border-radius:var(--r);background:var(--border)"></span><span style="height:80px;border-radius:var(--r);background:var(--border)"></span></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="dialog" aria-label="Choisir un site" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:10px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <h2 style="margin:0 0 4px;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Afficher les données de</h2>
+          <sc-for list="{{ sitePick }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;align-items:center;min-height:60px;padding:8px 12px;border-radius:var(--r-sm);border:{{ s.bd }};background:{{ s.bg }}">
+              <span style="width:40px;height:40px;flex:none;border-radius:var(--r-sm);background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ s.icon }}</span></span>
+              <div style="flex:1"><div style="font-weight:700;font-size:15px">{{ s.n }}</div><div style="font-size:12px;color:var(--muted)">{{ s.m }}</div></div>
+              <span style="width:24px;height:24px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ s.rbd }}"><span style="width:12px;height:12px;border-radius:99px;background:{{ s.dot }}"></span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="1f" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">1f</span><span style="font-weight:700;font-size:14px">Chargement · puis erreur partielle</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="weak" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:4px 20px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;gap:8px;align-items:center;min-height:48px;animation:fzPulse 1.6s infinite"><span style="width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface-2)"></span><span style="width:60px;height:18px;border-radius:999px;background:var(--surface-2)"></span><span style="flex:1"></span><span style="width:120px;height:38px;border-radius:999px;background:var(--surface-2)"></span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;animation:fzPulse 1.6s infinite"><span style="height:104px;border-radius:var(--r);background:var(--surface-2)"></span><span style="height:104px;border-radius:var(--r);background:var(--surface-2)"></span><span style="height:104px;border-radius:var(--r);background:var(--surface-2)"></span></div>
+          <div role="alert" style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">error</span><div style="flex:1;font-size:13px"><div style="font-weight:700;color:var(--danger-ink)">Revenus indisponibles</div><div>La caisse de Centre-ville ne répond pas. Les autres chiffres sont à jour.</div></div><span style="font-weight:700;font-size:13px;color:var(--danger-ink)">Réessayer</span></div>
+          <span style="height:150px;border-radius:var(--r);background:var(--surface-2);animation:fzPulse 1.6s infinite"></span>
+          <span style="height:58px;border-radius:var(--r-sm);background:var(--surface-2);animation:fzPulse 1.6s infinite"></span><span style="height:58px;border-radius:var(--r-sm);background:var(--surface-2);animation:fzPulse 1.6s infinite"></span>
+          <div role="status" style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--warning-ink);font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">network_check</span>Réseau faible · chargement plus long que d’habitude</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">02 · 03</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Alertes &amp; planning</h2><span style="color:var(--muted);font-size:14px">Action rapide sur chaque alerte · jour / semaine · détail d’une séance</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="2a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">2a</span><span style="font-weight:700;font-size:14px">Alertes avec action rapide</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Alertes</h1><span style="flex:1"></span><span style="font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--danger);color:var(--on-danger)">4</span></div>
+          <div style="display:flex;gap:6px;overflow:hidden"><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;background:var(--secondary);color:var(--on-secondary);font-size:13px;font-weight:700;display:flex;align-items:center">Toutes</span><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">Abonnements</span><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">Cours</span><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:600;display:flex;align-items:center">No-show</span></div>
+          <sc-for list="{{ alertsFull }}" as="a" hint-placeholder-count="4">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:10px;align-items:flex-start"><span style="width:36px;height:36px;flex:none;border-radius:var(--r-sm);display:grid;place-items:center;background:var(--{{ a.tone }}-soft);color:var(--{{ a.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:20px">{{ a.icon }}</span></span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ a.t }}</div><div style="font-size:12.5px;color:var(--muted)">{{ a.s }}</div></div></div>
+              <div style="display:flex;gap:6px"><span style="height:40px;padding:0 14px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">{{ a.ci }}</span>{{ a.cta }}</span><span style="height:40px;padding:0 12px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:13px;display:grid;place-items:center">{{ a.cta2 }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="2b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">2b</span><span style="font-weight:700;font-size:14px">Alertes · état vide (succès)</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 88px 0;padding:4px 20px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Alertes</h1></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:0 16px">
+            <div style="width:88px;height:88px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:46px">task_alt</span></div>
+            <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Tout est en ordre</h2>
+            <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Aucune alerte en attente. Vous serez notifié si un cours se remplit mal ou si des abonnements arrivent à échéance.</p>
+            <span style="font-size:12.5px;color:var(--muted)">Dernière vérification : 09:41</span>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" badge="{{ 0 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="3a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">3a</span><span style="font-weight:700;font-size:14px">Planning · vue jour, filtre par site</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Planning</h1><div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><span style="height:34px;padding:0 12px;border-radius:var(--r-xs);background:var(--surface);box-shadow:var(--sh1);font-weight:700;font-size:13px;display:grid;place-items:center">Jour</span><span style="height:34px;padding:0 12px;font-weight:700;font-size:13px;color:var(--muted);display:grid;place-items:center">Semaine</span></div></div>
+          <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:6px;overflow:hidden"><sc-for list="{{ siteChips }}" as="s" hint-placeholder-count="4"><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;display:flex;align-items:center;background:{{ s.bg }};color:{{ s.fg }};border:1px solid {{ s.bd }}">{{ s.l }}</span></sc-for></div></sc-if>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"><sc-for list="{{ days }}" as="d" hint-placeholder-count="7"><span style="height:56px;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);background:{{ d.bg }};color:{{ d.fg }}"><span style="font-size:11px;font-weight:600">{{ d.w }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ d.n }}</span></span></sc-for></div>
+          <sc-for list="{{ planDay }}" as="c" hint-placeholder-count="6">
+            <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;background:var(--surface);border-radius:var(--r);border:{{ c.bd }}">
+              <span style="font-family:var(--f-head);font-weight:800;font-size:14.5px;width:42px">{{ c.t }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><div style="display:flex;justify-content:space-between;gap:6px"><span style="font-weight:700;font-size:14.5px">{{ c.n }}</span><span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap;background:var(--{{ c.tone }}-soft);color:var(--{{ c.tone }}-ink)">{{ c.st }}</span></div><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);gap:6px"><span>{{ c.meta }}</span><strong style="color:var(--text)">{{ c.f }}</strong></div><div style="height:5px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;background:var(--{{ c.tone }});width:{{ c.pct }}%"></div></div></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 1 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="3b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">3b</span><span style="font-weight:700;font-size:14px">Planning · vue semaine (remplissage)</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 16px 112px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 4px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Planning</h1><div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><span style="height:34px;padding:0 12px;font-weight:700;font-size:13px;color:var(--muted);display:grid;place-items:center">Jour</span><span style="height:34px;padding:0 12px;border-radius:var(--r-xs);background:var(--surface);box-shadow:var(--sh1);font-weight:700;font-size:13px;display:grid;place-items:center">Semaine</span></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px"><span style="font-weight:700">5 – 11 octobre{{ siteLine }}</span><span style="display:flex;gap:4px"><span style="width:36px;height:36px;border-radius:999px;border:1px solid var(--border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:20px">chevron_left</span></span><span style="width:36px;height:36px;border-radius:999px;border:1px solid var(--border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:20px">chevron_right</span></span></span></div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+            <sc-for list="{{ week }}" as="d" hint-placeholder-count="7">
+              <div style="display:flex;flex-direction:column;gap:4px"><div style="text-align:center;font-size:11px;font-weight:700;color:var(--muted)">{{ d.w }}<div style="font-family:var(--f-head);font-size:15px;color:var(--text)">{{ d.n }}</div></div>
+                <sc-for list="{{ d.items }}" as="i" hint-placeholder-count="4"><div style="height:62px;border-radius:var(--r-xs);padding:4px;display:flex;flex-direction:column;justify-content:space-between;background:{{ i.bg }};color:{{ i.fg }};border:1px solid {{ i.bd }}"><span style="font-size:10px;font-weight:700;line-height:1.1">{{ i.t }}</span><span style="font-size:9.5px;font-weight:600;line-height:1.1">{{ i.n }}</span><span style="font-size:10px;font-weight:800">{{ i.f }}</span></div></sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:12px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;padding:0 4px"><span style="display:flex;gap:4px;align-items:center"><span style="width:10px;height:10px;border-radius:3px;background:var(--danger-soft);border:1px solid var(--danger-border)"></span>Complet</span><span style="display:flex;gap:4px;align-items:center"><span style="width:10px;height:10px;border-radius:3px;background:var(--success-soft);border:1px solid var(--success-border)"></span>Bon remplissage</span><span style="display:flex;gap:4px;align-items:center"><span style="width:10px;height:10px;border-radius:3px;background:var(--warning-soft);border:1px solid var(--warning-border)"></span>Sous-rempli</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 1 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="3c" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">3c</span><span style="font-weight:700;font-size:14px">Détail d’une séance</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 150px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><span style="flex:1"></span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink)">Complet</span></div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">HIIT Express</h1><div style="font-size:13.5px;color:var(--muted)">Aujourd’hui · 12:15 – 12:45{{ siteLine }}</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <sc-for list="{{ seance }}" as="s" hint-placeholder-count="4"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--secondary-ink)">{{ s.icon }}</span><div><div style="font-size:11.5px;color:var(--muted)">{{ s.k }}</div><div style="font-weight:700;font-size:14px">{{ s.v }}</div></div></div></sc-for>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between"><span style="font-weight:700">Inscrits</span><span style="font-weight:700;color:var(--danger-ink)">20 / 20</span></div>
+            <div style="height:8px;border-radius:99px;background:var(--danger)"></div>
+            <div style="display:flex;align-items:center"><sc-for list="{{ avatars }}" as="a" hint-placeholder-count="6"><span style="width:34px;height:34px;margin-right:-8px;border-radius:999px;border:2px solid var(--surface);background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-size:11px;font-weight:700">{{ a }}</span></sc-for><span style="margin-left:16px;font-size:13px;color:var(--muted)">+14 autres</span></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <div style="padding:10px 14px 4px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Liste d’attente · 3</div>
+            <sc-for list="{{ waitlist }}" as="w" hint-placeholder-count="3"><div style="display:flex;gap:10px;align-items:center;padding:8px 14px;border-top:1px solid var(--border)"><span style="font-family:var(--f-head);font-weight:800;width:22px;color:var(--warning-ink)">{{ w.p }}</span><span style="flex:1;font-weight:600;font-size:14px">{{ w.n }}</span><span style="font-size:12px;color:var(--muted)">{{ w.m }}</span></div></sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px;z-index:3">
+          <span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">swap_horiz</span>Remplacer coach</span>
+          <span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">group_add</span>Capacité</span>
+          <span style="grid-column:1 / -1;height:44px;border-radius:var(--r-sm);border:1.5px solid var(--danger-border);color:var(--danger-ink);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">event_busy</span>Annuler le cours</span>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">04 · 05</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Annuler, remplacer, modifier la capacité</h2><span style="color:var(--muted);font-size:14px">Motif · aperçu de la notification · confirmation · conflits</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="4a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">4a</span><span style="font-weight:700;font-size:14px">Annuler · motif et aperçu de la notification</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="font-weight:700">Annuler Yoga Flow · 18:00</span></div>
+          <div style="font-size:13px;color:var(--muted)">Studio A{{ siteLine }} · Nadia · <strong style="color:var(--text)">9 inscrits, 0 en attente</strong></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Motif</span>
+            <sc-for list="{{ cancelReasons }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:12px;align-items:center;min-height:46px;padding:0 12px;border-radius:var(--r-sm);border:1.5px solid {{ r.bd }};background:{{ r.bg }}"><span style="width:22px;height:22px;flex:none;border-radius:999px;border:2px solid {{ r.rbd }};display:grid;place-items:center"><span style="width:10px;height:10px;border-radius:99px;background:{{ r.dot }}"></span></span><span style="font-weight:600;font-size:14px">{{ r.l }}</span></div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Aperçu de la notification envoyée aux 9 inscrits</span>
+            <div style="border-radius:var(--r-lg);padding:14px;background:repeating-linear-gradient(135deg,var(--cam) 0 12px,var(--cam-2) 12px 24px)">
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:var(--r);background:var(--surface);box-shadow:var(--sh2)"><span style="width:34px;height:34px;flex:none;border-radius:var(--r-xs);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:11px">{{ mono }}</span><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);font-weight:600"><span>{{ brand }}</span><span>maintenant</span></div><div style="font-weight:700;font-size:13.5px">Cours annulé : Yoga Flow 18:00</div><div style="font-size:12.5px">Nadia est absente aujourd’hui. Votre réservation est annulée, aucun quota décompté. Voir les autres cours →</div></div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:13.5px"><span style="width:44px;height:26px;border-radius:99px;background:var(--primary);position:relative;flex:none"><span style="position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:99px;background:var(--surface)"></span></span>Proposer Pilates 18:30 (5 places) dans le message</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--danger);color:var(--on-danger);font-weight:700;font-size:15px;display:grid;place-items:center">Continuer</span></div>
+      </div></div>
+    </div>
+
+    <div id="4b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">4b</span><span style="font-weight:700;font-size:14px">Annuler · confirmation</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2)"><span style="height:28px;width:200px;border-radius:var(--r-xs);background:var(--border)"></span><span style="height:180px;border-radius:var(--r);background:var(--border)"></span></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="alertdialog" aria-label="Confirmer l’annulation" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">event_busy</span></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Annuler Yoga Flow de 18:00 ?</h2>
+          <sc-for list="{{ cancelImpact }}" as="i" hint-placeholder-count="3"><div style="display:flex;gap:10px;align-items:center;font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">{{ i.icon }}</span>{{ i.t }}</div></sc-for>
+          <div style="padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13px">Action irréversible. Le cours restera visible « Annulé » dans le planning.</div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--danger);color:var(--on-danger);font-weight:700;font-size:15px;display:grid;place-items:center">Annuler le cours et notifier</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:15px;display:grid;place-items:center">Revenir</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="4c" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">4c</span><span style="font-weight:700;font-size:14px">Annulation envoyée · 1 échec de notification</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:24px 20px 34px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px"><div style="width:88px;height:88px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:46px">mark_email_read</span></div><h1 style="margin:0;font-family:var(--f-head);font-size:25px;letter-spacing:-.03em;font-weight:800">Cours annulé</h1><div style="color:var(--muted);font-size:14px">Yoga Flow · 18:00{{ siteLine }}</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success-ink)">notifications_active</span><span style="flex:1;font-weight:600">Push reçues</span><strong>8 / 9</strong></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success-ink)">event_available</span><span style="flex:1;font-weight:600">Réservations libérées</span><strong>9</strong></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:12px 14px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">notifications_off</span><div style="flex:1"><div style="font-weight:600">Ines Gharbi non notifiée</div><div style="font-size:12px;color:var(--muted)">Notifications désactivées · +216 52 118 904</div></div><span style="height:36px;padding:0 10px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:12.5px;display:grid;place-items:center">Envoyer un SMS</span></div>
+          </div>
+          <div style="flex:1"></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Retour au planning</span>
+        </div>
+        <div role="status" style="position:absolute;left:16px;right:16px;top:58px;z-index:9;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span>Annulation confirmée · 9 inscrits prévenus</div>
+      </div></div>
+    </div>
+
+    <div id="5a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">5a</span><span style="font-weight:700;font-size:14px">Remplacer un coach · disponibilités</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="font-weight:700">Remplacer Hatem · Boxe 19:45</span></div>
+          <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--warning-ink)">person_off</span>Hatem a signalé une absence à 08:12 (malade).</div>
+          <sc-for list="{{ coaches }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:var(--r);background:var(--surface);border:{{ c.bd }};opacity:{{ c.op }}">
+              <div style="width:44px;height:44px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700">{{ c.ini }}</div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700">{{ c.n }}</div><div style="font-size:12px;font-weight:700;color:var(--{{ c.tone }}-ink)">{{ c.s }}</div></div>
+              <span style="width:24px;height:24px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ c.rbd }}"><span style="width:12px;height:12px;border-radius:99px;background:{{ c.dot }}"></span></span>
+            </div>
+          </sc-for>
+          <div style="display:flex;gap:10px;align-items:center;font-size:13.5px"><span style="width:44px;height:26px;border-radius:99px;background:var(--primary);position:relative;flex:none"><span style="position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:99px;background:var(--surface)"></span></span>Prévenir les 8 inscrits du changement</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Confier à Yassine</span></div>
+      </div></div>
+    </div>
+
+    <div id="5b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">5b</span><span style="font-weight:700;font-size:14px">Modifier la capacité · erreur sous les inscrits</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;padding:20px;display:flex;flex-direction:column;gap:12px;background:var(--surface-2)"><span style="height:28px;width:200px;border-radius:var(--r-xs);background:var(--border)"></span><span style="height:160px;border-radius:var(--r);background:var(--border)"></span></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="dialog" aria-label="Capacité" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:14px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Capacité · HIIT Express 12:15</h2><div style="font-size:13px;color:var(--muted)">Salle 2 · 24 places max · 20 inscrits, 3 en attente</div></div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:18px">
+            <span style="width:56px;height:56px;border-radius:999px;border:1.5px solid var(--border-input);display:grid;place-items:center;font-size:26px;font-weight:700">−</span>
+            <div style="text-align:center"><div style="font-family:var(--f-head);font-weight:800;font-size:56px;letter-spacing:-.03em;line-height:1;color:var(--danger-ink)">18</div><div style="font-size:12.5px;color:var(--muted)">places</div></div>
+            <span style="width:56px;height:56px;border-radius:999px;border:1.5px solid var(--border-input);display:grid;place-items:center;font-size:26px;font-weight:700">+</span>
+          </div>
+          <div role="alert" style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:var(--r-sm);background:var(--danger-soft);border:1px solid var(--danger-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--danger-ink)">error</span><span><strong style="color:var(--danger-ink)">Capacité inférieure aux 20 inscrits.</strong> Choisissez au moins 20, ou annulez d’abord des réservations.</span></div>
+          <div style="display:flex;gap:10px;font-size:13px;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:18px">tips_and_updates</span>À 23 places, les 3 personnes en attente seraient confirmées automatiquement.</div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--border);color:var(--muted);font-weight:700;font-size:15px;display:grid;place-items:center" aria-disabled="true">Enregistrer</span>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">06</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Scanner · portée élargie</h2><span style="color:var(--muted);font-size:14px">Mêmes écrans que le staff, avec choix du site puis du cours (saisie du code : voir App Staff 4a)</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="6a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">6a</span><span style="font-weight:700;font-size:14px">Choix du site puis du cours</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--cam);color:var(--on-cam);font-family:var(--f-body)">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--cam) 0 14px,var(--cam-2) 14px 28px)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="dialog" aria-label="Choisir site et cours" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);color:var(--text);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Que pointez-vous ?</h2>
+          <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">1 · Site</span><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ scanSites }}" as="s" hint-placeholder-count="3"><span style="height:44px;border-radius:var(--r-sm);display:grid;place-items:center;font-weight:700;font-size:13px;background:{{ s.bg }};color:{{ s.fg }};border:1.5px solid {{ s.bd }}">{{ s.l }}</span></sc-for></div></div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">{{ courseStep }}</span>
+            <sc-for list="{{ scanCourses }}" as="c" hint-placeholder-count="3"><div style="display:flex;gap:12px;align-items:center;min-height:58px;padding:8px 12px;border-radius:var(--r-sm);border:{{ c.bd }};background:{{ c.bg }};opacity:{{ c.op }}"><span style="font-family:var(--f-head);font-weight:800;font-size:15px;width:44px">{{ c.t }}</span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ c.n }}</div><div style="font-size:12px;font-weight:700;color:var(--{{ c.tone }}-ink)">{{ c.w }}</div></div><span style="width:24px;height:24px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ c.rbd }}"><span style="width:12px;height:12px;border-radius:99px;background:{{ c.dot }}"></span></span></div></sc-for>
+          </div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Ouvrir la caméra · Cycling 10:00</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="6b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">6b</span><span style="font-weight:700;font-size:14px">Caméra · hors ligne</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--cam);color:var(--on-cam);font-family:var(--f-body)">
+        <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--cam) 0 14px,var(--cam-2) 14px 28px)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="off" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;top:52px;left:16px;right:16px;display:flex;gap:8px;align-items:center;z-index:2"><span style="width:44px;height:44px;border-radius:999px;background:rgba(0,0,0,.45);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="flex:1;height:44px;border-radius:999px;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:13.5px">{{ camLabel }}<span style="font-family:'Material Symbols Rounded';font-size:20px">expand_more</span></span><span style="width:44px;height:44px;border-radius:999px;background:rgba(0,0,0,.45);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">flashlight_off</span></span></div>
+        <div role="status" style="position:absolute;top:108px;left:16px;right:16px;z-index:2;display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning);color:var(--on-warning);font-size:13.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px">cloud_off</span>Hors ligne, 2 présences à synchroniser</div>
+        <div style="position:absolute;top:220px;left:50%;width:250px;height:250px;margin-left:-125px">
+          <span style="position:absolute;top:0;left:0;width:48px;height:48px;border-top:5px solid var(--primary);border-left:5px solid var(--primary);border-top-left-radius:var(--r)"></span><span style="position:absolute;top:0;right:0;width:48px;height:48px;border-top:5px solid var(--primary);border-right:5px solid var(--primary);border-top-right-radius:var(--r)"></span><span style="position:absolute;bottom:0;left:0;width:48px;height:48px;border-bottom:5px solid var(--primary);border-left:5px solid var(--primary);border-bottom-left-radius:var(--r)"></span><span style="position:absolute;bottom:0;right:0;width:48px;height:48px;border-bottom:5px solid var(--primary);border-right:5px solid var(--primary);border-bottom-right-radius:var(--r)"></span>
+          <span style="position:absolute;left:16px;right:16px;top:50%;height:2px;background:var(--primary);animation:fzPulse 1.2s infinite"></span>
+        </div>
+        <div style="position:absolute;top:486px;left:0;right:0;text-align:center;font-size:14px;font-weight:600">QR vérifiés hors ligne (signature du code)</div>
+        <div style="position:absolute;left:16px;right:16px;bottom:110px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r);background:var(--surface);color:var(--text)"><div style="flex:1"><div style="font-size:12px;color:var(--muted);font-weight:600">Présents</div><div style="font-family:var(--f-head);font-weight:800;font-size:24px;line-height:1.1">7 <span style="font-size:14px;color:var(--muted);font-weight:600">/ 9 inscrits</span></div></div><div style="width:96px;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;width:78%;border-radius:99px;background:var(--success)"></div></div></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:rgba(0,0,0,.5);border:1.5px solid var(--on-cam);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">keyboard</span>Saisir un code</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px;color:var(--text)"><dc-import name="FZ AdminTabBar" active="{{ 2 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <sc-for list="{{ scanRes }}" as="r" hint-placeholder-count="3">
+    <div id="{{ r.id }}" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">{{ r.id }}</span><span style="font-weight:700;font-size:14px">{{ r.label }}</span></div>
+      <div style="{{ r.st }}"><div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;font-family:var(--f-body);background:var(--{{ r.tone }});color:var(--on-{{ r.tone }})">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div role="status" style="position:absolute;inset:46px 0 0 0;padding:16px 24px 36px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+          <span style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;border:1.5px solid var(--on-{{ r.tone }});font-size:12.5px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:18px">vibration</span>{{ r.vib }}</span>
+          <div style="width:120px;height:120px;margin-top:10px;border-radius:999px;background:var(--surface);color:var(--{{ r.tone }}-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:66px;font-variation-settings:'FILL' 1">{{ r.icon }}</span></div>
+          <div><div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">{{ r.kicker }}</div><h2 style="margin:4px 0 0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800;line-height:1.05;text-wrap:balance">{{ r.title }}</h2></div>
+          <div style="width:100%;display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);background:var(--surface);color:var(--text);text-align:start"><div style="width:48px;height:48px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700">{{ r.ini }}</div><div style="flex:1"><div style="font-weight:700">{{ r.who }}</div><div style="font-size:12.5px;color:var(--muted)">{{ r.meta }}</div></div></div>
+          <p style="margin:0;font-size:15px;text-wrap:pretty">{{ r.detail }}</p>
+          <div style="flex:1"></div>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);background:var(--surface);color:var(--{{ r.tone }}-ink);font-weight:700;font-size:15px;display:grid;place-items:center">{{ r.cta }}</span>
+          <span style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--on-{{ r.tone }});font-weight:700;font-size:15px;display:grid;place-items:center">Scanner le suivant</span>
+        </div>
+      </div></div></div>
+    </div>
+    </sc-for>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">07 · 08</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Adhérents · suspendre / réactiver</h2><span style="color:var(--muted);font-size:14px">Recherche, filtres statut · formule · site, fiche complète</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="7a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">7a</span><span style="font-weight:700;font-size:14px">Recherche &amp; filtres actifs</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Adhérents</h1><span style="font-size:13px;color:var(--muted);font-weight:600">{{ memberTotal }}</span></div>
+          <div style="display:flex;gap:8px"><div style="position:relative;flex:1"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Rechercher" placeholder="Nom ou téléphone" style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px 0 44px;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></div><span style="position:relative;width:var(--ctl);height:var(--ctl);border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">tune</span><span style="position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:99px;background:var(--primary);color:var(--primary-contrast);font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)">2</span></span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ activeFilters }}" as="f" hint-placeholder-count="2"><span style="height:32px;padding:0 6px 0 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);border:1px solid var(--primary-border);font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:4px">{{ f }}<span style="font-family:'Material Symbols Rounded';font-size:16px">close</span></span></sc-for></div>
+          <div style="font-size:12.5px;color:var(--muted)">{{ resultCount }}</div>
+          <sc-for list="{{ members }}" as="m" hint-placeholder-count="5">
+            <div style="display:flex;gap:12px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)">
+              <div style="width:44px;height:44px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:14px">{{ m.ini }}</div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ m.n }}</div><div style="font-size:12px;color:var(--muted)">{{ m.meta }}</div></div>
+              <span style="display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ m.tone }}-soft);color:var(--{{ m.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:14px">{{ m.icon }}</span>{{ m.st }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="7b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">7b</span><span style="font-weight:700;font-size:14px">Filtres · statut, formule, site</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;background:var(--surface-2)"></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="dialog" aria-label="Filtres" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:14px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Filtres</h2><span style="font-weight:700;font-size:14px;color:var(--primary-ink)">Réinitialiser</span></div>
+          <sc-for list="{{ filterGroups }}" as="g" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:600">{{ g.h }}</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="4"><span style="height:38px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.l }}</span></sc-for></div></div>
+          </sc-for>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Voir 14 adhérents</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="7c" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">7c</span><span style="font-weight:700;font-size:14px">Fiche adhérent · onglet Encaissements</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:44px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><span style="flex:1"></span><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">more_vert</span></span></div>
+          <div style="display:flex;gap:14px;align-items:center"><div style="width:60px;height:60px;flex:none;border-radius:999px;background:var(--info);color:var(--on-info);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:20px">YT</div><div><h1 style="margin:0;font-family:var(--f-head);font-size:23px;letter-spacing:-.03em;font-weight:800">Youssef Trabelsi</h1><div style="font-size:13px;color:var(--muted)">+216 98 112 640{{ siteLine }}</div></div></div>
+          <div style="background:var(--surface);border:1px solid var(--warning-border);border-radius:var(--r);padding:12px 14px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">Mensuel Multi</div><div style="font-size:12.5px;color:var(--muted)">08/09 → 07/10</div></div><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink)">Expire dans 3 j</span></div>
+          <div role="tablist" style="display:flex;border-bottom:1px solid var(--border);overflow:hidden"><sc-for list="{{ ficheTabs }}" as="t" hint-placeholder-count="5"><span style="flex:none;padding:0 10px;height:42px;display:grid;place-items:center;font-weight:700;font-size:13px;margin-bottom:-1px;color:{{ t.fg }};border-bottom:2.5px solid {{ t.bd }}">{{ t.l }}</span></sc-for></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ payments }}" as="p" hint-placeholder-count="4"><div style="display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)"><span style="width:36px;height:36px;flex:none;border-radius:var(--r-sm);background:var(--surface-2);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--secondary-ink)">{{ p.icon }}</span></span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ p.f }}</div><div style="font-size:12px;color:var(--muted)">{{ p.m }}</div></div><strong style="font-size:14px">{{ p.a }}</strong></div></sc-for>
+          </div>
+          <div style="display:flex;gap:10px;padding:10px 14px;border-radius:var(--r);background:var(--info-soft);border:1px solid var(--info-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">sticky_note_2</span><span><strong>Note :</strong> préfère être rappelé par SMS.</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><span style="height:44px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">payments</span>Encaisser</span><span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--danger-border);color:var(--danger-ink);font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:18px">pause_circle</span>Suspendre</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="8a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">8a</span><span style="font-weight:700;font-size:14px">Suspendre · motif et avertissement</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;background:var(--surface-2)"></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="alertdialog" aria-label="Suspendre" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Suspendre Youssef Trabelsi</h2>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Motif</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ suspendReasons }}" as="o" hint-placeholder-count="4"><span style="height:38px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;display:flex;align-items:center;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.l }}</span></sc-for></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600">Du<span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);display:flex;align-items:center;padding:0 12px;font-weight:500;font-size:14.5px">04/10/2026</span></label><label style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600">Reprise prévue<span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);display:flex;align-items:center;padding:0 12px;font-weight:500;font-size:14.5px">25/10/2026</span></label></div>
+          <div role="alert" style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:var(--r-sm);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--warning-ink)">warning</span><div><strong style="color:var(--warning-ink)">2 réservations existantes seront annulées</strong><div>HIIT Express auj. 12:15 (liste d’attente) et Cycling lun. 07:00. Les places sont rendues à la liste d’attente. L’échéance est repoussée de 21 jours.</div></div></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--danger);color:var(--on-danger);font-weight:700;font-size:15px;display:grid;place-items:center">Suspendre et annuler 2 réservations</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:15px;display:grid;place-items:center">Annuler</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="8b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">8b</span><span style="font-weight:700;font-size:14px">Suspendu · réactiver · sombre</span></div>
+      <div style="{{ darkSt }}"><div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:44px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span></div>
+          <div style="display:flex;gap:14px;align-items:center"><div style="width:60px;height:60px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:20px">YT</div><div><h1 style="margin:0;font-family:var(--f-head);font-size:23px;letter-spacing:-.03em;font-weight:800">Youssef Trabelsi</h1><span style="display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink)"><span style="font-family:'Material Symbols Rounded';font-size:14px">pause_circle</span>Suspendu</span></div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13.5px">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Motif</span><strong>Blessure</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Depuis</span><strong>04/10 · par Mourad</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Reprise prévue</span><strong>25/10</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Nouvelle échéance</span><strong>28/10</strong></div>
+          </div>
+          <div style="display:flex;gap:10px;padding:10px 12px;border-radius:var(--r-sm);background:var(--info-soft);border:1px solid var(--info-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">info</span>Ses QR sont refusés au pointage avec le motif « Abonnement suspendu ».</div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">play_circle</span>Réactiver maintenant</span>
+          <div style="font-size:12.5px;color:var(--muted);text-align:center">Les réservations annulées ne sont pas restaurées.</div>
+        </div>
+        <div role="status" style="position:absolute;left:16px;right:16px;bottom:104px;z-index:9;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span>Adhérent suspendu · 2 réservations annulées</div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 3 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">09 · 10</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Plus &amp; encaissements</h2><span style="color:var(--muted);font-size:14px">Paiement manuel (mode, montant, site, formule) · historique filtrable</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="9a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">9a</span><span style="font-weight:700;font-size:14px">Plus</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Plus</h1></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ moreRows }}" as="r" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center;min-height:60px;padding:0 14px;border-bottom:1px solid var(--border)"><span style="width:38px;height:38px;flex:none;border-radius:var(--r-sm);background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ r.icon }}</span></span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ r.l }}</div><div style="font-size:12px;color:var(--muted)">{{ r.s }}</div></div><sc-if value="{{ r.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--danger);color:var(--on-danger);font-size:12px;font-weight:700;display:grid;place-items:center">{{ r.b }}</span></sc-if><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">chevron_right</span></div></sc-for>
+          </div>
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">desktop_windows</span><span style="flex:1;font-weight:700;font-size:15px">Configuration · back-office web</span><span style="font-family:'Material Symbols Rounded';font-size:20px">open_in_new</span></div>
+            <div style="font-size:12.5px;opacity:.9">Formules, règles multi-sites, branding, modules, statistiques détaillées et audit se gèrent sur ordinateur.</div>
+            <div style="font-family:var(--f-mono);font-size:12px;opacity:.85">admin.fitzone.tn</div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="10a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">10a</span><span style="font-weight:700;font-size:14px">Saisir un paiement manuel</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="font-weight:700">Nouveau paiement</span></div>
+          <div style="display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface)"><div style="width:40px;height:40px;border-radius:999px;background:var(--info);color:var(--on-info);display:grid;place-items:center;font-weight:700;font-size:13px">YT</div><div style="flex:1"><div style="font-weight:700">Youssef Trabelsi</div><div style="font-size:12px;color:var(--muted)">Mensuel Multi · expire le 07/10</div></div><span style="font-weight:700;font-size:13px;color:var(--primary-ink)">Changer</span></div>
+          <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Site d’encaissement</span><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ scanSitesPay }}" as="s" hint-placeholder-count="3"><span style="height:42px;border-radius:var(--r-sm);display:grid;place-items:center;font-weight:700;font-size:13px;background:{{ s.bg }};color:{{ s.fg }};border:1.5px solid {{ s.bd }}">{{ s.l }}</span></sc-for></div></div></sc-if>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Formule</span><div style="display:flex;align-items:center;justify-content:space-between;height:var(--ctl);padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface)"><span style="font-weight:600">Mensuel Multi · 08/10 → 07/11</span><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">expand_more</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Montant</span><div style="display:flex;align-items:center;height:64px;padding:0 16px;border-radius:var(--r-sm);border:2px solid var(--focus);background:var(--surface)"><span style="flex:1;font-family:var(--f-head);font-weight:800;font-size:30px">{{ payAmount }}</span><span style="font-size:12px;color:var(--muted)">tarif catalogue</span></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Mode</span><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ modes }}" as="m" hint-placeholder-count="3"><span style="height:56px;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12.5px;font-weight:700;background:{{ m.bg }};color:{{ m.fg }};border:1.5px solid {{ m.bd }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ m.icon }}</span>{{ m.l }}</span></sc-for></div></div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Référence du virement<span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--danger);background:var(--surface);display:flex;align-items:center;padding:0 12px;color:var(--muted);font-weight:400">Ex. VIR-2026-…</span><span role="alert" style="display:flex;gap:4px;align-items:center;color:var(--danger-ink);font-size:12.5px"><span style="font-family:'Material Symbols Rounded';font-size:16px">error</span>Obligatoire pour un virement.</span></label>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Enregistrer {{ payAmount }}</span></div>
+      </div></div>
+    </div>
+
+    <div id="10b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">10b</span><span style="font-weight:700;font-size:14px">Historique des encaissements</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800;flex:1">Encaissements</h1><span style="width:44px;height:44px;border-radius:999px;background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">add</span></span></div>
+          <div style="display:flex;gap:6px;overflow:hidden"><sc-for list="{{ payFilters }}" as="f" hint-placeholder-count="4"><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }}">{{ f.l }}</span></sc-for></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-size:11.5px;color:var(--muted)">Aujourd’hui</div><div style="font-family:var(--f-head);font-weight:800;font-size:20px">{{ revDay }}</div></div><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-size:11.5px;color:var(--muted)">Paiements</div><div style="font-family:var(--f-head);font-weight:800;font-size:20px">11</div></div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ payHist }}" as="p" hint-placeholder-count="6"><div style="display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)"><span style="width:36px;height:36px;flex:none;border-radius:var(--r-sm);background:var(--surface-2);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--secondary-ink)">{{ p.icon }}</span></span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ p.n }}</div><div style="font-size:12px;color:var(--muted)">{{ p.m }}</div></div><div style="text-align:end"><div style="font-weight:700;font-size:14px">{{ p.a }}</div><div style="font-size:11.5px;color:var(--muted)">{{ p.t }}</div></div></div></sc-for>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">11</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Annonces</h2><span style="color:var(--muted);font-size:14px">Push ciblée · aperçu · immédiat ou planifié · historique · refus de droit</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="11a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">11a</span><span style="font-weight:700;font-size:14px">Créer · contenu et ciblage</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></span><span style="font-weight:700;flex:1">Nouvelle annonce</span><span style="font-size:12.5px;color:var(--muted);font-weight:600">1/2</span></div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Titre<span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);display:flex;align-items:center;padding:0 14px;font-weight:500;font-size:15px">Votre abonnement expire bientôt</span><span style="font-size:11.5px;color:var(--muted);font-weight:500;text-align:end">31 / 50</span></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Message<span style="min-height:84px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:10px 14px;font-weight:400;font-size:14.5px;line-height:1.45">Passez à l’accueil cette semaine : −10 % sur le renouvellement trimestriel jusqu’au 11/10.</span></label>
+          <sc-for list="{{ target }}" as="g" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">{{ g.h }}</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.opts }}" as="o" hint-placeholder-count="4"><span style="height:36px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;display:flex;align-items:center;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.l }}</span></sc-for></div></div>
+          </sc-for>
+          <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--info-soft);border:1px solid var(--info-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">groups</span><span><strong>≈ 14 destinataires</strong> · consentement marketing vérifié (2 exclus)</span></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Aperçu</span></div>
+      </div></div>
+    </div>
+
+    <div id="11b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">11b</span><span style="font-weight:700;font-size:14px">Aperçu sur téléphone · planifier</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 120px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><span style="font-weight:700;flex:1">Aperçu</span><span style="font-size:12.5px;color:var(--muted);font-weight:600">2/2</span></div>
+          <div style="align-self:center;width:250px;height:300px;border-radius:32px;border:6px solid var(--bezel);background:repeating-linear-gradient(135deg,var(--cam) 0 12px,var(--cam-2) 12px 24px);padding:40px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--on-cam)">
+            <div style="font-family:var(--f-head);font-weight:600;font-size:44px;line-height:1">10:00</div><div style="font-size:11px;opacity:.85">mardi 6 octobre</div>
+            <div style="width:100%;margin-top:14px;display:flex;gap:8px;align-items:flex-start;padding:10px;border-radius:var(--r);background:var(--surface);color:var(--text)"><span style="width:26px;height:26px;flex:none;border-radius:var(--r-xs);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:9px">{{ mono }}</span><div style="min-width:0"><div style="font-size:10px;color:var(--muted);font-weight:600">{{ brand }}</div><div style="font-weight:700;font-size:11.5px">Votre abonnement expire bientôt</div><div style="font-size:10.5px;line-height:1.35">Passez à l’accueil cette semaine : −10 % sur le renouvellement…</div></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Envoi</span><div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><span style="flex:1;height:42px;display:grid;place-items:center;font-weight:700;font-size:13.5px;color:var(--muted)">Maintenant</span><span style="flex:1;height:42px;border-radius:var(--r-xs);background:var(--surface);box-shadow:var(--sh1);display:grid;place-items:center;font-weight:700;font-size:13.5px">Planifier</span></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);display:flex;align-items:center;gap:6px;padding:0 12px;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">calendar_today</span>Mar. 6 oct.</span><span style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-input);display:flex;align-items:center;gap:6px;padding:0 12px;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">schedule</span>10:00</span></div>
+          <div style="font-size:12.5px;color:var(--muted)">14 destinataires{{ targetLine }} · Mensuel Multi · expire sous 7 j</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">schedule_send</span>Planifier l’envoi</span></div>
+      </div></div>
+    </div>
+
+    <div id="11c" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">11c</span><span style="font-weight:700;font-size:14px">Historique des annonces</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800;flex:1">Annonces</h1><span style="height:40px;padding:0 12px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:20px">add</span>Créer</span></div>
+          <sc-for list="{{ annHist }}" as="a" hint-placeholder-count="4">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-weight:700;font-size:14.5px">{{ a.t }}</span><span style="display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ a.tone }}-soft);color:var(--{{ a.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:14px">{{ a.icon }}</span>{{ a.st }}</span></div>
+              <div style="font-size:12.5px;color:var(--muted)">{{ a.m }}</div>
+              <div style="display:flex;gap:14px;font-size:12.5px"><span><strong>{{ a.n }}</strong> destinataires</span><span><strong>{{ a.o }}</strong> ouvertures</span></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="11d" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--danger);color:var(--on-danger)">11d</span><span style="font-weight:700;font-size:14px">Erreur de droit · admin de site</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;background:var(--surface-2)"></div>
+        <div style="position:absolute;inset:0;background:var(--overlay)"></div>
+        <div role="alertdialog" aria-label="Action non autorisée" style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">lock</span></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Action réservée à l’admin réseau</h2>
+          <p style="margin:0;font-size:14px;text-wrap:pretty">Vous êtes <strong>admin de site · Lac 2</strong>. Envoyer une annonce à <strong>tous les sites</strong> (1 284 adhérents) nécessite le rôle admin réseau.</p>
+          <div style="display:flex;gap:10px;padding:10px 12px;border-radius:var(--r-sm);background:var(--surface-2);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">info</span><span>Vos droits : annonces, annulations et encaissements sur Lac 2 uniquement.</span></div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;display:grid;place-items:center">Cibler Lac 2 uniquement</span>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">forward_to_inbox</span>Demander à Mourad (admin réseau)</span>
+          <span style="font-family:var(--f-mono);font-size:11.5px;color:var(--muted);text-align:center">Code 403 · droit « annonce.réseau » manquant</span>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap"><span style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink)">12 · 13</span><h2 style="margin:0;font-family:var(--f-head);font-size:30px;letter-spacing:-.03em;font-weight:800">Modération &amp; profil</h2><span style="color:var(--muted);font-size:14px">File de signalements · masquer, avertir, bloquer · rôle, portée, 2FA</span></div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div id="12a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">12a</span><span style="font-weight:700;font-size:14px">File de signalements</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Modération</h1></div>
+          <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><span style="flex:1;height:42px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--primary-ink);border-bottom:2.5px solid var(--primary);margin-bottom:-1px">À traiter · 4</span><span style="flex:1;height:42px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--muted)">Traités</span></div>
+          <sc-for list="{{ reports }}" as="r" hint-placeholder-count="4">
+            <div style="background:var(--surface);border:{{ r.bd }};border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--{{ r.tone }}-soft);color:var(--{{ r.tone }}-ink)">{{ r.motif }}</span><span style="font-size:11.5px;color:var(--muted)">{{ r.k }} · {{ r.t }}</span><span style="flex:1"></span><span style="display:flex;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--danger-ink)"><span style="font-family:'Material Symbols Rounded';font-size:16px">flag</span>{{ r.c }}</span></div>
+              <div style="font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ r.x }}</div>
+              <div style="font-size:12px;color:var(--muted)">par {{ r.a }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+
+    <div id="12b" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">12b</span><span style="font-weight:700;font-size:14px">Aperçu du contenu · actions</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 190px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><span style="font-weight:700">Signalement · publication</span></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:13px">WB</div><div style="flex:1"><div style="font-weight:700">Walid Bouazizi</div><div style="font-size:12px;color:var(--muted)">Communauté{{ siteLine }} · il y a 2 h</div></div></div>
+            <div style="font-size:14.5px">Vente de compléments protéinés à prix cassés 💪 Contactez-moi en privé, livraison à la salle !</div>
+            <div style="height:150px;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">photo · produits</span></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:13.5px">
+            <div style="font-weight:700">3 signalements</div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Spam / publicité</span><strong>2</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Produit dangereux</span><strong>1</strong></div>
+            <div style="font-size:12px;color:var(--muted)">Historique de l’auteur : 1 avertissement (août)</div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);gap:8px;z-index:3">
+          <span style="height:56px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);font-weight:700;font-size:12.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">visibility_off</span>Masquer</span>
+          <span style="height:56px;border-radius:var(--r-sm);border:1.5px solid var(--warning-border);color:var(--warning-ink);font-weight:700;font-size:12.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">report</span>Avertir</span>
+          <span style="height:56px;border-radius:var(--r-sm);background:var(--danger);color:var(--on-danger);font-weight:700;font-size:12.5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">block</span>Bloquer</span>
+          <span style="grid-column:1 / -1;height:40px;display:grid;place-items:center;font-weight:700;font-size:13.5px;color:var(--primary-ink)">Ignorer le signalement</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div id="13a" style="display:flex;flex-direction:column;gap:10px;flex:none">
+      <div style="display:flex;gap:8px;align-items:center"><span style="font-family:var(--f-mono);font-size:12px;padding:3px 8px;border-radius:var(--r-xs);background:var(--secondary);color:var(--on-secondary)">13a</span><span style="font-weight:700;font-size:14px">Profil admin · rôle, portée, sécurité</span></div>
+      <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:var(--bezel);box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+        <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" hint-size="100%,46px"></dc-import></div>
+        <div style="position:absolute;inset:46px 0 0 0;overflow:hidden;padding:4px 20px 112px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><span style="width:44px;height:44px;display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></span><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Profil</h1></div>
+          <div style="display:flex;gap:14px;align-items:center"><div style="width:64px;height:64px;flex:none;border-radius:999px;background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:21px">MB</div><div><div style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em">Mourad Ben Salem</div><div style="font-size:13px;color:var(--muted)">{{ scopeLine }}</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600">Utiliser l’app en tant que</span><div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><span style="flex:1;height:44px;border-radius:var(--r-xs);background:var(--surface);box-shadow:var(--sh1);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:18px">admin_panel_settings</span>Admin</span><span style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:14px;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:18px">person</span>Adhérent</span></div><span style="font-size:12px;color:var(--muted)">Vous êtes aussi adhérent (Premium) : la navigation change selon le rôle choisi.</span></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ profRows }}" as="r" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center;min-height:52px;padding:0 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">{{ r.icon }}</span><span style="flex:1;font-weight:600;font-size:14.5px">{{ r.l }}</span><span style="font-size:12.5px;font-weight:700;color:var(--{{ r.tone }}-ink)">{{ r.v }}</span><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">chevron_right</span></div></sc-for>
+          </div>
+          <span style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--danger-border);color:var(--danger-ink);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">logout</span>Se déconnecter</span>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:88px"><dc-import name="FZ AdminTabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clair&quot;,&quot;Sombre&quot;,&quot;Auto&quot;],&quot;default&quot;:&quot;Clair&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;logoMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Logo + nom&quot;,&quot;Logo seul&quot;],&quot;default&quot;:&quot;Logo + nom&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const ini=n=>n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const nf=n=>n.toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ');
+class Component extends DCLogic {
+  state={sysDark:false};
+  componentDidMount(){this.mq=window.matchMedia('(prefers-color-scheme: dark)');this.onMq=()=>this.setState({sysDark:this.mq.matches});this.onMq();this.mq.addEventListener('change',this.onMq);}
+  componentWillUnmount(){this.mq&&this.mq.removeEventListener('change',this.onMq);}
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--focus':ensure(C.primary,bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--bezel':mix(C.bgDark,'#000000',.35),'--cam':C.bgDark,'--cam-2':mix(C.bgDark,C.textDark,.07),'--on-cam':C.textDark,
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const dark=P.theme==='Sombre'||(P.theme==='Auto'&&S.sysDark);
+    const rootStyle={...this.vars(dark,C,P),background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const darkSt={...this.vars(true,C,P),color:'var(--text)',fontFamily:'var(--f-body)'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';const caps=brand.match(/[A-Z]/g);const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):brand.slice(0,2)).toUpperCase();
+    const multi=String(P.sites??'3')==='3';
+    const km=P.currency==='€'?0.3:1;const cur=P.currency==='€'?'€':'DT';
+    const money=n=>nf(Math.round(n*km))+' '+cur;
+    const bars=arr=>{const mx=Math.max(...arr);return arr.map((v,i)=>({h:Math.round(v/mx*100),bg:i===arr.length-1?'var(--primary)':'var(--secondary-border)'}));};
+    const AL=[{icon:'schedule',tone:'warning',t:'14 abonnements expirent sous 7 jours',site:'Lac 2 · 8 · La Marsa · 4 · Centre-ville · 2'},{icon:'trending_down',tone:'danger',t:'Stretching 20:30 sous-rempli · 2/15',site:'Centre-ville · aujourd’hui'},{icon:'person_off',tone:'danger',t:'Coach absent · Boxe 19:45',site:'Lac 2 · remplaçant à trouver'},{icon:'visibility_off',tone:'info',t:'No-show anormal · Boxe 31 % (moy. 9 %)',site:'Lac 2 · 4 dernières séances'}];
+    const k3=(a,b,c,d)=>[{icon:'group',v:a,l:'Adhérents actifs',d:'+'+d+' ce mois',tone:'success'},{icon:'how_to_reg',v:b[0],l:'Présences du jour',d:'sur '+b[1]+' réservées',tone:'secondary'},{icon:'donut_large',v:c+' %',l:'Taux de remplissage',d:c>=75?'+4 pts vs sem. dern.':'−3 pts vs sem. dern.',tone:c>=75?'success':'warning'}];
+    const dashV=[
+      {id:'1a',label:'Admin réseau · Tous les sites',st:{},role:'Admin réseau',who:'Mourad',selShow:true,selPin:'hub',selLabel:'Tous les sites',selIcon:'expand_more',sub:'Dimanche 4 octobre · 3 sites',kpis:k3('1 284',['186','240'],78,32),revJ:money(1240),revM:money(28600),bars:bars([162,174,181,170,196,214,186]),trend:'+6 % vs semaine dernière',alerts:AL.slice(0,3),alertN:4},
+      {id:'1b',label:'Admin réseau · vue La Marsa · sombre',st:darkSt,role:'Admin réseau',who:'Mourad',selShow:true,selPin:'location_on',selLabel:'La Marsa',selIcon:'expand_more',sub:'Dimanche 4 octobre · La Marsa',kpis:k3('418',['58','82'],71,9),revJ:money(360),revM:money(9120),bars:bars([48,52,55,50,61,66,58]),trend:'+3 % vs semaine dernière',alerts:[{icon:'schedule',tone:'warning',t:'4 abonnements expirent sous 7 jours',site:'La Marsa'}],alertN:1},
+      {id:'1c',label:'Admin de site · Lac 2 (portée verrouillée)',st:{},role:'Admin de site',who:'Salma',selShow:true,selPin:'location_on',selLabel:'Lac 2',selIcon:'lock',sub:'Dimanche 4 octobre · Lac 2',kpis:k3('612',['74','92'],82,15),revJ:money(540),revM:money(13400),bars:bars([66,71,73,69,80,88,74]),trend:'+8 % vs semaine dernière',alerts:[AL[2],AL[3]],alertN:3},
+      {id:'1d',label:'Réseau à un seul site · sélecteur masqué',st:{},role:'Admin',who:'Mourad',selShow:false,selPin:'',selLabel:'',selIcon:'',sub:'Dimanche 4 octobre',kpis:k3('612',['74','92'],82,15),revJ:money(540),revM:money(13400),bars:bars([66,71,73,69,80,88,74]),trend:'+8 % vs semaine dernière',alerts:[AL[2],AL[3]],alertN:3}];
+    const sitePick=[['hub','Tous les sites','1 284 adhérents · 3 sites',true],['location_on','Lac 2','612 adhérents'],['location_on','La Marsa','418 adhérents'],['location_on','Centre-ville','254 adhérents']].map(([icon,n,m,sel])=>({icon,n,m,bd:sel?'2px solid var(--primary)':'1px solid var(--border)',bg:sel?'var(--primary-soft)':'transparent',rbd:sel?'var(--primary)':'var(--border-input)',dot:sel?'var(--primary)':'transparent'}));
+    const sl=s=>multi?' · '+s:'';
+    const alertsFull=[{icon:'schedule',tone:'warning',t:'14 abonnements expirent sous 7 jours',s:multi?'Lac 2 · 8, La Marsa · 4, Centre-ville · 2':'Dont 5 cette semaine',ci:'sms',cta:'Relancer par SMS',cta2:'Voir la liste'},{icon:'trending_down',tone:'danger',t:'Stretching 20:30 sous-rempli · 2/15',s:'Aujourd’hui'+sl('Centre-ville')+' · seuil 5 inscrits',ci:'campaign',cta:'Promouvoir',cta2:'Annuler'},{icon:'person_off',tone:'danger',t:'Coach absent · Boxe 19:45',s:'Hatem malade'+sl('Lac 2')+' · 8 inscrits',ci:'swap_horiz',cta:'Remplacer',cta2:'Annuler'},{icon:'visibility_off',tone:'info',t:'No-show anormal · Boxe 31 %',s:'Moyenne du réseau 9 % · 4 dernières séances',ci:'group',cta:'Voir les absents',cta2:'Ignorer'}];
+    const siteChips=['Tous les sites','Lac 2','La Marsa','Centre-ville'].map((l,i)=>({l,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)',bd:i===0?'var(--secondary)':'var(--border-strong)'}));
+    const days=[['Dim','4'],['Lun','5'],['Mar','6'],['Mer','7'],['Jeu','8'],['Ven','9'],['Sam','10']].map(([w,n],i)=>({w,n,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)'}));
+    const PD=[['09:15','Pilates','Lina','Lac 2','12/14',86,'primary','En cours'],['10:00','Cycling','Rim','La Marsa','9/16',56,'success','Ouvert'],['12:15','HIIT Express','Yassine','Lac 2','20/20 +3',100,'danger','Complet'],['18:00','Yoga Flow','Nadia','Lac 2','9/14',64,'warning','Coach absente'],['19:45','Boxe','Hatem','Lac 2','8/12',67,'warning','Coach absent'],['20:30','Stretching','Lina','Centre-ville','2/15',13,'danger','Sous-rempli']];
+    const planDay=PD.filter(p=>multi||p[3]!=='La Marsa'&&p[3]!=='Centre-ville'||p[1]==='Stretching').map(([t,n,coach,site,f,pct,tone,st])=>({t,n,meta:coach+(multi?' · '+site:''),f,pct,tone,st,bd:n==='HIIT Express'?'2px solid var(--primary)':'1px solid var(--border)'}));
+    const cell=(t,n,f,k)=>({t,n,f,bg:'var(--'+k+'-soft)',fg:'var(--'+k+'-ink)',bd:'var(--'+k+'-border)'});
+    const week=[['Lun','5'],['Mar','6'],['Mer','7'],['Jeu','8'],['Ven','9'],['Sam','10'],['Dim','11']].map(([w,n],d)=>({w,n,items:[cell('07:00','Cycl.',['18','20','14','19','20','—','—'][d],d===1||d===4?'danger':'success'),cell('12:15','HIIT',['20','20','17','20','20','16','—'][d],[0,1,3,4].includes(d)?'danger':'success'),cell('18:00','Yoga',['9','4','11','3','12','8','6'][d],[1,3].includes(d)?'warning':'success'),cell('19:45','Boxe',['8','10','6','9','12','—','—'][d],d===2?'warning':(d===4?'danger':'success'))]}));
+    const seance=[{icon:'sports',k:'Coach',v:'Yassine'},{icon:'meeting_room',k:'Salle',v:'Salle 2'},{icon:'groups',k:'Capacité',v:'20 places'},{icon:'qr_code_scanner',k:'Pointés',v:'0 · ouvre à 11:45'}];
+    const avatars=['SB','NH','OS','KM','IG','SA'];
+    const waitlist=[{p:'1',n:'Youssef Trabelsi',m:'depuis 08:02'},{p:'2',n:'Rim Kefi',m:'depuis 08:40'},{p:'3',n:'Sarra Ben Ali',m:'depuis 09:05'}];
+    const cancelReasons=['Coach absent','Salle indisponible','Trop peu d’inscrits','Autre motif'].map((l,i)=>({l,bd:i===0?'var(--primary)':'var(--border)',bg:i===0?'var(--primary-soft)':'transparent',rbd:i===0?'var(--primary)':'var(--border-input)',dot:i===0?'var(--primary)':'transparent'}));
+    const cancelImpact=[{icon:'event_busy',t:'9 réservations annulées, quotas non décomptés'},{icon:'notifications',t:'9 notifications push + e-mail aux inscrits'},{icon:'sports',t:'Nadia est informée de l’annulation'}];
+    const coaches=[['Yassine','Disponible · qualifié boxe','success',true,1],['Lina','Disponible · non qualifiée boxe','warning',false,1],['Rim','Conflit · Cycling 19:00'+sl('La Marsa'),'danger',false,.6],['Nadia','Absente aujourd’hui','danger',false,.6]].map(([n,s,tone,sel,op])=>({n,ini:n.slice(0,2).toUpperCase(),s,tone,op,bd:sel?'2px solid var(--primary)':'1px solid var(--border)',rbd:sel?'var(--primary)':'var(--border-input)',dot:sel?'var(--primary)':'transparent'}));
+    const pick=(sel)=>({bg:sel?'var(--primary-soft)':'transparent',bd:sel?'2px solid var(--primary)':'1px solid var(--border)',rbd:sel?'var(--primary)':'var(--border-input)',dot:sel?'var(--primary)':'transparent'});
+    const scanSites=['Lac 2','La Marsa','Centre-ville'].map((l,i)=>({l,bg:i===1?'var(--secondary)':'var(--surface)',fg:i===1?'var(--on-secondary)':'var(--text)',bd:i===1?'var(--secondary)':'var(--border-input)'}));
+    const scanCourses=(multi?[['10:00','Cycling','Pointage ouvert · ferme à 10:15','success',true,1],['19:00','Cycling · ouvert à tous','Ouvre à 18:30','secondary',false,1],['20:00','Boxe','Ouvre à 19:30','secondary',false,1]]:[['09:15','Pilates','Pointage ouvert · ferme à 09:30','success',true,1],['12:15','HIIT Express','Ouvre à 11:45','secondary',false,1],['07:00','Cycling','Fermé','secondary',false,.6]]).map(([t,n,w,tone,sel,op])=>({t,n,w,tone,op,...pick(sel)}));
+    const ok={tone:'success',vib:'Vibration courte · 1 impulsion',icon:'check_circle',kicker:'Présence confirmée',cta:'Voir le cours'};
+    const ko={tone:'danger',vib:'Vibration longue · 3 impulsions',kicker:'Refusé'};
+    const scanRes=[{id:'6c',label:'Présence confirmée · sombre',st:darkSt,...ok,title:'Karim Mansour',ini:'KM',who:'Karim Mansour',meta:'Premium · '+(multi?'Cycling 10:00 · La Marsa':'Pilates 09:15'),detail:'Validé à 09:58 · 8 / 9 présents.'},
+      {id:'6d',label:'Refus : formule non valable dans ce site',st:{},...ko,icon:'location_off',title:multi?'Formule non valable dans ce site':'Abonnement expiré',ini:multi?'NH':'AC',who:multi?'Nour Hammami':'Amira Chaouch',meta:multi?'Mensuel · Lac 2 uniquement':'Mensuel · expiré le 02/07',detail:multi?'Sa formule ne donne pas accès à La Marsa. Proposez un passage en Mensuel Multi à l’accueil.':'Proposez un renouvellement avant le cours.',cta:multi?'Voir ses sites d’accès':'Encaisser un renouvellement'},
+      {id:'6e',label:'Refus : pas de réservation → inscrire et valider',st:{},...ko,icon:'event_busy',title:'Pas de réservation',ini:'SB',who:'Sarra Ben Ali',meta:'Premium · actif · non inscrite',detail:'7 places restantes sur 16. Règles vérifiées : Premium valable sur tous les sites.',cta:'Inscrire et valider'}];
+    const members=[['Youssef Trabelsi','Mensuel Multi','Lac 2','Expire dans 3 j','warning','schedule'],['Ines Gharbi','Trimestriel','Lac 2','Expire dans 5 j','warning','schedule'],['Sami Ayari','Mensuel','La Marsa','Expire dans 6 j','warning','schedule'],['Rim Kefi','Mensuel','Lac 2','Expire dans 6 j','warning','schedule'],['Amira Chaouch','Mensuel','Lac 2','Expiré le 02/07','danger','event_busy'],['Hedi Karoui','Trimestriel','Lac 2','Suspendu','secondary','pause_circle']].map(([n,plan,site,st,tone,icon])=>({n,ini:ini(n),meta:plan+(multi?' · '+site:''),st,tone,icon}));
+    const opt=(arr,sel)=>arr.map(l=>({l,bg:sel.includes(l)?'var(--secondary)':'var(--surface)',fg:sel.includes(l)?'var(--on-secondary)':'var(--text)',bd:sel.includes(l)?'var(--secondary)':'var(--border-input)'}));
+    const filterGroups=[{h:'Statut',opts:opt(['Actif','Expire bientôt','Expiré','Suspendu'],['Expire bientôt'])},{h:'Formule',opts:opt(['Mensuel','Mensuel Multi','Trimestriel','Premium','Annuel'],[])},...(multi?[{h:'Site d’origine',opts:opt(['Tous','Lac 2','La Marsa','Centre-ville'],['Tous'])}]:[])];
+    const ficheTabs=['Abonnement','Réservations','Présence','Encaissements','Notes'].map((l,i)=>({l,fg:i===3?'var(--primary-ink)':'var(--muted)',bd:i===3?'var(--primary)':'transparent'}));
+    const payments=[['payments','Mensuel Multi','08/09 · espèces · Leila M.',120],['account_balance','Mensuel Multi','08/08 · virement',120],['payments','Mensuel Multi','09/07 · espèces · Leila M.',120],['edit_note','Mensuel','10/06 · chèque n° 418 220',90]].map(([icon,f,m,a])=>({icon,f,m,a:money(a)}));
+    const suspendReasons=['Demande de l’adhérent','Blessure','Impayé','Comportement'].map((l,i)=>({l,bg:i===1?'var(--secondary)':'var(--surface)',fg:i===1?'var(--on-secondary)':'var(--text)',bd:i===1?'var(--secondary)':'var(--border-input)'}));
+    const moreRows=[{icon:'payments',l:'Encaissements',s:'Saisie manuelle et historique',b:0},{icon:'campaign',l:'Annonces',s:'Notifications push ciblées',b:0},{icon:'shield',l:'Modération',s:'Signalements de la communauté',b:4},{icon:'warning',l:'Alertes',s:'Abonnements, remplissage, no-show',b:4},{icon:'person',l:'Profil',s:'Rôle, sécurité, déconnexion',b:0}].map(r=>({...r,hasBadge:r.b>0}));
+    const scanSitesPay=['Lac 2','La Marsa','Centre-ville'].map((l,i)=>({l,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)',bd:i===0?'var(--secondary)':'var(--border-input)'}));
+    const modes=[['payments','Espèces'],['account_balance','Virement'],['edit_note','Chèque']].map(([icon,l],i)=>({icon,l,bg:i===1?'var(--secondary)':'var(--surface)',fg:i===1?'var(--on-secondary)':'var(--text)',bd:i===1?'var(--secondary)':'var(--border-input)'}));
+    const payFilters=['Aujourd’hui',...(multi?['Tous les sites']:[]),'Tous les modes','Toutes formules'].map((l,i)=>({l,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)',bd:i===0?'var(--secondary)':'var(--border-strong)'}));
+    const payHist=[['payments','Youssef Trabelsi','Mensuel Multi · espèces','Lac 2',120,'09:44'],['account_balance','Sarra Ben Ali','Premium · virement','Lac 2',180,'09:20'],['payments','Sami Ayari','Mensuel · espèces','La Marsa',90,'08:52'],['edit_note','Ines Gharbi','Trimestriel · chèque','Lac 2',240,'08:31'],['payments','Omar Saidi','Séance découverte · espèces','Centre-ville',15,'08:05'],['account_balance','Karim Mansour','Premium · virement','Lac 2',180,'07:48']].map(([icon,n,m,site,a,t])=>({icon,n,m:m+(multi?' · '+site:''),a:money(a),t}));
+    const opt2=(arr,sel)=>arr.map(l=>({l,bg:sel.includes(l)?'var(--secondary)':'var(--surface)',fg:sel.includes(l)?'var(--on-secondary)':'var(--text)',bd:sel.includes(l)?'var(--secondary)':'var(--border-input)'}));
+    const target=[...(multi?[{h:'Site',opts:opt2(['Tous les sites','Lac 2','La Marsa','Centre-ville'],['Lac 2'])}]:[]),{h:'Formule',opts:opt2(['Toutes','Mensuel','Mensuel Multi','Premium'],['Mensuel Multi'])},{h:'Segment',opts:opt2(['Tous','Expire sous 7 j','Inactifs 30 j','Nouveaux'],['Expire sous 7 j'])}];
+    const annHist=[{t:'Votre abonnement expire bientôt',m:'Planifiée · mar. 6 oct. 10:00'+(multi?' · Lac 2':''),st:'Planifiée',tone:'info',icon:'schedule_send',n:'14',o:'—'},{t:'Nouveau cours : Stretching',m:'Envoyée · 1er oct.'+(multi?' · Centre-ville':''),st:'Envoyée',tone:'success',icon:'done_all',n:'254',o:'41 %'},{t:'Fermeture exceptionnelle le 15/10',m:'Envoyée · 28 sept. · '+(multi?'tous les sites':'tous les adhérents'),st:'Envoyée',tone:'success',icon:'done_all',n:multi?'1 284':'612',o:'63 %'},{t:'Défi d’octobre : 20 séances',m:'Échec partiel · 27 sept.',st:'38 échecs',tone:'warning',icon:'error',n:'612',o:'35 %'}];
+    const reports=[['Spam / publicité','danger','Publication','il y a 2 h','3','Vente de compléments protéinés à prix cassés, contactez-moi en privé…','Walid Bouazizi',true],['Propos insultants','danger','Commentaire','il y a 5 h','2','« Franchement t’as rien à faire au cours de boxe… »','Hedi Karoui'],['Photo inappropriée','warning','Publication','hier','1','Photo de vestiaire avec d’autres adhérents en arrière-plan','Sami Ayari'],['Hors sujet','secondary','Message','hier','1','Quelqu’un a trouvé une gourde bleue au Studio 2 ?','Rim Kefi']].map(([motif,tone,k,t,c,x,a,sel])=>({motif,tone,k,t,c,x,a,bd:sel?'2px solid var(--primary)':'1px solid var(--border)'}));
+    const profRows=[{icon:'badge',l:'Rôle',v:'Admin réseau',tone:'secondary'},...(multi?[{icon:'hub',l:'Portée',v:'3 sites',tone:'secondary'}]:[]),{icon:'verified_user',l:'Double authentification',v:'Activée',tone:'success'},{icon:'devices',l:'Sessions actives',v:'2 appareils',tone:'secondary'},{icon:'dark_mode',l:'Thème',v:'Auto',tone:'secondary'}];
+    return {moreRows,scanSitesPay,modes,payFilters,payHist,payAmount:money(120),revDay:money(1240),target,targetLine:multi?' · Lac 2':'',annHist,reports,profRows,scopeLine:multi?'Admin réseau · Lac 2, La Marsa, Centre-ville':'Admin · '+brand,scanSites,scanCourses,courseStep:multi?'2 · Cours du jour à La Marsa':'Cours du jour',camLabel:multi?'La Marsa · Cycling 10:00':'Pilates · 09:15',scanRes,members,memberTotal:multi?'1 284 · 3 sites':'612',activeFilters:['Expire bientôt',...(multi?['Tous les sites']:[])],resultCount:'14 résultats · triés par échéance',filterGroups,ficheTabs,payments,suspendReasons,alertsFull,siteChips,days,planDay,week,seance,avatars,waitlist,cancelReasons,cancelImpact,coaches,siteLine:multi?' · Lac 2':'',rootStyle,darkSt,brand,mono,multiSite:multi,singleSite:!multi,dashV,sitePick,weekL:['L','M','M','J','V','S','D'],money};
+  }
+}
+</script>
+</body>
+</html>

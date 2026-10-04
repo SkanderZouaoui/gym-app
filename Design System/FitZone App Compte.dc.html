@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=IBM+Plex+Sans+Arabic:wght@400;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+:root{--bg:#F7F7F9;--surface:#FFFFFF;--surface-2:#F1F2F4;--text:#111827;--muted:#5B6270;--border:#E3E4E7;--border-strong:#C5C8CE;--border-input:#8A909B;--primary:#FF5A1F;--primary-hover:#E6511C;--primary-pressed:#CC4819;--primary-soft:#FFEEE9;--primary-border:#FFC6B1;--primary-ink:#B83A0C;--primary-contrast:#FFFFFF;--secondary:#14213D;--secondary-soft:#E8E9EC;--secondary-border:#B9BCC5;--secondary-ink:#14213D;--on-secondary:#FFFFFF;--accent:#FCA311;--accent-soft:#FFF6E7;--accent-border:#FEDCA6;--accent-ink:#8A5600;--on-accent:#111111;--success:#16A34A;--success-soft:#E8F6ED;--success-ink:#11793A;--success-border:#B1E0C2;--warning:#F59E0B;--warning-soft:#FEF5E7;--warning-ink:#8A5600;--warning-border:#FCDDA6;--danger:#DC2626;--danger-soft:#FCE9E9;--danger-ink:#B91C1C;--danger-border:#F3B7B7;--info:#2563EB;--info-soft:#E9EFFD;--info-ink:#1D4ED8;--info-border:#B6CBF8;--focus:#E04E18;--overlay:rgba(14,17,23,.45);--knob:#FFFFFF;--r:16px;--r-xs:5px;--r-sm:9px;--r-lg:22px;--pad:16px;--gap:16px;--ctl:48px;--f-head:'Sora',system-ui,sans-serif;--f-body:'DM Sans',system-ui,sans-serif;--f-mono:'JetBrains Mono',ui-monospace,monospace;--sh1:0 1px 3px rgba(17,24,39,.07);--sh2:0 6px 16px rgba(17,24,39,.08);--sh3:0 20px 48px rgba(17,24,39,.18)}
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button,textarea{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fzSpin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:64px 72px 140px;display:flex;flex-direction:column;gap:96px">
+
+<div style="max-width:880px">
+  <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Rôle adhérent · Engagement &amp; compte</div>
+  <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:64px;line-height:1;letter-spacing:-.035em;font-weight:800">Engagement &amp; compte</h1>
+  <p style="margin:16px 0 0;font-size:18px;color:var(--muted);text-wrap:pretty">Fidélité, communauté, boutique (retrait et paiement sur place), profil, paramètres, notifications et infos pratiques. Thème clair et sombre ; les pastilles changent d’état.</p>
+</div>
+
+<section data-screen-label="I Fidélité" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">I</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Fidélité</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">I1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Points &amp; badges</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.pts }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Fidélité</h1></div>
+                <sc-if value="{{ PT.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px;animation:fzPulse 1.4s ease-in-out infinite"><div style="height:160px;border-radius:var(--r-lg);background:var(--surface-2)"></div><div style="height:14px;width:30%;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"><sc-for list="{{ skel8 }}" as="k" hint-placeholder-count="8"><div style="aspect-ratio:1;border-radius:var(--r);background:var(--surface-2)"></div></sc-for></div></div></sc-if>
+                <sc-if value="{{ PT.error }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:64px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">cloud_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Solde indisponible</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Vos points sont en sécurité. Réessayez dans un instant.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ PT.normal }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85">Mon solde</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent);color:var(--on-accent)"><span style="font-family:'Material Symbols Rounded';font-size:15px;font-variation-settings:'FILL' 1">workspace_premium</span>Niveau Or</span></div>
+                    <div style="font-family:var(--f-head);font-weight:800;font-size:44px;letter-spacing:-.04em;line-height:1">2 340 <span style="font-size:17px;font-weight:600;opacity:.85">pts</span></div>
+                    <div style="height:8px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden"><div style="width:78%;height:100%;border-radius:99px;background:var(--accent)"></div></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span style="opacity:.85">660 pts avant Platine</span><button style="height:40px;padding:0 14px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;cursor:pointer" style-focus="outline:2px solid var(--on-secondary);outline-offset:2px">Utiliser mes points</button></div>
+                  </div>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                    <sc-for list="{{ ptsHist }}" as="h" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;padding:0 14px;height:48px;border-bottom:1px solid var(--border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">{{ h.icon }}</span><span style="flex:1">{{ h.l }}</span><span style="font-weight:700;color:var(--{{ h.tone }}-ink)">{{ h.v }}</span></div></sc-for>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px"><h2 style="margin:0;font-family:var(--f-head);font-size:19px;font-weight:700;letter-spacing:-.02em">Badges</h2><span style="font-size:13px;color:var(--muted)">4 sur 8</span></div>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+                    <sc-for list="{{ badges }}" as="b" hint-placeholder-count="8">
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center">
+                        <div style="position:relative;width:64px;height:64px;border-radius:999px;display:grid;place-items:center;background:{{ b.bg }};color:{{ b.fg }};border:2px {{ b.bs }} {{ b.bd }}"><span style="font-family:'Material Symbols Rounded';font-size:30px;font-variation-settings:'FILL' {{ b.fill }}">{{ b.icon }}</span><sc-if value="{{ b.locked }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:999px;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:14px;color:var(--muted)">lock</span></sc-if></div>
+                        <span style="font-size:11.5px;font-weight:700;line-height:1.2">{{ b.n }}</span>
+                        <span style="font-size:11px;color:var(--muted)">{{ b.sub }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">I2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Défis &amp; classement</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.chal }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ chalNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Défis</h1></div>
+                <div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><sc-for list="{{ chalTabs }}" as="s" hint-placeholder-count="2"><button role="tab" onClick="{{ s.on }}" style="flex:1;height:40px;border:0;border-radius:var(--r-xs);font-weight:700;font-size:13.5px;cursor:pointer;background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.sh }}">{{ s.l }}</button></sc-for></div>
+                <sc-if value="{{ CH.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · classement du jour à 09:12</span></div></sc-if>
+                <sc-if value="{{ CH.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">flag</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucun défi en cours</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Les défis de novembre ouvrent le 1er. Rejoignez celui de la salle pour gagner des points.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Voir les défis à venir</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ CH.joined }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--success-soft);color:var(--success-ink);border:1px solid var(--success-border);font-size:13px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">check_circle</span>Vous participez à « 3 cours de yoga »</div></sc-if>
+                <sc-if value="{{ showChal }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ challenges }}" as="d" hint-placeholder-count="4">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;gap:12px;align-items:center">
+                        <div style="width:44px;height:44px;flex:none;border-radius:999px;display:grid;place-items:center;background:var(--{{ d.tone }}-soft);color:var(--{{ d.tone }}-ink)"><span style="font-family:'Material Symbols Rounded';font-size:24px">{{ d.icon }}</span></div>
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ d.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ d.reward }} · {{ d.end }}</div></div>
+                        <sc-if value="{{ d.joined }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ d.prog }}</span></sc-if>
+                        <sc-if value="{{ d.open }}" hint-placeholder-val="{{ false }}"><button style="height:40px;padding:0 14px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13px;cursor:pointer">Rejoindre</button></sc-if>
+                      </div>
+                      <sc-if value="{{ d.joined }}" hint-placeholder-val="{{ true }}"><div style="height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;width:{{ d.pct }}%;background:var(--{{ d.tone }})"></div></div></sc-if>
+                    </div>
+                  </sc-for>
+                </sc-if>
+                <sc-if value="{{ showRank }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12.5px;color:var(--muted);text-align:center">Points gagnés en octobre · {{ rankScope }}</div>
+                  <div style="display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:8px;align-items:end">
+                    <sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                        <div style="width:52px;height:52px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;border:3px solid var(--{{ p.tone }})">{{ p.ini }}</div>
+                        <span style="font-size:12.5px;font-weight:700;text-align:center;line-height:1.2">{{ p.n }}</span>
+                        <div style="width:100%;border-radius:var(--r-sm) var(--r-sm) 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:{{ p.h }}px;background:var(--{{ p.tone }});color:var(--on-{{ p.tone }})"><span style="font-family:var(--f-head);font-weight:800;font-size:22px">{{ p.rank }}</span><span style="font-size:11.5px;font-weight:700">{{ p.pts }}</span></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                    <sc-for list="{{ rankRows }}" as="r" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:0 14px;height:52px;border-bottom:1px solid var(--border);background:{{ r.bg }}"><span style="width:24px;font-family:var(--f-head);font-weight:800;color:var(--muted)">{{ r.rank }}</span><div style="width:32px;height:32px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-size:12px;font-weight:700">{{ r.ini }}</div><span style="flex:1;font-weight:{{ r.fw }};font-size:14px">{{ r.n }}</span><span style="font-weight:700;font-size:13.5px">{{ r.pts }}</span></div></sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">I3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Parrainage</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.ref }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Parrainage</h1></div>
+                <div style="background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:12px">
+                  <div style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em;line-height:1.2;text-wrap:balance">Invitez un ami : 500 pts pour vous, 1re semaine offerte pour lui</div>
+                  <div style="font-size:13px;color:var(--text)">Les points sont crédités dès son premier règlement à l’accueil.</div>
+                  <div style="display:flex;align-items:center;gap:8px;height:56px;padding:0 6px 0 16px;border-radius:var(--r-sm);background:var(--surface);border:1.5px dashed var(--accent-border)"><span style="flex:1;font-family:var(--f-mono);font-weight:500;font-size:19px;letter-spacing:.06em;text-decoration:{{ refCodeTd }};color:{{ refCodeFg }}">{{ refCode }}</span><button aria-label="Copier le code" style="height:44px;padding:0 12px;border:0;border-radius:var(--r-xs);background:var(--surface-2);font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:4px"><span style="font-family:'Material Symbols Rounded';font-size:18px">{{ refCopyIcon }}</span>{{ refCopy }}</button></div>
+                  <button disabled="{{ RF.refus }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;background:{{ refBtnBg }};color:{{ refBtnFg }};cursor:{{ refCur }}" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">ios_share</span>Partager mon lien</button>
+                </div>
+                <sc-if value="{{ RF.refus }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">block</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Limite atteinte : 10 filleuls cette année</div><div>Votre code est suspendu jusqu’au 1er janvier. Vos points déjà gagnés restent acquis.</div></div></div></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ refStats }}" as="s" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:20px">{{ s.v }}</div><div style="font-size:12px;color:var(--muted)">{{ s.l }}</div></div></sc-for></div>
+                <h2 style="margin:4px 0 0;font-family:var(--f-head);font-size:19px;font-weight:700;letter-spacing:-.02em">Mes filleuls</h2>
+                <sc-if value="{{ RF.empty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:28px 16px;border:1.5px dashed var(--border-strong);border-radius:var(--r)"><span style="font-family:'Material Symbols Rounded';font-size:32px;color:var(--muted)">group_add</span><div style="font-weight:700">Aucun filleul pour l’instant</div><div style="font-size:13px;color:var(--muted)">Partagez votre code : vos invitations apparaîtront ici.</div></div></sc-if>
+                <sc-if value="{{ refHasList }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                    <sc-for list="{{ filleuls }}" as="f" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border)"><div style="width:36px;height:36px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-size:12.5px;font-weight:700">{{ f.ini }}</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ f.n }}</div><div style="font-size:12px;color:var(--muted)">{{ f.st }}</div></div><span style="font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ f.tone }}-soft);color:var(--{{ f.tone }}-ink)">{{ f.pts }}</span></div></sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ RF.copied }}" hint-placeholder-val="{{ false }}"><div role="status" style="position:absolute;top:56px;left:16px;right:16px;z-index:6;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span>Code copié dans le presse-papiers</div></sc-if>
+              <dc-import name="FZ TabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="J Communauté" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">J</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Communauté</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">J1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Fil d’actualité</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.feed }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ feedNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Communauté</h1><button aria-label="Messages" style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">chat_bubble</span><span style="position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--danger);color:var(--on-danger);font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)">7</span></button></div>
+                <sc-if value="{{ FD.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · publications enregistrées, mentions « J’aime » envoyées plus tard</span></div></sc-if>
+                <sc-if value="{{ FD.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);animation:fzPulse 1.4s ease-in-out infinite"><div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:999px;background:var(--surface-2)"></div><div style="flex:1;height:14px;border-radius:var(--r-xs);background:var(--surface-2)"></div></div><div style="height:12px;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="height:12px;width:70%;border-radius:var(--r-xs);background:var(--surface-2)"></div></div></sc-for></sc-if>
+                <sc-if value="{{ FD.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">forum</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Le fil est calme</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Partagez une séance, un record ou une question à la communauté.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Publier</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ feedList }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ posts }}" as="p" hint-placeholder-count="3">
+                    <div style="background:var(--surface);border:1px solid {{ p.bd }};border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+                      <sc-if value="{{ p.pinned }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:4px;align-items:center;font-size:11.5px;font-weight:700;color:var(--primary-ink);text-transform:uppercase;letter-spacing:.05em"><span style="font-family:'Material Symbols Rounded';font-size:16px">push_pin</span>Épinglé par la salle</div></sc-if>
+                      <div style="display:flex;gap:10px;align-items:center">
+                        <div style="width:40px;height:40px;flex:none;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--{{ p.tone }});color:var(--on-{{ p.tone }})">{{ p.ini }}</div>
+                        <div style="flex:1;min-width:0"><div style="display:flex;gap:6px;align-items:center"><span style="font-weight:700;font-size:14.5px">{{ p.a }}</span><sc-if value="{{ p.coach }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:999px;background:var(--info-soft);color:var(--info-ink)">COACH</span></sc-if></div><div style="font-size:12px;color:var(--muted)">{{ p.t }}</div></div>
+                        <button aria-label="Options" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:22px">more_horiz</span></button>
+                      </div>
+                      <p style="margin:0;font-size:14.5px;text-wrap:pretty">{{ p.txt }}</p>
+                      <sc-if value="{{ p.img }}" hint-placeholder-val="{{ false }}"><div style="aspect-ratio:4/3;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:11.5px;color:var(--muted)">photo · publication</span></div></sc-if>
+                      <div style="display:flex;gap:4px;margin:0 -8px -6px">
+                        <button style="height:40px;padding:0 10px;border:0;border-radius:var(--r-sm);background:transparent;display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;cursor:pointer;color:{{ p.likeFg }}"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' {{ p.likeFill }}">favorite</span>{{ p.likes }}</button>
+                        <button style="height:40px;padding:0 10px;border:0;border-radius:var(--r-sm);background:transparent;display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px;cursor:pointer;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:20px">mode_comment</span>{{ p.com }}</button>
+                      </div>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <button aria-label="Créer une publication" style="position:absolute;right:20px;bottom:108px;z-index:4;width:56px;height:56px;border-radius:var(--r);border:0;background:var(--primary);color:var(--primary-contrast);box-shadow:var(--sh3);display:grid;place-items:center;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:28px">edit</span></button>
+              <dc-import name="FZ TabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">J2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Publication, commentaires &amp; signalement</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.post }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 110px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:22px;letter-spacing:-.02em;font-weight:800">Publication</h1></div>
+                <div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:999px;background:var(--info);color:var(--on-info);display:grid;place-items:center;font-weight:700;font-size:13px">KM</div><div><div style="font-weight:700;font-size:14.5px">Karim Mansour</div><div style="font-size:12px;color:var(--muted)">Il y a 3 h · Lac 2</div></div></div>
+                <p style="margin:0;font-size:15px">Nouveau record au squat : 120 kg. Merci Yassine pour le programme !</p>
+                <div style="aspect-ratio:16/10;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:11.5px;color:var(--muted)">photo · publication</span></div>
+                <div style="display:flex;gap:14px;font-size:13px;font-weight:700;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="display:flex;gap:4px;align-items:center;color:var(--danger-ink)"><span style="font-family:'Material Symbols Rounded';font-size:18px;font-variation-settings:'FILL' 1">favorite</span>41</span><span>8 commentaires</span></div>
+                <sc-for list="{{ comments }}" as="c" hint-placeholder-count="3">
+                  <div style="display:flex;gap:10px;opacity:{{ c.op }}">
+                    <div style="width:32px;height:32px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-size:11.5px;font-weight:700">{{ c.ini }}</div>
+                    <div style="flex:1;min-width:0"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px"><div style="display:flex;gap:6px;align-items:center"><span style="font-weight:700;font-size:13px">{{ c.n }}</span><sc-if value="{{ c.coach }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--info-soft);color:var(--info-ink)">COACH</span></sc-if></div><div style="font-size:14px">{{ c.t }}</div></div><div style="display:flex;gap:12px;font-size:12px;color:var(--muted);font-weight:600;padding:4px 4px 0"><span>{{ c.h }}</span><span>Répondre</span><span style="color:{{ c.errFg }}">{{ c.extra }}</span></div></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:10px 16px 30px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;z-index:3">
+                <input aria-label="Écrire un commentaire" placeholder="Écrire un commentaire…" style="flex:1;min-width:0;height:44px;border-radius:999px;border:1.5px solid var(--border-input);background:var(--surface-2);padding:0 16px;font-size:14.5px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)">
+                <button aria-label="Envoyer" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">send</span></button>
+              </div>
+              <sc-if value="{{ PS.reported }}" hint-placeholder-val="{{ false }}"><div role="status" style="position:absolute;top:56px;left:16px;right:16px;z-index:6;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span><span>Merci, signalement envoyé. L’équipe de la salle examine le contenu sous 24 h.</span></div></sc-if>
+              <sc-if value="{{ PS.report }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Signaler" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:12px">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Signaler ce commentaire</h2>
+                    <p style="margin:-4px 0 0;font-size:13.5px;color:var(--muted)">Votre signalement est anonyme pour l’auteur.</p>
+                    <div role="radiogroup" style="display:flex;flex-direction:column">
+                      <sc-for list="{{ reasons }}" as="r" hint-placeholder-count="5"><button role="radio" aria-checked="{{ r.sel }}" onClick="{{ r.on }}" style="display:flex;align-items:center;gap:12px;min-height:48px;border:0;border-bottom:1px solid var(--border);background:transparent;text-align:start;font-size:14.5px;cursor:pointer"><span style="width:22px;height:22px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ r.bd }}"><span style="width:10px;height:10px;border-radius:99px;background:{{ r.dot }}"></span></span>{{ r.l }}</button></sc-for>
+                    </div>
+                    <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--danger);color:var(--on-danger);font-weight:700;font-size:15px;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px">Envoyer le signalement</button>
+                    <label style="display:flex;align-items:center;gap:10px;font-size:13.5px"><span style="width:22px;height:22px;border-radius:var(--r-xs);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:18px">check</span>Masquer aussi les contenus de cet auteur</label>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">J3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Créer une publication</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.create }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 12px;min-height:52px"><button style="height:44px;padding:0 10px;border:0;background:transparent;font-weight:700;font-size:15px;cursor:pointer">Annuler</button><span style="font-weight:700;font-size:15.5px">Nouvelle publication</span><button style="height:40px;padding:0 14px;border:0;border-radius:var(--r-sm);font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;background:{{ crBtnBg }};color:{{ crBtnFg }};cursor:pointer"><sc-if value="{{ CR.sending }}" hint-placeholder-val="{{ false }}"><span style="font-family:'Material Symbols Rounded';font-size:18px;animation:fzSpin 1s linear infinite">progress_activity</span></sc-if>{{ crBtn }}</button></div>
+              <div style="padding:8px 20px;display:flex;flex-direction:column;gap:14px">
+                <sc-if value="{{ CR.refus }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">gpp_bad</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Publication refusée</div><div>Les liens vers des boutiques externes ne sont pas autorisés (règlement, art. 7). Retirez le lien pour publier.</div></div></div></sc-if>
+                <sc-if value="{{ CR.success }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--success-soft);border:1px solid var(--success-border);color:var(--success-ink);font-weight:700;font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">check_circle</span>Publié dans la communauté {{ siteName }}</div></sc-if>
+                <div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:999px;background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center;font-weight:700;font-size:13px">SB</div><div><div style="font-weight:700;font-size:14.5px">Sarra Ben Ali</div><span style="display:inline-flex;align-items:center;gap:2px;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid var(--border-strong)"><span style="font-family:'Material Symbols Rounded';font-size:14px">group</span>Membres {{ siteName }}<span style="font-family:'Material Symbols Rounded';font-size:16px">expand_more</span></span></div></div>
+                <div style="min-height:140px;border-radius:var(--r-sm);border:1.5px solid {{ crBd }};background:var(--surface);padding:12px 14px;font-size:16px;line-height:1.45">{{ crText }}<span style="display:inline-block;width:2px;height:20px;background:var(--primary);vertical-align:middle;margin-left:1px;animation:fzPulse 1s steps(1) infinite"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)"><span>Restez bienveillant : règlement de la communauté</span><span>{{ crCount }}/500</span></div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                  <div style="position:relative;aspect-ratio:1;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 8px,var(--surface) 8px 16px)"><button aria-label="Retirer la photo" style="position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:999px;border:0;background:var(--text);color:var(--bg);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:16px">close</span></button></div>
+                  <button style="aspect-ratio:1;border-radius:var(--r-sm);border:1.5px dashed var(--border-strong);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:26px">add_photo_alternate</span>Ajouter</button>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">fitness_center</span>Joindre une séance</span><span style="height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--border-strong);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">emoji_events</span>Joindre un badge</span></div>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">J4</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Messagerie</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.msgs }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;flex:1;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Messages</h1><button aria-label="Nouveau message" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">edit_square</span></button></div>
+                <div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Rechercher une conversation" placeholder="Rechercher" style="width:100%;height:44px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);padding:0 14px 0 44px;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></div>
+                <sc-if value="{{ MS.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel5 }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center;animation:fzPulse 1.4s ease-in-out infinite"><div style="width:52px;height:52px;border-radius:999px;background:var(--surface-2)"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div style="height:14px;width:50%;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="height:12px;width:80%;border-radius:var(--r-xs);background:var(--surface-2)"></div></div></div></sc-for></sc-if>
+                <sc-if value="{{ MS.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">chat</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune conversation</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Écrivez à votre coach ou à l’accueil de la salle. Réponse en général dans la journée.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Nouveau message</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ MS.normal }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ convs }}" as="c" hint-placeholder-count="4">
+                    <div style="display:flex;gap:12px;align-items:center;min-height:68px;border-bottom:1px solid var(--border)">
+                      <div style="width:52px;height:52px;flex:none;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:15px;background:var(--{{ c.tone }});color:var(--on-{{ c.tone }})"><span style="font-family:'Material Symbols Rounded';font-size:24px;display:{{ c.iconD }}">{{ c.icon }}</span><span style="display:{{ c.iniD }}">{{ c.ini }}</span></div>
+                      <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px"><span style="font-weight:700;font-size:15px">{{ c.n }}</span><span style="font-size:12px;color:{{ c.timeFg }};font-weight:{{ c.fw }}">{{ c.t }}</span></div><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="font-weight:600">{{ c.role }}</span> · {{ c.last }}</span><sc-if value="{{ c.unread }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--primary);color:var(--primary-contrast);font-size:11.5px;font-weight:700;display:grid;place-items:center">{{ c.u }}</span></sc-if></div></div>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 0 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">J5</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Conversation</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.conv }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body);display:flex;flex-direction:column">
+              <dc-import name="FZ StatusBar" net="{{ convNet }}" hint-size="100%,46px"></dc-import>
+              <div style="display:flex;align-items:center;gap:10px;padding:4px 12px 10px;border-bottom:1px solid var(--border);background:var(--surface)"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><div style="width:40px;height:40px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:13px">YA</div><div style="flex:1"><div style="font-weight:700;font-size:15px">Yassine</div><div style="font-size:12px;color:var(--muted)">Coach · répond en général en 2 h</div></div></div>
+              <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+                <div style="align-self:center;font-size:11.5px;font-weight:700;color:var(--muted);padding:4px 10px;border-radius:999px;background:var(--surface-2)">Aujourd’hui</div>
+                <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="5">
+                  <div style="display:flex;flex-direction:column;max-width:80%;align-self:{{ m.align }};align-items:{{ m.align }};gap:2px">
+                    <div style="padding:10px 14px;font-size:14.5px;line-height:1.4;background:{{ m.bg }};color:{{ m.fg }};border-radius:{{ m.rad }};border:1px solid {{ m.bd }};opacity:{{ m.op }}">{{ m.t }}</div>
+                    <span style="display:flex;gap:4px;align-items:center;font-size:11.5px;color:{{ m.metaFg }};font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:14px">{{ m.icon }}</span>{{ m.meta }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ CV.blocked }}" hint-placeholder-val="{{ false }}"><div role="alert" style="margin:0 16px 8px;display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--danger-ink)">block</span><span><strong style="color:var(--danger-ink)">Envoi impossible.</strong> Les photos ne sont pas autorisées dans les messages aux coachs. Utilisez les photos de progression privées.</span></div></sc-if>
+              <sc-if value="{{ CV.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="margin:0 16px 8px;display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);font-size:12.5px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">wifi_off</span>Hors ligne · envoi automatique au retour du réseau</div></sc-if>
+              <div style="padding:10px 12px 30px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+                <button aria-label="Joindre" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:24px">add_circle</span></button>
+                <input aria-label="Message" placeholder="Message" style="flex:1;min-width:0;height:44px;border-radius:999px;border:1.5px solid var(--border-input);background:var(--surface-2);padding:0 16px;font-size:14.5px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)">
+                <button aria-label="Envoyer" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">send</span></button>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="K Boutique" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">K</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Boutique · retrait &amp; paiement sur place</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">K1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Catalogue</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.shop }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Boutique</h1><button aria-label="Mes réservations boutique" style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">shopping_bag</span><span style="position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--primary);color:var(--primary-contrast);font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)">2</span></button></div>
+                <div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--info-soft);border:1px solid var(--info-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">storefront</span><span>Réservez dans l’app, <strong>payez et retirez à l’accueil</strong> (espèces, carte ou chèque).</span></div>
+                <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ cats }}" as="m" hint-placeholder-count="4"><button onClick="{{ m.on }}" style="height:36px;flex:none;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.l }}</button></sc-for></div>
+                <sc-if value="{{ SH.loading }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ skel4 }}" as="k" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;gap:8px;animation:fzPulse 1.4s ease-in-out infinite"><div style="aspect-ratio:1;border-radius:var(--r);background:var(--surface-2)"></div><div style="height:14px;width:80%;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="height:14px;width:40%;border-radius:var(--r-xs);background:var(--surface-2)"></div></div></sc-for></div></sc-if>
+                <sc-if value="{{ SH.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">inventory_2</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Rien dans cette catégorie</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Aucun produit Nutrition disponible à {{ siteName }} pour le moment.</p>
+                    <button style="height:44px;padding:0 18px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">Voir tout le catalogue</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ SH.error }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">cloud_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Catalogue indisponible</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Impossible de charger les produits et les stocks.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ SH.normal }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <sc-for list="{{ products }}" as="p" hint-placeholder-count="6">
+                      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column">
+                        <div style="position:relative;aspect-ratio:1;background:repeating-linear-gradient(135deg,var(--surface-2) 0 8px,var(--surface) 8px 16px);display:grid;place-items:center;opacity:{{ p.op }}"><span style="font-family:'Material Symbols Rounded';font-size:34px;color:var(--muted)">{{ p.icon }}</span><sc-if value="{{ p.hasTag }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--{{ p.tone }}-soft);color:var(--{{ p.tone }}-ink)">{{ p.tag }}</span></sc-if></div>
+                        <div style="padding:10px 12px;display:flex;flex-direction:column;gap:2px"><span style="font-weight:700;font-size:13.5px;line-height:1.25">{{ p.n }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ p.price }}</span><span style="font-size:11.5px;color:var(--muted)">ou {{ p.pts }} pts</span></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">K2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Fiche produit</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.prod }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <div style="position:absolute;inset:0 0 auto 0;height:330px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);border-bottom:1px solid var(--border);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">photo · t-shirt technique</span></div>
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:relative;z-index:2;display:flex;justify-content:space-between;padding:4px 16px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--surface);box-shadow:var(--sh2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_back</span></button><button aria-label="Favori" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--surface);box-shadow:var(--sh2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">favorite</span></button></div>
+              <div style="position:absolute;top:300px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--bg);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 20px 150px;display:flex;flex-direction:column;gap:14px">
+                <div><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Textile</div><h1 style="margin:2px 0 0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">T-shirt technique {{ brand }}</h1><div style="display:flex;gap:10px;align-items:baseline"><span style="font-family:var(--f-head);font-weight:800;font-size:22px">{{ tshirtPrice }}</span><span style="font-size:13px;color:var(--muted)">ou 3 500 pts</span></div></div>
+                <sc-if value="{{ PD.refus }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">block</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Réservation refusée</div><div>Vous avez déjà 2 réservations non retirées (maximum 2). Retirez-les à l’accueil pour en faire une nouvelle.</div></div></div></sc-if>
+                <div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px"><span>Taille</span><a href="#">Guide des tailles</a></div>
+                  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px"><sc-for list="{{ sizes }}" as="s" hint-placeholder-count="5"><button onClick="{{ s.on }}" disabled="{{ s.dis }}" aria-label="{{ s.aria }}" style="height:48px;border-radius:var(--r-sm);font-weight:700;font-size:14px;background:{{ s.bg }};color:{{ s.fg }};border:1.5px solid {{ s.bd }};text-decoration:{{ s.td }};cursor:{{ s.cur }}">{{ s.l }}</button></sc-for></div>
+                  <div style="font-size:12.5px;font-weight:700;margin-top:8px;color:var(--{{ stockTone }}-ink)">{{ stockLabel }}</div>
+                </div>
+                <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><div><div style="font-size:13px;font-weight:700;margin-bottom:8px">Retrait à</div><div style="display:flex;align-items:center;gap:10px;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);padding:0 12px;background:var(--surface)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--primary-ink)">location_on</span><span style="flex:1;font-weight:600">Accueil Lac 2</span><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">expand_more</span></div></div></sc-if>
+                <p style="margin:0;font-size:14px;color:var(--muted);text-wrap:pretty">Tissu respirant à séchage rapide, coupe ajustée. Logo de votre salle brodé.</p>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;z-index:3">
+                <sc-if value="{{ PD.dispo }}" hint-placeholder-val="{{ true }}"><button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Réserver · payer au retrait</button></sc-if>
+                <sc-if value="{{ PD.rupture }}" hint-placeholder-val="{{ false }}"><button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">notifications</span>M’alerter du retour en stock</button></sc-if>
+                <sc-if value="{{ PD.refus }}" hint-placeholder-val="{{ false }}"><button disabled="{{ true }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--surface-2);color:var(--muted);font-weight:700;font-size:15px;cursor:not-allowed">Réservation impossible</button></sc-if>
+                <span style="font-size:12px;color:var(--muted);text-align:center">Aucun paiement dans l’app · article gardé 7 jours</span>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">K3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Réservation produit</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.sres }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ sresNet }}" hint-size="100%,46px"></dc-import>
+              <sc-if value="{{ SR.success }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:46px;left:0;right:0;bottom:0;padding:40px 24px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px">
+                  <div style="width:104px;height:104px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:54px;font-variation-settings:'FILL' 1">shopping_bag</span></div>
+                  <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Article réservé</h1><p style="margin:6px 0 0;color:var(--muted)">Présentez ce code à l’accueil de Lac 2 avant le 10/10.</p></div>
+                  <div style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Code de retrait</span><span style="font-family:var(--f-mono);font-size:30px;font-weight:500;letter-spacing:.12em">B-4821</span><span style="font-size:13px;color:var(--muted)">T-shirt technique · M · ×1</span></div>
+                  <div style="width:100%;display:flex;justify-content:space-between;padding:12px 14px;border-radius:var(--r-sm);background:var(--surface-2);font-size:14px"><span>À régler sur place</span><strong>{{ tshirtPrice }}</strong></div>
+                  <div style="flex:1"></div>
+                  <button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer">Mes réservations</button>
+                  <button style="width:100%;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--primary-ink);cursor:pointer">Continuer mes achats</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ srSheet }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;top:46px;left:20px;right:20px;display:flex;flex-direction:column;gap:12px;opacity:.5"><div style="height:250px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"></div><div style="height:90px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border)"></div></div>
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Confirmer la réservation" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:14px">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Confirmer la réservation</h2>
+                    <sc-if value="{{ SR.offline }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Connexion requise pour vérifier le stock.</div></sc-if>
+                    <div style="display:flex;gap:12px;align-items:center"><div style="width:64px;height:64px;flex:none;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px)"></div><div style="flex:1"><div style="font-weight:700">T-shirt technique {{ brand }}</div><div style="font-size:13px;color:var(--muted)">Taille M</div></div>
+                      <div style="display:flex;align-items:center;border:1.5px solid var(--border-input);border-radius:var(--r-sm)"><button aria-label="Moins" style="width:40px;height:44px;border:0;background:transparent;cursor:pointer;font-family:'Material Symbols Rounded';font-size:20px">remove</button><span style="width:24px;text-align:center;font-weight:700">1</span><button aria-label="Plus" style="width:40px;height:44px;border:0;background:transparent;cursor:pointer;font-family:'Material Symbols Rounded';font-size:20px">add</button></div></div>
+                    <div style="background:var(--surface-2);border-radius:var(--r);overflow:hidden">
+                      <div style="display:flex;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">location_on</span><span style="flex:1;font-size:13px;color:var(--muted)">Retrait</span><span style="font-weight:700;font-size:14px">Accueil Lac 2</span></div>
+                      <div style="display:flex;gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">event</span><span style="flex:1;font-size:13px;color:var(--muted)">Gardé jusqu’au</span><span style="font-weight:700;font-size:14px">10/10</span></div>
+                      <div style="display:flex;gap:12px;align-items:center;padding:11px 14px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">payments</span><span style="flex:1;font-size:13px;color:var(--muted)">À régler sur place</span><span style="font-weight:800;font-size:16px">{{ tshirtPrice }}</span></div>
+                    </div>
+                    <div style="font-size:12.5px;color:var(--muted)">Espèces, carte bancaire ou chèque à l’accueil. Annulation possible à tout moment avant retrait.</div>
+                    <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);font-weight:700;font-size:15px;background:{{ srBtnBg }};color:{{ srBtnFg }};cursor:{{ srCur }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">Confirmer la réservation</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">K4</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Mes réservations boutique</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.sorders }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Mes réservations</h1></div>
+                <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><sc-for list="{{ sTabs }}" as="tb" hint-placeholder-count="2"><button role="tab" onClick="{{ tb.on }}" style="flex:1;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;cursor:pointer;color:{{ tb.fg }};border-bottom:2.5px solid {{ tb.bd }};margin-bottom:-1px">{{ tb.l }}</button></sc-for></div>
+                <sc-if value="{{ SO.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3"><div style="height:92px;border-radius:var(--r);background:var(--surface-2);animation:fzPulse 1.4s ease-in-out infinite"></div></sc-for></sc-if>
+                <sc-if value="{{ SO.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">shopping_bag</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune réservation en cours</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Réservez un article : il vous attendra 7 jours à l’accueil.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Voir la boutique</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ SO.normal }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ orders }}" as="o" hint-placeholder-count="2">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;opacity:{{ o.op }}">
+                      <div style="display:flex;gap:12px;align-items:center">
+                        <div style="width:52px;height:52px;flex:none;border-radius:var(--r-sm);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px)"></div>
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ o.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ o.det }} · {{ o.price }}</div></div>
+                        <span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ o.tone }}-soft);color:var(--{{ o.tone }}-ink)">{{ o.st }}</span>
+                      </div>
+                      <div style="font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:16px">{{ o.icon }}</span>{{ o.info }}</div>
+                      <sc-if value="{{ o.ready }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button style="height:44px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;cursor:pointer">Code B-4821</button><button style="height:44px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--danger-ink);font-weight:700;font-size:13.5px;cursor:pointer" style-hover="background:var(--danger-soft)">Annuler</button></div></sc-if>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ TabBar" active="{{ 4 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="fz-next"></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;frames&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Les deux&quot;,&quot;Clair&quot;,&quot;Sombre&quot;],&quot;default&quot;:&quot;Les deux&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;primaryContrast&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#16A34A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;warning&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F59E0B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;danger&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#DC2626&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;info&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2563EB&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;bgLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F7F7F9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#111827&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;bgDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0E1117&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#1A1F2B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F3F4F6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const ini=n=>n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const SITES=['Lac 2','La Marsa','Centre-ville'];
+
+class Component extends DCLogic {
+  state={pts:'normal',chal:'normal',chTab:0,ref:'normal',feed:'normal',post:'normal',reason:1,create:'draft',msgs:'normal',conv:'normal',shop:'normal',cat:0,prod:'dispo',size:2,sres:'confirm',sorders:'normal',sTab:0,prof:'actif',plan:'normal',edit:'form',set:'normal',tg:{c1:true,c2:true,c3:true,c4:true,c5:false,c6:false,k1:true,k2:true,k3:false},lang:0,theme:2,del:'confirm',notif:'normal',info:'normal',infoSite:0,rule:1};
+  chips(key,opts){const S=this.state;return opts.map(([v,l])=>({l,on:()=>this.setState({[key]:v}),bg:S[key]===v?'var(--secondary)':'var(--surface)',fg:S[key]===v?'var(--on-secondary)':'var(--text)',bd:S[key]===v?'var(--secondary)':'var(--border-strong)'}));}
+  flags(key,list){const o={};list.forEach(k=>o[k]=this.state[key]===k);return o;}
+  pick(sel,on){return{bg:sel?'var(--secondary)':'var(--surface)',fg:sel?'var(--on-secondary)':'var(--text)',bd:sel?'var(--secondary)':'var(--border)',on};}
+  seg(key,i,l){const S=this.state,a=S[key]===i;return{l,on:()=>this.setState({[key]:i}),bg:a?'var(--surface)':'transparent',fg:a?'var(--text)':'var(--muted)',sh:a?'var(--sh1)':'none'};}
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",'IBM Plex Sans Arabic',system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--knob':C.surfaceLight,'--focus':ensure(C.primary,bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const light=this.vars(false,C,P),dark=this.vars(true,C,P);
+    const frame=v=>({...v,width:'390px',height:'844px',flex:'none',borderRadius:'54px',padding:'10px',background:'#0B0D12',boxShadow:'var(--sh3)'});
+    const show=P.frames||'Les deux';const themes=[];
+    if(show!=='Sombre')themes.push({label:'Clair',frame:frame(light)});if(show!=='Clair')themes.push({label:'Sombre',frame:frame(dark)});
+    const rootStyle={...light,background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';const caps=brand.match(/[A-Z]/g);const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):brand.slice(0,2)).toUpperCase();
+    const multiSite=String(P.sites??'3')==='3';
+    const k=P.currency==='€'?0.3:1;const cur=P.currency==='€'?'€':'DT';
+    const money=n=>(Math.round(n*k*10)/10).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ')+' '+cur;
+    const ch={};
+    const ctx={S,ch,money,multiSite,brand,mono};
+    return {rootStyle,themes,brand,mono,multiSite,singleSite:!multiSite,siteName:SITES[0],ch,skel3:[1,2,3],skel4:[1,2,3,4],skel5:[1,2,3,4,5],skel8:[1,2,3,4,5,6,7,8],
+      ...this.partI(ctx),...this.partJ(ctx),...this.partK(ctx),...this.partL(ctx),...this.partM(ctx)};
+  }
+  partI({S,ch,multiSite}){
+    ch.pts=this.chips('pts',[['normal','Normal'],['loading','Chargement'],['error','Erreur']]);
+    ch.chal=this.chips('chal',[['normal','Normal'],['joined','Inscription (succès)'],['empty','Vide'],['offline','Hors ligne']]);
+    ch.ref=this.chips('ref',[['normal','Normal'],['copied','Code copié'],['empty','Aucun filleul'],['refus','Refus : limite']]);
+    const B=[['local_fire_department','Série 6 sem.',1,'03/10'],['fitness_center','100 séances',1,'12/09'],['wb_twilight','Lève-tôt',1,'28/08'],['group_add','Parrain',1,'02/08'],['emoji_events','Défi d’oct.',0,'14/20'],['bolt','Records ×10',0,'6/10'],['self_improvement','Zen 30',0,'11/30'],['location_city','Globe-trotter',0,'2/3 sites']];
+    const badges=B.map(([icon,n,u,sub])=>({icon,n,sub,locked:!u,fill:u?1:0,bg:u?'var(--accent)':'var(--surface-2)',fg:u?'var(--on-accent)':'var(--muted)',bd:u?'var(--accent)':'var(--border-strong)',bs:u?'solid':'dashed'}));
+    const ptsHist=[['fitness_center','Séance J1 · Poussée','+20','success'],['emoji_events','Badge Série 6 semaines','+150','success'],['group_add','Parrainage · Youssef','+500','success'],['redeem','Bon −10 % boutique','−1 000','danger']].map(([icon,l,v,tone])=>({icon,l,v,tone}));
+    const CH=this.flags('chal',['normal','joined','empty','offline']);
+    const tab=S.chTab;
+    const challenges=[['20 séances en octobre',14,20,'500 pts','fin le 31/10','calendar_month','accent',1],['3 cours de yoga',CH.joined?0:null,3,'150 pts','fin dimanche','self_improvement','info',CH.joined?1:0],['Soulever 25 t ce mois',18.4,25,'300 pts','fin le 31/10','fitness_center','primary',1],['Venir 5 matins avant 8 h',2,5,'200 pts','fin le 31/10','wb_twilight','success',1]].map(([n,v,m,reward,end,icon,tone,j])=>({n,reward,end,icon,tone,joined:!!j,open:!j,prog:j?(String(v??0).replace('.',',')+'/'+m+(n.includes(' t ')?' t':'')):'',pct:j?Math.round((v??0)/m*100):0}));
+    const R=[['Karim Mansour','3 120'],['Lina Ferchichi','2 980'],['Nour Hammami','2 760'],['Walid Bouazizi','2 610'],['Youssef Trabelsi','2 540'],['Omar Saidi','2 410'],['Sarra Ben Ali (vous)','2 340']];
+    const podium=[[1,'warning',72],[0,'accent',96],[2,'secondary',56]].map(([i,tone,h])=>({n:R[i][0].split(' ')[0],ini:ini(R[i][0]),pts:R[i][1],rank:i+1,tone,h}));
+    const rankRows=R.slice(3).map((r,i)=>{const me=r[0].includes('vous');return{rank:i+4,n:r[0],ini:ini(r[0]),pts:r[1],bg:me?'var(--primary-soft)':'transparent',fw:me?800:600};});
+    const RF=this.flags('ref',['normal','copied','empty','refus']);
+    const filleuls=[['Youssef Trabelsi','Abonné depuis le 25/09','+500 pts','success'],['Ines Gharbi','Inscrite · 1er règlement à l’accueil attendu','En attente','warning'],['Omar Saidi','Invitation envoyée le 30/09','Envoyée','secondary']].map(([n,st,pts,tone])=>({n,ini:ini(n),st,pts,tone}));
+    return {PT:this.flags('pts',['normal','loading','error']),badges,ptsHist,CH,chalNet:CH.offline?'off':'ok',chalTabs:[this.seg('chTab',0,'Défis'),this.seg('chTab',1,'Classement')],showChal:tab===0&&!CH.empty,showRank:tab===1&&!CH.empty,challenges,podium,rankRows,rankScope:multiSite?'Lac 2':'toute la salle',
+      RF,refCode:'SARRA-24',refCodeTd:RF.refus?'line-through':'none',refCodeFg:RF.refus?'var(--muted)':'var(--text)',refCopy:RF.copied?'Copié':'Copier',refCopyIcon:RF.copied?'check':'content_copy',refBtnBg:RF.refus?'var(--surface-2)':'var(--primary)',refBtnFg:RF.refus?'var(--muted)':'var(--primary-contrast)',refCur:RF.refus?'not-allowed':'pointer',
+      refStats:RF.empty?[{v:'0',l:'invités'},{v:'0',l:'abonnés'},{v:'0',l:'pts gagnés'}]:[{v:RF.refus?'10':'3',l:'invités'},{v:RF.refus?'10':'1',l:'abonnés'},{v:RF.refus?'5 000':'500',l:'pts gagnés'}],refHasList:!RF.empty,filleuls};
+  }
+  partJ({S,ch,brand,mono}){
+    ch.feed=this.chips('feed',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['offline','Hors ligne']]);
+    ch.post=this.chips('post',[['normal','Commentaires'],['error','Échec d’envoi'],['report','Signaler'],['reported','Signalé (succès)']]);
+    ch.create=this.chips('create',[['draft','Rédaction'],['sending','Envoi'],['refus','Refus modération'],['success','Publié']]);
+    ch.msgs=this.chips('msgs',[['normal','Normal'],['loading','Chargement'],['empty','Vide']]);
+    ch.conv=this.chips('conv',[['normal','Normal'],['offline','Hors ligne'],['failed','Échec'],['blocked','Refus']]);
+    const FD=this.flags('feed',['normal','loading','empty','offline']);
+    const posts=[{pinned:true,a:brand+' · Lac 2',ini:mono,tone:'primary',t:'Il y a 2 h',txt:'Fermeture exceptionnelle samedi 11/10 à partir de 14:00 pour maintenance des vestiaires. Les cours de l’après-midi sont déplacés à La Marsa.',likes:24,com:3},{a:'Karim Mansour',ini:'KM',tone:'info',t:'Il y a 3 h · Lac 2',txt:'Nouveau record au squat : 120 kg. Merci Yassine pour le programme !',img:true,likes:41,com:8,liked:true},{a:'Lina',ini:'LI',tone:'accent',coach:true,t:'Hier',txt:'Nouveau cours Mobility mardi 19:00, 30 min, tous niveaux. Pensez à votre tapis.',likes:12,com:2}].map(p=>({pinned:false,img:false,coach:false,liked:false,...p,bd:p.pinned?'var(--primary-border)':'var(--border)',likeFg:p.liked?'var(--danger-ink)':'var(--muted)',likeFill:p.liked?1:0}));
+    const PS=this.flags('post',['normal','error','report','reported']);
+    const comments=[['Nour Hammami','Bravo, énorme !','2 h'],['Yassine','Fier de toi. Prochain objectif : 125 kg.','1 h',1],['Walid Bouazizi','Tu fais combien de séries ?','35 min'],['Sarra Ben Ali','Impressionnant, bravo Karim !','à l’instant',0,1]].map(([n,t,h,coach,mine])=>({n,t,h,ini:ini(n),coach:!!coach,op:mine&&PS.error?.6:1,extra:mine&&PS.error?'Non envoyé · Réessayer':(mine?'Envoyé':'Signaler'),errFg:mine&&PS.error?'var(--danger-ink)':'var(--muted)'}));
+    const reasons=['Contenu inapproprié','Harcèlement ou propos haineux','Spam ou publicité','Fausse information','Autre'].map((l,i)=>({l,sel:S.reason===i,on:()=>this.setState({reason:i}),bd:S.reason===i?'var(--primary)':'var(--border-input)',dot:S.reason===i?'var(--primary)':'transparent'}));
+    const CR=this.flags('create',['draft','sending','refus','success']);
+    const txt=CR.refus?'Séance jambes terminée ! Mes leggings viennent de shop-sport.tn, -30 % ce week-end':'Séance jambes terminée ! 4 × 6 au squat à 60 kg, objectif 65 avant la fin du mois.';
+    const MS=this.flags('msgs',['normal','loading','empty']);
+    const convs=[['Yassine','Coach','Parfait, on garde 52,5 kg lundi.','10:24',2,'accent'],['Accueil Lac 2','Salle','Votre t-shirt est prêt à retirer.','Hier',0,'primary','storefront'],['Lina','Coach','Pense au tapis mardi !','Jeu.',0,'info'],['Groupe HIIT 18:30','Groupe · 14','Karim : qui vient samedi ?','Mer.',5,'secondary','groups']].map(([n,role,last,t,u,tone,icon])=>({n,role,last,t,u,tone,unread:u>0,icon:icon||'',iconD:icon?'block':'none',iniD:icon?'none':'block',ini:ini(n),timeFg:u?'var(--primary-ink)':'var(--muted)',fw:u?700:500}));
+    const CV=this.flags('conv',['normal','offline','failed','blocked']);
+    const last=CV.offline?{icon:'schedule',meta:'En attente d’envoi',op:.7}:(CV.failed?{icon:'error',meta:'Non envoyé · Toucher pour réessayer',op:.7,err:1}:(CV.blocked?{icon:'block',meta:'Refusé',op:.6,err:1}:{icon:'done_all',meta:'Lu 10:26',op:1}));
+    const M=[[0,'Salut Sarra, bravo pour la séance de samedi !','09:58'],[1,'Merci ! La dernière série était dure à 52,5 kg.','10:12'],[0,'Normal. On reste à 52,5 lundi, objectif 4 × 8.','10:24'],[1,CV.blocked?'[Photo] Ma posture au développé, ça va ?':'Parfait, à lundi 10:00 alors.','10:25',1]];
+    const msgs=M.map(([me,t,h,isLast])=>{const L=isLast?last:{icon:me?'done_all':'',meta:h,op:1};return{t,align:me?'flex-end':'flex-start',bg:me?'var(--primary)':'var(--surface)',fg:me?'var(--primary-contrast)':'var(--text)',bd:me?'var(--primary)':'var(--border)',rad:me?'var(--r) var(--r) var(--r-xs) var(--r)':'var(--r) var(--r) var(--r) var(--r-xs)',op:L.op,icon:L.icon,meta:isLast?L.meta:h,metaFg:L.err?'var(--danger-ink)':'var(--muted)'};});
+    return {FD,feedNet:FD.offline?'off':'ok',feedList:FD.normal||FD.offline,posts,PS,comments,reasons,
+      CR,crText:txt,crCount:txt.length,crBd:CR.refus?'var(--danger)':'var(--border-input)',crBtn:CR.sending?'Envoi…':(CR.success?'Publié':'Publier'),crBtnBg:CR.success?'var(--success-soft)':'var(--primary)',crBtnFg:CR.success?'var(--success-ink)':'var(--primary-contrast)',
+      MS,convs,CV,convNet:CV.offline?'off':'ok',msgs};
+  }
+  partK({S,ch,money,brand}){
+    ch.shop=this.chips('shop',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['error','Erreur']]);
+    ch.prod=this.chips('prod',[['dispo','Disponible'],['rupture','Rupture'],['refus','Refus : limite']]);
+    ch.sres=this.chips('sres',[['confirm','Confirmation'],['offline','Hors ligne'],['success','Succès']]);
+    ch.sorders=this.chips('sorders',[['normal','Normal'],['loading','Chargement'],['empty','Vide']]);
+    const SH=this.flags('shop',['normal','loading','empty','error']);
+    const CATS=['Tout','Textile','Nutrition','Accessoires'];
+    const cats=CATS.map((l,i)=>({l,...this.pick(S.cat===i,()=>this.setState({cat:i}))}));
+    const PR=[['T-shirt technique '+brand,35,'Textile',12,'apparel'],['Shaker 700 ml',18,'Accessoires',3,'local_drink'],['Whey isolate 1 kg',120,'Nutrition',0,'nutrition'],['Serviette microfibre',25,'Accessoires',20,'dry_cleaning'],['Gants de musculation',40,'Accessoires',8,'back_hand'],['Barres protéinées ×12',48,'Nutrition',15,'cookie']];
+    const products=PR.filter(p=>S.cat===0||p[2]===CATS[S.cat]).map(([n,pr,c,st,icon])=>({n,icon,price:money(pr),pts:(pr*100).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' '),hasTag:st<=3,tag:st===0?'Rupture':'Plus que '+st,tone:st===0?'danger':'warning',op:st===0?.55:1}));
+    const PD=this.flags('prod',['dispo','rupture','refus']);
+    const SZ=['XS','S','M','L','XL'];const out=PD.rupture?[0,1,2,3,4]:[4];
+    const sizes=SZ.map((l,i)=>{const o=out.includes(i);const sel=!o&&S.size===i;return{l,dis:o,aria:o?l+' épuisée':l,on:()=>!o&&this.setState({size:i}),bg:sel?'var(--secondary)':'var(--surface)',fg:sel?'var(--on-secondary)':(o?'var(--muted)':'var(--text)'),bd:sel?'var(--secondary)':(o?'var(--border)':'var(--border-input)'),td:o?'line-through':'none',cur:o?'not-allowed':'pointer'};});
+    const SR=this.flags('sres',['confirm','offline','success']);
+    const SO=this.flags('sorders',['normal','loading','empty']);
+    const past=S.sTab===1;
+    const cur=[['T-shirt technique '+brand,'Taille M · ×1',35,'Prête à retirer','success','storefront','Accueil Lac 2 · jusqu’au 10/10',1],['Shaker 700 ml','×2',36,'En préparation','warning','schedule','Disponible demain à Lac 2',0]];
+    const old=[['Serviette microfibre','×1',25,'Retirée','secondary','check','Retirée le 12/09 · payée par carte',0],['Barres protéinées ×12','×1',48,'Expirée','danger','event_busy','Non retirée avant le 05/09 · annulée',0]];
+    const orders=(past?old:cur).map(([n,det,p,st,tone,icon,info,ready])=>({n,det,price:money(p),st,tone,icon,info,ready:!!ready,op:past?.85:1}));
+    const tab=(l,i)=>({l,on:()=>this.setState({sTab:i}),fg:S.sTab===i?'var(--primary-ink)':'var(--muted)',bd:S.sTab===i?'var(--primary)':'transparent'});
+    return {SH,cats,products,PD,sizes,tshirtPrice:money(35),stockLabel:PD.rupture?'Rupture de stock à Lac 2 · réassort prévu le 15/10':'En stock · 12 disponibles à Lac 2',stockTone:PD.rupture?'danger':'success',
+      SR,srSheet:!SR.success,sresNet:SR.offline?'off':'ok',srBtnBg:SR.offline?'var(--surface-2)':'var(--primary)',srBtnFg:SR.offline?'var(--muted)':'var(--primary-contrast)',srCur:SR.offline?'not-allowed':'pointer',
+      SO,orders,sTabs:[tab('En cours',0),tab('Passées',1)]};
+  }
+  partL(){return{};}
+  partM(){return{};}
+}
+</script>
+</body>
+</html>

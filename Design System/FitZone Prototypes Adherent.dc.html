@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+:root{--bg:#F7F7F9;--surface:#FFFFFF;--surface-2:#F1F2F4;--text:#111827;--muted:#5B6270;--border:#E3E4E7;--border-strong:#C5C8CE;--border-input:#8A909B;--primary:#FF5A1F;--primary-hover:#E6511C;--primary-pressed:#CC4819;--primary-soft:#FFEEE9;--primary-border:#FFC6B1;--primary-ink:#B83A0C;--primary-contrast:#FFFFFF;--secondary:#14213D;--secondary-soft:#E8E9EC;--secondary-border:#B9BCC5;--secondary-ink:#14213D;--on-secondary:#FFFFFF;--accent:#FCA311;--accent-soft:#FFF6E7;--accent-border:#FEDCA6;--accent-ink:#8A5600;--on-accent:#111111;--success:#16A34A;--success-soft:#E8F6ED;--success-ink:#11793A;--success-border:#B1E0C2;--on-success:#FFFFFF;--warning:#F59E0B;--warning-soft:#FEF5E7;--warning-ink:#8A5600;--warning-border:#FCDDA6;--danger:#DC2626;--danger-soft:#FCE9E9;--danger-ink:#B91C1C;--danger-border:#F3B7B7;--on-danger:#FFFFFF;--info:#2563EB;--info-soft:#E9EFFD;--info-ink:#1D4ED8;--info-border:#B6CBF8;--focus:#E04E18;--overlay:rgba(14,17,23,.45);--r:16px;--r-xs:5px;--r-sm:9px;--r-lg:22px;--pad:16px;--gap:16px;--ctl:48px;--f-head:'Sora',system-ui,sans-serif;--f-body:'DM Sans',system-ui,sans-serif;--f-mono:'JetBrains Mono',ui-monospace,monospace;--sh1:0 1px 3px rgba(17,24,39,.07);--sh2:0 6px 16px rgba(17,24,39,.08);--sh3:0 20px 48px rgba(17,24,39,.18)}
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fzSpin{to{transform:rotate(360deg)}}
+@keyframes fzFwd{from{transform:translateX(100%)}to{transform:none}}
+@keyframes fzBack{from{transform:translateX(-28%);opacity:.4}to{transform:none;opacity:1}}
+@keyframes fzFade{from{opacity:0}to{opacity:1}}
+@keyframes fzRise{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fzUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fzDrop{from{transform:translateY(-140%)}to{transform:none}}
+@keyframes fzToast{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fzPop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:56px 64px 120px;display:flex;flex-direction:column;gap:44px">
+
+<div style="max-width:980px">
+  <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Adhérent · Prototypes</div>
+  <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:56px;line-height:1;letter-spacing:-.035em;font-weight:800">Trois parcours cliquables</h1>
+  <p style="margin:14px 0 0;font-size:17px;color:var(--muted);text-wrap:pretty">Cliquez directement dans les écrans. Sous chaque téléphone : simuler le hors ligne, recommencer, ou sauter à une étape. Les Tweaks (palette, thème, nombre de sites, devise) restent actifs en pleine démo.</p>
+</div>
+
+<div style="display:flex;gap:64px;align-items:flex-start">
+
+<div data-screen-label="Parcours 1" style="display:flex;flex-direction:column;gap:16px;width:410px;flex:none">
+  <div style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;flex:none;border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:18px">1</span><h2 style="margin:0;font-family:var(--f-head);font-size:22px;line-height:1.15;letter-spacing:-.02em">Première réservation &amp; entrée en salle</h2></div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;font-weight:700"><span style="padding:4px 10px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">Départ · Onboarding</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">arrow_forward</span><span style="padding:4px 10px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Arrivée · Accès accepté</span></div>
+  <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:#0B0D12;box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+    <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="{{ p1.net }}" hint-size="100%,46px"></dc-import></div>
+
+    <sc-if value="{{ p1.is.onb }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;padding-top:46px;animation:{{ p1.anim }}">
+        <div style="display:flex;justify-content:flex-end;padding:4px 20px"><button onClick="{{ p1.toSignup }}" style="height:44px;padding:0 12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer">Passer</button></div>
+        <div style="margin:8px 20px 0;height:350px;border-radius:var(--r-lg);border:1px solid var(--border);background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ p1.ob.ph }}</span></div>
+        <div style="padding:28px 24px 0;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;gap:6px"><sc-for list="{{ p1.obDots }}" as="d" hint-placeholder-count="3"><button onClick="{{ d.on }}" aria-label="{{ d.l }}" style="height:8px;padding:0;border:0;border-radius:99px;cursor:pointer;transition:width .25s;width:{{ d.w }}px;background:{{ d.bg }}"></button></sc-for></div>
+          <h2 style="margin:6px 0 0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800;text-wrap:balance">{{ p1.ob.title }}</h2>
+          <p style="margin:0;color:var(--muted);font-size:15.5px;text-wrap:pretty">{{ p1.ob.text }}</p>
+        </div>
+        <div style="padding:0 24px 40px"><button onClick="{{ p1.obNext }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ p1.obCta }}<span style="font-family:'Material Symbols Rounded';font-size:20px">arrow_forward</span></button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.signup }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;padding-top:46px;animation:{{ p1.anim }}">
+        <div style="display:flex;align-items:center;gap:8px;padding:4px 12px"><button onClick="{{ p1.back }}" aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><span style="font-size:13px;color:var(--muted);font-weight:600">{{ p1.signStep }}</span></div>
+        <div style="padding:4px 24px 0;display:flex;flex-direction:column;gap:14px;flex:1;overflow:auto">
+          <h2 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Créer un compte</h2>
+          <sc-if value="{{ p1.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Pas de connexion : l’inscription nécessite le réseau.</div></sc-if>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Prénom<input defaultValue="Sarra" style="min-width:0;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 12px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Nom<input defaultValue="Ben Ali" style="min-width:0;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 12px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+          </div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">E-mail<input defaultValue="sarra.benali@mail.tn" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Téléphone<input defaultValue="+216 22 345 678" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Mot de passe<input type="password" defaultValue="motdepasse1" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+          <button onClick="{{ p1.toggleCgu }}" role="checkbox" aria-checked="{{ p1.cgu }}" style="display:flex;gap:10px;align-items:center;text-align:start;border:0;background:transparent;padding:0;cursor:pointer;font-size:13px;color:var(--muted);min-height:44px"><span style="width:24px;height:24px;flex:none;border-radius:var(--r-xs);display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:18px;color:var(--primary-contrast);background:{{ p1.cguBg }};border:2px solid {{ p1.cguBd }}">{{ p1.cguIcon }}</span><span>J’accepte les conditions d’utilisation et le règlement intérieur.</span></button>
+          <sc-if value="{{ p1.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="margin-top:-10px;display:flex;gap:6px;align-items:center;color:var(--danger-ink);font-size:12.5px;font-weight:600;animation:fzRise .25s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:16px">error</span>Cochez cette case pour créer votre compte.</div></sc-if>
+        </div>
+        <div style="padding:12px 24px 36px"><button onClick="{{ p1.submit }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Créer mon compte</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.site }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;padding-top:46px;animation:{{ p1.anim }}">
+        <div style="padding:4px 12px"><button onClick="{{ p1.back }}" aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button></div>
+        <div style="padding:4px 24px 0;display:flex;flex-direction:column;gap:14px;flex:1">
+          <div><span style="font-size:13px;color:var(--muted);font-weight:600">Étape 2 sur 2</span><h2 style="margin:2px 0 0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Votre salle</h2><p style="margin:4px 0 0;color:var(--muted)">Choisissez votre site d’origine.</p></div>
+          <sc-for list="{{ p1.sites }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.on }}" style="text-align:start;display:flex;gap:12px;align-items:center;padding:14px;border-radius:var(--r);cursor:pointer;background:var(--surface);border:{{ s.bd }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+              <div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">location_on</span></div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:16px">{{ s.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ s.a }}</div></div>
+              <span style="width:24px;height:24px;flex:none;border-radius:999px;display:grid;place-items:center;border:2px solid {{ s.radioBd }}"><span style="width:12px;height:12px;border-radius:99px;background:{{ s.dot }}"></span></span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="padding:12px 24px 40px"><button onClick="{{ p1.siteNext }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)">Continuer avec {{ p1.siteName }}</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.home }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p1.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:8px;min-height:48px">
+            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div><sc-if value="{{ showName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em">{{ brand }}</span></sc-if></div>
+            <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><span style="height:36px;padding:0 12px 0 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:2px;font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:16px;color:var(--primary-ink)">location_on</span>{{ p1.siteName }}</span></sc-if>
+            <span style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">notifications</span></span>
+          </div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800">Bienvenue, Sarra</h1><div style="font-size:13.5px;color:var(--muted);margin-top:4px">Samedi 3 octobre · Premium</div></div>
+          <sc-if value="{{ p1.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Hors ligne · votre QR reste disponible</div></sc-if>
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:20px;display:flex;align-items:center;gap:16px">
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><div style="font-family:var(--f-head);font-weight:700;font-size:19px;letter-spacing:-.02em">Accès salle</div><div style="font-size:13px;opacity:.85">Présentez votre code à l’entrée</div>
+              <button onClick="{{ p1.goQr }}" style="margin-top:10px;align-self:flex-start;height:44px;padding:0 16px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--on-secondary);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">qr_code_scanner</span>Afficher mon QR</button></div>
+            <div style="width:84px;height:84px;flex:none;border-radius:var(--r);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:58px;line-height:1">qr_code_2</span></div>
+          </div>
+          <sc-if value="{{ p1.homeEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="background:var(--surface);border:1.5px dashed var(--border-strong);border-radius:var(--r);padding:24px 18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+              <div style="width:64px;height:64px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:34px">event_available</span></div>
+              <div style="font-family:var(--f-head);font-weight:800;font-size:18px;letter-spacing:-.02em">Aucune réservation pour l’instant</div>
+              <div style="font-size:14px;color:var(--muted)">Réservez votre premier cours en deux gestes.</div>
+              <button onClick="{{ p1.goPlan }}" style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;margin-top:4px" style-hover="background:var(--primary-hover)">Explorer le planning</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ p1.homeWait }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ p1.goResa }}" style="text-align:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer">
+              <div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px">hourglass_top</span></div>
+              <div style="flex:1"><div style="font-weight:700">HIIT Express · 12:15</div><div style="font-size:13px;color:var(--warning-ink);font-weight:700">Liste d’attente · 4e position</div></div><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+            </button>
+          </sc-if>
+          <sc-if value="{{ p1.conf }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ p1.goResa }}" style="text-align:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);box-shadow:var(--sh1);display:flex;flex-direction:column;gap:12px;cursor:pointer">
+              <div style="display:flex;justify-content:space-between;align-items:center;width:100%"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Prochain cours</span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">Confirmé</span></div>
+              <div style="display:flex;gap:12px;align-items:center"><div style="width:52px;height:52px;flex:none;border-radius:var(--r-sm);background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:28px">local_fire_department</span></div><div><div style="font-family:var(--f-head);font-weight:700;font-size:18px;letter-spacing:-.02em">HIIT Express</div><div style="font-size:13px;color:var(--muted)">Aujourd’hui · 12:15 · Salle 2 · Yassine</div></div></div>
+            </button>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.plan }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p1.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Planning</h1></div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"><sc-for list="{{ p1.days }}" as="d" hint-placeholder-count="7"><span style="height:60px;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:{{ d.bg }};color:{{ d.fg }};border:1px solid var(--border)"><span style="font-size:11px;font-weight:600;opacity:.85">{{ d.w }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:17px">{{ d.n }}</span></span></sc-for></div>
+          <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px">
+            <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><span style="height:36px;flex:none;padding:0 12px;border-radius:999px;background:var(--secondary);color:var(--on-secondary);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700">Site : {{ p1.siteName }}</span></sc-if>
+            <span style="height:36px;flex:none;padding:0 10px 0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600">Type de cours<span style="font-family:'Material Symbols Rounded';font-size:18px">expand_more</span></span>
+            <span style="height:36px;flex:none;padding:0 10px 0 12px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600">Coach<span style="font-family:'Material Symbols Rounded';font-size:18px">expand_more</span></span>
+          </div>
+          <sc-if value="{{ p1.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Hors ligne · places mises à jour à 11:40</div></sc-if>
+          <sc-for list="{{ p1.courses }}" as="c" hint-placeholder-count="4">
+            <button onClick="{{ c.on }}" style="text-align:start;background:var(--surface);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer;border:{{ c.bd }};box-shadow:{{ c.sh }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+              <div style="width:52px;flex:none;text-align:center"><div style="font-family:var(--f-head);font-weight:800;font-size:17px">{{ c.t }}</div><div style="font-size:11.5px;color:var(--muted)">{{ c.d }}</div></div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15.5px">{{ c.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ c.coach }} · {{ c.room }}</div><div style="font-size:12px;font-weight:700;margin-top:2px;color:var(--{{ c.tone }}-ink)">{{ c.spots }}</div></div>
+              <span style="height:36px;padding:0 12px;border-radius:var(--r-sm);display:flex;align-items:center;font-weight:700;font-size:13px;background:{{ c.bg }};color:{{ c.fg }};border:1.5px solid {{ c.cbd }}">{{ c.cta }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.detail }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p1.anim }}">
+        <div style="position:absolute;inset:0 0 auto 0;height:240px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);border-bottom:1px solid var(--border);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">photo · cours HIIT</span></div>
+        <button onClick="{{ p1.back }}" aria-label="Retour" style="position:absolute;top:54px;left:16px;z-index:2;width:44px;height:44px;border-radius:999px;border:0;background:var(--surface);box-shadow:var(--sh2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_back</span></button>
+        <div style="position:absolute;top:214px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--bg);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 20px 150px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:6px"><span style="font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Cardio</span><span style="font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink)">Intermédiaire</span></div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">HIIT Express</h1><div style="color:var(--muted);font-size:14px">Aujourd’hui · 12:15 – 12:45 · Salle 2</div></div>
+          <sc-if value="{{ p1.dWait }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:14px;align-items:center;padding:14px;border-radius:var(--r);background:var(--warning-soft);border:1px solid var(--warning-border);animation:fzRise .35s ease-out">
+              <div style="font-family:var(--f-head);font-weight:800;font-size:40px;line-height:1;color:var(--warning-ink)">4<sup style="font-size:16px">e</sup></div>
+              <div style="font-size:13.5px"><div style="font-weight:700;color:var(--warning-ink)">En liste d’attente · 4e sur 4</div><div>Confirmation automatique si une place se libère, jusqu’à 11:15.</div></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ p1.conf }}" hint-placeholder-val="{{ false }}">
+            <div role="status" style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--success-soft);border:1px solid var(--success-border);color:var(--success-ink);font-weight:700;font-size:14px;animation:fzRise .35s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">check_circle</span>Une place s’est libérée : vous êtes confirmée</div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><div style="width:36px;height:36px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:13px">YA</div><div><div style="font-size:11.5px;color:var(--muted)">Coach</div><div style="font-weight:700;font-size:14px">Yassine</div></div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--secondary-ink)">meeting_room</span><div><div style="font-size:11.5px;color:var(--muted)">Salle</div><div style="font-weight:700;font-size:14px">Salle 2</div></div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--secondary-ink)">signal_cellular_alt</span><div><div style="font-size:11.5px;color:var(--muted)">Niveau</div><div style="font-weight:700;font-size:14px">Intermédiaire</div></div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--secondary-ink)">timer</span><div><div style="font-size:11.5px;color:var(--muted)">Durée</div><div style="font-weight:700;font-size:14px">30 min</div></div></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700">Places</span><span style="font-size:13px;font-weight:700;color:var(--{{ p1.dTone }}-ink)">{{ p1.dSpots }}</span></div>
+            <div style="height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;width:100%;border-radius:99px;background:var(--{{ p1.dTone }})"></div></div>
+            <div style="font-size:12.5px;color:var(--muted)">{{ p1.dSub }}</div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;z-index:3">
+          <sc-if value="{{ p1.dCanJoin }}" hint-placeholder-val="{{ true }}"><button onClick="{{ p1.openWait }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">hourglass_top</span>Rejoindre la liste d’attente</button><span style="font-size:12.5px;color:var(--muted);text-align:center">Cours complet · 3 personnes en attente</span></sc-if>
+          <sc-if value="{{ p1.dWait }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button onClick="{{ p1.leave }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--danger-border);background:transparent;color:var(--danger-ink);font-weight:700;font-size:14px;cursor:pointer">Quitter la liste</button><button onClick="{{ p1.goResa }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer">Mes réservations</button></div><span style="font-size:12.5px;color:var(--muted);text-align:center">Une notification arrive dans quelques secondes…</span></sc-if>
+          <sc-if value="{{ p1.conf }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p1.goResa }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)">Voir mes réservations</button></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.resa }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p1.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button onClick="{{ p1.back }}" aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Mes réservations</h1></div>
+          <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><sc-for list="{{ p1.resaTabs }}" as="tb" hint-placeholder-count="2"><button role="tab" onClick="{{ tb.on }}" style="flex:1;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:-1px;color:{{ tb.fg }};border-bottom:2.5px solid {{ tb.bd }}">{{ tb.l }}</button></sc-for></div>
+          <sc-if value="{{ p1.resaNone }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+              <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">event_available</span></div>
+              <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune réservation à venir</h2>
+              <button onClick="{{ p1.goPlan }}" style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Explorer le planning</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ p1.resaPast }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+              <div style="width:80px;height:80px;border-radius:999px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">history</span></div>
+              <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune séance passée</h2>
+              <p style="margin:0;color:var(--muted);font-size:14.5px">Votre historique apparaîtra après votre premier cours.</p>
+            </div>
+          </sc-if>
+          <sc-if value="{{ p1.resaUp }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:12px;align-items:center">
+                <div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--surface-2);color:var(--secondary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">local_fire_department</span></div>
+                <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15.5px">HIIT Express</div><div style="font-size:12.5px;color:var(--muted)">{{ p1.resaMeta }}</div></div>
+                <span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ p1.rTone }}-soft);color:var(--{{ p1.rTone }}-ink)">{{ p1.rSt }}</span>
+              </div>
+              <sc-if value="{{ p1.conf }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:var(--r-sm);font-size:12.5px;font-weight:700;color:var(--success-ink);background:var(--success-soft);border:1px solid var(--success-border);animation:fzRise .4s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:18px">autorenew</span>Statut mis à jour à 11:48 : liste d’attente → confirmée</div></sc-if>
+              <sc-if value="{{ p1.dWait }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:var(--r-sm);font-size:12.5px;background:var(--surface-2)"><strong style="color:var(--warning-ink)">4e sur 4</strong> en liste d’attente</div></sc-if>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <button onClick="{{ p1.goDetail }}" style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:13.5px;cursor:pointer">Détails</button>
+                <sc-if value="{{ p1.conf }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p1.goQr }}" style="height:44px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px" style-hover="background:var(--primary-hover)"><span style="font-family:'Material Symbols Rounded';font-size:18px">qr_code_2</span>Mon QR</button></sc-if>
+                <sc-if value="{{ p1.dWait }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p1.leave }}" style="height:44px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--danger-ink);font-weight:700;font-size:13.5px;cursor:pointer">Quitter la liste</button></sc-if>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.qr }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p1.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:88px;padding:4px 20px 16px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">QR d’accès</h1><span style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:18px">brightness_high</span>Luminosité max</span></div>
+          <sc-if value="{{ p1.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Mode hors ligne : code de secours signé, valable jusqu’à 21:00.</div></sc-if>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:var(--sh2)">
+            <div style="width:220px;height:220px;border-radius:var(--r);background:var(--qr-bg);color:var(--qr-fg);display:grid;place-items:center;border:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:204px;line-height:1">qr_code_2</span></div>
+            <sc-if value="{{ p1.online }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:10px"><svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="var(--surface-2)" stroke-width="4"></circle><circle cx="16" cy="16" r="13" fill="none" stroke="var(--primary)" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ p1.qrDash }}" transform="rotate(-90 16 16)"></circle></svg><div><div style="font-size:12px;color:var(--muted)">Nouveau code dans</div><div style="font-family:var(--f-mono);font-weight:500;font-size:17px">0:{{ p1.qrSec }}</div></div></div></sc-if>
+            <sc-if value="{{ p1.off }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;font-weight:700;color:var(--warning-ink);display:flex;gap:6px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:18px">verified_user</span>Code hors ligne · non renouvelé</div></sc-if>
+          </div>
+          <button onClick="{{ p1.scan }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px dashed var(--primary);background:var(--primary-soft);color:var(--primary-ink);font-weight:700;font-size:14.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">sensor_door</span>Passer au tourniquet (démo)</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.is.ok }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;padding:110px 24px 40px;animation:fzFade .3s ease-out">
+        <div style="width:140px;height:140px;border-radius:999px;display:grid;place-items:center;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);animation:fzPop .5s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:76px;font-variation-settings:'FILL' 1">check_circle</span></div>
+        <div><h2 style="margin:0;font-family:var(--f-head);font-size:34px;letter-spacing:-.03em;font-weight:800;color:var(--success-ink)">Accès accepté</h2><p style="margin:6px 0 0;color:var(--muted);font-size:15px">Bonne séance, Sarra ! HIIT Express commence à 12:15.</p></div>
+        <span style="font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Arrivée du parcours 1</span>
+        <div style="flex:1"></div>
+        <button onClick="{{ p1.reset }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)">Recommencer le parcours</button>
+        <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ p1.okMeta }}</span>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.showTabs }}" hint-placeholder-val="{{ false }}">
+      <nav style="position:absolute;left:0;right:0;bottom:0;height:88px;padding:0 6px 22px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:4">
+        <sc-for list="{{ p1.tabsL }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.on }}" aria-label="{{ n.label }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span></button></sc-for>
+        <div style="display:grid;place-items:center"><button onClick="{{ p1.goQr }}" aria-label="QR d’accès" style="width:60px;height:60px;margin-top:-26px;border-radius:999px;border:4px solid var(--surface);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;box-shadow:var(--sh2);cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1">qr_code_2</span></button></div>
+        <sc-for list="{{ p1.tabsR }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.on }}" aria-label="{{ n.label }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span></button></sc-for>
+      </nav>
+    </sc-if>
+
+    <sc-if value="{{ p1.sheet }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ p1.closeSheet }}" style="position:absolute;inset:0;background:var(--overlay);animation:fzFade .25s ease-out"></div>
+        <div role="dialog" aria-label="Rejoindre la liste d’attente" style="position:relative;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:14px;animation:fzUp .32s cubic-bezier(.2,.8,.2,1)">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--warning-soft);color:var(--warning-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">hourglass_top</span></div>
+          <div><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Rejoindre la liste d’attente ?</h2><p style="margin:6px 0 0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Vous serez 4e. Si une place se libère avant 11:15, elle vous est attribuée automatiquement et vous recevez une notification.</p></div>
+          <button onClick="{{ p1.confirmWait }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Confirmer</button>
+          <button onClick="{{ p1.closeSheet }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:15px;cursor:pointer">Annuler</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p1.push }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ p1.tapPush }}" style="position:absolute;top:10px;left:10px;right:10px;z-index:10;text-align:start;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);box-shadow:var(--sh3);cursor:pointer;animation:fzDrop .45s cubic-bezier(.2,.8,.2,1)">
+        <div style="width:36px;height:36px;flex:none;border-radius:var(--r-xs);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:12px">{{ mono }}</div>
+        <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600"><span>{{ brand }}</span><span>maintenant</span></div><div style="font-weight:700;font-size:14px">Une place s’est libérée</div><div style="font-size:13px">Vous êtes confirmée pour HIIT Express à 12:15. Touchez pour voir.</div></div>
+      </button>
+    </sc-if>
+
+    <sc-if value="{{ p1.hasToast }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="position:absolute;left:16px;right:16px;bottom:112px;z-index:9;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3);animation:fzToast .3s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1;color:{{ p1.toastFg }}">{{ p1.toast.icon }}</span><span style="flex:1">{{ p1.toast.text }}</span></div>
+    </sc-if>
+  </div></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:8px"><button onClick="{{ p1.toggleOff }}" style="flex:1;height:44px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:13.5px;cursor:pointer;background:{{ p1.offBg }};color:{{ p1.offFg }};border:1.5px solid {{ p1.offBd }}"><span style="font-family:'Material Symbols Rounded';font-size:20px">{{ p1.offIcon }}</span>{{ p1.offLabel }}</button><button onClick="{{ p1.reset }}" style="height:44px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">restart_alt</span>Recommencer</button></div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Aller à une étape</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ p1.steps }}" as="c" hint-placeholder-count="9"><button onClick="{{ c.on }}" style="height:32px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+    <div style="font-size:12.5px;color:var(--muted);text-wrap:pretty"><strong style="color:var(--text)">Erreur :</strong> créer le compte sans cocher les conditions. <strong style="color:var(--text)">Hors ligne :</strong> inscription bloquée, liste d’attente refusée, QR de secours.</div>
+  </div>
+</div>
+
+<div data-screen-label="Parcours 2" style="display:flex;flex-direction:column;gap:16px;width:410px;flex:none">
+  <div style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;flex:none;border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:18px">2</span><h2 style="margin:0;font-family:var(--f-head);font-size:22px;line-height:1.15;letter-spacing:-.02em">Règles multi-sites vues par l’adhérent</h2></div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;font-weight:700"><span style="padding:4px 10px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">Départ · Planning La Marsa</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">arrow_forward</span><span style="padding:4px 10px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Arrivée · Mes sites d’accès</span></div>
+  <sc-if value="{{ singleSite }}" hint-placeholder-val="{{ false }}">
+    <div style="width:390px;height:844px;border-radius:54px;border:2px dashed var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;text-align:center;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:48px">location_off</span><div style="font-family:var(--f-head);font-weight:800;font-size:20px;color:var(--text)">Parcours masqué : un seul site</div><div style="font-size:14px;text-wrap:pretty">Les règles multi-sites n’existent pas avec un seul site. Passez le Tweak « Nombre de sites » à 3 pour jouer ce parcours.</div></div>
+  </sc-if>
+  <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}">
+  <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:#0B0D12;box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+    <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="{{ p2.net }}" hint-size="100%,46px"></dc-import></div>
+
+    <sc-if value="{{ p2.is.plan }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p2.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="min-height:48px;display:flex;flex-direction:column;justify-content:center"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Planning</h1><div style="font-size:12.5px;color:var(--muted)">Aujourd’hui · formule Mensuel Multi · origine Lac 2</div></div>
+          <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ p2.siteChips }}" as="m" hint-placeholder-count="3"><button onClick="{{ m.on }}" style="height:36px;flex:none;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}"><span style="font-family:'Material Symbols Rounded';font-size:16px">location_on</span>{{ m.l }}<sc-if value="{{ m.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;padding:1px 6px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">origine</span></sc-if></button></sc-for></div>
+          <sc-if value="{{ p2.notOrigin }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--warning-ink)">data_usage</span><span><strong style="color:var(--warning-ink)">Hors site d’origine : 4/4 cours utilisés en octobre.</strong> Les cours « Ouvert à tous les sites » ne sont pas décomptés.</span></div></sc-if>
+          <sc-if value="{{ p2.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Hors ligne · planning du jour à 17:40</div></sc-if>
+          <sc-if value="{{ p2.listEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:40px 12px">
+              <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">location_off</span></div>
+              <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Centre-ville n’est pas inclus</h2>
+              <p style="margin:0;color:var(--muted);font-size:14.5px">Votre formule Mensuel Multi donne accès à Lac 2 et La Marsa.</p>
+              <button onClick="{{ p2.goSites }}" style="height:44px;padding:0 18px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">Voir mes sites d’accès</button>
+            </div>
+          </sc-if>
+          <sc-for list="{{ p2.list }}" as="c" hint-placeholder-count="3">
+            <button onClick="{{ c.on }}" style="text-align:start;background:var(--surface);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer;border:{{ c.bd }};box-shadow:{{ c.sh }};transition:box-shadow .3s" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+              <div style="width:52px;flex:none;text-align:center;font-family:var(--f-head);font-weight:800;font-size:17px">{{ c.t }}</div>
+              <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15.5px">{{ c.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ c.coach }} · {{ c.room }}</div>
+                <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:4px;margin-top:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--accent-border)"><span style="font-family:'Material Symbols Rounded';font-size:14px">public</span>Ouvert à tous les sites</span></sc-if>
+                <div style="font-size:12px;font-weight:700;margin-top:3px;color:var(--{{ c.tone }}-ink)">{{ c.spots }}</div></div>
+              <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p2.is.detail }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p2.anim }}">
+        <div style="position:absolute;inset:0 0 auto 0;height:220px;background:repeating-linear-gradient(135deg,var(--surface-2) 0 10px,var(--surface) 10px 20px);border-bottom:1px solid var(--border);display:grid;place-items:center"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">photo · {{ p2.c.n }}</span></div>
+        <button onClick="{{ p2.back }}" aria-label="Retour" style="position:absolute;top:54px;left:16px;z-index:2;width:44px;height:44px;border-radius:999px;border:0;background:var(--surface);box-shadow:var(--sh2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_back</span></button>
+        <div style="position:absolute;top:196px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--bg);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 20px 150px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <sc-if value="{{ p2.cOpen }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--accent-border)"><span style="font-family:'Material Symbols Rounded';font-size:15px">public</span>Ouvert à tous les sites · non décompté</span></sc-if>
+            <sc-if value="{{ p2.cClosed }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink)">Hors site d’origine · décompté du quota</span></sc-if>
+          </div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">{{ p2.c.n }}</h1><div style="color:var(--muted);font-size:14px">Aujourd’hui · {{ p2.c.t }} · {{ p2.c.room }} · La Marsa</div></div>
+          <sc-if value="{{ p2.booked }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--success-soft);border:1px solid var(--success-border);color:var(--success-ink);font-weight:700;font-size:14px;animation:fzRise .35s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">check_circle</span>Réservation acceptée · présentez votre QR à La Marsa</div></sc-if>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--secondary-ink)">sports</span><div><div style="font-size:11.5px;color:var(--muted)">Coach</div><div style="font-weight:700;font-size:14px">{{ p2.c.coach }}</div></div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--secondary-ink)">location_on</span><div><div style="font-size:11.5px;color:var(--muted)">Site</div><div style="font-weight:700;font-size:14px">La Marsa</div></div></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700">Places</span><span style="font-size:13px;font-weight:700;color:var(--success-ink)">{{ p2.cSpots }}</span></div>
+            <div style="height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="height:100%;border-radius:99px;width:{{ p2.cPct }}%;background:var(--success)"></div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;z-index:3">
+          <sc-if value="{{ p2.canBook }}" hint-placeholder-val="{{ true }}"><button onClick="{{ p2.book }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Réserver ma place</button></sc-if>
+          <sc-if value="{{ p2.booked }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:1fr 1.4fr;gap:8px"><button onClick="{{ p2.cancel }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--danger-border);background:transparent;color:var(--danger-ink);font-weight:700;font-size:14px;cursor:pointer">Annuler</button><button onClick="{{ p2.goQr }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px" style-hover="background:var(--primary-hover)"><span style="font-family:'Material Symbols Rounded';font-size:20px">qr_code_2</span>Afficher mon QR</button></div></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p2.is.qr }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p2.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:88px;padding:4px 20px 16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">QR d’accès</h1></div>
+          <sc-if value="{{ p2.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Hors ligne : code de secours signé. Les droits par site sont vérifiés par le lecteur.</div></sc-if>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:var(--sh2)">
+            <div style="width:196px;height:196px;border-radius:var(--r);background:var(--qr-bg);color:var(--qr-fg);display:grid;place-items:center;border:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:182px;line-height:1">qr_code_2</span></div>
+            <sc-if value="{{ p2.online }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:10px"><svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="none" stroke="var(--surface-2)" stroke-width="4"></circle><circle cx="16" cy="16" r="13" fill="none" stroke="var(--primary)" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ p2.qrDash }}" transform="rotate(-90 16 16)"></circle></svg><span style="font-size:12.5px;color:var(--muted)">Nouveau code dans <strong style="font-family:var(--f-mono);color:var(--text)">0:{{ p2.qrSec }}</strong></span></div></sc-if>
+            <div style="font-size:12.5px;color:var(--muted)">Sarra Ben Ali · Mensuel Multi · origine Lac 2</div>
+          </div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Simuler l’entrée à</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ p2.entryChips }}" as="m" hint-placeholder-count="3"><button onClick="{{ m.on }}" style="height:40px;border-radius:var(--r-sm);font-size:13px;font-weight:700;cursor:pointer;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.l }}</button></sc-for></div>
+          <button onClick="{{ p2.scan }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px dashed var(--primary);background:var(--primary-soft);color:var(--primary-ink);font-weight:700;font-size:14.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">sensor_door</span>Passer au tourniquet de {{ p2.entryName }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p2.is.result }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding:100px 24px 40px;animation:fzFade .3s ease-out">
+        <sc-if value="{{ p2.resOk }}" hint-placeholder-val="{{ true }}">
+          <div style="width:132px;height:132px;border-radius:999px;display:grid;place-items:center;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);animation:fzPop .5s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:72px;font-variation-settings:'FILL' 1">check_circle</span></div>
+          <div><h2 style="margin:0;font-family:var(--f-head);font-size:32px;letter-spacing:-.03em;font-weight:800;color:var(--success-ink)">Accès accepté</h2><p style="margin:6px 0 0;color:var(--muted)">Bienvenue à {{ p2.entryName }} · {{ p2.okDetail }}</p></div>
+          <div style="flex:1"></div>
+          <button onClick="{{ p2.tryCentre }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);font-weight:700;font-size:15px;cursor:pointer">Essayer l’entrée à Centre-ville</button>
+          <button onClick="{{ p2.back }}" style="width:100%;height:44px;border:0;background:transparent;font-weight:700;color:var(--primary-ink);cursor:pointer">Fermer</button>
+        </sc-if>
+        <sc-if value="{{ p2.resKo }}" hint-placeholder-val="{{ false }}">
+          <div style="width:132px;height:132px;border-radius:999px;display:grid;place-items:center;background:var(--danger-soft);color:var(--danger-ink);border:6px solid var(--danger-border);animation:fzPop .5s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:72px;font-variation-settings:'FILL' 1">cancel</span></div>
+          <div><h2 style="margin:0;font-family:var(--f-head);font-size:32px;letter-spacing:-.03em;font-weight:800;color:var(--danger-ink)">Accès refusé</h2><p style="margin:6px 0 0;color:var(--muted)">Ce site n’est pas inclus dans votre formule.</p></div>
+          <div style="width:100%;text-align:start;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--danger-ink)">location_off</span><div><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Motif</div><div style="font-weight:700;font-size:15px">Formule Mensuel Multi non valable à Centre-ville</div><div style="font-size:13.5px;color:var(--muted);margin-top:2px">Accès inclus : Lac 2 et La Marsa. Pour tous les sites, passez en Premium à l’accueil.</div></div></div>
+          <div style="flex:1"></div>
+          <button onClick="{{ p2.goSites }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)">Voir mes sites d’accès</button>
+          <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">Centre-ville · tourniquet 1 · 18:52</span>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p2.is.sites }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p2.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button onClick="{{ p2.back }}" aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><div><div style="font-size:12px;color:var(--muted);font-weight:600">Profil · Abonnement</div><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Mes sites d’accès</h1></div></div>
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--f-head);font-weight:800;font-size:20px">Mensuel Multi</span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--success);color:var(--on-success)">Actif</span></div><div style="font-size:13px;opacity:.85">Jusqu’au 15/10 · réglé à l’accueil le 15/09</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <sc-for list="{{ p2.accessSites }}" as="s" hint-placeholder-count="3">
+              <div style="display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)">
+                <div style="width:40px;height:40px;flex:none;border-radius:var(--r-sm);background:var(--{{ s.tone }}-soft);color:var(--{{ s.tone }}-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ s.icon }}</span></div>
+                <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ s.n }}</div><div style="font-size:12.5px;color:var(--{{ s.tone }}-ink);font-weight:600">{{ s.st }}</div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:12px;padding:14px;border-radius:var(--r);background:var(--accent-soft);border:1px solid var(--accent-border)"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--accent-ink)">workspace_premium</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--accent-ink)">Premium · tous les sites, sans quota</div><div>{{ p2.premium }} / mois. À souscrire à l’accueil (espèces, carte ou chèque) : aucun paiement dans l’app.</div></div></div>
+          <span style="align-self:center;font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Arrivée du parcours 2</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p2.showTabs }}" hint-placeholder-val="{{ true }}">
+      <nav style="position:absolute;left:0;right:0;bottom:0;height:88px;padding:0 6px 22px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:4">
+        <sc-for list="{{ p2.tabsL }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.on }}" aria-label="{{ n.label }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span></button></sc-for>
+        <div style="display:grid;place-items:center"><button onClick="{{ p2.goQr }}" aria-label="QR d’accès" style="width:60px;height:60px;margin-top:-26px;border-radius:999px;border:4px solid var(--surface);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;box-shadow:var(--sh2);cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1">qr_code_2</span></button></div>
+        <sc-for list="{{ p2.tabsR }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.on }}" aria-label="{{ n.label }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span></button></sc-for>
+      </nav>
+    </sc-if>
+
+    <sc-if value="{{ p2.sheet }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ p2.closeSheet }}" style="position:absolute;inset:0;background:var(--overlay);animation:fzFade .25s ease-out"></div>
+        <div role="alertdialog" aria-label="Réservation refusée" style="position:relative;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px;animation:fzUp .32s cubic-bezier(.2,.8,.2,1)">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="width:56px;height:56px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:30px">block</span></div>
+          <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Réservation refusée</h2>
+          <div style="padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border);font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Quota hors site d’origine atteint</div><div>Votre formule inclut 4 cours par mois hors de Lac 2 et vous les avez utilisés (4/4). Nouveau quota le 1er novembre.</div></div>
+          <div style="font-size:13px;color:var(--muted)">Les cours « Ouvert à tous les sites » restent réservables sans limite.</div>
+          <button onClick="{{ p2.refusToOpen }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Voir les cours ouverts à tous</button>
+          <button onClick="{{ p2.refusBack }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:15px;cursor:pointer">Retour au planning</button>
+          <button onClick="{{ p2.goSites }}" style="height:40px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--primary-ink);cursor:pointer">Voir mes sites d’accès</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p2.hasToast }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="position:absolute;left:16px;right:16px;bottom:112px;z-index:9;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3);animation:fzToast .3s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1;color:{{ p2.toastFg }}">{{ p2.toast.icon }}</span><span style="flex:1">{{ p2.toast.text }}</span></div>
+    </sc-if>
+  </div></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:8px"><button onClick="{{ p2.toggleOff }}" style="flex:1;height:44px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:13.5px;cursor:pointer;background:{{ p2.offBg }};color:{{ p2.offFg }};border:1.5px solid {{ p2.offBd }}"><span style="font-family:'Material Symbols Rounded';font-size:20px">{{ p2.offIcon }}</span>{{ p2.offLabel }}</button><button onClick="{{ p2.reset }}" style="height:44px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">restart_alt</span>Recommencer</button></div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Aller à une étape</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ p2.steps }}" as="c" hint-placeholder-count="8"><button onClick="{{ c.on }}" style="height:32px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+    <div style="font-size:12.5px;color:var(--muted);text-wrap:pretty"><strong style="color:var(--text)">Refus :</strong> quota hors site (Yoga Flow) et formule non valable (Centre-ville). <strong style="color:var(--text)">Hors ligne :</strong> réservation bloquée, QR de secours.</div>
+  </div>
+  </sc-if>
+</div>
+
+<div data-screen-label="Parcours 3" style="display:flex;flex-direction:column;gap:16px;width:410px;flex:none">
+  <div style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;flex:none;border-radius:var(--r-sm);background:var(--secondary);color:var(--on-secondary);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:18px">3</span><h2 style="margin:0;font-family:var(--f-head);font-size:22px;line-height:1.15;letter-spacing:-.02em">Entraînement &amp; progression</h2></div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12.5px;font-weight:700"><span style="padding:4px 10px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">Départ · Accueil</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">arrow_forward</span><span style="padding:4px 10px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Arrivée · Série mise à jour</span></div>
+  <div style="width:390px;height:844px;flex:none;border-radius:54px;padding:10px;background:#0B0D12;box-shadow:var(--sh3)"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+    <div style="position:absolute;top:0;left:0;right:0;z-index:6;pointer-events:none"><dc-import name="FZ StatusBar" net="{{ p3.net }}" hint-size="100%,46px"></dc-import></div>
+
+    <sc-if value="{{ p3.is.home }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p3.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:8px;min-height:48px"><div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div><sc-if value="{{ showName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em">{{ brand }}</span></sc-if></div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800">Bonjour, Sarra</h1><div style="font-size:13.5px;color:var(--muted);margin-top:4px">Samedi 3 octobre · {{ p3.streak }} semaines d’affilée</div></div>
+          <sc-if value="{{ p3.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Hors ligne · votre programme est téléchargé</div></sc-if>
+          <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85">Séance du jour</span>
+            <div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">J1 · Poussée express</div><div style="font-size:13px;opacity:.85">Force — Haut du corps · 2 exercices · ≈ 25 min</div></div>
+            <button onClick="{{ p3.goProg }}" style="align-self:flex-start;height:44px;padding:0 16px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--on-secondary);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">fitness_center</span>Aller à l’entraînement</button>
+          </div>
+          <div style="background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:var(--r);padding:var(--pad);display:flex;gap:14px;align-items:center">
+            <div style="width:48px;height:48px;flex:none;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px;font-variation-settings:'FILL' 1">emoji_events</span></div>
+            <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em">Défi du mois</div><div style="font-weight:700;font-size:15px">20 séances en octobre</div></div>
+            <div style="font-family:var(--f-head);font-weight:800;font-size:18px;color:var(--accent-ink)">14/20</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.is.prog }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p3.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Entraînement</h1></div>
+          <div role="tablist" style="display:flex;border-bottom:1px solid var(--border)"><span style="flex:1;height:44px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--primary-ink);border-bottom:2.5px solid var(--primary);margin-bottom:-1px">Programmes</span><button onClick="{{ p3.notInDemo }}" style="flex:1;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer">Historique</button><button onClick="{{ p3.goProgress }}" style="flex:1;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer">Progression</button></div>
+          <button onClick="{{ p3.goPdet }}" style="text-align:start;background:var(--secondary);color:var(--on-secondary);border:0;border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:12px;cursor:pointer" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;width:100%"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85">En cours · semaine 2/4</span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--accent);color:var(--on-accent)">Coach Yassine</span></div>
+            <div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">Force — Haut du corps</div><div style="font-size:13px;opacity:.85">3 jours / semaine</div></div>
+            <div style="height:8px;width:100%;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden"><div style="width:42%;height:100%;border-radius:99px;background:var(--primary)"></div></div>
+            <span style="display:flex;align-items:center;gap:4px;font-weight:700;font-size:14px">Voir le programme<span style="font-family:'Material Symbols Rounded';font-size:20px">chevron_right</span></span>
+          </button>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px;align-items:center"><div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--success-soft);color:var(--success-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:26px">directions_run</span></div><div style="flex:1"><div style="font-weight:700">Remise en forme</div><div style="font-size:12.5px;color:var(--muted)">Lina · 6 semaines · terminé</div></div></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.is.pdet }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p3.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 200px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><button onClick="{{ p3.back }}" aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button></div>
+          <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Force — Haut du corps</h1><div style="font-size:13.5px;color:var(--muted)">Par Yassine · J1 · Poussée express</div></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">01</span><div style="flex:1"><div style="font-weight:700;font-size:14.5px">Développé couché</div><div style="font-size:12.5px;color:var(--muted)"><strong style="color:var(--text)">4 × 8</strong> · repos 90 s · 52,5 kg</div></div></div>
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 14px"><span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">02</span><div style="flex:1"><div style="font-weight:700;font-size:14.5px">Dips</div><div style="font-size:12.5px;color:var(--muted)"><strong style="color:var(--text)">3 × 12</strong> · repos 60 s · poids du corps</div></div></div>
+          </div>
+          <div style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--info-soft);border:1px solid var(--info-border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--info-ink)">forum</span><div><strong style="color:var(--info-ink)">Note du coach</strong><div>Gardez 1 à 2 répétitions en réserve sur la dernière série.</div></div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:88px;padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><button onClick="{{ p3.start }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">play_arrow</span>Démarrer la séance</button></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.is.sess }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p3.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;display:flex;align-items:center;gap:8px;padding:0 12px;height:52px">
+          <button onClick="{{ p3.back }}" aria-label="Quitter" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></button>
+          <div style="flex:1;text-align:center"><div style="font-weight:700;font-size:14.5px">J1 · Poussée express</div><div style="font-size:12px;color:var(--muted)">Exercice {{ p3.exNum }} sur 2</div></div>
+          <button onClick="{{ p3.quit }}" style="height:36px;padding:0 12px;border-radius:999px;border:0;background:var(--danger-soft);color:var(--danger-ink);font-weight:700;font-size:13px;cursor:pointer">Terminer</button>
+        </div>
+        <div style="position:absolute;top:100px;left:20px;right:20px;display:grid;grid-template-columns:1fr 1fr;gap:4px"><sc-for list="{{ p3.exBars }}" as="b" hint-placeholder-count="2"><span style="height:4px;border-radius:99px;background:{{ b }}"></span></sc-for></div>
+        <div style="position:absolute;top:116px;left:0;right:0;bottom:0;overflow-y:auto;padding:8px 20px 130px;display:flex;flex-direction:column;gap:12px">
+          <sc-if value="{{ p3.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">cloud_off</span>Hors ligne · séance gardée sur le téléphone</div></sc-if>
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:64px;height:64px;flex:none;border-radius:var(--r-sm);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px);border:1px solid var(--border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px;color:var(--muted)">play_circle</span></div>
+            <div style="flex:1;min-width:0"><div style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em;line-height:1.15">{{ p3.ex.n }}</div><div style="font-size:13px;color:var(--muted)">{{ p3.ex.meta }}</div></div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+            <div style="display:grid;grid-template-columns:40px 1fr 70px 64px 44px;gap:8px;align-items:center;padding:8px 12px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)"><span>Série</span><span>Précédent</span><span>kg</span><span>Rép.</span><span></span></div>
+            <sc-for list="{{ p3.rows }}" as="s" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:40px 1fr 70px 64px 44px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);background:{{ s.rowBg }};transition:background .3s">
+                <span style="font-family:var(--f-head);font-weight:800;font-size:15px">{{ s.i }}</span>
+                <span style="font-size:13px;color:var(--muted)">{{ s.prev }}</span>
+                <span style="text-align:center;font-weight:700;font-size:15px;color:{{ s.fg }}">{{ s.kg }}</span>
+                <sc-if value="{{ s.edit }}" hint-placeholder-val="{{ false }}"><input aria-label="Répétitions" inputMode="numeric" defaultValue="{{ s.reps }}" onInput="{{ p3.onReps }}" style="width:100%;height:44px;border-radius:var(--r-xs);background:var(--surface);text-align:center;font-weight:700;font-size:15px;outline:none;border:1.5px solid {{ s.repBd }}" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></sc-if>
+                <sc-if value="{{ s.ro }}" hint-placeholder-val="{{ true }}"><span style="text-align:center;font-weight:700;font-size:15px;color:{{ s.fg }}">{{ s.reps }}</span></sc-if>
+                <button onClick="{{ s.chkOn }}" aria-label="Valider la série" style="width:44px;height:44px;border-radius:var(--r-xs);display:grid;place-items:center;cursor:pointer;background:{{ s.chkBg }};color:{{ s.chkFg }};border:1.5px solid {{ s.chkBd }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">check</span></button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ p3.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:6px;align-items:center;padding:10px 12px;color:var(--danger-ink);font-size:13px;font-weight:600;animation:fzRise .25s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:18px">error</span>Saisissez un nombre de répétitions entre 1 et 50.</div></sc-if>
+          </div>
+          <div style="font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:16px">lightbulb</span>Astuce démo : videz le champ « Rép. » puis validez pour voir l’erreur.</div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);z-index:3"><button onClick="{{ p3.ctaOn }}" style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ p3.cta }}</button></div>
+        <sc-if value="{{ p3.restOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:flex-end">
+            <div style="position:absolute;inset:0;background:var(--overlay);animation:fzFade .25s ease-out"></div>
+            <div role="dialog" aria-label="Repos" style="position:relative;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 24px 36px;display:flex;flex-direction:column;align-items:center;gap:16px;animation:fzUp .32s cubic-bezier(.2,.8,.2,1)">
+              <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong)"></div>
+              <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Repos · série validée</div>
+              <div style="position:relative;width:200px;height:200px">
+                <svg width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="88" fill="none" stroke="var(--surface-2)" stroke-width="12"></circle><circle cx="100" cy="100" r="88" fill="none" stroke="var(--primary)" stroke-width="12" stroke-linecap="round" stroke-dasharray="{{ p3.restDash }}" transform="rotate(-90 100 100)" style="transition:stroke-dasharray 1s linear"></circle></svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:var(--f-head);font-weight:800;font-size:52px;letter-spacing:-.03em;line-height:1">{{ p3.restLabel }}</span><span style="font-size:13px;color:var(--muted)">sur {{ p3.restTotal }}</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;width:100%">
+                <button onClick="{{ p3.restMinus }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">−15 s</button>
+                <button onClick="{{ p3.restPlus }}" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">+15 s</button>
+                <button onClick="{{ p3.restSkip }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer" style-hover="background:var(--primary-hover)">Passer</button>
+              </div>
+              <div style="font-size:13px;color:var(--muted)">Prochaine : {{ p3.nextSet }}</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.is.end }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:fzFade .3s ease-out">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:16px 20px 160px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:8px">
+            <div style="width:88px;height:88px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;animation:fzPop .5s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:48px;font-variation-settings:'FILL' 1">emoji_events</span></div>
+            <h1 style="margin:4px 0 0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Séance terminée</h1>
+            <div style="font-size:14px;color:var(--muted)">J1 · Poussée express · samedi 3 octobre</div>
+          </div>
+          <sc-if value="{{ p3.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">cloud_off</span>Séance enregistrée hors ligne. Points crédités à la synchronisation.</div></sc-if>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px"><div style="font-size:12px;color:var(--muted)">Durée</div><div style="font-family:var(--f-head);font-weight:800;font-size:22px">26 min</div></div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px"><div style="font-size:12px;color:var(--muted)">Volume</div><div style="font-family:var(--f-head);font-weight:800;font-size:22px">1 640 kg</div><div style="font-size:12px;font-weight:700;color:var(--success-ink)">+8 % vs dernière fois</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:center;padding:14px;border-radius:var(--r);background:var(--primary-soft);border:1px solid var(--primary-border)"><div style="font-family:var(--f-head);font-weight:800;font-size:30px;color:var(--primary-ink);letter-spacing:-.02em">+120</div><div style="flex:1;font-size:13.5px"><div style="font-weight:700;color:var(--primary-ink)">points fidélité gagnés</div><div>Solde : 1 360 points</div></div></div>
+          <div style="display:flex;gap:14px;align-items:center;padding:14px;border-radius:var(--r);background:var(--accent-soft);border:1px solid var(--accent-border);animation:fzRise .5s .2s ease-out both">
+            <div style="width:56px;height:56px;flex:none;border-radius:var(--r);background:var(--accent);color:var(--on-accent);display:grid;place-items:center;animation:fzPop .6s .35s ease-out both"><span style="font-family:'Material Symbols Rounded';font-size:30px;font-variation-settings:'FILL' 1">local_fire_department</span></div>
+            <div><div style="font-size:12px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em">Badge débloqué</div><div style="font-weight:700;font-size:15.5px">Série de 7 semaines</div><div style="font-size:12.5px;color:var(--muted)">Record personnel battu (6)</div></div>
+          </div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;z-index:3">
+          <button onClick="{{ p3.goProgress }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Voir ma progression</button>
+          <button onClick="{{ p3.goHome }}" style="height:44px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--primary-ink);cursor:pointer">Retour à l’accueil</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.is.progress }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:var(--bg);animation:{{ p3.anim }}">
+        <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Progression</h1><button onClick="{{ p3.openMes }}" style="height:40px;padding:0 12px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:4px;cursor:pointer" style-hover="background:var(--primary-hover)"><span style="font-family:'Material Symbols Rounded';font-size:20px">add</span>Mesure</button></div>
+          <sc-if value="{{ p3.off }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span>Hors ligne · nouvelles mesures envoyées plus tard</div></sc-if>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+            <div><div style="font-size:13px;color:var(--muted)">Poids · {{ p3.wLabel }}</div><div style="font-family:var(--f-head);font-weight:800;font-size:28px;letter-spacing:-.03em;line-height:1.1">{{ p3.wNow }} <span style="font-size:15px;font-weight:600;color:var(--muted)">kg</span></div><div style="font-size:12.5px;font-weight:700;color:var(--success-ink)">{{ p3.wDelta }}</div></div>
+            <div style="position:relative;height:130px">
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between"><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px dashed var(--border)"></div><div style="border-top:1px solid var(--border)"></div></div>
+              <svg width="100%" height="130" viewBox="0 0 300 130" preserveAspectRatio="none" style="position:absolute;inset:0;overflow:visible"><path d="{{ p3.wArea }}" fill="var(--primary)" fill-opacity="0.1"></path><polyline points="{{ p3.wLine }}" fill="none" stroke="var(--primary)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"></polyline><circle cx="{{ p3.wLastX }}" cy="{{ p3.wLastY }}" r="5" fill="var(--surface)" stroke="var(--primary)" stroke-width="3" vector-effect="non-scaling-stroke"></circle></svg>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted)"><span>juil.</span><span>août</span><span>sept.</span><span>oct.</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);align-items:center">
+            <div style="width:64px;height:64px;border-radius:var(--r);background:var(--accent);color:var(--on-accent);display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-family:'Material Symbols Rounded';font-size:24px;font-variation-settings:'FILL' 1;line-height:1">local_fire_department</span><span style="font-family:var(--f-head);font-weight:800;font-size:18px;line-height:1.1">{{ p3.streak }}</span></div>
+            <div><div style="display:flex;gap:6px;align-items:center"><span style="font-weight:700;font-size:15px">{{ p3.streak }} semaines d’affilée</span><sc-if value="{{ p3.streakNew }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:999px;background:var(--success);color:var(--on-success);animation:fzPop .5s ease-out">+1</span></sc-if></div><div style="font-size:12.5px;color:var(--muted)">{{ p3.weekLabel }}</div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:32px;margin-top:8px"><sc-for list="{{ p3.regBars }}" as="b" hint-placeholder-count="8"><div style="border-radius:3px;height:{{ b.h }}%;background:{{ b.bg }};transition:height .4s"></div></sc-for></div>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:var(--pad);display:flex;flex-direction:column;gap:10px">
+            <div style="font-weight:700;font-size:15px">Octobre 2026 · présences</div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center"><sc-for list="{{ p3.calHead }}" as="h" hint-placeholder-count="7"><span style="font-size:11px;font-weight:700;color:var(--muted)">{{ h }}</span></sc-for><sc-for list="{{ p3.cal }}" as="c" hint-placeholder-count="35"><span style="height:34px;border-radius:var(--r-xs);display:grid;place-items:center;font-size:13px;font-weight:{{ c.fw }};background:{{ c.bg }};color:{{ c.fg }};border:1.5px solid {{ c.bd }};animation:{{ c.anim }}">{{ c.n }}</span></sc-for></div>
+            <div style="display:flex;gap:14px;font-size:12px;color:var(--muted)"><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary)"></span>Séance</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary-soft);border:1px solid var(--primary-border)"></span>Cours collectif</span></div>
+          </div>
+          <span style="align-self:center;font-size:12.5px;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">Arrivée du parcours 3</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.showTabs }}" hint-placeholder-val="{{ true }}">
+      <nav style="position:absolute;left:0;right:0;bottom:0;height:88px;padding:0 6px 22px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:4">
+        <sc-for list="{{ p3.tabsL }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.on }}" aria-label="{{ n.label }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span></button></sc-for>
+        <div style="display:grid;place-items:center"><button onClick="{{ p3.notInDemo }}" aria-label="QR d’accès" style="width:60px;height:60px;margin-top:-26px;border-radius:999px;border:4px solid var(--surface);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;box-shadow:var(--sh2);cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1">qr_code_2</span></button></div>
+        <sc-for list="{{ p3.tabsR }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.on }}" aria-label="{{ n.label }}" style="height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span></button></sc-for>
+      </nav>
+    </sc-if>
+
+    <sc-if value="{{ p3.mesOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ p3.closeSheet }}" style="position:absolute;inset:0;background:var(--overlay);animation:fzFade .25s ease-out"></div>
+        <div role="dialog" aria-label="Nouvelle mesure" style="position:relative;background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:14px;animation:fzUp .32s cubic-bezier(.2,.8,.2,1)">
+          <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Nouvelle mesure · poids</h2><button onClick="{{ p3.closeSheet }}" aria-label="Fermer" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--surface-2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">close</span></button></div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Poids (kg)
+            <div style="display:flex;align-items:center;height:72px;border-radius:var(--r-sm);background:var(--surface);padding:0 16px;border:1.5px solid {{ p3.mesBd }}"><input aria-label="Poids en kg" inputMode="decimal" defaultValue="71,8" onInput="{{ p3.onMes }}" style="flex:1;min-width:0;border:0;background:transparent;font-family:var(--f-head);font-weight:800;font-size:34px;letter-spacing:-.02em;outline:none"><span style="font-size:17px;font-weight:700;color:var(--muted)">kg</span></div>
+            <sc-if value="{{ p3.mesErr }}" hint-placeholder-val="{{ false }}"><span role="alert" style="display:flex;gap:4px;align-items:center;color:var(--danger-ink);font-weight:600;font-size:12.5px"><span style="font-family:'Material Symbols Rounded';font-size:16px">error</span>Valeur hors plage : entre 30 et 250 kg.</span></sc-if>
+            <span style="font-size:12.5px;color:var(--muted);font-weight:500">Dernière mesure : 72,1 kg · 26/09 · essayez « 718 » pour voir l’erreur</span>
+          </label>
+          <button onClick="{{ p3.saveMes }}" style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Enregistrer</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ p3.hasToast }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="position:absolute;left:16px;right:16px;bottom:112px;z-index:9;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3);animation:fzToast .3s ease-out"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1;color:{{ p3.toastFg }}">{{ p3.toast.icon }}</span><span style="flex:1">{{ p3.toast.text }}</span></div>
+    </sc-if>
+  </div></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:8px"><button onClick="{{ p3.toggleOff }}" style="flex:1;height:44px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:13.5px;cursor:pointer;background:{{ p3.offBg }};color:{{ p3.offFg }};border:1.5px solid {{ p3.offBd }}"><span style="font-family:'Material Symbols Rounded';font-size:20px">{{ p3.offIcon }}</span>{{ p3.offLabel }}</button><button onClick="{{ p3.reset }}" style="height:44px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:var(--surface);font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">restart_alt</span>Recommencer</button></div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Aller à une étape</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ p3.steps }}" as="c" hint-placeholder-count="8"><button onClick="{{ c.on }}" style="height:32px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+    <div style="font-size:12.5px;color:var(--muted);text-wrap:pretty"><strong style="color:var(--text)">Erreurs :</strong> répétitions vides, mesure hors plage. <strong style="color:var(--text)">Hors ligne :</strong> séance et mesure gardées localement, points crédités à la synchro.</div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clair&quot;,&quot;Sombre&quot;,&quot;Auto&quot;],&quot;default&quot;:&quot;Clair&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;logoMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Logo + nom&quot;,&quot;Logo seul&quot;],&quot;default&quot;:&quot;Logo + nom&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const linePts=(arr,w,h,p,mn,mx)=>{mx=mx??Math.max(...arr);mn=mn??Math.min(...arr);const sx=(w-2*p)/(arr.length-1);return arr.map((v,i)=>[+(p+i*sx).toFixed(1),+(h-p-(v-mn)/((mx-mn)||1)*(h-2*p)).toFixed(1)]);};
+const ptsStr=p=>p.map(q=>q.join(',')).join(' ');
+const areaD=(p,h)=>'M'+p[0][0]+','+h+' L'+p.map(q=>q.join(',')).join(' L')+' L'+p[p.length-1][0]+','+h+' Z';
+const SITES=[{n:'Lac 2',a:'Les Berges du Lac, Tunis'},{n:'La Marsa',a:'Av. Habib Bourguiba, La Marsa'},{n:'Centre-ville',a:'Rue de Marseille, Tunis'}];
+const OB=[{title:'Réservez votre cours en deux gestes',text:'Le planning de vos salles, avec les places restantes en temps réel.',ph:'photo · cours collectif'},{title:'Entrez avec votre QR',text:'Un code d’accès dynamique, qui fonctionne même sans réseau.',ph:'photo · entrée de salle'},{title:'Progressez, relevez des défis',text:'Suivez vos séances et gagnez des badges chaque mois.',ph:'photo · entraînement'}];
+const ANIM={f:'fzFwd .34s cubic-bezier(.2,.8,.2,1)',b:'fzBack .3s ease-out',n:'fzFade .25s ease-out'};
+const YOGA={t:'18:00',n:'Yoga Flow',coach:'Nadia',room:'Studio A',open:false,left:6,cap:14};
+const CYC={t:'19:00',n:'Cycling',coach:'Rim',room:'Studio B',open:true,left:5,cap:16};
+const EX=[{n:'Développé couché',meta:'4 × 8 · repos 90 s · objectif 52,5 kg',kg:'52,5',reps:'8',prev:['50 × 8','50 × 8','50 × 7','50 × 6'],sets:4,rest:90},{n:'Dips',meta:'3 × 12 · repos 60 s · poids du corps',kg:'PDC',reps:'12',prev:['PDC × 12','PDC × 11','PDC × 10'],sets:3,rest:60}];
+const I0={p1:{s:'onb',dir:'n',hist:[],ob:0,cgu:false,err:false,off:false,site:0,wait:false,conf:false,sheet:null,toast:null,push:false,resaTab:0},
+p2:{s:'plan',dir:'n',hist:[],site:1,course:null,booked:false,off:false,sheet:null,toast:null,entry:1,flash:false},
+p3:{s:'home',dir:'n',hist:[],ex:0,done:[0,0],log:[[],[]],off:false,sheet:null,rest:90,toast:null,err:false,mesErr:false,added:false,newW:null,finished:false}};
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+class Component extends DCLogic {
+  state={...clone(I0),tick:0,sysDark:false};
+  tm={};
+  componentDidMount(){
+    this.mq=window.matchMedia('(prefers-color-scheme: dark)');this.onMq=()=>this.setState({sysDark:this.mq.matches});this.onMq();this.mq.addEventListener('change',this.onMq);
+    this.iv=setInterval(()=>this.setState(s=>{const o={tick:s.tick+1};if(s.p3.sheet==='rest'){const r=s.p3.rest-1;o.p3=r<=0?{...s.p3,sheet:null,rest:90}:{...s.p3,rest:r};}return o;}),1000);
+  }
+  componentWillUnmount(){clearInterval(this.iv);Object.values(this.tm).forEach(clearTimeout);this.mq&&this.mq.removeEventListener('change',this.onMq);}
+  up(k,p){this.setState(s=>({[k]:{...s[k],...(typeof p==='function'?p(s[k]):p)}}));}
+  go(k,scr,extra){this.up(k,f=>({s:scr,dir:'f',hist:[...f.hist,f.s],sheet:null,...(extra||{})}));}
+  back(k){this.up(k,f=>{const h=[...f.hist];const s=h.pop()||I0[k].s;return{s,dir:'b',hist:h,sheet:null};});}
+  jump(k,scr,extra){this.up(k,{s:scr,dir:'n',hist:[],sheet:null,toast:null,...(extra||{})});}
+  toast(k,text,icon,tone){this.up(k,{toast:{text,icon:icon||'check_circle',tone:tone||'success'}});clearTimeout(this.tm[k]);this.tm[k]=setTimeout(()=>this.up(k,{toast:null}),2800);}
+  reset(k){Object.keys(this.tm).forEach(t=>{if(t.indexOf(k)===0)clearTimeout(this.tm[t]);});this.curReps=null;this.mesVal=null;this.setState({[k]:clone(I0[k])});}
+  shell(k){const f=this.state[k];const t=f.toast;return{anim:ANIM[f.dir],net:f.off?'off':'ok',off:f.off,online:!f.off,hasToast:!!t,toast:t||{},toastFg:t?'var(--'+t.tone+')':'',
+    toggleOff:()=>this.up(k,x=>({off:!x.off})),offLabel:f.off?'Hors ligne : activé':'Simuler le hors ligne',offBg:f.off?'var(--warning-soft)':'var(--surface)',offFg:f.off?'var(--warning-ink)':'var(--text)',offBd:f.off?'var(--warning-border)':'var(--border-strong)',offIcon:f.off?'wifi_off':'wifi',
+    reset:()=>this.reset(k),back:()=>this.back(k),is:{[f.s]:true}};}
+  steps(k,list){const f=this.state[k];return list.map(([scr,l,extra],i)=>{const sel=f.s===scr&&(((extra&&extra.sheet)||null)===(f.sheet||null));return{l:(i+1)+'. '+l,on:()=>this.jump(k,scr,extra),bg:sel?'var(--secondary)':'var(--surface)',fg:sel?'var(--on-secondary)':'var(--text)',bd:sel?'var(--secondary)':'var(--border-strong)'};});}
+  tabs(k,active,targets){const items=[['home','Accueil',0],['calendar_month','Planning',1],['fitness_center','Entraînement',3],['person','Profil',4]];
+    const all=items.map(([icon,label,i])=>({icon,label,fill:active===i?1:0,fg:active===i?'var(--primary-ink)':'var(--muted)',on:()=>{const t=targets[i];if(!t)this.toast(k,'Non inclus dans ce parcours de démo','info','info');else if(t!==this.state[k].s)this.go(k,t);}}));
+    return{L:all.slice(0,2),R:all.slice(2)};}
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--qr-bg':C.surfaceLight,'--qr-fg':C.textLight,'--focus':ensure(C.primary,bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const dark=P.theme==='Sombre'||(P.theme==='Auto'&&S.sysDark);
+    const rootStyle={...this.vars(dark,C,P),background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';const caps=brand.match(/[A-Z]/g);const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):brand.slice(0,2)).toUpperCase();
+    const multi=String(P.sites??'3')==='3';
+    const km=P.currency==='€'?0.3:1;const cur=P.currency==='€'?'€':'DT';
+    const money=n=>Math.round(n*km).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ')+' '+cur;
+    return {rootStyle,brand,mono,showName:P.logoMode!=='Logo seul',multiSite:multi,singleSite:!multi,p1:this.v1(multi),p2:this.v2(money),p3:this.v3()};
+  }
+  qr(){const sec=30-(this.state.tick%30);const C2=2*Math.PI*13;return{qrSec:String(sec).padStart(2,'0'),qrDash:(sec/30*C2).toFixed(1)+' '+C2.toFixed(1)};}
+  v1(multi){
+    const k='p1',f=this.state.p1,sh=this.shell(k);
+    const submit=()=>{if(f.off){this.toast(k,'Hors ligne : inscription impossible','wifi_off','danger');return;}if(!f.cgu){this.up(k,{err:true});return;}this.toast(k,'Compte créé · bienvenue Sarra !');this.go(k,multi?'site':'home');};
+    const sites=SITES.map((s,i)=>({...s,on:()=>this.up(k,{site:i}),bd:f.site===i?'2px solid var(--primary)':'1px solid var(--border)',radioBd:f.site===i?'var(--primary)':'var(--border-input)',dot:f.site===i?'var(--primary)':'transparent'}));
+    const siteName=multi?SITES[f.site].n:SITES[0].n;
+    const CS=[['07:00','45 min','Cycling','Rim','Studio 1',2],['12:15','30 min','HIIT Express','Yassine','Salle 2',0],['18:30','60 min','Yoga Flow','Lina','Studio 2',7],['19:45','60 min','Boxe','Hatem','Ring',4]];
+    const courses=CS.map(([t,d,n,coach,room,left])=>{const h=left===0;return{t,d,n,coach,room,
+      tone:h?(f.conf?'success':(f.wait?'warning':'danger')):(left<=4?'warning':'success'),
+      spots:h?(f.conf?'Réservé · 20/20':(f.wait?'Liste d’attente · 4e':'Complet · 3 en attente')):(left<=4?'Plus que '+left+' places':left+' places'),
+      cta:h?(f.conf?'Réservé':(f.wait?'En attente':'Liste d’attente')):'Réserver',bg:h?'transparent':'var(--primary)',fg:h?'var(--text)':'var(--primary-contrast)',cbd:h?'var(--border-strong)':'var(--primary)',bd:h?'2px solid var(--primary)':'1px solid var(--border)',sh:h?'var(--sh2)':'none',
+      on:()=>h?this.go(k,'detail'):this.toast(k,'Démo : ouvrez le cours complet HIIT Express','touch_app','info')};});
+    const days=[['Sam','3'],['Dim','4'],['Lun','5'],['Mar','6'],['Mer','7'],['Jeu','8'],['Ven','9']].map(([w,n],i)=>({w,n,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)'}));
+    const openWait=()=>{if(f.off){this.toast(k,'Hors ligne : impossible de rejoindre la liste','wifi_off','danger');return;}this.up(k,{sheet:true});};
+    const confirmWait=()=>{this.up(k,{sheet:null,wait:true});this.toast(k,'Ajoutée à la liste d’attente · 4e position','hourglass_top','warning');clearTimeout(this.tm.p1push);clearTimeout(this.tm.p1push2);
+      this.tm.p1push=setTimeout(()=>{if(!this.state.p1.wait)return;this.up(k,{wait:false,conf:true,push:true});this.tm.p1push2=setTimeout(()=>this.up(k,{push:false}),7000);},4500);};
+    const leave=()=>{clearTimeout(this.tm.p1push);this.up(k,{wait:false});this.toast(k,'Vous avez quitté la liste d’attente','logout','info');};
+    const tb=this.tabs(k,f.s==='home'?0:(f.s==='qr'?2:1),{0:'home',1:'plan'});
+    const steps=this.steps(k,[['onb','Onboarding'],['signup','Inscription'],...(multi?[['site','Site']]:[]),['home','Accueil',{wait:false,conf:false}],['plan','Planning'],['detail','Cours complet',{wait:false,conf:false}],['resa','Réservations',{wait:false,conf:true,push:false}],['qr','QR dynamique',{conf:true}],['ok','Accès accepté',{conf:true}]]);
+    return {...sh,...this.qr(),ob:OB[f.ob],obDots:OB.map((_,i)=>({l:'Slide '+(i+1),w:i===f.ob?24:8,bg:i===f.ob?'var(--primary)':'var(--border-strong)',on:()=>this.up(k,{ob:i})})),obCta:f.ob===2?'Commencer':'Suivant',obNext:()=>f.ob<2?this.up(k,{ob:f.ob+1}):this.go(k,'signup'),toSignup:()=>this.go(k,'signup'),
+      signStep:multi?'Étape 1 sur 2':'Étape 1 sur 1',cgu:f.cgu,toggleCgu:()=>this.up(k,x=>({cgu:!x.cgu,err:false})),cguBg:f.cgu?'var(--primary)':'transparent',cguBd:f.cgu?'var(--primary)':(f.err?'var(--danger)':'var(--border-input)'),cguIcon:f.cgu?'check':'',err:f.err,submit,
+      sites,siteName,siteNext:()=>this.go(k,'home'),homeEmpty:!f.wait&&!f.conf,homeWait:f.wait,conf:f.conf,goPlan:()=>this.go(k,'plan'),goResa:()=>this.go(k,'resa',{resaTab:0}),goDetail:()=>this.go(k,'detail'),goQr:()=>{if(f.s!=='qr')this.go(k,'qr');},
+      days,courses,dWait:f.wait,dCanJoin:!f.wait&&!f.conf,dTone:f.conf?'success':'danger',dSpots:f.conf?'Votre place est réservée':'Complet · 20/20',dSub:f.wait?'Vous êtes 4e sur 4 en liste d’attente':(f.conf?'20 / 20 inscrits · place libérée par un désistement':'20 / 20 inscrits · 3 en liste d’attente'),
+      openWait,sheet:!!f.sheet,closeSheet:()=>this.up(k,{sheet:null}),confirmWait,leave,push:f.push,tapPush:()=>{this.up(k,{push:false});this.go(k,'resa',{resaTab:0});},
+      resaTabs:['À venir','Passées'].map((l,i)=>({l,on:()=>this.up(k,{resaTab:i}),fg:f.resaTab===i?'var(--primary-ink)':'var(--muted)',bd:f.resaTab===i?'var(--primary)':'transparent'})),
+      resaUp:f.resaTab===0&&(f.wait||f.conf),resaNone:f.resaTab===0&&!f.wait&&!f.conf,resaPast:f.resaTab===1,resaMeta:'Aujourd’hui · 12:15'+(multi?' · '+siteName:''),rTone:f.conf?'success':'warning',rSt:f.conf?'Confirmée':'Liste d’attente',
+      scan:()=>this.go(k,'ok'),okMeta:siteName+' · tourniquet 2 · 12:02'+(f.off?' · validé hors ligne':''),tabsL:tb.L,tabsR:tb.R,showTabs:['home','plan','resa','qr'].includes(f.s),steps};
+  }
+  v2(money){
+    const k='p2',f=this.state.p2,sh=this.shell(k);
+    const LIST={0:[['07:00','Cycling','Rim','Studio 1',6,20,false],['18:30','Yoga Flow','Lina','Studio 2',7,16,false]],1:[[YOGA.t,YOGA.n,YOGA.coach,YOGA.room,YOGA.left,YOGA.cap,false],[CYC.t,CYC.n,CYC.coach,CYC.room,CYC.left,CYC.cap,true],['20:00','Boxe','Hatem','Ring',3,12,false]],2:[]};
+    const list=(LIST[f.site]||[]).map(([t,n,coach,room,left,cap,open])=>{const mine=open&&f.booked;return{t,n,coach,room,open,
+      spots:mine?'Réservé · vous y êtes':(left<=4?'Plus que '+left+' places':left+' places sur '+cap),tone:mine?'success':(left<=4?'warning':'success'),
+      bd:(f.flash&&open)?'2px solid var(--accent)':'1px solid var(--border)',sh:(f.flash&&open)?'var(--sh2)':'none',
+      on:()=>{if(f.site===0){this.toast(k,'Démo : ce parcours se joue hors de Lac 2','touch_app','info');return;}if(n==='Boxe'){this.toast(k,'Démo : ouvrez Yoga Flow ou Cycling','touch_app','info');return;}this.go(k,'detail',{course:open?CYC:YOGA,flash:false});}};});
+    const siteChips=SITES.map((s,i)=>({l:s.n,hasTag:i===0,on:()=>this.up(k,{site:i,flash:false}),bg:f.site===i?'var(--secondary)':'var(--surface)',fg:f.site===i?'var(--on-secondary)':'var(--text)',bd:f.site===i?'var(--secondary)':'var(--border-strong)'}));
+    const c=f.course||YOGA;
+    const book=()=>{if(f.off){this.toast(k,'Hors ligne : la réservation nécessite le réseau','wifi_off','danger');return;}if(!c.open){this.up(k,{sheet:true});return;}this.up(k,{booked:true});this.toast(k,'Réservation confirmée · Cycling 19:00, La Marsa');};
+    const entryChips=SITES.map((s,i)=>({l:s.n,on:()=>this.up(k,{entry:i}),bg:f.entry===i?'var(--secondary)':'var(--surface)',fg:f.entry===i?'var(--on-secondary)':'var(--text)',bd:f.entry===i?'var(--secondary)':'var(--border-strong)'}));
+    const ok=f.entry!==2;
+    const accessSites=[{n:'Lac 2',st:'Site d’origine · accès illimité',tone:'success',icon:'home_pin'},{n:'La Marsa',st:'Inclus · cours : 4/4 hors site ce mois · cours « ouverts » illimités',tone:'warning',icon:'location_on'},{n:'Centre-ville',st:'Non inclus dans votre formule',tone:'danger',icon:'location_off'}];
+    const tb=this.tabs(k,f.s==='sites'?4:(f.s==='qr'?2:1),{1:'plan',4:'sites'});
+    const steps=this.steps(k,[['plan','Planning La Marsa',{site:1,flash:false}],['detail','Refus quota',{course:YOGA,sheet:true}],['plan','Cours ouverts',{site:1,flash:true}],['detail','Réservation acceptée',{course:CYC,booked:true}],['qr','QR à La Marsa',{booked:true,entry:1}],['result','Accès accepté',{booked:true,entry:1}],['result','Refus Centre-ville',{entry:2}],['sites','Mes sites d’accès']]);
+    return {...sh,...this.qr(),siteChips,list,listEmpty:f.site===2,siteName:SITES[f.site].n,notOrigin:f.site!==0,c,cOpen:!!c.open,cClosed:!c.open,booked:f.booked&&!!c.open,canBook:!(f.booked&&c.open),book,
+      cSpots:(f.booked&&c.open)?'Votre place est réservée':c.left+' places restantes sur '+c.cap,cPct:Math.round((c.cap-c.left)/c.cap*100),
+      sheet:!!f.sheet,closeSheet:()=>this.up(k,{sheet:null}),refusToOpen:()=>{this.up(k,{sheet:null,flash:true,site:1});this.back(k);this.toast(k,'Cours ouverts à tous les sites mis en avant','travel_explore','info');},refusBack:()=>{this.up(k,{sheet:null});this.back(k);},
+      goSites:()=>this.go(k,'sites'),goQr:()=>{if(f.s!=='qr')this.go(k,'qr');},cancel:()=>{this.up(k,{booked:false});this.toast(k,'Réservation annulée','event_busy','info');},
+      entryChips,entryName:SITES[f.entry].n,scan:()=>this.go(k,'result'),resOk:ok,resKo:!ok,okDetail:(f.booked&&f.entry===1)?'Cycling 19:00 · Studio B · réservé':'Accès libre au plateau',okMeta:SITES[f.entry].n+' · tourniquet 1 · 18:52'+(f.off?' · validé hors ligne':''),tryCentre:()=>{this.up(k,{entry:2});this.go(k,'qr');},
+      accessSites,premium:money(180),tabsL:tb.L,tabsR:tb.R,showTabs:['plan','qr','sites'].includes(f.s),steps};
+  }
+  v3(){
+    const k='p3',f=this.state.p3,sh=this.shell(k);const e=EX[f.ex];const done=f.done[f.ex];
+    const validate=()=>{const v=String(this.curReps??e.reps).trim();const n=parseInt(v,10);if(!v||isNaN(n)||n<1||n>50){this.up(k,{err:true});return;}this.curReps=null;
+      this.up(k,x=>{const d=[...x.done];d[x.ex]++;const lg=x.log.map(a=>[...a]);lg[x.ex].push(String(n));return{done:d,log:lg,err:false,sheet:d[x.ex]<EX[x.ex].sets?'rest':null,rest:EX[x.ex].rest};});};
+    const rows=e.prev.map((p,i)=>{const st=i<done?'done':(i===done?'cur':'todo');return{i:i+1,prev:p,kg:e.kg,reps:st==='done'?f.log[f.ex][i]:e.reps,edit:st==='cur',ro:st!=='cur',fg:st==='todo'?'var(--muted)':'var(--text)',rowBg:st==='cur'?'var(--primary-soft)':'transparent',
+      chkBg:st==='done'?'var(--success)':'transparent',chkFg:st==='done'?'var(--on-success)':'var(--muted)',chkBd:st==='done'?'var(--success)':'var(--border-input)',repBd:(st==='cur'&&f.err)?'var(--danger)':'var(--border-input)',chkOn:st==='cur'?validate:()=>{}};});
+    const allDone=done>=e.sets;
+    const finish=()=>this.go(k,'end',{finished:true});
+    const cta=allDone?(f.ex===0?'Exercice suivant · Dips':'Terminer la séance'):'Valider la série '+(done+1);
+    const ctaOn=allDone?(f.ex===0?()=>{this.curReps=null;this.up(k,{ex:1,err:false});this.toast(k,'Exercice 2 sur 2 : Dips','skip_next','info');}:finish):validate;
+    const RC=2*Math.PI*88;const rt=e.rest;
+    const W=[74.6,74.2,73.9,73.8,73.3,73.0,72.8,72.6,72.5,72.3,72.1];const ws=f.added?[...W,f.newW]:W;const mn=Math.min(...ws)-.5,mx=Math.max(...ws)+.5;const pts=linePts(ws,300,130,4,mn,mx);const last=pts[pts.length-1];
+    const fr=n=>n.toFixed(1).replace('.',',');const dl=ws[ws.length-1]-ws[0];
+    const saveMes=()=>{const n=parseFloat(String(this.mesVal??'71,8').replace(',','.').trim());if(isNaN(n)||n<30||n>250){this.up(k,{mesErr:true});return;}this.up(k,{added:true,newW:n,sheet:null,mesErr:false});this.toast(k,f.off?'Mesure gardée hors ligne · synchro à venir':'Mesure enregistrée · '+fr(n)+' kg',f.off?'cloud_off':'check_circle',f.off?'warning':'success');};
+    const cal=[];for(let i=0;i<3;i++)cal.push({n:'',bg:'transparent',fg:'var(--muted)',bd:'transparent',fw:500,anim:'none'});
+    for(let d=1;d<=31;d++){const today=d===3,cls=d===1,ses=today&&f.finished;cal.push({n:d,fw:(cls||today)?700:500,anim:ses?'fzPop .5s ease-out':'none',bg:ses?'var(--primary)':(cls?'var(--primary-soft)':'transparent'),fg:ses?'var(--primary-contrast)':(cls?'var(--primary-ink)':(d>3?'var(--muted)':'var(--text)')),bd:ses?'var(--primary)':(cls?'var(--primary-border)':(today?'var(--primary)':'transparent'))});}
+    while(cal.length%7)cal.push({n:'',bg:'transparent',fg:'var(--muted)',bd:'transparent',fw:500,anim:'none'});
+    const reg=[3,2,3,4,3,3,4,f.finished?3:2];
+    const tb=this.tabs(k,f.s==='home'?0:3,{0:'home',3:'prog'});
+    const steps=this.steps(k,[['home','Accueil'],['prog','Entraînement'],['pdet','Mon programme'],['sess','Séance',{ex:0,done:[2,0],log:[['8','8'],[]],err:false}],['sess','Repos',{ex:0,done:[3,0],log:[['8','8','7'],[]],sheet:'rest',rest:90}],['end','Fin de séance',{finished:true}],['progress','Progression',{finished:true}],['progress','Ajout mesure',{finished:true,sheet:'mes'}]]);
+    return {...sh,ex:e,exNum:f.ex+1,rows,err:f.err,onReps:ev=>{this.curReps=ev.target.value;},cta,ctaOn,quit:finish,exBars:[0,1].map(i=>i<f.ex?'var(--success)':(i===f.ex?'var(--primary)':'var(--border)')),
+      restOpen:f.sheet==='rest',restLabel:Math.floor(f.rest/60)+':'+String(f.rest%60).padStart(2,'0'),restTotal:Math.floor(rt/60)+':'+String(rt%60).padStart(2,'0'),restDash:(Math.min(f.rest,rt)/rt*RC).toFixed(1)+' '+RC.toFixed(1),
+      restMinus:()=>this.up(k,x=>({rest:Math.max(5,x.rest-15)})),restPlus:()=>this.up(k,x=>({rest:x.rest+15})),restSkip:()=>this.up(k,{sheet:null}),nextSet:'Série '+(done+1)+' · '+e.kg+(e.kg==='PDC'?'':' kg')+' × '+e.reps,
+      goProg:()=>this.go(k,'prog'),goPdet:()=>this.go(k,'pdet'),start:()=>{this.curReps=null;this.go(k,'sess',{ex:0,done:[0,0],log:[[],[]],err:false});},goProgress:()=>this.go(k,'progress'),goHome:()=>this.jump(k,'home'),notInDemo:()=>this.toast(k,'Non inclus dans ce parcours de démo','info','info'),
+      wNow:fr(ws[ws.length-1]),wDelta:(dl<=0?'−':'+')+fr(Math.abs(dl))+' kg depuis juillet',wLine:ptsStr(pts),wArea:areaD(pts,130),wLastX:last[0],wLastY:last[1],wNew:f.added,wLabel:f.added?'Aujourd’hui':'26/09',
+      openMes:()=>{this.mesVal=null;this.up(k,{sheet:'mes',mesErr:false});},mesOpen:f.sheet==='mes',onMes:ev=>{this.mesVal=ev.target.value;},saveMes,mesErr:f.mesErr,mesBd:f.mesErr?'var(--danger)':'var(--border-input)',closeSheet:()=>this.up(k,{sheet:null}),
+      cal,calHead:['L','M','M','J','V','S','D'],streak:f.finished?7:6,streakNew:f.finished,regBars:reg.map((v,i)=>({h:v/4*100,bg:i===7?'var(--primary)':(v>=3?'var(--secondary)':'var(--secondary-border)')})),weekLabel:f.finished?'Objectif de la semaine atteint · 3/3':'Cette semaine · 2/3 séances',
+      finished:f.finished,tabsL:tb.L,tabsR:tb.R,showTabs:['home','prog','pdet','progress'].includes(f.s),steps};
+  }
+}
+</script>
+</body>
+</html>

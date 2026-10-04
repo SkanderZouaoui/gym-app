@@ -1,0 +1,374 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Organisation et sites (section 8.1)
+// ---------------------------------------------------------------------------
+
+model OrganizationSettings {
+  id                 String   @id @default(uuid())
+  name               String
+  branding           Json     @default("{}")
+  features           Json     @default("{}")
+  multiBranchPolicy  Json     @map("multi_branch_policy")
+  attendancePolicy   Json     @map("attendance_policy")
+  version            Int      @default(1)
+  updatedBy          String?  @map("updated_by")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@map("organization_settings")
+}
+
+model Branch {
+  id          String   @id @default(uuid())
+  name        String
+  address     String?
+  timezone    String   @default("Africa/Tunis")
+  phone       String?
+  email       String?
+  openingHours Json    @default("{}") @map("opening_hours")
+  maxCapacity Int?     @map("max_capacity")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rooms             Room[]
+  userBranchRoles   UserBranchRole[]
+  coachBranches     CoachBranch[]
+  coachAvailabilities CoachAvailability[]
+  planBranches      PlanBranch[]
+  memberships       Membership[] @relation("HomeBranch")
+  payments          Payment[]
+  classSessions     ClassSession[]
+  coachingSessions  CoachingSession[]
+  users             User[] @relation("HomeBranchUsers")
+
+  @@map("branches")
+}
+
+model Room {
+  id       String @id @default(uuid())
+  branchId String @map("branch_id")
+  name     String
+  capacity Int
+
+  branch        Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  classSessions ClassSession[]
+
+  @@index([branchId])
+  @@map("rooms")
+}
+
+// ---------------------------------------------------------------------------
+// Utilisateurs (section 8.2)
+// ---------------------------------------------------------------------------
+
+enum RoleName {
+  MEMBER
+  COACH
+  STAFF
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String?    @unique
+  phone         String?    @unique
+  passwordHash  String     @map("password_hash")
+  firstName     String     @map("first_name")
+  lastName      String     @map("last_name")
+  photoKey      String?    @map("photo_key")
+  homeBranchId  String?    @map("home_branch_id")
+  status        UserStatus @default(ACTIVE)
+  consents      Json       @default("{}")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  deletedAt     DateTime?  @map("deleted_at")
+
+  homeBranch        Branch?            @relation("HomeBranchUsers", fields: [homeBranchId], references: [id])
+  branchRoles       UserBranchRole[]
+  coachProfile      CoachProfile?
+  deviceTokens      DeviceToken[]
+  memberships       Membership[]
+  recordedPayments  Payment[]          @relation("RecordedByUser")
+  bookings          Booking[]
+  refreshTokens     RefreshToken[]
+
+  @@map("users")
+}
+
+model UserBranchRole {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      RoleName
+  branchId  String?  @map("branch_id") // null = toutes les branches (réseau)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role, branchId])
+  @@index([userId])
+  @@map("user_branch_roles")
+}
+
+model CoachProfile {
+  userId       String  @id @map("user_id")
+  bio          String?
+  specialties  String[]
+
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coachBranches     CoachBranch[]
+  availabilities    CoachAvailability[]
+
+  @@map("coach_profiles")
+}
+
+model CoachBranch {
+  id       String @id @default(uuid())
+  coachId  String @map("coach_id")
+  branchId String @map("branch_id")
+
+  coach  CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+  branch Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([coachId, branchId])
+  @@map("coach_branches")
+}
+
+model CoachAvailability {
+  id          String   @id @default(uuid())
+  coachId     String   @map("coach_id")
+  branchId    String   @map("branch_id")
+  dayOfWeek   Int?     @map("day_of_week") // récurrent: 0-6
+  startsAt    DateTime? @map("starts_at")  // ponctuel
+  endsAt      DateTime? @map("ends_at")
+  startTime   String?  @map("start_time")  // récurrent "HH:mm"
+  endTime     String?  @map("end_time")
+
+  coach  CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+  branch Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@index([coachId])
+  @@map("coach_availabilities")
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  tokenHash  String    @unique @map("token_hash")
+  revokedAt  DateTime? @map("revoked_at")
+  expiresAt  DateTime  @map("expires_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Abonnements et encaissements (section 8.3)
+// ---------------------------------------------------------------------------
+
+enum AccessScope {
+  INHERIT
+  HOME_ONLY
+  ALL
+  SELECTED
+}
+
+enum CrossBranchBookingMode {
+  INHERIT
+  ENABLED
+  DISABLED
+}
+
+model MembershipPlan {
+  id                      String                 @id @default(uuid())
+  name                    String
+  description             String?
+  durationDays            Int                    @map("duration_days")
+  price                   Decimal                @db.Decimal(10, 2)
+  accessCount             Int?                   @map("access_count") // null = illimité
+  accessScope             AccessScope            @default(INHERIT) @map("access_scope")
+  crossBranchBooking      CrossBranchBookingMode @default(INHERIT) @map("cross_branch_booking")
+  crossBranchMonthlyQuota Int?                   @map("cross_branch_monthly_quota")
+  isContractual           Boolean                @default(false) @map("is_contractual")
+  isActive                Boolean                @default(true) @map("is_active")
+  createdAt               DateTime               @default(now()) @map("created_at")
+  updatedAt               DateTime               @updatedAt @map("updated_at")
+
+  branches     PlanBranch[]
+  memberships  Membership[]
+
+  @@map("membership_plans")
+}
+
+model PlanBranch {
+  id       String @id @default(uuid())
+  planId   String @map("plan_id")
+  branchId String @map("branch_id")
+
+  plan   MembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  branch Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, branchId])
+  @@map("plan_branches")
+}
+
+enum MembershipStatus {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
+  CANCELLED
+}
+
+model Membership {
+  id                  String            @id @default(uuid())
+  userId              String            @map("user_id")
+  planId              String            @map("plan_id")
+  homeBranchId         String?           @map("home_branch_id")
+  startDate           DateTime          @map("start_date")
+  endDate             DateTime          @map("end_date")
+  status              MembershipStatus  @default(ACTIVE)
+  frozenAccessScope   AccessScope?      @map("frozen_access_scope")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     MembershipPlan @relation(fields: [planId], references: [id])
+  homeBranch Branch?      @relation("HomeBranch", fields: [homeBranchId], references: [id])
+  payments Payment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("memberships")
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  CHECK
+  OTHER
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  membershipId         String        @map("membership_id")
+  branchId             String        @map("branch_id")
+  amount               Decimal       @db.Decimal(10, 2)
+  method               PaymentMethod
+  recordedById         String        @map("recorded_by")
+  recordedAt           DateTime      @default(now()) @map("recorded_at")
+  reference            String?
+  externalProviderRef  String?       @map("external_provider_ref")
+  deletedAt            DateTime?     @map("deleted_at")
+
+  membership Membership @relation(fields: [membershipId], references: [id])
+  branch     Branch     @relation(fields: [branchId], references: [id])
+  recordedBy User       @relation("RecordedByUser", fields: [recordedById], references: [id])
+
+  @@index([branchId])
+  @@index([membershipId])
+  @@map("payments")
+}
+
+// ---------------------------------------------------------------------------
+// Cours et réservations (socle minimal — modèle complet en phase 2)
+// ---------------------------------------------------------------------------
+
+model ClassSession {
+  id          String   @id @default(uuid())
+  branchId    String   @map("branch_id")
+  roomId      String?  @map("room_id")
+  startsAt    DateTime @map("starts_at")
+  endsAt      DateTime @map("ends_at")
+  capacity    Int
+
+  branch   Branch    @relation(fields: [branchId], references: [id])
+  room     Room?     @relation(fields: [roomId], references: [id])
+  bookings Booking[]
+
+  @@index([branchId, startsAt])
+  @@map("class_sessions")
+}
+
+enum BookingStatus {
+  CONFIRMED
+  WAITLISTED
+  CANCELLED
+  ATTENDED
+  NO_SHOW
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  sessionId  String        @map("session_id")
+  userId     String        @map("user_id")
+  status     BookingStatus @default(CONFIRMED)
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  session ClassSession @relation(fields: [sessionId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+
+  @@index([sessionId])
+  @@map("bookings")
+}
+
+model CoachingSession {
+  id        String   @id @default(uuid())
+  branchId  String   @map("branch_id")
+  startsAt  DateTime @map("starts_at")
+  endsAt    DateTime @map("ends_at")
+
+  branch Branch @relation(fields: [branchId], references: [id])
+
+  @@map("coaching_sessions")
+}
+
+// ---------------------------------------------------------------------------
+// Audit (section 8.8) — socle
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?  @map("actor_id")
+  action     String
+  entity     String
+  entityId   String?  @map("entity_id")
+  branchId   String?  @map("branch_id")
+  oldValue   Json?    @map("old_value")
+  newValue   Json?    @map("new_value")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@map("audit_logs")
+}

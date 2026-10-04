@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+:root{--bg:#F7F7F9;--surface:#FFFFFF;--surface-2:#F1F2F4;--text:#111827;--muted:#5B6270;--border:#E3E4E7;--border-strong:#C5C8CE;--border-input:#8A909B;--primary:#FF5A1F;--primary-hover:#E6511C;--primary-pressed:#CC4819;--primary-soft:#FFEEE9;--primary-border:#FFC6B1;--primary-ink:#B83A0C;--primary-contrast:#FFFFFF;--secondary:#14213D;--secondary-soft:#E8E9EC;--secondary-border:#B9BCC5;--secondary-ink:#14213D;--on-secondary:#FFFFFF;--accent:#FCA311;--accent-soft:#FFF6E7;--accent-border:#FEDCA6;--accent-ink:#8A5600;--on-accent:#111111;--success:#16A34A;--success-soft:#E8F6ED;--success-ink:#11793A;--success-border:#B1E0C2;--on-success:#FFFFFF;--warning:#F59E0B;--warning-soft:#FEF5E7;--warning-ink:#8A5600;--warning-border:#FCDDA6;--danger:#DC2626;--danger-soft:#FCE9E9;--danger-ink:#B91C1C;--danger-border:#F3B7B7;--on-danger:#FFFFFF;--info:#2563EB;--info-soft:#E9EFFD;--info-ink:#1D4ED8;--info-border:#B6CBF8;--on-info:#FFFFFF;--focus:#E04E18;--overlay:rgba(14,17,23,.45);--r:16px;--r-xs:5px;--r-sm:9px;--r-lg:22px;--pad:16px;--gap:16px;--ctl:48px;--f-head:'Sora',system-ui,sans-serif;--f-body:'DM Sans',system-ui,sans-serif;--f-mono:'JetBrains Mono',ui-monospace,monospace;--sh1:0 1px 3px rgba(17,24,39,.07);--sh2:0 6px 16px rgba(17,24,39,.08);--sh3:0 20px 48px rgba(17,24,39,.18)}
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button,textarea{font:inherit;color:inherit}
+@keyframes fzPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes fzSpin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:64px 72px 140px;display:flex;flex-direction:column;gap:96px">
+
+<div style="max-width:900px">
+  <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Rôle coach</div>
+  <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:64px;line-height:1;letter-spacing:-.035em;font-weight:800">Espace coach</h1>
+  <p style="margin:16px 0 0;font-size:18px;color:var(--muted);text-wrap:pretty">Même application, onglets dédiés : Aujourd’hui, Planning, Élèves, Messages, Profil. Chaque écran est montré en thème clair et sombre ; les pastilles changent d’état.</p>
+</div>
+
+<section data-screen-label="I Aujourd’hui et planning" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">I</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Aujourd’hui, planning &amp; appel</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">I1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Accueil coach</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.home }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ homeNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;gap:8px;min-height:48px">
+                  <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0"><div style="width:34px;height:34px;flex:none;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:13px">{{ mono }}</div><sc-if value="{{ showName }}" hint-placeholder-val="{{ true }}"><span style="font-family:var(--f-head);font-weight:800;font-size:19px;letter-spacing:-.02em">{{ brand }}</span></sc-if><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--secondary);color:var(--on-secondary)">Coach</span></div>
+                  <button aria-label="Notifications" style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">notifications</span><span style="position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:99px;background:var(--danger);border:2px solid var(--surface)"></span></button>
+                </div>
+                <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800">Bonjour, Yassine</h1><div style="font-size:13.5px;color:var(--muted);margin-top:4px">{{ homeSub }}</div></div>
+                <sc-if value="{{ HO.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">wifi_off</span><span style="flex:1">Hors ligne · planning du jour à 07:02. L’appel reste possible, il sera envoyé plus tard.</span></div></sc-if>
+                <sc-if value="{{ HO.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px;animation:fzPulse 1.4s ease-in-out infinite"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><div style="height:72px;border-radius:var(--r-sm);background:var(--surface-2)"></div><div style="height:72px;border-radius:var(--r-sm);background:var(--surface-2)"></div><div style="height:72px;border-radius:var(--r-sm);background:var(--surface-2)"></div></div><div style="height:150px;border-radius:var(--r-lg);background:var(--surface-2)"></div><div style="height:220px;border-radius:var(--r);background:var(--surface-2)"></div></div></sc-if>
+                <sc-if value="{{ HO.error }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--danger-soft);color:var(--danger-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">cloud_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Planning indisponible</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Le serveur ne répond pas. Réessayez ou consultez le planning téléchargé.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">refresh</span>Réessayer</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ HO.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:40px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">beach_access</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Journée de repos</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Aucun cours ni séance aujourd’hui. Prochain cours : lundi 5 à 07:00, Cycling.</p>
+                    <button style="height:44px;padding:0 18px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer">Voir la semaine</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ homeContent }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ homeStats }}" as="s" hint-placeholder-count="3"><div style="background:var(--{{ s.tone }}-soft);border:1px solid var(--{{ s.tone }}-border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--{{ s.tone }}-ink)">{{ s.v }}</div><div style="font-size:12px;font-weight:600;color:var(--text)">{{ s.l }}</div></div></sc-for></div>
+                  <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85">Prochain · dans 25 min</span><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--danger);color:var(--on-danger)">Complet 20/20</span></div>
+                    <div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">HIIT Express</div><div style="font-size:13px;opacity:.85">12:15 – 12:45 · Salle 2 · Lac 2 · 3 en attente</div></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button style="height:44px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--on-secondary);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">how_to_reg</span>Faire l’appel</button><button style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--on-secondary);background:transparent;color:var(--on-secondary);font-weight:700;font-size:14px;cursor:pointer">Inscrits</button></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font-family:var(--f-head);font-size:19px;font-weight:700;letter-spacing:-.02em">Ma journée</h2><a href="#" style="font-size:13.5px;font-weight:700">Planning</a></div>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                    <sc-for list="{{ todayList }}" as="t" hint-placeholder-count="6">
+                      <div style="display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);opacity:{{ t.op }}">
+                        <div style="width:46px;flex:none"><div style="font-family:var(--f-head);font-weight:800;font-size:15px">{{ t.t }}</div><div style="font-size:11px;color:var(--muted)">{{ t.dur }}</div></div>
+                        <span style="width:4px;align-self:stretch;border-radius:99px;background:var(--{{ t.kindTone }})"></span>
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ t.n }}</div><div style="font-size:12px;color:var(--muted)">{{ t.meta }}</div></div>
+                        <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;background:var(--{{ t.tone }}-soft);color:var(--{{ t.tone }}-ink)">{{ t.st }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font-family:var(--f-head);font-size:19px;font-weight:700;letter-spacing:-.02em">Messages non lus</h2><a href="#" style="font-size:13.5px;font-weight:700">Tout voir</a></div>
+                  <sc-for list="{{ unread }}" as="m" hint-placeholder-count="2">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center">
+                      <div style="width:44px;height:44px;flex:none;border-radius:999px;background:var(--{{ m.tone }});color:var(--on-{{ m.tone }});display:grid;place-items:center;font-weight:700;font-size:14px">{{ m.ini }}</div>
+                      <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><span style="font-weight:700;font-size:14.5px">{{ m.n }}</span><span style="font-size:12px;color:var(--muted)">{{ m.t }}</span></div><div style="font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.msg }}</div></div>
+                      <span style="min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--primary);color:var(--primary-contrast);font-size:12px;font-weight:700;display:grid;place-items:center">{{ m.c }}</span>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ CoachTabBar" active="{{ 0 }}" unread="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">I2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Mon planning</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.plan }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px">
+                  <h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Planning</h1>
+                  <div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><sc-for list="{{ viewSeg }}" as="s" hint-placeholder-count="2"><button role="tab" onClick="{{ s.on }}" style="height:38px;padding:0 14px;border:0;border-radius:var(--r-xs);font-weight:700;font-size:13px;cursor:pointer;background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.sh }}">{{ s.l }}</button></sc-for></div>
+                </div>
+                <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ siteFilter }}" as="m" hint-placeholder-count="4"><button onClick="{{ m.on }}" style="height:36px;flex:none;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}"><span style="width:8px;height:8px;border-radius:99px;background:{{ m.dot }}"></span>{{ m.l }}</button></sc-for></div>
+                </sc-if>
+                <sc-if value="{{ pIsDay }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"><sc-for list="{{ pDays }}" as="d" hint-placeholder-count="7"><button onClick="{{ d.on }}" style="height:60px;border-radius:var(--r-sm);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:{{ d.bg }};color:{{ d.fg }};border:1px solid {{ d.bd }}"><span style="font-size:11px;font-weight:600;opacity:.85">{{ d.w }}</span><span style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ d.n }}</span><span style="font-size:10px;font-weight:700;opacity:.85">{{ d.c }}</span></button></sc-for></div>
+                </sc-if>
+                <sc-if value="{{ PL.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel4 }}" as="k" hint-placeholder-count="4"><div style="height:88px;border-radius:var(--r);background:var(--surface-2);animation:fzPulse 1.4s ease-in-out infinite"></div></sc-for></sc-if>
+                <sc-if value="{{ PL.error }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;align-items:center;padding:12px;border-radius:var(--r-sm);background:var(--danger-soft);color:var(--danger-ink);border:1px solid var(--danger-border);font-size:13.5px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">error</span><span style="flex:1">Impossible de mettre à jour le planning.</span><span style="font-weight:700;text-decoration:underline">Réessayer</span></div></sc-if>
+                <sc-if value="{{ pEmpty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">event_busy</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Rien de prévu {{ pEmptyWhere }}</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Ajoutez des disponibilités pour recevoir des demandes de séances individuelles.</p>
+                    <button style="height:44px;padding:0 18px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;cursor:pointer">Mes disponibilités</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ pShowDay }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ pList }}" as="c" hint-placeholder-count="5">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center">
+                      <div style="width:50px;flex:none;text-align:center"><div style="font-family:var(--f-head);font-weight:800;font-size:16px">{{ c.t }}</div><div style="font-size:11px;color:var(--muted)">{{ c.dur }}</div></div>
+                      <span style="width:4px;align-self:stretch;border-radius:99px;background:var(--{{ c.kindTone }})"></span>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ c.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ c.room }}<sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"> · {{ c.site }}</sc-if></div><div style="font-size:12px;font-weight:700;color:var(--{{ c.tone }}-ink);margin-top:2px">{{ c.fillLabel }}</div></div>
+                      <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+                    </div>
+                  </sc-for>
+                </sc-if>
+                <sc-if value="{{ pShowWeek }}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{ pWeek }}" as="g" hint-placeholder-count="4">
+                    <div style="display:flex;flex-direction:column;gap:6px">
+                      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:4px"><span>{{ g.day }}</span><span>{{ g.sum }}</span></div>
+                      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                        <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="2">
+                          <div style="display:flex;align-items:center;gap:10px;padding:0 14px;min-height:52px;border-bottom:1px solid var(--border)">
+                            <span style="font-family:var(--f-head);font-weight:700;font-size:13.5px;width:42px">{{ c.t }}</span>
+                            <span style="width:4px;height:28px;border-radius:99px;background:var(--{{ c.kindTone }})"></span>
+                            <div style="flex:1;min-width:0;font-size:14px"><strong>{{ c.n }}</strong><span style="color:var(--muted)"> · {{ c.site }}</span></div>
+                            <span style="font-size:11.5px;font-weight:700;color:var(--{{ c.tone }}-ink)">{{ c.short }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </sc-if>
+                <div style="display:flex;gap:14px;font-size:12px;color:var(--muted)"><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--primary)"></span>Cours collectif</span><span style="display:flex;gap:6px;align-items:center"><span style="width:12px;height:12px;border-radius:3px;background:var(--info)"></span>Séance individuelle</span></div>
+              </div>
+              <dc-import name="FZ CoachTabBar" active="{{ 1 }}" unread="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">I3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Détail du cours &amp; appel</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.att }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ attNet }}" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 150px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><span style="flex:1"></span><button aria-label="Plus" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">more_horiz</span></button></div>
+                <div><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">HIIT Express</h1><div style="font-size:13.5px;color:var(--muted)">Aujourd’hui · 12:15 – 12:45 · Salle 2<sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"> · Lac 2</sc-if></div></div>
+                <sc-if value="{{ AT.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">cloud_off</span><span style="flex:1">Hors ligne · pointage gardé sur le téléphone, envoi automatique au retour du réseau</span></div></sc-if>
+                <sc-if value="{{ AT.refus }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">person_off</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Ajout refusé : Amira Chaouch</div><div>Abonnement expiré depuis le 02/07. Orientez-la vers l’accueil pour un renouvellement.</div></div></div></sc-if>
+                <sc-if value="{{ AT.success }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--success-soft);border:1px solid var(--success-border);color:var(--success-ink);font-weight:700;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">check_circle</span>Appel validé à 12:22 · 2 absents notifiés</div></sc-if>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700">Présents</span><span style="font-family:var(--f-head);font-weight:800;font-size:20px">{{ attPresent }} <span style="font-size:13px;color:var(--muted);font-weight:600">/ {{ attTotal }} inscrits</span></span></div>
+                  <div style="display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--surface-2)"><div style="width:{{ attPctP }}%;background:var(--success)"></div><div style="width:{{ attPctA }}%;background:var(--danger)"></div></div>
+                  <div style="display:flex;gap:14px;font-size:12px;color:var(--muted)"><span>{{ attPresent }} présents</span><span>{{ attAbsent }} absents</span><span>{{ attTodo }} à pointer</span><span>3 en attente</span></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Inscrits</span><button onClick="{{ allPresent }}" style="height:36px;padding:0 12px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--primary-ink);font-weight:700;font-size:13px;cursor:pointer">Tous présents</button></div>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                  <sc-for list="{{ roster }}" as="r" hint-placeholder-count="10">
+                    <div style="display:flex;gap:10px;align-items:center;padding:8px 10px 8px 14px;border-bottom:1px solid var(--border)">
+                      <div style="width:36px;height:36px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:12.5px">{{ r.ini }}</div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.n }}</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:1px"><span style="font-size:11.5px;color:var(--muted)">{{ r.plan }}</span><sc-if value="{{ r.hasFlag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--{{ r.flagTone }}-soft);color:var(--{{ r.flagTone }}-ink)">{{ r.flag }}</span></sc-if></div></div>
+                      <button onClick="{{ r.onP }}" aria-label="Présent" aria-pressed="{{ r.isP }}" style="width:44px;height:44px;border-radius:var(--r-sm);display:grid;place-items:center;cursor:pointer;background:{{ r.pBg }};color:{{ r.pFg }};border:1.5px solid {{ r.pBd }}" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">check</span></button>
+                      <button onClick="{{ r.onA }}" aria-label="Absent" aria-pressed="{{ r.isA }}" style="width:44px;height:44px;border-radius:var(--r-sm);display:grid;place-items:center;cursor:pointer;background:{{ r.aBg }};color:{{ r.aFg }};border:1.5px solid {{ r.aBd }}" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:22px">close</span></button>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:8px;z-index:3">
+                <button style="height:var(--ctl);padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">person_add</span>Ajouter</button>
+                <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);font-weight:700;font-size:15px;cursor:pointer;background:{{ attBtnBg }};color:{{ attBtnFg }}" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ attBtn }}</button>
+              </div>
+              <sc-if value="{{ AT.add }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Ajouter un adhérent" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:12px;max-height:84%">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Ajouter un adhérent</h2>
+                    <div style="display:flex;gap:10px;padding:10px 12px;border-radius:var(--r-sm);background:var(--warning-soft);border:1px solid var(--warning-border);font-size:13px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--warning-ink)">group_add</span><span>Cours complet : l’ajout manuel se fait en surnombre (21/20) et passe devant la liste d’attente.</span></div>
+                    <div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Nom, téléphone ou n° d’adhérent" defaultValue="a" style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--focus);box-shadow:0 0 0 3px var(--primary-soft);background:var(--surface);padding:0 14px 0 44px;font-size:15px;outline:none"></div>
+                    <sc-for list="{{ addResults }}" as="r" hint-placeholder-count="4">
+                      <div style="display:flex;gap:10px;align-items:center;padding:6px 0;opacity:{{ r.op }}">
+                        <div style="width:40px;height:40px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:13px">{{ r.ini }}</div>
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ r.n }}</div><div style="font-size:12px;font-weight:600;color:var(--{{ r.tone }}-ink)">{{ r.why }}</div></div>
+                        <button disabled="{{ r.dis }}" style="height:40px;padding:0 14px;border-radius:var(--r-sm);font-weight:700;font-size:13px;cursor:{{ r.cur }};background:{{ r.bg }};color:{{ r.fg }};border:1.5px solid {{ r.bd }}">{{ r.cta }}</button>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="L Élèves et programmes" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">L</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Élèves &amp; programmes</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">L1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Mes élèves</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.stu }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Élèves</h1><span style="font-size:13px;color:var(--muted);font-weight:600">{{ stuCount }}</span></div>
+                <div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Rechercher un élève" placeholder="Rechercher un élève" defaultValue="{{ stuQuery }}" style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px 0 44px;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></div>
+                <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ stuFilters }}" as="m" hint-placeholder-count="4"><button onClick="{{ m.on }}" style="height:36px;flex:none;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.l }}</button></sc-for></div>
+                <sc-if value="{{ SL.loading }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ skel6 }}" as="k" hint-placeholder-count="6"><div style="display:flex;gap:12px;align-items:center;animation:fzPulse 1.4s ease-in-out infinite"><div style="width:48px;height:48px;border-radius:999px;background:var(--surface-2)"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div style="height:14px;width:60%;border-radius:var(--r-xs);background:var(--surface-2)"></div><div style="height:12px;width:80%;border-radius:var(--r-xs);background:var(--surface-2)"></div></div></div></sc-for></sc-if>
+                <sc-if value="{{ SL.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">group</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Pas encore d’élève suivi</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Les adhérents apparaissent ici après une séance individuelle ou quand vous leur assignez un programme.</p>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ SL.noresult }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">search_off</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucun élève « Mansouri »</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Seuls vos élèves suivis sont listés. Pour un autre adhérent, passez par l’accueil.</p>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ SL.normal }}" hint-placeholder-val="{{ true }}">
+                  <sc-for list="{{ students }}" as="s" hint-placeholder-count="6">
+                    <div style="display:flex;gap:12px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)">
+                      <div style="position:relative;width:48px;height:48px;flex:none;border-radius:999px;background:var(--{{ s.tone }});color:var(--on-{{ s.tone }});display:grid;place-items:center;font-weight:700;font-size:15px">{{ s.ini }}<span style="position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:99px;background:var(--{{ s.dot }});border:2.5px solid var(--surface)"></span></div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ s.n }}</div><div style="font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.prog }}</div><div style="font-size:12px;font-weight:700;color:var(--{{ s.dot }}-ink)">{{ s.last }}</div></div>
+                      <span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">chevron_right</span>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <dc-import name="FZ CoachTabBar" active="{{ 2 }}" unread="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">L2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Fiche élève &amp; consentement</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.fiche }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 130px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button></div>
+                <div style="display:flex;gap:14px;align-items:center">
+                  <div style="width:68px;height:68px;flex:none;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:22px">SB</div>
+                  <div style="flex:1;min-width:0"><h1 style="margin:0;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Sarra Ben Ali</h1><div style="font-size:13px;color:var(--muted)">Premium<sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"> · Lac 2</sc-if> · suivie depuis juillet</div><span style="display:inline-block;margin-top:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--success-soft);color:var(--success-ink)">Actif · jusqu’au 15/10</span></div>
+                </div>
+                <div role="note" style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:var(--r);background:var(--{{ consent.tone }}-soft);border:1px solid var(--{{ consent.tone }}-border)">
+                  <div style="display:flex;gap:8px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--{{ consent.tone }}-ink)">{{ consent.icon }}</span><span style="flex:1;font-weight:700;font-size:13.5px;color:var(--{{ consent.tone }}-ink)">{{ consent.title }}</span></div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ consent.items }}" as="c" hint-placeholder-count="4"><span style="display:flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--surface);color:{{ c.fg }};border:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:16px">{{ c.icon }}</span>{{ c.l }}</span></sc-for></div>
+                  <div style="font-size:12px;color:var(--text)">{{ consent.sub }}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><sc-for list="{{ ficheStats }}" as="s" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px"><div style="font-family:var(--f-head);font-weight:800;font-size:20px;letter-spacing:-.02em">{{ s.v }}</div><div style="font-size:11.5px;color:var(--muted)">{{ s.l }}</div></div></sc-for></div>
+                <sc-if value="{{ fShowProg }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700">Poids · 3 mois</span><span style="font-size:13px;font-weight:700;color:var(--success-ink)">−2,8 kg</span></div>
+                    <svg width="100%" height="70" viewBox="0 0 300 70" preserveAspectRatio="none" style="overflow:visible"><polyline points="{{ fWeight }}" fill="none" stroke="var(--primary)" stroke-width="2.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline></svg>
+                    <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--muted)">Développé couché</span><strong>52,5 kg × 8 · record</strong></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ fLockProg }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:12px;align-items:center;padding:16px;border-radius:var(--r);border:1.5px dashed var(--border-strong)"><span style="font-family:'Material Symbols Rounded';font-size:28px;color:var(--muted)">lock</span><div style="font-size:13.5px"><div style="font-weight:700">Progression et mesures masquées</div><div style="color:var(--muted)">Sarra n’a pas autorisé le partage. Vous voyez uniquement présence et programmes.</div></div></div>
+                </sc-if>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:700">Présence · 8 semaines</span><span style="font-size:13px;font-weight:700;color:var(--success-ink)">86 %</span></div>
+                  <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:56px"><sc-for list="{{ fPresence }}" as="b" hint-placeholder-count="8"><div title="{{ b.t }}" style="border-radius:4px;height:{{ b.h }}%;background:{{ b.bg }}"></div></sc-for></div>
+                  <div style="font-size:12px;color:var(--muted)">Dernière visite aujourd’hui 10:00 · séance individuelle</div>
+                </div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Programmes</div>
+                <sc-for list="{{ fPrograms }}" as="p" hint-placeholder-count="2">
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center">
+                    <div style="width:44px;height:44px;flex:none;border-radius:var(--r-sm);background:var(--{{ p.tone }}-soft);color:var(--{{ p.tone }}-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">{{ p.icon }}</span></div>
+                    <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ p.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ p.meta }}</div></div>
+                    <span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--{{ p.tone }}-soft);color:var(--{{ p.tone }}-ink)">{{ p.st }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1.4fr;gap:8px;z-index:3">
+                <button style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">chat</span>Message</button>
+                <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:20px">assignment_add</span>Assigner un programme</button>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">L3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Créer &amp; assigner un programme</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.prg }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <sc-if value="{{ PGs.success }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:46px;left:0;right:0;bottom:0;padding:64px 24px 40px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px">
+                  <div style="width:112px;height:112px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);border:6px solid var(--success-border);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:60px;font-variation-settings:'FILL' 1">assignment_turned_in</span></div>
+                  <div><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Programme assigné</h1><p style="margin:6px 0 0;color:var(--muted)">« Force — Haut du corps » a été envoyé à Sarra Ben Ali et Youssef Trabelsi. Ils reçoivent une notification.</p></div>
+                  <div style="flex:1"></div>
+                  <button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer">Retour aux élèves</button>
+                  <button style="width:100%;height:44px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--primary-ink);cursor:pointer">Enregistrer comme modèle</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ prgEditor }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:8px;padding:0 12px;height:52px"><button aria-label="Fermer" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></button><div style="flex:1;text-align:center;font-weight:700;font-size:15px">Nouveau programme</div><span style="width:44px;font-size:12.5px;color:var(--muted);font-weight:600">{{ prgStepLabel }}</span></div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 20px"><sc-for list="{{ prgSteps }}" as="s" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:4px"><span style="height:4px;border-radius:99px;background:{{ s.bg }}"></span><span style="font-size:11px;font-weight:700;color:{{ s.fg }}">{{ s.l }}</span></div></sc-for></div>
+                <div style="position:absolute;top:118px;left:0;right:0;bottom:0;overflow-y:auto;padding:12px 20px 130px;display:flex;flex-direction:column;gap:12px">
+                  <sc-if value="{{ PGs.preview }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--secondary);color:var(--on-secondary);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font-family:var(--f-head);font-weight:800;font-size:21px;letter-spacing:-.02em">Force — Haut du corps</div><div style="font-size:13px;opacity:.85">4 semaines · 3 jours / semaine · 14 exercices · ≈ 55 min</div></div>
+                    <sc-for list="{{ prgPreview }}" as="d" hint-placeholder-count="3"><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px"><div style="display:flex;justify-content:space-between"><strong>{{ d.k }} · {{ d.n }}</strong><span style="font-size:12.5px;color:var(--muted)">{{ d.count }} exercices</span></div><div style="font-size:12.5px;color:var(--muted);margin-top:2px">{{ d.list }}</div></div></sc-for>
+                    <div style="font-weight:700;font-size:15px;margin-top:4px">Assigner à</div>
+                    <sc-for list="{{ assignees }}" as="a" hint-placeholder-count="4">
+                      <button onClick="{{ a.on }}" style="display:flex;gap:12px;align-items:center;padding:8px 12px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--border);cursor:pointer;text-align:start;min-height:56px">
+                        <div style="width:36px;height:36px;flex:none;border-radius:999px;background:var(--secondary-soft);color:var(--secondary-ink);display:grid;place-items:center;font-weight:700;font-size:12.5px">{{ a.ini }}</div>
+                        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">{{ a.n }}</div><div style="font-size:12px;color:var(--muted)">{{ a.meta }}</div></div>
+                        <span role="checkbox" aria-checked="{{ a.sel }}" style="width:24px;height:24px;border-radius:var(--r-xs);display:grid;place-items:center;background:{{ a.bg }};border:2px solid {{ a.bd }};color:var(--primary-contrast)"><span style="font-family:'Material Symbols Rounded';font-size:18px">{{ a.icon }}</span></span>
+                      </button>
+                    </sc-for>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Date de début<div style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:400">Lundi 5 octobre<span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">calendar_today</span></div></label>
+                  </sc-if>
+                  <sc-if value="{{ prgEditDays }}" hint-placeholder-val="{{ true }}">
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Nom du programme<input defaultValue="Force — Haut du corps" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+                    <sc-if value="{{ PGs.error }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--danger-soft);color:var(--danger-ink);border:1px solid var(--danger-border);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:20px">error</span><span style="flex:1">J3 · Jambes n’a aucun exercice. Ajoutez-en au moins un ou supprimez le jour.</span></div></sc-if>
+                    <div role="tablist" style="display:flex;gap:6px;overflow-x:auto"><sc-for list="{{ prgDayTabs }}" as="d" hint-placeholder-count="3"><button role="tab" onClick="{{ d.on }}" style="height:40px;flex:none;padding:0 14px;border-radius:var(--r-sm);font-weight:700;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:6px;background:{{ d.bg }};color:{{ d.fg }};border:1.5px solid {{ d.bd }}">{{ d.l }}<sc-if value="{{ d.err }}" hint-placeholder-val="{{ false }}"><span style="width:8px;height:8px;border-radius:99px;background:var(--danger)"></span></sc-if></button></sc-for><button aria-label="Ajouter un jour" style="height:40px;width:40px;flex:none;border-radius:var(--r-sm);border:1.5px dashed var(--border-strong);background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:20px">add</span></button></div>
+                    <sc-for list="{{ prgEx }}" as="e" hint-placeholder-count="3">
+                      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px">
+                        <div style="display:flex;gap:10px;align-items:center"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">drag_indicator</span><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ e.n }}</div><div style="font-size:12px;color:var(--muted)">{{ e.m }}</div></div><button aria-label="Supprimer" style="width:40px;height:40px;border-radius:var(--r-sm);border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:20px">delete</span></button></div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+                          <sc-for list="{{ e.fields }}" as="f" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">{{ f.l }}</span><div style="display:flex;align-items:center;height:44px;border-radius:var(--r-xs);border:1.5px solid var(--border-input);background:var(--surface)"><button aria-label="Moins" style="width:30px;height:100%;border:0;background:transparent;cursor:pointer;font-weight:700;color:var(--muted)">−</button><span style="flex:1;text-align:center;font-weight:700;font-size:14px">{{ f.v }}</span><button aria-label="Plus" style="width:30px;height:100%;border:0;background:transparent;cursor:pointer;font-weight:700;color:var(--muted)">+</button></div></div></sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ prgDayEmpty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px;border:1.5px dashed var(--danger-border);border-radius:var(--r);text-align:center"><span style="font-family:'Material Symbols Rounded';font-size:30px;color:var(--danger-ink)">playlist_remove</span><span style="font-weight:700">Aucun exercice pour ce jour</span></div></sc-if>
+                    <button style="height:var(--ctl);border-radius:var(--r);border:1.5px dashed var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text)"><span style="font-family:'Material Symbols Rounded';font-size:20px">library_add</span>Ajouter depuis la bibliothèque</button>
+                  </sc-if>
+                </div>
+                <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:auto 1fr;gap:8px;z-index:3">
+                  <button style="height:var(--ctl);padding:0 16px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer">{{ prgBack }}</button>
+                  <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">{{ prgNext }}</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ PGs.lib }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Bibliothèque" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px;height:82%">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Bibliothèque</h2><span style="font-size:13px;font-weight:700;color:var(--primary-ink)">2 sélectionnés</span></div>
+                    <div style="position:relative"><span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'Material Symbols Rounded';font-size:22px;color:var(--muted)">search</span><input aria-label="Rechercher" placeholder="Rechercher un exercice" style="width:100%;height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px 0 44px;font-size:15px;outline:none"></div>
+                    <div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ libMuscles }}" as="m" hint-placeholder-count="5"><span style="height:34px;flex:none;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;display:flex;align-items:center;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.l }}</span></sc-for></div>
+                    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column">
+                      <sc-for list="{{ libItems }}" as="e" hint-placeholder-count="6">
+                        <div style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+                          <div style="width:48px;height:48px;flex:none;border-radius:var(--r-xs);background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px);border:1px solid var(--border)"></div>
+                          <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ e.n }}</div><div style="font-size:12px;color:var(--muted)">{{ e.m }} · {{ e.eq }}</div></div>
+                          <span role="checkbox" aria-checked="{{ e.sel }}" style="width:26px;height:26px;border-radius:var(--r-xs);display:grid;place-items:center;background:{{ e.bg }};border:2px solid {{ e.bd }};color:var(--primary-contrast)"><span style="font-family:'Material Symbols Rounded';font-size:18px">{{ e.icon }}</span></span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer">Ajouter 2 exercices à J1</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section data-screen-label="N Disponibilités et demandes" style="display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--border);padding-bottom:16px"><span style="font-family:var(--f-mono);font-size:15px;color:var(--primary-ink)">N</span><h2 style="margin:0;font-family:var(--f-head);font-size:40px;letter-spacing:-.03em">Disponibilités, demandes, messages &amp; profil</h2></div>
+  <div style="display:flex;flex-wrap:wrap;gap:72px;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">N1</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Mes disponibilités</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.dispo }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 120px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Disponibilités</h1></div>
+                <div role="tablist" style="display:flex;padding:3px;border-radius:var(--r-sm);background:var(--surface-2)"><sc-for list="{{ dSeg }}" as="s" hint-placeholder-count="2"><button role="tab" onClick="{{ s.on }}" style="flex:1;height:40px;border:0;border-radius:var(--r-xs);font-weight:700;font-size:13.5px;cursor:pointer;background:{{ s.bg }};color:{{ s.fg }};box-shadow:{{ s.sh }}">{{ s.l }}</button></sc-for></div>
+                <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:6px;overflow-x:auto;margin:0 -20px;padding:0 20px"><sc-for list="{{ dSites }}" as="m" hint-placeholder-count="3"><button onClick="{{ m.on }}" style="height:36px;flex:none;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}"><span style="width:8px;height:8px;border-radius:99px;background:{{ m.dot }}"></span>{{ m.l }}</button></sc-for></div></sc-if>
+                <sc-if value="{{ DS.conflict }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">event_busy</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Créneau refusé : chevauchement</div><div>Samedi 18:00 – 19:00 recoupe votre cours HIIT Express de 18:30 à Lac 2.</div></div></div></sc-if>
+                <sc-if value="{{ DS.success }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--success-soft);border:1px solid var(--success-border);color:var(--success-ink);font-weight:700;font-size:14px"><span style="font-family:'Material Symbols Rounded';font-size:22px;font-variation-settings:'FILL' 1">check_circle</span>Disponibilités enregistrées · visibles par les adhérents</div></sc-if>
+                <sc-if value="{{ DS.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:40px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">schedule</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune disponibilité{{ dSiteSuffix }}</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px;text-wrap:pretty">Les adhérents ne peuvent pas vous réserver tant qu’aucun créneau n’est ouvert.</p>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ dShowRec }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-size:12.5px;color:var(--muted)">Chaque semaine{{ dSiteSuffix }} · séances de 60 min</div>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                    <sc-for list="{{ recRows }}" as="r" hint-placeholder-count="7">
+                      <div style="display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);min-height:56px">
+                        <span style="width:36px;font-weight:700;font-size:14px;color:{{ r.fg }}">{{ r.d }}</span>
+                        <div style="flex:1;display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ r.slots }}" as="s" hint-placeholder-count="2"><span style="height:32px;padding:0 10px;border-radius:var(--r-xs);display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;background:{{ s.bg }};color:{{ s.fg }};border:1.5px solid {{ s.bd }}">{{ s.t }}</span></sc-for><sc-if value="{{ r.none }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--muted)">Indisponible</span></sc-if></div>
+                        <button aria-label="Ajouter un créneau" style="width:36px;height:36px;border-radius:999px;border:1px solid var(--border-strong);background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:18px">add</span></button>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ dShowPonct }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:12.5px;color:var(--muted)">Exceptions au planning récurrent</div>
+                  <sc-for list="{{ ponct }}" as="p" hint-placeholder-count="3">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center">
+                      <div style="width:44px;height:44px;flex:none;border-radius:var(--r-sm);background:var(--{{ p.tone }}-soft);color:var(--{{ p.tone }}-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ p.icon }}</span></div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14.5px">{{ p.n }}</div><div style="font-size:12.5px;color:var(--muted)">{{ p.meta }}</div></div>
+                      <button aria-label="Modifier" style="width:40px;height:40px;border-radius:var(--r-sm);border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)"><span style="font-family:'Material Symbols Rounded';font-size:20px">edit</span></button>
+                    </div>
+                  </sc-for>
+                </sc-if>
+              </div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 34px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px;z-index:3">
+                <button style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">event</span>Ponctuel</button>
+                <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--primary-hover)">Enregistrer</button>
+              </div>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">N2</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Demandes de séances</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.req }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button><h1 style="margin:0;flex:1;font-family:var(--f-head);font-size:26px;letter-spacing:-.03em;font-weight:800">Demandes</h1><span style="font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--accent);color:var(--on-accent)">{{ reqCount }}</span></div>
+                <sc-if value="{{ RQ.conflict }}" hint-placeholder-val="{{ false }}"><div role="alert" style="display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);background:var(--danger-soft);border:1px solid var(--danger-border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--danger-ink)">block</span><div style="font-size:13.5px"><div style="font-weight:700;color:var(--danger-ink)">Acceptation impossible</div><div>Vous avez déjà accepté Karim Mansour sur ce créneau (lun. 5 · 10:00). Proposez un autre horaire à Sarra.</div></div></div></sc-if>
+                <sc-if value="{{ RQ.empty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:56px 12px">
+                    <div style="width:80px;height:80px;border-radius:999px;background:var(--success-soft);color:var(--success-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">inbox</span></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune demande en attente</h2>
+                    <p style="margin:0;color:var(--muted);font-size:14.5px">Vous êtes à jour. Les nouvelles demandes arrivent aussi en notification.</p>
+                  </div>
+                </sc-if>
+                <sc-for list="{{ requests }}" as="q" hint-placeholder-count="3">
+                  <div style="background:var(--surface);border:1px solid {{ q.bd }};border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;gap:12px;align-items:center">
+                      <div style="width:44px;height:44px;flex:none;border-radius:999px;background:var(--{{ q.tone }});color:var(--on-{{ q.tone }});display:grid;place-items:center;font-weight:700;font-size:14px">{{ q.ini }}</div>
+                      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">{{ q.n }}</div><div style="font-size:12.5px;color:var(--muted)">Reçue {{ q.ago }}</div></div>
+                      <sc-if value="{{ q.hasSt }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--{{ q.stTone }}-soft);color:var(--{{ q.stTone }}-ink)">{{ q.st }}</span></sc-if>
+                    </div>
+                    <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">event</span><strong>{{ q.when }}</strong><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">location_on</span><span>{{ q.where }}</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">confirmation_number</span><span>{{ q.pay }}</span><span style="font-family:'Material Symbols Rounded';font-size:18px;color:var(--muted)">flag</span><span style="color:var(--muted)">« {{ q.goal }} »</span></div>
+                    <sc-if value="{{ q.actions }}" hint-placeholder-val="{{ true }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button style="height:44px;border-radius:var(--r-sm);border:1.5px solid var(--danger-border);background:transparent;color:var(--danger-ink);font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--danger-soft)">Refuser</button><button style="height:44px;border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14px;cursor:pointer" style-hover="background:var(--primary-hover)">Accepter</button></div></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <dc-import name="FZ CoachTabBar" active="{{ 0 }}" unread="{{ 3 }}" hint-size="100%,88px"></dc-import>
+              <sc-if value="{{ RQ.accepted }}" hint-placeholder-val="{{ false }}"><div role="status" style="position:absolute;top:56px;left:16px;right:16px;z-index:6;background:var(--text);color:var(--bg);border-radius:var(--r-sm);padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;box-shadow:var(--sh3)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:var(--success);font-variation-settings:'FILL' 1">check_circle</span><span style="flex:1">Séance acceptée · Sarra est prévenue</span></div></sc-if>
+              <sc-if value="{{ RQ.refuse }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;inset:0;z-index:8;background:var(--overlay);display:flex;flex-direction:column;justify-content:flex-end">
+                  <div role="dialog" aria-label="Refuser la demande" style="background:var(--surface);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:10px 20px 36px;display:flex;flex-direction:column;gap:12px">
+                    <div style="width:40px;height:5px;border-radius:99px;background:var(--border-strong);align-self:center"></div>
+                    <h2 style="margin:0;font-family:var(--f-head);font-size:22px;font-weight:800;letter-spacing:-.02em">Refuser la demande de Sarra ?</h2>
+                    <div style="font-size:13.5px;color:var(--muted)">Lun. 5 oct. · 10:30. Le crédit lui est rendu automatiquement.</div>
+                    <div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ refuseReasons }}" as="r" hint-placeholder-count="3"><div style="display:flex;gap:12px;align-items:center;min-height:48px;padding:0 12px;border-radius:var(--r-sm);border:1.5px solid {{ r.bd }};background:{{ r.bg }}"><span style="width:22px;height:22px;flex:none;border-radius:999px;border:2px solid {{ r.rbd }};display:grid;place-items:center"><span style="width:10px;height:10px;border-radius:99px;background:{{ r.dot }}"></span></span><span style="font-weight:600;font-size:14px">{{ r.l }}</span></div></sc-for></div>
+                    <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Proposer un autre créneau<div style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:400">Lun. 5 oct. · 12:00<span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">expand_more</span></div></label>
+                    <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--danger);color:var(--on-danger);font-weight:700;font-size:15px;cursor:pointer">Refuser et proposer 12:00</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">N3</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Messagerie</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.msg }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="{{ msgNet }}" hint-size="100%,46px"></dc-import>
+              <sc-if value="{{ msgListView }}" hint-placeholder-val="{{ true }}">
+                <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Messages</h1><button aria-label="Nouveau message" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">edit_square</span></button></div>
+                  <sc-if value="{{ MS.empty }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:64px 12px">
+                      <div style="width:80px;height:80px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:42px">forum</span></div>
+                      <h2 style="margin:0;font-family:var(--f-head);font-size:21px;font-weight:800;letter-spacing:-.02em">Aucune conversation</h2>
+                      <p style="margin:0;color:var(--muted);font-size:14.5px">Écrivez à un élève depuis sa fiche ou après une séance.</p>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ MS.list }}" hint-placeholder-val="{{ true }}">
+                    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                      <sc-for list="{{ convs }}" as="m" hint-placeholder-count="5">
+                        <div style="display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);min-height:68px">
+                          <div style="width:46px;height:46px;flex:none;border-radius:999px;background:var(--{{ m.tone }});color:var(--on-{{ m.tone }});display:grid;place-items:center;font-weight:700;font-size:14px">{{ m.ini }}</div>
+                          <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px"><span style="font-weight:{{ m.fw }};font-size:14.5px">{{ m.n }}</span><span style="font-size:12px;color:var(--muted);flex:none">{{ m.t }}</span></div><div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ m.fg }};font-weight:{{ m.fw2 }}">{{ m.msg }}</div></div>
+                          <sc-if value="{{ m.hasC }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:var(--primary);color:var(--primary-contrast);font-size:12px;font-weight:700;display:grid;place-items:center">{{ m.c }}</span></sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+                <dc-import name="FZ CoachTabBar" active="{{ 3 }}" unread="{{ msgUnread }}" hint-size="100%,88px"></dc-import>
+              </sc-if>
+              <sc-if value="{{ msgConvView }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:10px;padding:0 12px;height:60px;border-bottom:1px solid var(--border);background:var(--surface)">
+                  <button aria-label="Retour" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">arrow_back</span></button>
+                  <div style="width:38px;height:38px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:13px">SB</div>
+                  <div style="flex:1"><div style="font-weight:700;font-size:15px">Sarra Ben Ali</div><div style="font-size:12px;color:var(--muted)">Élève · Premium</div></div>
+                  <button aria-label="Fiche élève" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">info</span></button>
+                </div>
+                <div style="position:absolute;top:106px;left:0;right:0;bottom:96px;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+                  <sc-if value="{{ MS.offline }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:8px;align-items:center;padding:8px 12px;border-radius:var(--r-sm);background:var(--warning-soft);color:var(--warning-ink);border:1px solid var(--warning-border);font-size:12.5px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">wifi_off</span>Hors ligne · les messages partiront au retour du réseau</div></sc-if>
+                  <div style="align-self:center;font-size:11.5px;color:var(--muted);font-weight:600">Aujourd’hui</div>
+                  <sc-for list="{{ bubbles }}" as="b" hint-placeholder-count="6">
+                    <div style="display:flex;flex-direction:column;align-items:{{ b.align }};gap:2px">
+                      <div style="max-width:78%;padding:10px 12px;font-size:14px;line-height:1.4;background:{{ b.bg }};color:{{ b.fg }};border-radius:{{ b.rad }};border:1px solid {{ b.bd }};opacity:{{ b.op }}">{{ b.t }}</div>
+                      <span style="font-size:11px;color:{{ b.metaFg }};display:flex;align-items:center;gap:4px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:14px">{{ b.metaIcon }}</span>{{ b.meta }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="position:absolute;left:0;right:0;bottom:0;padding:10px 12px 30px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+                  <button aria-label="Joindre un programme" style="width:44px;height:44px;flex:none;border-radius:999px;border:0;background:var(--surface-2);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">add</span></button>
+                  <input aria-label="Message" placeholder="Écrire un message…" style="flex:1;min-width:0;height:44px;border-radius:999px;border:1.5px solid var(--border-input);background:var(--surface);padding:0 16px;font-size:15px;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)">
+                  <button aria-label="Envoyer" style="width:44px;height:44px;flex:none;border-radius:999px;border:0;background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">send</span></button>
+                </div>
+              </sc-if>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:var(--f-mono);font-size:13px;color:var(--muted)">N4</span><h3 style="margin:0;font-family:var(--f-head);font-size:22px">Profil coach</h3></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;min-height:36px"><sc-for list="{{ ch.prof }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.on }}" style="height:32px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.bd }}">{{ c.l }}</button></sc-for></div>
+      <div style="display:flex;gap:28px">
+        <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+          <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+            <div style="{{ th.frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body)">
+              <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+              <div style="position:absolute;top:46px;left:0;right:0;bottom:0;overflow-y:auto;padding:4px 20px 112px;display:flex;flex-direction:column;gap:14px">
+                <sc-if value="{{ PF.view }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;justify-content:space-between;min-height:48px"><h1 style="margin:0;font-family:var(--f-head);font-size:28px;letter-spacing:-.03em;font-weight:800">Profil</h1><button aria-label="Paramètres" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:22px">settings</span></button></div>
+                  <sc-if value="{{ PF.success }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--r-sm);background:var(--success-soft);border:1px solid var(--success-border);color:var(--success-ink);font-weight:700;font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;font-variation-settings:'FILL' 1">check_circle</span>Profil mis à jour · visible par les adhérents</div></sc-if>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px">
+                    <div style="width:88px;height:88px;border-radius:var(--r);background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:28px">YA</div>
+                    <div><div style="font-family:var(--f-head);font-weight:800;font-size:22px;letter-spacing:-.02em">Yassine Hamdi</div><div style="font-size:13px;color:var(--muted)">Coach · préparateur physique</div></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"><sc-for list="{{ specs }}" as="s" hint-placeholder-count="3"><span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink)">{{ s }}</span></sc-for></div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-top:6px"><sc-for list="{{ profStats }}" as="s" hint-placeholder-count="3"><div style="background:var(--surface-2);border-radius:var(--r-sm);padding:10px 6px"><div style="font-family:var(--f-head);font-weight:800;font-size:19px">{{ s.v }}</div><div style="font-size:11.5px;color:var(--muted)">{{ s.l }}</div></div></sc-for></div>
+                  </div>
+                  <sc-if value="{{ multiSite }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);font-size:13.5px"><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--primary-ink)">location_on</span><span style="flex:1">Intervient à <strong>Lac 2</strong>, <strong>La Marsa</strong> et <strong>Centre-ville</strong></span></div></sc-if>
+                  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+                    <sc-for list="{{ profMenu }}" as="m" hint-placeholder-count="6"><div style="display:flex;gap:12px;align-items:center;padding:0 14px;min-height:56px;border-bottom:1px solid var(--border)"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ m.ic }}">{{ m.icon }}</span><span style="flex:1;font-weight:600;font-size:14.5px;color:{{ m.fg }}">{{ m.l }}</span><span style="font-size:12.5px;color:var(--muted)">{{ m.v }}</span><span style="font-family:'Material Symbols Rounded';font-size:20px;color:var(--muted)">chevron_right</span></div></sc-for>
+                  </div>
+                  <button style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:20px">swap_horiz</span>Passer en mode adhérent</button>
+                </sc-if>
+                <sc-if value="{{ PF.edit }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:4px;min-height:48px;margin-left:-12px"><button aria-label="Annuler" style="width:44px;height:44px;border-radius:999px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="font-family:'Material Symbols Rounded';font-size:24px">close</span></button><h1 style="margin:0;flex:1;font-family:var(--f-head);font-size:24px;letter-spacing:-.03em;font-weight:800">Modifier le profil</h1></div>
+                  <div style="display:flex;gap:14px;align-items:center"><div style="width:72px;height:72px;border-radius:var(--r);background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--f-head);font-weight:800;font-size:24px">YA</div><button style="height:44px;padding:0 14px;border-radius:var(--r-sm);border:1.5px solid var(--border-strong);background:transparent;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">photo_camera</span>Changer la photo</button></div>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Nom affiché<input defaultValue="Yassine" style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:0 14px;font-size:15px;font-weight:400;outline:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Présentation<textarea rows="4" defaultValue="Préparateur physique diplômé, 8 ans d’expérience. Programmes de force progressifs et suivi nutritionnel simple." style="border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface);padding:12px 14px;font-size:15px;font-weight:400;outline:none;resize:none" style-focus="border-color:var(--focus);box-shadow:0 0 0 3px var(--primary-soft)"></textarea><span style="font-size:12px;color:var(--muted);font-weight:500;align-self:flex-end">112 / 300</span></label>
+                  <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Spécialités<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ specEdit }}" as="s" hint-placeholder-count="6"><span style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;background:{{ s.bg }};color:{{ s.fg }};border:1px solid {{ s.bd }}"><span style="font-family:'Material Symbols Rounded';font-size:16px">{{ s.icon }}</span>{{ s.l }}</span></sc-for></div></div>
+                  <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600">Tarif d’une séance hors crédit<div style="height:var(--ctl);border-radius:var(--r-sm);border:1.5px solid var(--border-input);background:var(--surface-2);padding:0 14px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:400;color:var(--muted)">{{ coachPrice }}<span style="font-size:12px;font-weight:600">fixé par la salle</span></div></label>
+                  <button style="height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer" style-hover="background:var(--primary-hover)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Enregistrer</button>
+                </sc-if>
+                <sc-if value="{{ PF.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px;animation:fzPulse 1.4s ease-in-out infinite"><div style="height:48px"></div><div style="height:260px;border-radius:var(--r-lg);background:var(--surface-2)"></div><div style="height:280px;border-radius:var(--r);background:var(--surface-2)"></div></div></sc-if>
+              </div>
+              <dc-import name="FZ CoachTabBar" active="{{ 4 }}" unread="{{ 3 }}" hint-size="100%,88px"></dc-import>
+            </div></div>
+            <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">{{ th.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;frames&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Les deux&quot;,&quot;Clair&quot;,&quot;Sombre&quot;],&quot;default&quot;:&quot;Les deux&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Personnalisé&quot;,&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Personnalisé&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Palette&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FF5A1F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;primaryContrast&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;secondary&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#14213D&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FCA311&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;success&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#16A34A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;warning&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F59E0B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;danger&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#DC2626&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;info&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#2563EB&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Couleurs&quot;},&quot;bgLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F7F7F9&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#FFFFFF&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textLight&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#111827&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;bgDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0E1117&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;surfaceDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#1A1F2B&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;textDark&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F3F4F6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Neutres&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;unit&quot;:&quot;px&quot;,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortable&quot;,&quot;Compacte&quot;],&quot;default&quot;:&quot;Confortable&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Affichage&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DT&quot;,&quot;€&quot;],&quot;default&quot;:&quot;DT&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;sites&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;3&quot;],&quot;default&quot;:&quot;3&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;logoMode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Logo + nom&quot;,&quot;Logo seul&quot;],&quot;default&quot;:&quot;Logo + nom&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const linePts=(arr,w,h,p,mn,mx)=>{mx=mx??Math.max(...arr);mn=mn??Math.min(...arr);const sx=(w-2*p)/(arr.length-1);return arr.map((v,i)=>[+(p+i*sx).toFixed(1),+(h-p-(v-mn)/((mx-mn)||1)*(h-2*p)).toFixed(1)]);};
+const ptsStr=p=>p.map(q=>q.join(',')).join(' ');
+const ini=n=>n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const SITES=['Lac 2','La Marsa','Centre-ville'];
+const SITE_TONE=['primary','info','accent'];
+const SESS={0:[['07:00','45 min','Cycling','Studio 1',0,18,20,'c'],['10:00','60 min','Individuel · Sarra Ben Ali','Plateau muscu',0,0,0,'i'],['12:15','30 min','HIIT Express','Salle 2',0,20,20,'c'],['17:00','60 min','Individuel · Karim Mansour','Plateau',1,0,0,'i'],['18:30','30 min','HIIT Express','Salle 2',0,17,20,'c'],['19:45','45 min','Circuit training','Salle B',2,12,18,'c']],1:[],2:[['07:00','45 min','Cycling','Studio 1',0,14,20,'c'],['18:00','60 min','Individuel · Youssef Trabelsi','Plateau',1,0,0,'i'],['19:00','45 min','HIIT Express','Salle A',1,9,16,'c']],3:[['12:15','30 min','HIIT Express','Salle 2',0,16,20,'c'],['19:45','45 min','Circuit training','Salle B',2,7,18,'c']],4:[['07:00','45 min','Cycling','Studio 1',0,11,20,'c'],['10:00','60 min','Individuel · Ines Gharbi','Plateau',2,0,0,'i']],5:[['18:30','30 min','HIIT Express','Salle 2',0,12,20,'c']],6:[['09:00','45 min','HIIT Express','Salle A',1,6,16,'c']]};
+const ROSTER=[['Sarra Ben Ali','Premium','',''],['Youssef Trabelsi','Mensuel','Hors site · La Marsa','info'],['Nour Hammami','Mensuel','',''],['Omar Saidi','Mensuel','1re séance','accent'],['Karim Mansour','Premium','',''],['Ines Gharbi','Trimestriel','Paiement en attente','warning'],['Lina Ferchichi','Premium','',''],['Sami Ayari','Annuel','',''],['Rim Kefi','Mensuel','',''],['Hatem Dridi','Premium','Blessure épaule','danger']];
+
+class Component extends DCLogic {
+  state={home:'normal',plan:'normal',pView:'jour',pDay:0,pSite:-1,att:'pointage',marks:{0:'p',1:'p',2:'p',3:'p',4:'a',5:'p',7:'p'},stu:'normal',stuF:0,fiche:'complet',prg:'edit',prgDay:0,dispo:'normal',dView:'rec',dSite:0,req:'normal',msg:'list',prof:'normal'};
+  chips(key,opts){const S=this.state;return opts.map(([v,l])=>({l,on:()=>this.setState({[key]:v}),bg:S[key]===v?'var(--secondary)':'var(--surface)',fg:S[key]===v?'var(--on-secondary)':'var(--text)',bd:S[key]===v?'var(--secondary)':'var(--border-strong)'}));}
+  flags(key,list){const o={};list.forEach(k=>o[k]=this.state[key]===k);return o;}
+  pick(sel,on){return{bg:sel?'var(--secondary)':'var(--surface)',fg:sel?'var(--on-secondary)':'var(--text)',bd:sel?'var(--secondary)':'var(--border)',on};}
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--focus':ensure(C.primary,bg,3),'--overlay':dark?'rgba(0,0,0,.62)':'rgba(14,17,23,.45)',
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px',
+      '--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const light=this.vars(false,C,P),dark=this.vars(true,C,P);
+    const frame=v=>({...v,width:'390px',height:'844px',flex:'none',borderRadius:'54px',padding:'10px',background:'#0B0D12',boxShadow:'var(--sh3)'});
+    const show=P.frames||'Les deux';const themes=[];
+    if(show!=='Sombre')themes.push({label:'Clair',frame:frame(light)});if(show!=='Clair')themes.push({label:'Sombre',frame:frame(dark)});
+    const rootStyle={...light,background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';const caps=brand.match(/[A-Z]/g);const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):brand.slice(0,2)).toUpperCase();
+    const multiSite=String(P.sites??'3')==='3';
+    const k=P.currency==='€'?0.3:1;const cur=P.currency==='€'?'€':'DT';
+    const money=n=>Math.round(n*k).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g,' ')+' '+cur;
+    const ch={};
+    return {rootStyle,themes,brand,mono,showName:P.logoMode!=='Logo seul',multiSite,singleSite:!multiSite,ch,skel4:[1,2,3,4],
+      ...this.partI(S,ch,multiSite),...this.partL(S,ch,multiSite),...this.partM(S,ch),...this.partN(S,ch,multiSite),...this.partO(S,ch,money,multiSite),...this.partP(S,ch),...this.partQ(S,ch,multiSite)};
+  }
+  sess(day,multiSite){return (SESS[day]||[]).map(([t,dur,n,room,site,b,c,kind])=>{const ind=kind==='i';const p=c?b/c:0;const tone=ind?'info':(p>=1?'danger':(p>=.85?'warning':'success'));return{t,dur,n,room,site:SITES[site],siteIdx:site,kindTone:ind?'info':'primary',tone,fillLabel:ind?'Séance individuelle · 1 crédit':(b+'/'+c+' inscrits'+(p>=1?' · complet':'')),short:ind?'Indiv.':(b+'/'+c)};}).filter(x=>!multiSite||this.state.pSite<0||x.siteIdx===this.state.pSite);}
+  partI(S,ch,multiSite){
+    ch.home=this.chips('home',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['offline','Hors ligne'],['error','Erreur']]);
+    ch.plan=this.chips('plan',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['error','Erreur']]);
+    ch.att=this.chips('att',[['pointage','Pointage'],['add','Ajout manuel'],['refus','Refus d’ajout'],['success','Appel validé'],['offline','Hors ligne']]);
+    const HO=this.flags('home',['normal','loading','empty','offline','error']);
+    const st=[['Terminé','secondary',.6],['Terminé','secondary',.6],['Dans 25 min','primary',1],['À venir','success',1],['À venir','success',1],['À venir','success',1]];
+    const todayList=this.sess(0,false).map((s,i)=>({...s,meta:s.room+(multiSite?' · '+s.site:'')+(s.kindTone==='info'?' · individuel':' · '+s.short),st:st[i][0],tone:st[i][1],op:st[i][2]}));
+    const unread=[{n:'Sarra Ben Ali',msg:'Je peux décaler lundi à 10:30 ?',t:'11:42',c:2,tone:'accent'},{n:'Youssef Trabelsi',msg:'Merci pour le programme, j’attaque demain !',t:'09:15',c:1,tone:'info'}].map(m=>({...m,ini:ini(m.n)}));
+    const PL=this.flags('plan',['normal','loading','empty','error']);
+    const isDay=S.pView==='jour';
+    const days=[['Sam','3'],['Dim','4'],['Lun','5'],['Mar','6'],['Mer','7'],['Jeu','8'],['Ven','9']];
+    const pDays=days.map(([w,n],i)=>({w,n,c:(SESS[i]||[]).length?(SESS[i].length+' séances'):'—',...this.pick(S.pDay===i,()=>this.setState({pDay:i}))}));
+    const pList=PL.empty?[]:this.sess(S.pDay,multiSite);
+    const wd=['Samedi 3','Dimanche 4','Lundi 5','Mardi 6','Mercredi 7','Jeudi 8','Ven 9'];
+    const pWeek=PL.empty?[]:wd.map((d,i)=>{const it=this.sess(i,multiSite);return{day:d,sum:it.length?it.length+' séances':'Repos',items:it};}).filter(g=>g.items.length);
+    const siteFilter=[['Tous les sites',-1],...SITES.map((s,i)=>[s,i])].map(([l,i])=>({l,dot:i<0?'transparent':'var(--'+SITE_TONE[i]+')',...this.pick(S.pSite===i,()=>this.setState({pSite:i})),bd:S.pSite===i?'var(--secondary)':'var(--border-strong)'}));
+    const seg=(v,l)=>({l,on:()=>this.setState({pView:v}),bg:S.pView===v?'var(--surface)':'transparent',fg:S.pView===v?'var(--text)':'var(--muted)',sh:S.pView===v?'var(--sh1)':'none'});
+    const listOk=PL.normal||PL.error;
+    const AT=this.flags('att',['pointage','add','refus','success','offline']);
+    const M=S.marks;
+    const setM=(i,v)=>()=>this.setState(s=>{const m={...s.marks};m[i]=m[i]===v?undefined:v;return{marks:m};});
+    const roster=ROSTER.map(([n,plan,flag,ft],i)=>{const v=M[i];const isP=v==='p',isA=v==='a';return{n,ini:ini(n),plan,flag,flagTone:ft,hasFlag:!!flag,isP,isA,onP:setM(i,'p'),onA:setM(i,'a'),
+      pBg:isP?'var(--success)':'transparent',pFg:isP?'var(--on-success)':'var(--muted)',pBd:isP?'var(--success)':'var(--border-input)',aBg:isA?'var(--danger)':'transparent',aFg:isA?'var(--on-danger)':'var(--muted)',aBd:isA?'var(--danger)':'var(--border-input)'};});
+    const total=20;const pres=Object.values(M).filter(v=>v==='p').length+10;const abs=Object.values(M).filter(v=>v==='a').length;const todo=total-pres-abs;
+    const addResults=[['Walid Bouazizi','Annuel · actif','success',false],['Amira Chaouch','Abonnement expiré · ajout impossible','danger',true],['Hedi Karoui','Abonnement gelé · ajout impossible','danger',true],['Nour Hammami','Déjà inscrite','secondary',true]].map(([n,why,tone,dis])=>({n,ini:ini(n),why,tone,dis,op:dis?.7:1,cta:dis?(tone==='secondary'?'Inscrite':'Refusé'):'Ajouter',cur:dis?'not-allowed':'pointer',bg:dis?'var(--surface-2)':'var(--primary)',fg:dis?'var(--muted)':'var(--primary-contrast)',bd:dis?'var(--surface-2)':'var(--primary)'}));
+    const done=AT.success;
+    return {HO,homeNet:HO.offline?'off':'ok',homeContent:HO.normal||HO.offline,homeSub:HO.empty?'Samedi 3 octobre · aucun cours':'Samedi 3 octobre · 4 cours, 2 séances individuelles',
+      homeStats:[{v:'6',l:'séances',tone:'secondary'},{v:'67',l:'inscrits',tone:'success'},{v:'2',l:'demandes',tone:'accent'}],todayList,unread,
+      PL,viewSeg:[seg('jour','Jour'),seg('semaine','Semaine')],pIsDay:isDay,pDays,pList,pWeek,siteFilter,pEmpty:PL.empty||(listOk&&(isDay?pList.length===0:pWeek.length===0)),pEmptyWhere:PL.empty?'ce jour-là':(S.pSite>=0&&multiSite?'à '+SITES[S.pSite]:'ce jour-là'),pShowDay:listOk&&isDay&&pList.length>0,pShowWeek:listOk&&!isDay&&pWeek.length>0,
+      AT,attNet:AT.offline?'off':'ok',roster,attPresent:pres,attAbsent:abs,attTodo:todo,attTotal:total,attPctP:pres/total*100,attPctA:abs/total*100,allPresent:()=>{const m={};ROSTER.forEach((_,i)=>m[i]='p');this.setState({marks:m});},
+      addResults,attBtn:done?'Appel validé':(AT.offline?'Valider (envoi différé)':'Valider l’appel'),attBtnBg:done?'var(--success-soft)':'var(--primary)',attBtnFg:done?'var(--success-ink)':'var(--primary-contrast)'};
+  }
+  partL(S,ch,multiSite){
+    ch.stu=this.chips('stu',[['normal','Normal'],['loading','Chargement'],['empty','Vide'],['noresult','Aucun résultat']]);
+    ch.fiche=this.chips('fiche',[['complet','Consentement complet'],['partiel','Partiel'],['refuse','Refusé']]);
+    const SL=this.flags('stu',['normal','loading','empty','noresult']);
+    const ST=[['Sarra Ben Ali','Force — Haut du corps · S2/4','Vue aujourd’hui','success','accent',0],['Youssef Trabelsi','Force — Haut du corps · S1/4','Vu il y a 2 jours','success','info',0],['Karim Mansour','Perte de poids · S5/8','Vu hier','success','primary',0],['Ines Gharbi','Remise en forme · S3/6','Pas vue depuis 9 jours','warning','success',1],['Mehdi Jaziri','Aucun programme · abonnement gelé','Pas vu depuis 7 semaines','danger','secondary',1],['Omar Saidi','Découverte · 1re séance aujourd’hui','Nouveau','info','warning',2]];
+    const fl=[['Tous',null],['À relancer',1],['Nouveaux',2]];
+    const students=ST.filter(s=>S.stuF===0||s[5]===fl[S.stuF][1]).map(([n,prog,last,dot,tone])=>({n,ini:ini(n),prog,last,dot,tone}));
+    const stuFilters=fl.map(([l],i)=>({l:l+(i===0?' · 24':(i===1?' · 2':' · 1')),...this.pick(S.stuF===i,()=>this.setState({stuF:i})),bd:S.stuF===i?'var(--secondary)':'var(--border-strong)'}));
+    const F=S.fiche;
+    const yes=(l)=>({l,icon:'check_circle',fg:'var(--success-ink)'}),no=(l)=>({l,icon:'block',fg:'var(--danger-ink)'});
+    const consent={complet:{tone:'success',icon:'verified_user',title:'Sarra partage toutes ses données avec vous',items:[yes('Présence'),yes('Progression'),yes('Mesures'),yes('Photos')],sub:'Consentement donné le 12/07/2026 · révocable à tout moment par l’élève.'},
+      partiel:{tone:'info',icon:'shield_person',title:'Partage partiel',items:[yes('Présence'),yes('Progression'),yes('Mesures'),no('Photos')],sub:'Les photos de progression restent privées. Ne les demandez pas par message.'},
+      refuse:{tone:'warning',icon:'shield_lock',title:'Sarra ne partage pas ses données personnelles',items:[yes('Présence'),no('Progression'),no('Mesures'),no('Photos')],sub:'Seules la présence et les programmes assignés sont visibles.'}}[F];
+    const pres=[3,2,3,4,3,3,4,3];
+    return {SL,students,stuFilters,stuCount:SL.empty?'0 élève':'24 élèves',stuQuery:SL.noresult?'Mansouri':'',skel6:[1,2,3,4,5,6],consent,fShowProg:F!=='refuse',fLockProg:F==='refuse',
+      ficheStats:[{v:'38',l:'séances (3 mois)'},{v:'86 %',l:'assiduité'},{v:'6',l:'semaines d’affilée'}],fWeight:ptsStr(linePts([74.6,74.2,73.9,73.8,73.3,73.0,72.8,72.6,72.5,72.1,71.9,71.8],300,70,4)),
+      fPresence:pres.map((v,i)=>({h:v/4*100,t:v+' séances',bg:i===7?'var(--primary)':'var(--secondary)'})),
+      fPrograms:[{n:'Force — Haut du corps',meta:'Assigné le 21/09 · semaine 2 sur 4 · 5 séances faites',st:'En cours',tone:'primary',icon:'fitness_center'},{n:'Remise en forme',meta:'Juillet – août · 18 séances',st:'Terminé',tone:'success',icon:'directions_run'}]};
+  }
+  partM(S,ch){
+    ch.prg=this.chips('prg',[['edit','Édition'],['lib','Bibliothèque'],['error','Erreur'],['preview','Aperçu & assignation'],['success','Succès']]);
+    const PGs=this.flags('prg',['edit','lib','error','preview','success']);
+    const D=[['J1','Poussée',[['Développé couché','Pectoraux · barre',['4','8','90 s']],['Développé incliné haltères','Pectoraux · haltères',['3','10','75 s']],['Dips','Triceps · poids du corps',['3','12','60 s']]]],['J2','Tirage',[['Rowing barre','Dos · barre',['4','8','90 s']],['Tirage poitrine','Dos · machine',['3','10','75 s']]]],['J3','Jambes',[]]];
+    const day=PGs.error?2:S.prgDay;
+    const prgDayTabs=D.map(([k,n,ex],i)=>({l:k+' · '+n,err:PGs.error&&ex.length===0,...this.pick(day===i,()=>this.setState({prgDay:i})),bd:day===i?'var(--secondary)':(PGs.error&&ex.length===0?'var(--danger)':'var(--border-input)')}));
+    const prgEx=D[day][2].map(([n,m,v])=>({n,m,fields:[{l:'Séries',v:v[0]},{l:'Rép.',v:v[1]},{l:'Repos',v:v[2]}]}));
+    const step=PGs.preview?2:1;
+    const prgSteps=['Infos','Exercices','Aperçu'].map((l,i)=>({l,bg:i<=step?'var(--primary)':'var(--border)',fg:i<=step?'var(--primary-ink)':'var(--muted)'}));
+    const full=[['J1','Poussée','Développé couché, incliné haltères, dips, élévations latérales, extensions triceps',5],['J2','Tirage','Tractions assistées, rowing barre, tirage poitrine, face pull, curl',5],['J3','Jambes','Squat barre, fentes marchées, presse, leg curl',4]];
+    const sel=[true,true,false,false];
+    const assignees=[['Sarra Ben Ali','Premium · consentement complet'],['Youssef Trabelsi','Mensuel · programme actuel remplacé'],['Karim Mansour','Premium · programme en cours S5/8'],['Omar Saidi','Mensuel · nouveau']].map(([n,meta],i)=>({n,meta,ini:ini(n),sel:sel[i],icon:sel[i]?'check':'',bg:sel[i]?'var(--primary)':'transparent',bd:sel[i]?'var(--primary)':'var(--border-input)'}));
+    const LI=[['Élévations latérales','Épaules','Haltères',true],['Extensions triceps poulie','Bras','Poulie',true],['Développé militaire','Épaules','Barre',false],['Pompes','Pectoraux','Poids du corps',false],['Écarté poulie','Pectoraux','Poulie',false],['Pull-over','Dos','Haltère',false]];
+    const libItems=LI.map(([n,m,eq,s])=>({n,m,eq,sel:s,icon:s?'check':'',bg:s?'var(--primary)':'transparent',bd:s?'var(--primary)':'var(--border-input)'}));
+    const libMuscles=['Tous','Pectoraux','Épaules','Bras','Dos'].map((l,i)=>({l,bg:i===0?'var(--secondary)':'var(--surface)',fg:i===0?'var(--on-secondary)':'var(--text)',bd:i===0?'var(--secondary)':'var(--border-strong)'}));
+    return {PGs,prgEditor:!PGs.success,prgEditDays:PGs.edit||PGs.lib||PGs.error,prgDayTabs,prgEx,prgDayEmpty:prgEx.length===0,prgSteps,prgStepLabel:(step+1)+'/3',
+      prgPreview:full.map(([k,n,list,count])=>({k,n,list,count})),assignees,libItems,libMuscles,prgBack:PGs.preview?'Retour':'Brouillon',prgNext:PGs.preview?'Assigner à 2 élèves':'Aperçu'};
+  }
+  partN(S,ch,multiSite){
+    ch.dispo=this.chips('dispo',[['normal','Normal'],['conflict','Refus : chevauchement'],['success','Enregistré'],['empty','Vide']]);
+    const DS=this.flags('dispo',['normal','conflict','success','empty']);
+    const site=multiSite?S.dSite:0;
+    const REC={0:[['Lun',['10:00 – 12:00']],['Mar',[]],['Mer',['14:00 – 16:00']],['Jeu',['10:00 – 11:00']],['Ven',[]],['Sam',['09:00 – 11:00']],['Dim',[]]],1:[['Lun',['17:00 – 19:00']],['Mar',[]],['Mer',[]],['Jeu',[]],['Ven',['17:00 – 18:00']],['Sam',['16:00 – 18:00']],['Dim',[]]],2:[['Lun',[]],['Mar',['10:00 – 12:00']],['Mer',[]],['Jeu',['10:00 – 11:00']],['Ven',[]],['Sam',[]],['Dim',[]]]};
+    const tone=SITE_TONE[site];
+    const recRows=REC[site].map(([d,sl])=>{const slots=sl.map(t=>({t,bg:'var(--'+tone+'-soft)',fg:'var(--'+tone+'-ink)',bd:'var(--'+tone+'-border)'}));if(DS.conflict&&d==='Sam'&&site===0)slots.push({t:'18:00 – 19:00',bg:'var(--danger-soft)',fg:'var(--danger-ink)',bd:'var(--danger)'});return{d,slots,none:!slots.length,fg:slots.length?'var(--text)':'var(--muted)'};});
+    const dSeg=[['rec','Récurrents'],['ponct','Ponctuels']].map(([v,l])=>({l,on:()=>this.setState({dView:v}),bg:S.dView===v?'var(--surface)':'transparent',fg:S.dView===v?'var(--text)':'var(--muted)',sh:S.dView===v?'var(--sh1)':'none'}));
+    const dSites=SITES.map((l,i)=>({l,dot:'var(--'+SITE_TONE[i]+')',...this.pick(S.dSite===i,()=>this.setState({dSite:i})),bd:S.dSite===i?'var(--secondary)':'var(--border-strong)'}));
+    const ponct=[{n:'Congé',meta:'Dim. 11 → mar. 13 oct. · tous les sites',icon:'beach_access',tone:'warning'},{n:'Créneau supplémentaire',meta:'Mer. 14 oct. · 18:00 – 20:00'+(multiSite?' · La Marsa':''),icon:'add_circle',tone:'success'},{n:'Indisponible',meta:'Jeu. 15 oct. · 10:00 – 11:00 · formation',icon:'block',tone:'danger'}];
+    return {DS,recRows,dSeg,dSites,ponct,dSiteSuffix:multiSite?' à '+SITES[site]:'',dShowRec:!DS.empty&&S.dView==='rec',dShowPonct:!DS.empty&&S.dView==='ponct'};
+  }
+  partO(S,ch,money,multiSite){
+    ch.req=this.chips('req',[['normal','Normal'],['refuse','Refus avec motif'],['accepted','Accepté'],['conflict','Conflit'],['empty','Vide']]);
+    const RQ=this.flags('req',['normal','refuse','accepted','conflict','empty']);
+    const R=[{n:'Sarra Ben Ali',tone:'accent',ago:'il y a 8 min',when:'Lun. 5 oct. · 10:30 – 11:30',where:'Plateau muscu'+(multiSite?' · Lac 2':''),pay:'1 crédit inclus (Premium)',goal:'Travailler la technique du squat'},{n:'Ines Gharbi',tone:'success',ago:'il y a 2 h',when:'Mer. 7 oct. · 14:00 – 15:00',where:'Plateau'+(multiSite?' · Centre-ville':''),pay:'À régler à l’accueil · '+money(45),goal:'Reprise après blessure au genou'},{n:'Omar Saidi',tone:'warning',ago:'hier',when:'Sam. 10 oct. · 09:00 – 10:00',where:'Plateau muscu'+(multiSite?' · Lac 2':''),pay:'À régler à l’accueil · '+money(45),goal:'Séance découverte'}];
+    const requests=RQ.empty?[]:R.map((q,i)=>{const acc=RQ.accepted&&i===0;const conf=RQ.conflict&&i===0;return{...q,ini:ini(q.n),hasSt:acc||conf,st:acc?'Acceptée':'Créneau pris',stTone:acc?'success':'danger',actions:!acc,bd:conf?'var(--danger)':'var(--border)'};});
+    const refuseReasons=['Indisponible à cet horaire','Hors de mes spécialités','Autre motif'].map((l,i)=>({l,bg:i===0?'var(--primary-soft)':'transparent',bd:i===0?'var(--primary)':'var(--border)',rbd:i===0?'var(--primary)':'var(--border-input)',dot:i===0?'var(--primary)':'transparent'}));
+    return {RQ,requests,refuseReasons,reqCount:RQ.empty?'0':(RQ.accepted?'2 en attente':'3 en attente'),coachPrice:money(45)};
+  }
+  partP(S,ch){
+    ch.msg=this.chips('msg',[['list','Liste'],['conv','Conversation'],['empty','Vide'],['offline','Hors ligne'],['error','Échec d’envoi']]);
+    const MS=this.flags('msg',['list','conv','empty','offline','error']);
+    const convs=[['Sarra Ben Ali','Je peux décaler lundi à 10:30 ?','11:42',2,'accent'],['Youssef Trabelsi','Merci pour le programme, j’attaque demain !','09:15',1,'info'],['Karim Mansour','Vous : Pense à t’hydrater avant la séance.','Hier',0,'primary'],['Ines Gharbi','Mon genou va mieux, je reprends mercredi.','Jeu.',0,'success'],['Omar Saidi','Vous : Bienvenue Omar ! Rendez-vous à 12:15.','Jeu.',0,'warning']].map(([n,msg,t,c,tone])=>({n,ini:ini(n),msg,t,c,tone,hasC:c>0,fw:c>0?700:600,fw2:c>0?600:400,fg:c>0?'var(--text)':'var(--muted)'}));
+    const me={align:'flex-end',bg:'var(--primary)',fg:'var(--primary-contrast)',bd:'var(--primary)',rad:'var(--r) var(--r) var(--r-xs) var(--r)',metaFg:'var(--muted)'};
+    const them={align:'flex-start',bg:'var(--surface)',fg:'var(--text)',bd:'var(--border)',rad:'var(--r) var(--r) var(--r) var(--r-xs)',metaFg:'var(--muted)',metaIcon:'',op:1};
+    const bubbles=[{...them,t:'Bonjour Yassine ! Super séance ce matin, merci 💪'.replace(' 💪',''),meta:'10:58'},{...me,t:'Merci Sarra ! Belle progression au développé couché, 52,5 kg × 8 c’est un record.',meta:'Lu · 11:05',metaIcon:'done_all',op:1},{...them,t:'Je peux décaler lundi à 10:30 ? J’ai un rendez-vous à 9h.',meta:'11:42'},{...them,t:'Sinon mercredi après-midi.',meta:'11:42'}];
+    if(MS.offline)bubbles.push({...me,t:'Pas de souci, je regarde mes créneaux.',meta:'En attente d’envoi',metaIcon:'schedule',op:.75});
+    if(MS.error)bubbles.push({...me,t:'Pas de souci, je regarde mes créneaux.',meta:'Échec · toucher pour réessayer',metaIcon:'error',metaFg:'var(--danger-ink)',op:1,bd:'var(--danger)'});
+    return {MS,convs,bubbles,msgListView:MS.list||MS.empty,msgConvView:MS.conv||MS.offline||MS.error,msgNet:MS.offline?'off':'ok',msgUnread:MS.empty?0:3};
+  }
+  partQ(S,ch,multiSite){
+    ch.prof=this.chips('prof',[['normal','Normal'],['edit','Modification'],['success','Succès'],['loading','Chargement']]);
+    const p=S.prof;const PF={view:p==='normal'||p==='success',edit:p==='edit',success:p==='success',loading:p==='loading'};
+    const specEdit=['Force','HIIT','Perte de poids','Yoga','Boxe','Mobilité'].map((l,i)=>{const on=i<3;return{l,icon:on?'check':'add',bg:on?'var(--secondary)':'var(--surface)',fg:on?'var(--on-secondary)':'var(--text)',bd:on?'var(--secondary)':'var(--border-strong)'};});
+    const profMenu=[['schedule','Mes disponibilités','12 h / sem.'],['inbox','Demandes de séances','3'],['workspace_premium','Diplômes & certifications','2'],['notifications','Notifications',''],['language','Langue','Français'],['logout','Se déconnecter','']].map(([icon,l,v],i)=>({icon,l,v,fg:i===5?'var(--danger-ink)':'var(--text)',ic:i===5?'var(--danger-ink)':'var(--muted)'}));
+    return {PF,specs:['Force','HIIT','Perte de poids'],profStats:[{v:'4,9',l:'128 avis'},{v:'24',l:'élèves'},{v:'46',l:'séances / mois'}],specEdit,profMenu};
+  }
+}
+</script>
+</body>
+</html>

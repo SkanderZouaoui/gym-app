@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<nav style="position:absolute;left:0;right:0;bottom:0;height:88px;padding:0 6px 22px;background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:4">
+  <sc-for list="{{ items }}" as="n" hint-placeholder-count="5">
+    <button aria-label="{{ n.label }}" style="position:relative;height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-radius:var(--r-sm);color:{{ n.fg }}" style-focus="outline:2px solid var(--focus)"><span style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;font-variation-settings:'FILL' {{ n.fill }}">{{ n.icon }}</span><span style="font-size:10.5px;font-weight:700">{{ n.label }}</span><sc-if value="{{ n.hasBadge }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--danger);color:var(--on-danger);font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--surface)">{{ n.badge }}</span></sc-if></button>
+  </sc-for>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:100},&quot;active&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:4,&quot;tsType&quot;:&quot;number&quot;},&quot;unread&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;min&quot;:0,&quot;max&quot;:99,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  renderVals(){
+    const a=+(this.props.active??0);const b=+(this.props.unread??3);
+    const items=[['today','Aujourd’hui'],['calendar_month','Planning'],['group','Élèves'],['chat','Messages'],['person','Profil']].map(([icon,label],i)=>({icon,label,fill:a===i?1:0,fg:a===i?'var(--primary-ink)':'var(--muted)',hasBadge:i===3&&b>0,badge:b}));
+    return {items};
+  }
+}
+</script>
+</body>
+</html>
