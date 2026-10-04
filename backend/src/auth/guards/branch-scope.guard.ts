@@ -30,16 +30,20 @@ export class BranchScopeGuard implements CanActivate {
           ? request.query?.[field]
           : request.body?.[field];
 
+    const hasNetworkScope = user.grants.some(
+      (g) => g.role === user.activeRole && g.branchId === null,
+    );
+
     if (!targetBranchId) {
-      if (options.optional) {
+      // L'absence de branchId n'est acceptée que pour une portée réseau
+      // (vue "tous les sites") — jamais comme contournement pour un admin
+      // ou staff limité à un ou plusieurs sites précis.
+      if (options.optional && hasNetworkScope) {
         return true;
       }
       throw new ForbiddenException('BRANCH_NOT_AUTHORIZED');
     }
 
-    const hasNetworkScope = user.grants.some(
-      (g) => g.role === user.activeRole && g.branchId === null,
-    );
     if (hasNetworkScope) {
       return true;
     }

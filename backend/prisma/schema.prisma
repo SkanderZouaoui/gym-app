@@ -50,6 +50,7 @@ model Branch {
   classSessions       ClassSession[]
   coachingSessions    CoachingSession[]
   users               User[]              @relation("HomeBranchUsers")
+  announcements       Announcement[]
 
   @@map("branches")
 }
@@ -110,6 +111,12 @@ model User {
   checkedInBookings        Booking[]         @relation("CheckedInByUser")
   coachingSessionsAsMember CoachingSession[] @relation("CoachingMember")
   refreshTokens            RefreshToken[]
+  notifications            Notification[]
+  announcementsCreated     Announcement[]    @relation("AnnouncementCreatedBy")
+  reportsFiled             Report[]          @relation("ReportReportedBy")
+  reportsResolved          Report[]          @relation("ReportResolvedBy")
+  notesReceived            MemberNote[]      @relation("MemberNoteUser")
+  notesAuthored            MemberNote[]      @relation("MemberNoteAuthor")
 
   @@map("users")
 }
@@ -232,8 +239,9 @@ model MembershipPlan {
   createdAt               DateTime               @default(now()) @map("created_at")
   updatedAt               DateTime               @updatedAt @map("updated_at")
 
-  branches    PlanBranch[]
-  memberships Membership[]
+  branches      PlanBranch[]
+  memberships   Membership[]
+  announcements Announcement[]
 
   @@map("membership_plans")
 }
@@ -484,6 +492,94 @@ model CoachingSession {
 
   @@index([coachId, startsAt])
   @@map("coaching_sessions")
+}
+
+// ---------------------------------------------------------------------------
+// Communication et modération (section 8.7, socle phase 3)
+// ---------------------------------------------------------------------------
+
+enum NotificationType {
+  CLASS_REMINDER
+  WAITLIST_PROMOTED
+  MEMBERSHIP_EXPIRING
+  ANNOUNCEMENT
+  ATTENDANCE_CONFIRMED
+  MESSAGE
+  CHALLENGE
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model Announcement {
+  id          String    @id @default(uuid())
+  title       String
+  body        String
+  branchId    String?   @map("branch_id") // null = tous les sites
+  planId      String?   @map("plan_id") // ciblage par formule
+  createdById String    @map("created_by")
+  sentAt      DateTime? @map("sent_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  branch    Branch?         @relation(fields: [branchId], references: [id])
+  plan      MembershipPlan? @relation(fields: [planId], references: [id])
+  createdBy User            @relation("AnnouncementCreatedBy", fields: [createdById], references: [id])
+
+  @@map("announcements")
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id           String       @id @default(uuid())
+  reportedById String       @map("reported_by")
+  targetType   String       @map("target_type") // POST | COMMENT | USER
+  targetId     String       @map("target_id")
+  reason       String
+  status       ReportStatus @default(OPEN)
+  resolvedById String?      @map("resolved_by")
+  resolvedAt   DateTime?    @map("resolved_at")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  reportedBy User  @relation("ReportReportedBy", fields: [reportedById], references: [id])
+  resolvedBy User? @relation("ReportResolvedBy", fields: [resolvedById], references: [id])
+
+  @@index([status])
+  @@map("reports")
+}
+
+/**
+ * Notes libres sur un adhérent, visibles par staff/coach/admin (section 10.5).
+ */
+model MemberNote {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  authorId  String   @map("author_id")
+  body      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User @relation("MemberNoteUser", fields: [userId], references: [id], onDelete: Cascade)
+  author User @relation("MemberNoteAuthor", fields: [authorId], references: [id])
+
+  @@index([userId])
+  @@map("member_notes")
 }
 
 // ---------------------------------------------------------------------------

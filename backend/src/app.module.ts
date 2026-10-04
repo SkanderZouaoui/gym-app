@@ -12,6 +12,10 @@ import { AccessPolicyModule } from './access-policy/access-policy.module.js';
 import { ClassesModule } from './classes/classes.module.js';
 import { BookingsModule } from './bookings/bookings.module.js';
 import { AttendanceModule } from './attendance/attendance.module.js';
+import { StaffModule } from './staff/staff.module.js';
+import { AdminModule } from './admin/admin.module.js';
+import { AnnouncementsModule } from './announcements/announcements.module.js';
+import { SocialModule } from './social/social.module.js';
 
 @Module({
   imports: [
@@ -28,6 +32,10 @@ import { AttendanceModule } from './attendance/attendance.module.js';
     ClassesModule,
     BookingsModule,
     AttendanceModule,
+    StaffModule,
+    AdminModule,
+    AnnouncementsModule,
+    SocialModule,
   ],
 })
 export class AppModule {}
