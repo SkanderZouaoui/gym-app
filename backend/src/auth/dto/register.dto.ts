@@ -21,4 +21,8 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   homeBranchId?: string;
+
+  @IsOptional()
+  @IsString()
+  referralCode?: string;
 }

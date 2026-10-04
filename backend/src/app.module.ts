@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { OrganizationModule } from './organization/organization.module.js';
@@ -18,11 +19,13 @@ import { AnnouncementsModule } from './announcements/announcements.module.js';
 import { SocialModule } from './social/social.module.js';
 import { CoachingModule } from './coaching/coaching.module.js';
 import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
+import { LoyaltyModule } from './loyalty/loyalty.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     AuthModule,
     OrganizationModule,
@@ -40,6 +43,7 @@ import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
     SocialModule,
     CoachingModule,
     BodyMetricsModule,
+    LoyaltyModule,
   ],
 })
 export class AppModule {}

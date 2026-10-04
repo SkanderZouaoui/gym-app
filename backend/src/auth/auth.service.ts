@@ -7,9 +7,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as argon2 from 'argon2';
 import { Role } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { AppEvent, type UserRegisteredEvent } from '../common/events.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { AuthenticatedUser, BranchRoleGrant } from './types/authenticated-user.js';
@@ -26,6 +28,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -52,6 +55,11 @@ export class AuthService {
       },
       include: { branchRoles: true },
     });
+
+    this.events.emit(AppEvent.USER_REGISTERED, {
+      userId: user.id,
+      referralCode: dto.referralCode,
+    } satisfies UserRegisteredEvent);
 
     return this.issueTokensForRole(user.id, Role.MEMBER, dto.homeBranchId ?? null);
   }

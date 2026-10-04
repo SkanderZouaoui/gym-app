@@ -51,6 +51,7 @@ model Branch {
   coachingSessions    CoachingSession[]
   users               User[]              @relation("HomeBranchUsers")
   announcements       Announcement[]
+  challenges          Challenge[]
 
   @@map("branches")
 }
@@ -101,27 +102,32 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
 
-  homeBranch               Branch?           @relation("HomeBranchUsers", fields: [homeBranchId], references: [id])
+  homeBranch               Branch?                  @relation("HomeBranchUsers", fields: [homeBranchId], references: [id])
   branchRoles              UserBranchRole[]
   coachProfile             CoachProfile?
   deviceTokens             DeviceToken[]
   memberships              Membership[]
-  recordedPayments         Payment[]         @relation("RecordedByUser")
+  recordedPayments         Payment[]                @relation("RecordedByUser")
   bookings                 Booking[]
-  checkedInBookings        Booking[]         @relation("CheckedInByUser")
-  coachingSessionsAsMember CoachingSession[] @relation("CoachingMember")
+  checkedInBookings        Booking[]                @relation("CheckedInByUser")
+  coachingSessionsAsMember CoachingSession[]        @relation("CoachingMember")
   refreshTokens            RefreshToken[]
   notifications            Notification[]
-  announcementsCreated     Announcement[]    @relation("AnnouncementCreatedBy")
-  reportsFiled             Report[]          @relation("ReportReportedBy")
-  reportsResolved          Report[]          @relation("ReportResolvedBy")
-  notesReceived            MemberNote[]      @relation("MemberNoteUser")
-  notesAuthored            MemberNote[]      @relation("MemberNoteAuthor")
-  exercisesCreated         Exercise[]        @relation("ExerciseCreatedBy")
-  programsCreated          Program[]         @relation("ProgramCreatedBy")
-  programsAssigned         Program[]         @relation("ProgramAssignedTo")
+  announcementsCreated     Announcement[]           @relation("AnnouncementCreatedBy")
+  reportsFiled             Report[]                 @relation("ReportReportedBy")
+  reportsResolved          Report[]                 @relation("ReportResolvedBy")
+  notesReceived            MemberNote[]             @relation("MemberNoteUser")
+  notesAuthored            MemberNote[]             @relation("MemberNoteAuthor")
+  exercisesCreated         Exercise[]               @relation("ExerciseCreatedBy")
+  programsCreated          Program[]                @relation("ProgramCreatedBy")
+  programsAssigned         Program[]                @relation("ProgramAssignedTo")
   workoutLogs              WorkoutLog[]
   bodyMetrics              BodyMetric[]
+  pointsTransactions       PointsTransaction[]
+  badges                   UserBadge[]
+  challengeParticipations  ChallengeParticipation[]
+  referralsAsReferrer      Referral[]               @relation("ReferralReferrer")
+  referralsAsReferee       Referral[]               @relation("ReferralReferee")
 
   @@map("users")
 }
@@ -729,4 +735,115 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Fidélité (section 8.6) — pilotée par événements, idempotente
+// ---------------------------------------------------------------------------
+
+model PointsTransaction {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  points    Int // positif ou négatif
+  reason    String
+  sourceKey String   @unique @map("source_key") // clé d'idempotence (ex. "booking.attended:<bookingId>")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("points_transactions")
+}
+
+enum BadgeCriterionType {
+  STREAK_DAYS
+  TOTAL_ATTENDANCE
+  MANUAL
+}
+
+model Badge {
+  id             String             @id @default(uuid())
+  name           String
+  description    String?
+  iconKey        String?            @map("icon_key")
+  criterionType  BadgeCriterionType @map("criterion_type")
+  criterionValue Int?               @map("criterion_value")
+  isActive       Boolean            @default(true) @map("is_active")
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  badgeId  String   @map("badge_id")
+  earnedAt DateTime @default(now()) @map("earned_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+enum ChallengeMetric {
+  CLASSES_ATTENDED
+  STREAK_DAYS
+}
+
+model Challenge {
+  id           String          @id @default(uuid())
+  name         String
+  description  String?
+  metric       ChallengeMetric
+  targetValue  Int             @map("target_value")
+  startDate    DateTime        @map("start_date")
+  endDate      DateTime        @map("end_date")
+  pointsReward Int             @default(0) @map("points_reward")
+  branchId     String?         @map("branch_id") // null = réseau
+
+  branch         Branch?                  @relation(fields: [branchId], references: [id])
+  participations ChallengeParticipation[]
+
+  @@map("challenges")
+}
+
+model ChallengeParticipation {
+  id          String    @id @default(uuid())
+  challengeId String    @map("challenge_id")
+  userId      String    @map("user_id")
+  progress    Int       @default(0)
+  completedAt DateTime? @map("completed_at")
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, userId])
+  @@map("challenge_participations")
+}
+
+enum ReferralStatus {
+  PENDING
+  COMPLETED
+  REWARDED
+}
+
+model Referral {
+  id           String         @id @default(uuid())
+  referrerId   String         @map("referrer_id")
+  refereeId    String?        @map("referee_id") // renseigné une fois le filleul inscrit
+  code         String         @unique
+  status       ReferralStatus @default(PENDING)
+  rewardPoints Int?           @map("reward_points")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  completedAt  DateTime?      @map("completed_at")
+
+  referrer User  @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User? @relation("ReferralReferee", fields: [refereeId], references: [id])
+
+  @@index([referrerId])
+  @@map("referrals")
 }

@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { AccessReasonCode } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AccessPolicyService } from '../access-policy/access-policy.service.js';
 import { QrTokenService } from './qr-token.service.js';
 import { generateBookingCode } from '../bookings/booking-code.js';
+import { AppEvent, type BookingAttendedEvent, type BookingNoShowEvent } from '../common/events.js';
 import type { ManualCheckinDto } from './dto/manual-checkin.dto.js';
 import type { WalkInDto } from './dto/walk-in.dto.js';
 import type { SyncDto } from './dto/sync.dto.js';
@@ -21,6 +23,7 @@ export class AttendanceService {
     private readonly prisma: PrismaService,
     private readonly accessPolicyService: AccessPolicyService,
     private readonly qrTokenService: QrTokenService,
+    private readonly events: EventEmitter2,
   ) {}
 
   async issueMyQrToken(userId: string) {
@@ -165,6 +168,11 @@ export class AttendanceService {
 
     let processed = 0;
     for (const session of sessions) {
+      const noShowBookings = await this.prisma.booking.findMany({
+        where: { sessionId: session.id, status: 'CONFIRMED' },
+        select: { id: true, userId: true },
+      });
+
       await this.prisma.booking.updateMany({
         where: { sessionId: session.id, status: 'CONFIRMED' },
         data: { status: 'NO_SHOW' },
@@ -173,6 +181,14 @@ export class AttendanceService {
         where: { id: session.id },
         data: { status: 'COMPLETED', noShowProcessedAt: new Date() },
       });
+
+      for (const b of noShowBookings) {
+        this.events.emit(AppEvent.BOOKING_NO_SHOW, {
+          bookingId: b.id,
+          userId: b.userId,
+        } satisfies BookingNoShowEvent);
+      }
+
       processed++;
     }
     return { sessionsProcessed: processed };
@@ -211,7 +227,7 @@ export class AttendanceService {
       return { result: 'DENIED', reasonCode: policyResult.reasonCode };
     }
 
-    await this.prisma.booking.update({
+    const updatedBooking = await this.prisma.booking.update({
       where: { id: booking!.id },
       data: {
         status: 'ATTENDED',
@@ -222,6 +238,12 @@ export class AttendanceService {
     });
 
     await this.logScan(sessionId, userId, scannedBy, 'GRANTED', 'OK', offline);
+
+    this.events.emit(AppEvent.BOOKING_ATTENDED, {
+      bookingId: updatedBooking.id,
+      userId,
+      sessionId,
+    } satisfies BookingAttendedEvent);
 
     const member = await this.prisma.user.findUnique({
       where: { id: userId },
