@@ -27,6 +27,20 @@ export class BookingsService {
    * l'adhérent est placé en liste d'attente plutôt que refusé.
    */
   async create(userId: string, sessionId: string) {
+    try {
+      return await this.doCreate(userId, sessionId);
+    } catch (err: any) {
+      // Filet de sécurité en cas de course concurrente sur l'index unique
+      // partiel (deux requêtes quasi simultanées) — transforme l'erreur
+      // Prisma brute en réponse HTTP propre plutôt qu'une 500.
+      if (err?.code === 'P2002') {
+        throw new ConflictException('ALREADY_BOOKED');
+      }
+      throw err;
+    }
+  }
+
+  private async doCreate(userId: string, sessionId: string) {
     const activeMembership = await this.prisma.membership.findFirst({
       where: { userId, status: 'ACTIVE', endDate: { gte: new Date() } },
       include: { plan: true },

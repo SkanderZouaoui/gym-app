@@ -447,7 +447,11 @@ model Booking {
   user            User         @relation(fields: [userId], references: [id])
   checkedInByUser User?        @relation("CheckedInByUser", fields: [checkedInBy], references: [id])
 
-  @@unique([sessionId, userId], map: "booking_session_user_active_unique")
+  // Pas d'unicité (sessionId, userId) globale : un adhérent peut avoir
+  // plusieurs réservations CANCELLED sur la même séance au fil du temps
+  // (annulation puis nouvelle réservation). L'unicité ne doit porter que
+  // sur les réservations actives — index partiel ajouté en SQL manuel
+  // dans la migration (voir prisma/migrations/.../migration.sql).
   @@index([sessionId])
   @@index([userId])
   @@index([bookingCode])
