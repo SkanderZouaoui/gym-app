@@ -28,9 +28,14 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 .idea/
+.claude/settings.json
 
 # Prisma
-apps/api/prisma/migrations/dev-*
+backend/prisma/migrations/dev-*
+
+# Expo native projects (Continuous Native Generation)
+mobile/ios/
+mobile/android/
 
 # Tests
 coverage/

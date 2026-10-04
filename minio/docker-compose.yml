@@ -1,0 +1,22 @@
+services:
+  # Stockage objet compatible S3 (Garage) — remplace MinIO, dont l'image
+  # Docker officielle n'est plus librement accessible sur Docker Hub.
+  # API S3 identique, le SDK AWS/MinIO côté backend fonctionne sans changement.
+  garage:
+    image: dxflrs/garage:v1.0.1
+    environment:
+      GARAGE_ALLOW_WORLD_READABLE_SECRETS: "true"
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - muscleup_garage_data:/data
+    ports:
+      - "${MINIO_API_PORT:-9000}:3900" # API S3
+      - "${MINIO_ADMIN_PORT:-9001}:3903" # API admin (créer buckets/clés)
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  muscleup_garage_data:
