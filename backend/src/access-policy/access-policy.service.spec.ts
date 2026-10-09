@@ -220,7 +220,7 @@ describe('AccessPolicyService', () => {
       const session = makeSession();
       const result = await service.canBook({ id: 'user-1' }, session, null);
       expect(result.allowed).toBe(false);
-      expect(result.reasonCode).toBe('MEMBERSHIP_EXPIRED');
+      expect(result.reasonCode).toBe('NO_MEMBERSHIP');
     });
 
     it('refuse si la pénalité de no-show est active', async () => {
@@ -274,7 +274,7 @@ describe('AccessPolicyService', () => {
       const session = makeSession({ startsAt: now });
       const result = await service.evaluateAttendance(null, session, null, now);
       expect(result.allowed).toBe(false);
-      expect(result.reasonCode).toBe('MEMBERSHIP_EXPIRED');
+      expect(result.reasonCode).toBe('NO_MEMBERSHIP');
     });
 
     it('refuse sans réservation (NO_BOOKING)', async () => {

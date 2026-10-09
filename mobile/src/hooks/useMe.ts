@@ -16,3 +16,7 @@ export function useMyBookings() {
 export function useMyPoints() {
   return useQuery({ queryKey: ['me', 'points'], queryFn: meApi.getPoints });
 }
+
+export function useMyStreak() {
+  return useQuery({ queryKey: ['me', 'streak'], queryFn: meApi.getStreak });
+}

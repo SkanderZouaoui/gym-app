@@ -18,3 +18,34 @@ export function useAdminDashboard(branchId: string | undefined) {
     enabled: !!branchId,
   });
 }
+
+export interface DailyAttendance {
+  days: { date: string; count: number }[];
+  currentWeekTotal: number;
+  previousWeekTotal: number;
+  changePercent: number;
+}
+
+/** Présences des 7 derniers jours + variation vs semaine précédente. */
+export function useDailyAttendance(branchId: string | undefined) {
+  return useQuery({
+    queryKey: ['admin', 'stats', 'daily-attendance', branchId],
+    queryFn: () => apiRequest<DailyAttendance>(`/v1/admin/stats/daily-attendance?branchId=${branchId}`),
+    enabled: !!branchId,
+  });
+}
+
+export interface ExpiringMembership {
+  id: string;
+  endDate: string;
+  user: { firstName: string; lastName: string; phone: string | null };
+  plan: { name: string };
+}
+
+export function useExpiringMemberships(branchId: string | undefined) {
+  return useQuery({
+    queryKey: ['admin', 'alerts', 'expiring-memberships', branchId],
+    queryFn: () => apiRequest<ExpiringMembership[]>(`/v1/admin/alerts/expiring-memberships?branchId=${branchId}`),
+    enabled: !!branchId,
+  });
+}

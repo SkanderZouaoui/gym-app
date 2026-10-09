@@ -9,12 +9,12 @@ const REFRESH_TOKEN_KEY = 'muscleup.refreshToken';
 // stockage sécurisé du système (Keychain/Keystore).
 const isWeb = Platform.OS === 'web';
 
-async function getItem(key: string): Promise<string | null> {
+export async function getItem(key: string): Promise<string | null> {
   if (isWeb) return globalThis.localStorage?.getItem(key) ?? null;
   return SecureStore.getItemAsync(key);
 }
 
-async function setItem(key: string, value: string): Promise<void> {
+export async function setItem(key: string, value: string): Promise<void> {
   if (isWeb) {
     globalThis.localStorage?.setItem(key, value);
     return;
@@ -22,7 +22,7 @@ async function setItem(key: string, value: string): Promise<void> {
   await SecureStore.setItemAsync(key, value);
 }
 
-async function deleteItem(key: string): Promise<void> {
+export async function deleteItem(key: string): Promise<void> {
   if (isWeb) {
     globalThis.localStorage?.removeItem(key);
     return;

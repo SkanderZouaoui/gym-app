@@ -2,6 +2,7 @@ import { apiRequest } from './client';
 import type {
   Booking,
   Branch,
+  ClassSessionDetail,
   ClassSessionSummary,
   MeResponse,
   MembershipSummary,
@@ -28,6 +29,14 @@ export const authApi = {
   }) => apiRequest<TokenPair>('/v1/auth/register', { method: 'POST', body: data, auth: false }),
   logout: (refreshToken: string) =>
     apiRequest<void>('/v1/auth/logout', { method: 'POST', body: { refreshToken } }),
+  forgotPassword: (email: string) =>
+    apiRequest<void>('/v1/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
+  resetPassword: (email: string, code: string, newPassword: string) =>
+    apiRequest<void>('/v1/auth/reset-password', {
+      method: 'POST',
+      body: { email, code, newPassword },
+      auth: false,
+    }),
 };
 
 export const meApi = {
@@ -35,6 +44,7 @@ export const meApi = {
   getMemberships: () => apiRequest<MembershipSummary[]>('/v1/me/memberships'),
   getBookings: () => apiRequest<Booking[]>('/v1/me/bookings'),
   getQrToken: () => apiRequest<QrTokenResponse>('/v1/me/qr-token'),
+  getOfflineQrToken: () => apiRequest<QrTokenResponse>('/v1/me/qr-token/offline'),
   getPoints: () => apiRequest<PointsBalance>('/v1/me/points'),
   getStreak: () => apiRequest<{ streak: number }>('/v1/me/streak'),
 };
@@ -50,7 +60,7 @@ export const classesApi = {
     if (to) params.set('to', to);
     return apiRequest<ClassSessionSummary[]>(`/v1/classes/sessions?${params.toString()}`);
   },
-  findSession: (id: string) => apiRequest<ClassSessionSummary>(`/v1/classes/sessions/${id}`),
+  findSession: (id: string) => apiRequest<ClassSessionDetail>(`/v1/classes/sessions/${id}`),
 };
 
 export const bookingsApi = {

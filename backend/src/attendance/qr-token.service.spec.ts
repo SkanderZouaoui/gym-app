@@ -101,4 +101,22 @@ describe('QrTokenService', () => {
     const result = await service.verifyAndConsume('not-a-valid-jwt');
     expect(result.valid).toBe(false);
   });
+
+  it('émet un token offline longue durée, vérifiable et marqué offline', async () => {
+    const { token, expiresInSeconds } = await service.issueOfflineToken('user-1');
+    expect(expiresInSeconds).toBe(12 * 60 * 60);
+    const result = await service.verifyAndConsume(token);
+    expect(result.valid).toBe(true);
+    if (result.valid) {
+      expect(result.userId).toBe('user-1');
+      expect(result.offline).toBe(true);
+    }
+  });
+
+  it('marque un token court-vécu comme non-offline', async () => {
+    const { token } = await service.issueToken('user-1');
+    const result = await service.verifyAndConsume(token);
+    expect(result.valid).toBe(true);
+    if (result.valid) expect(result.offline).toBe(false);
+  });
 });

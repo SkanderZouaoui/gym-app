@@ -8,24 +8,24 @@ export const colors = {
   border: '#E3E4E7',
   borderStrong: '#C5C8CE',
 
-  primary: '#FF5A1F',
-  primaryHover: '#E6511C',
-  primaryPressed: '#CC4819',
-  primarySoft: '#FFEEE9',
-  primaryBorder: '#FFC6B1',
-  primaryInk: '#B83A0C',
+  primary: '#6D28D9',
+  primaryHover: '#5F21BE',
+  primaryPressed: '#511BA3',
+  primarySoft: '#F1EAFB',
+  primaryBorder: '#D5C2F3',
+  primaryInk: '#5B21B6',
   primaryContrast: '#FFFFFF',
 
-  secondary: '#14213D',
-  secondarySoft: '#E8E9EC',
-  secondaryInk: '#14213D',
+  secondary: '#3B1764',
+  secondarySoft: '#EDE5F7',
+  secondaryInk: '#3B1764',
   onSecondary: '#FFFFFF',
 
-  accent: '#FCA311',
-  accentSoft: '#FFF6E7',
-  accentBorder: '#FEDCA6',
-  accentInk: '#8A5600',
-  onAccent: '#111111',
+  accent: '#6D28D9',
+  accentSoft: '#F1EAFB',
+  accentBorder: '#D5C2F3',
+  accentInk: '#5B21B6',
+  onAccent: '#FFFFFF',
 
   success: '#16A34A',
   successSoft: '#E8F6ED',
@@ -45,10 +45,10 @@ export const colors = {
 } as const;
 
 export const radii = {
-  xs: 4,
-  sm: 8,
+  xs: 5,
+  sm: 9,
   md: 16,
-  lg: 24,
+  lg: 22,
   full: 999,
 } as const;
 
@@ -59,6 +59,9 @@ export const spacing = {
   lg: 24,
   xl: 32,
 } as const;
+
+/** Hauteur standard des contrôles (inputs, boutons pleine largeur) — cf. --ctl des maquettes */
+export const controlHeight = 48;
 
 export const fonts = {
   head: 'Sora_800ExtraBold',

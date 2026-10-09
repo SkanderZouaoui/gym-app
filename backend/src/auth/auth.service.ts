@@ -11,6 +11,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as argon2 from 'argon2';
 import { Role } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { OtpService } from '../otp/otp.service.js';
 import { AppEvent, type UserRegisteredEvent } from '../common/events.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
@@ -29,6 +30,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     private readonly events: EventEmitter2,
+    private readonly otpService: OtpService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -153,6 +155,34 @@ export class AuthService {
       where: { tokenHash, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  /** Toujours silencieux côté réponse (ne révèle jamais si l'e-mail existe) —
+   * section Compte/Profil, mot de passe oublié. */
+  async requestPasswordReset(email: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || user.status !== 'ACTIVE') return;
+    await this.otpService.generateAndStore(user.id, 'PASSWORD_RESET');
+  }
+
+  async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || user.status !== 'ACTIVE') throw new UnauthorizedException('OTP_INVALID');
+
+    const otp = await this.otpService.verify(user.id, 'PASSWORD_RESET', code);
+    const passwordHash = await argon2.hash(newPassword);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: user.id }, data: { passwordHash } }),
+      this.prisma.otpCode.update({ where: { id: otp.id }, data: { consumedAt: new Date() } }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId: user.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+      this.prisma.auditLog.create({
+        data: { actorId: user.id, action: 'PASSWORD_RESET', entity: 'User', entityId: user.id },
+      }),
+    ]);
   }
 
   private async issueTokensForRole(userId: string, role: Role, branchId: string | null) {

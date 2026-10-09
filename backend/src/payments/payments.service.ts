@@ -48,6 +48,9 @@ export class PaymentsService {
   findForBranch(branchId: string) {
     return this.prisma.payment.findMany({
       where: { branchId, deletedAt: null },
+      include: {
+        membership: { include: { user: { select: { firstName: true, lastName: true } }, plan: { select: { name: true } } } },
+      },
       orderBy: { recordedAt: 'desc' },
       take: 50,
     });

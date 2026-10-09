@@ -30,4 +30,43 @@ export class BranchesService {
     await this.findOne(id);
     return this.prisma.branch.update({ where: { id }, data: { isActive: false } });
   }
+
+  /** Affluence estimée : comptage des pointages d'entrée (QR/manuel) acceptés
+   * sur une fenêtre glissante de 2 h, faute de capteurs de sortie en temps réel
+   * (section 4.3 — reconnu comme approximation, pas une mesure exacte). */
+  async getOccupancy(branchId: string) {
+    const branch = await this.findOne(branchId);
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - 2 * 60 * 60_000);
+
+    const currentCount = await this.prisma.attendanceScanLog.count({
+      where: {
+        result: 'GRANTED',
+        scannedAt: { gte: windowStart, lte: now },
+        session: { branchId },
+      },
+    });
+
+    const dayStart = new Date(now);
+    dayStart.setHours(0, 0, 0, 0);
+    const todayScans = await this.prisma.attendanceScanLog.findMany({
+      where: { result: 'GRANTED', scannedAt: { gte: dayStart, lte: now }, session: { branchId } },
+      select: { scannedAt: true },
+    });
+    const hourly = Array(24).fill(0);
+    for (const scan of todayScans) hourly[scan.scannedAt.getHours()]++;
+
+    const capacity = branch.maxCapacity ?? null;
+    const percent = capacity ? Math.min(100, Math.round((currentCount / capacity) * 100)) : null;
+
+    return {
+      branchId,
+      branchName: branch.name,
+      capacity,
+      currentCount,
+      percent,
+      hourly,
+      updatedAt: now.toISOString(),
+    };
+  }
 }

@@ -3,8 +3,10 @@ import { ModerationService } from './moderation.service.js';
 import { ModerationController } from './moderation.controller.js';
 import { SocialFeedService } from './social-feed.service.js';
 import { SocialFeedController } from './social-feed.controller.js';
+import { StorageModule } from '../storage/storage.module.js';
 
 @Module({
+  imports: [StorageModule],
   controllers: [ModerationController, SocialFeedController],
   providers: [ModerationService, SocialFeedService],
   exports: [ModerationService, SocialFeedService],

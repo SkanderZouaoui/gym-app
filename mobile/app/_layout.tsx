@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   useFonts,
@@ -18,6 +19,7 @@ import {
 import { tokenStorage } from '../src/api/storage';
 import { meApi } from '../src/api/endpoints';
 import { useSessionStore } from '../src/store/session';
+import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -63,9 +65,22 @@ export default function RootLayout() {
   if (!fontsLoaded || !bootstrapped) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <StatusBar style="dark" />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <RootLayoutInner />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function RootLayoutInner() {
+  const { scheme } = useTheme();
+  return (
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }} />
-    </QueryClientProvider>
+    </>
   );
 }

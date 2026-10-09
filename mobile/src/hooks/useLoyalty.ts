@@ -48,6 +48,20 @@ export function useActiveChallenges() {
   });
 }
 
+export interface MyChallenge extends Challenge {
+  myProgress: number;
+  joined: boolean;
+  completedAt: string | null;
+}
+
+/** Défis actifs + progression de l'utilisateur courant — carte "Défi en cours" de l'accueil. */
+export function useMyActiveChallenges() {
+  return useQuery({
+    queryKey: ['me', 'challenges'],
+    queryFn: () => apiRequest<MyChallenge[]>('/v1/me/challenges'),
+  });
+}
+
 export function useJoinChallenge() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -68,5 +82,49 @@ export function useChallengeLeaderboard(challengeId: string | undefined) {
 export function useReferralCode() {
   return useMutation({
     mutationFn: () => apiRequest<{ code: string }>('/v1/me/referral-code', { method: 'POST' }),
+  });
+}
+
+export interface Referral {
+  id: string;
+  refereeId: string;
+  status: 'COMPLETED' | 'REWARDED';
+  rewardPoints: number | null;
+  createdAt: string;
+  completedAt: string | null;
+  referee: { firstName: string; lastName: string };
+}
+
+export interface ReferralOverview {
+  code: string | null;
+  referrals: Referral[];
+  invitedCount: number;
+  pointsEarned: number;
+  limitReached: boolean;
+  maxReferralsPerYear: number;
+}
+
+export function useReferralOverview() {
+  return useQuery({
+    queryKey: ['me', 'referrals'],
+    queryFn: () => apiRequest<ReferralOverview>('/v1/me/referrals'),
+  });
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string | null;
+  iconKey: string | null;
+  criterionType: 'STREAK_DAYS' | 'TOTAL_ATTENDANCE' | 'MANUAL';
+  criterionValue: number | null;
+  earned: boolean;
+  earnedAt: string | null;
+}
+
+export function useBadges() {
+  return useQuery({
+    queryKey: ['me', 'badges'],
+    queryFn: () => apiRequest<Badge[]>('/v1/me/badges'),
   });
 }

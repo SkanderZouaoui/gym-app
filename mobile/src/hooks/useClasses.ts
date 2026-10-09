@@ -9,6 +9,14 @@ export function useSessions(branchId: string | undefined) {
   });
 }
 
+export function useSession(sessionId: string | undefined) {
+  return useQuery({
+    queryKey: ['classes', 'sessions', 'detail', sessionId],
+    queryFn: () => classesApi.findSession(sessionId!),
+    enabled: !!sessionId,
+  });
+}
+
 export function useCreateBooking() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -60,7 +60,7 @@ export class AccessPolicyService {
     session: ClassSession,
     membership: MembershipWithPlan | null,
   ): Promise<PolicyResult> {
-    if (!membership) return deny('MEMBERSHIP_EXPIRED');
+    if (!membership) return deny('NO_MEMBERSHIP');
 
     const settings = await this.organizationService.getSettings();
     const multiBranchPolicy = settings.multiBranchPolicy as unknown as MultiBranchPolicy;
@@ -183,7 +183,7 @@ export class AccessPolicyService {
     );
     if (now < windowStart || now > windowEnd) return deny('OUTSIDE_WINDOW');
 
-    if (!membership) return deny('MEMBERSHIP_EXPIRED');
+    if (!membership) return deny('NO_MEMBERSHIP');
     if (membership.status === 'EXPIRED') return deny('MEMBERSHIP_EXPIRED');
     if (membership.status === 'SUSPENDED') return deny('MEMBERSHIP_SUSPENDED');
 

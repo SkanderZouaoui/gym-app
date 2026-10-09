@@ -59,14 +59,25 @@ export const membersApi = {
   reactivate: (id: string) => api.patch(`/v1/members/${id}/reactivate`),
 };
 
+export interface PlanBranch {
+  id: string;
+  planId: string;
+  branchId: string;
+}
+
 export interface MembershipPlan {
   id: string;
   name: string;
   description: string | null;
   durationDays: number;
   price: string;
-  accessScope: string;
+  accessCount: number | null;
+  accessScope: 'INHERIT' | 'HOME_ONLY' | 'ALL' | 'SELECTED';
+  crossBranchBooking: 'INHERIT' | 'ENABLED' | 'DISABLED';
+  crossBranchMonthlyQuota: number | null;
+  isContractual: boolean;
   isActive: boolean;
+  branches: PlanBranch[];
 }
 
 export interface CreatePlanInput {
@@ -74,6 +85,11 @@ export interface CreatePlanInput {
   description?: string;
   durationDays: number;
   price: number;
+  accessCount?: number;
+  accessScope?: 'INHERIT' | 'HOME_ONLY' | 'ALL' | 'SELECTED';
+  crossBranchBooking?: 'INHERIT' | 'ENABLED' | 'DISABLED';
+  crossBranchMonthlyQuota?: number;
+  isContractual?: boolean;
   branchIds?: string[];
 }
 
@@ -83,6 +99,44 @@ export const plansApi = {
   update: (id: string, data: Partial<CreatePlanInput>) =>
     api.patch(`/v1/admin/plans/${id}`, data).then((r) => r.data),
   deactivate: (id: string) => api.patch(`/v1/admin/plans/${id}/deactivate`),
+};
+
+export interface Membership {
+  id: string;
+  userId: string;
+  planId: string;
+  homeBranchId: string | null;
+  startDate: string;
+  endDate: string;
+  status: 'ACTIVE' | 'EXPIRED' | 'SUSPENDED' | 'CANCELLED';
+  frozenAccessScope: MembershipPlan['accessScope'] | null;
+  plan: { id: string; name: string; durationDays: number; price: string };
+  homeBranch: { id: string; name: string } | null;
+}
+
+export interface CreateMembershipInput {
+  userId: string;
+  planId: string;
+  startDate?: string;
+  homeBranchId?: string;
+}
+
+export interface RenewMembershipInput {
+  planId?: string;
+  startDate?: string;
+  homeBranchId?: string;
+}
+
+export const membershipsApi = {
+  findForMember: (userId: string) =>
+    api.get<Membership[]>(`/v1/admin/members/${userId}/memberships`).then((r) => r.data),
+  create: (data: CreateMembershipInput) =>
+    api.post<Membership>('/v1/admin/memberships', data).then((r) => r.data),
+  suspend: (id: string) => api.patch(`/v1/admin/memberships/${id}/suspend`),
+  reactivate: (id: string) => api.patch(`/v1/admin/memberships/${id}/reactivate`),
+  extend: (id: string, days: number) => api.patch(`/v1/admin/memberships/${id}/extend`, { days }),
+  cancel: (id: string, reason?: string) => api.patch(`/v1/admin/memberships/${id}/cancel`, { reason }),
+  renew: (id: string, data: RenewMembershipInput) => api.patch(`/v1/admin/memberships/${id}/renew`, data),
 };
 
 export interface ClassSession {

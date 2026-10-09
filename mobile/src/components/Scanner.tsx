@@ -1,11 +1,12 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Button } from './Button';
 import { ScanResultOverlay } from './ScanResultOverlay';
-import { colors, fonts, radii, spacing } from '../theme/tokens';
+import { fonts, radii, spacing } from '../theme/tokens';
+import { useTheme } from '../theme/ThemeContext';
 import { useManualCheckin, useScan, type ScanOutcome } from '../hooks/useAttendance';
 
 interface ScannerProps {
@@ -14,6 +15,8 @@ interface ScannerProps {
 }
 
 export function Scanner({ sessionId }: ScannerProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [permission, requestPermission] = useCameraPermissions();
   const [torch, setTorch] = useState(false);
   const [outcome, setOutcome] = useState<ScanOutcome | null>(null);
@@ -73,7 +76,7 @@ export function Scanner({ sessionId }: ScannerProps) {
       <View style={[styles.container, styles.centered]}>
         <MaterialIcons name="qr-code-scanner" size={48} color={colors.muted} />
         <Text style={styles.permissionText}>
-          L'accès à la caméra est nécessaire pour scanner les QR de présence
+          L’accès à la caméra est nécessaire pour scanner les QR de présence
         </Text>
         <Button label="Autoriser la caméra" onPress={requestPermission} />
       </View>
@@ -85,7 +88,7 @@ export function Scanner({ sessionId }: ScannerProps) {
       {manualMode ? (
         <View style={styles.manualContainer}>
           <Text style={styles.manualTitle}>Code de réservation</Text>
-          <Text style={styles.manualSubtitle}>Saisis le code à 6 caractères de l'adhérent</Text>
+          <Text style={styles.manualSubtitle}>Saisis le code à 6 caractères de l’adhérent</Text>
           <View style={styles.codeInputRow}>
             {Array.from({ length: 6 }).map((_, i) => (
               <View key={i} style={styles.codeBox}>
@@ -143,6 +146,8 @@ function KeypadInput({
   onChange: (v: string) => void;
   maxLength: number;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const keys = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫'];
   return (
     <View style={styles.keypad}>
@@ -162,55 +167,58 @@ function KeypadInput({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  centered: { alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.lg },
-  permissionText: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center' },
-  frameOverlay: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
-  frame: { width: 240, height: 240, borderRadius: radii.lg, borderWidth: 3, borderColor: '#fff' },
-  topBar: { position: 'absolute', top: spacing.lg, right: spacing.lg },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 999,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bottomBar: { position: 'absolute', bottom: spacing.xl, left: 0, right: 0, alignItems: 'center' },
-  manualButton: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: radii.sm,
-  },
-  manualButtonText: { fontFamily: fonts.bodyBold, color: '#fff', fontSize: 13.5 },
-  manualContainer: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg, alignItems: 'center', gap: spacing.md, paddingTop: 60 },
-  manualTitle: { fontFamily: fonts.head, fontSize: 22, color: colors.secondary },
-  manualSubtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-  codeInputRow: { flexDirection: 'row', gap: 8, marginVertical: spacing.md },
-  codeBox: {
-    width: 40,
-    height: 48,
-    borderRadius: radii.sm,
-    borderWidth: 1.5,
-    borderColor: colors.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-  },
-  codeBoxText: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
-  keypad: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 280 },
-  key: {
-    width: 56,
-    height: 48,
-    borderRadius: radii.sm,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  keyText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
-  linkText: { fontFamily: fonts.bodyBold, color: colors.primaryInk, fontSize: 13 },
-});
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    // Chrome caméra — toujours sombre, indépendant du thème de l'app.
+    container: { flex: 1, backgroundColor: '#000' },
+    centered: { alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.lg },
+    permissionText: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center' },
+    frameOverlay: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+    frame: { width: 240, height: 240, borderRadius: radii.lg, borderWidth: 3, borderColor: '#fff' },
+    topBar: { position: 'absolute', top: spacing.lg, right: spacing.lg },
+    iconButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 999,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bottomBar: { position: 'absolute', bottom: spacing.xl, left: 0, right: 0, alignItems: 'center' },
+    manualButton: {
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: radii.sm,
+    },
+    manualButtonText: { fontFamily: fonts.bodyBold, color: '#fff', fontSize: 13.5 },
+    manualContainer: { flex: 1, backgroundColor: colors.bg, padding: spacing.lg, alignItems: 'center', gap: spacing.md, paddingTop: 60 },
+    manualTitle: { fontFamily: fonts.head, fontSize: 22, color: colors.secondary },
+    manualSubtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
+    codeInputRow: { flexDirection: 'row', gap: 8, marginVertical: spacing.md },
+    codeBox: {
+      width: 40,
+      height: 48,
+      borderRadius: radii.sm,
+      borderWidth: 1.5,
+      borderColor: colors.borderStrong,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+    },
+    codeBoxText: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
+    keypad: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 280 },
+    key: {
+      width: 56,
+      height: 48,
+      borderRadius: radii.sm,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    keyText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
+    linkText: { fontFamily: fonts.bodyBold, color: colors.primaryInk, fontSize: 13 },
+  });
+}

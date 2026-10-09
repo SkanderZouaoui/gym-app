@@ -149,6 +149,62 @@ export class MembershipsService {
     return updated;
   }
 
+  async cancel(id: string, reason: string | undefined, actorId: string) {
+    await this.findOne(id);
+    const membership = await this.prisma.membership.update({
+      where: { id },
+      data: { status: 'CANCELLED' },
+    });
+    await this.prisma.auditLog.create({
+      data: {
+        actorId,
+        action: 'CANCEL_MEMBERSHIP',
+        entity: 'Membership',
+        entityId: id,
+        newValue: reason ? { reason } : undefined,
+      },
+    });
+    return membership;
+  }
+
+  /**
+   * Renouvellement : crée une nouvelle ligne d'abonnement (historique préservé),
+   * en héritant plan/site de l'abonnement source si non précisés (section 1.3 du plan).
+   */
+  async renew(id: string, dto: { planId?: string; startDate?: string; homeBranchId?: string }, actorId: string) {
+    const source = await this.findOne(id);
+    const planId = dto.planId ?? source.planId;
+    const homeBranchId = dto.homeBranchId ?? source.homeBranchId ?? undefined;
+    const plan = await this.findPlan(planId);
+    const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
+    const endDate = new Date(startDate.getTime() + plan.durationDays * 86_400_000);
+
+    const membership = await this.prisma.membership.create({
+      data: {
+        userId: source.userId,
+        planId,
+        homeBranchId,
+        startDate,
+        endDate,
+        status: 'ACTIVE',
+        frozenAccessScope: plan.isContractual ? plan.accessScope : null,
+      },
+      include: { plan: true },
+    });
+
+    await this.prisma.auditLog.create({
+      data: {
+        actorId,
+        action: 'RENEW_MEMBERSHIP',
+        entity: 'Membership',
+        entityId: membership.id,
+        newValue: { previousMembershipId: id, planId, userId: source.userId },
+      },
+    });
+
+    return membership;
+  }
+
   async findOne(id: string) {
     const membership = await this.prisma.membership.findUnique({ where: { id } });
     if (!membership) throw new NotFoundException('MEMBERSHIP_NOT_FOUND');

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import { ArrayMinSize, IsArray, IsInt, IsISO8601, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
+import { ProgramExerciseSetInputDto } from './program-exercise-set-input.dto.js';
 
 class ProgramExerciseInputDto {
   @IsString()
@@ -23,6 +24,13 @@ class ProgramExerciseInputDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  /** Détail par série (reps/poids individuels) — facultatif, remplace l'affichage résumé. */
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProgramExerciseSetInputDto)
+  setDetails?: ProgramExerciseSetInputDto[];
 }
 
 class ProgramDayInputDto {

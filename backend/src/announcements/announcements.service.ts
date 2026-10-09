@@ -63,6 +63,33 @@ export class AnnouncementsService {
     return { announcement, recipientCount: recipients.length };
   }
 
+  /** Annonces envoyées reçues par l'adhérent courant — GET /v1/me/announcements. */
+  async findForMember(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { homeBranchId: true, memberships: { where: { status: 'ACTIVE' }, select: { planId: true } } },
+    });
+    if (!user) return [];
+
+    const planIds = user.memberships.map((m) => m.planId);
+
+    return this.prisma.announcement.findMany({
+      where: {
+        sentAt: { not: null },
+        OR: [
+          { branchId: null, planId: null },
+          ...(user.homeBranchId ? [{ branchId: user.homeBranchId, planId: null }] : []),
+          ...(planIds.length > 0 ? [{ branchId: null, planId: { in: planIds } }] : []),
+          ...(user.homeBranchId && planIds.length > 0
+            ? [{ branchId: user.homeBranchId, planId: { in: planIds } }]
+            : []),
+        ],
+      },
+      orderBy: { sentAt: 'desc' },
+      take: 20,
+    });
+  }
+
   private targetFilter(dto: CreateAnnouncementDto) {
     return {
       deletedAt: null,

@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { colors, fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/ThemeContext';
 import { useMe } from '../../src/hooks/useMe';
 import { tokenStorage } from '../../src/api/storage';
 import { authApi } from '../../src/api/endpoints';
@@ -16,6 +18,8 @@ const ITEMS: { icon: keyof typeof MaterialIcons.glyphMap; label: string; descrip
 ];
 
 export default function AdminMoreScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
   const clearSession = useSessionStore((s) => s.clear);
 
@@ -60,27 +64,29 @@ export default function AdminMoreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  header: { padding: spacing.lg, paddingBottom: spacing.sm },
-  title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondary },
-  subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 4 },
-  list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm },
-  card: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
-  },
-  iconBox: {
-    width: 40, height: 40, borderRadius: radii.sm, backgroundColor: colors.primarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  cardTitle: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },
-  cardDesc: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.sm },
-  footerNote: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, textAlign: 'center' },
-  logoutButton: {
-    height: 48, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
-    alignItems: 'center', justifyContent: 'center', marginTop: spacing.sm,
-  },
-  logoutText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
-});
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    header: { padding: spacing.lg, paddingBottom: spacing.sm },
+    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 4 },
+    list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm },
+    card: {
+      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
+    },
+    iconBox: {
+      width: 40, height: 40, borderRadius: radii.sm, backgroundColor: colors.primarySoft,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    cardTitle: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },
+    cardDesc: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.sm },
+    footerNote: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, textAlign: 'center' },
+    logoutButton: {
+      height: 48, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
+      alignItems: 'center', justifyContent: 'center', marginTop: spacing.sm,
+    },
+    logoutText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
+  });
+}

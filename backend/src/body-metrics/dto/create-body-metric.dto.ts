@@ -1,6 +1,10 @@
-import { IsIn, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsISO8601, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class CreateBodyMetricDto {
+  @IsOptional()
+  @IsISO8601()
+  date?: string;
+
   @IsOptional()
   @IsNumber()
   weightKg?: number;

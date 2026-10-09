@@ -1,6 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../api/client';
 
+export interface CoachProfileSummary {
+  bio: string | null;
+  specialties: string[];
+  yearsExperience: number | null;
+  sessionPrice: string | null;
+  rating: string | null;
+  reviewCount: number;
+}
+
 export interface CoachAvailability {
   id: string;
   coachId: string;
@@ -8,7 +17,20 @@ export interface CoachAvailability {
   dayOfWeek: number | null;
   startTime: string | null;
   endTime: string | null;
-  coach: { user: { firstName: string; lastName: string } };
+  coach: CoachProfileSummary & { user: { firstName: string; lastName: string } };
+}
+
+export interface CoachProfile extends CoachProfileSummary {
+  userId: string;
+  user: { firstName: string; lastName: string };
+}
+
+export function useCoachProfile(coachId: string | undefined) {
+  return useQuery({
+    queryKey: ['coaching', 'coach', coachId],
+    queryFn: () => apiRequest<CoachProfile>(`/v1/coaching/coaches/${coachId}`),
+    enabled: !!coachId,
+  });
 }
 
 export interface MyCoachingSession {
@@ -37,7 +59,7 @@ export function useMyCoachingSessions() {
 export function useRequestCoachingSession() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { coachId: string; branchId: string; startsAt: string; endsAt: string }) =>
+    mutationFn: (payload: { coachId: string; branchId: string; startsAt: string; endsAt: string; objective?: string }) =>
       apiRequest('/v1/coaching-sessions', { method: 'POST', body: payload }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'coaching-sessions'] }),
   });

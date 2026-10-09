@@ -26,6 +26,13 @@ export class AttendanceController {
     return this.attendanceService.issueMyQrToken(user.userId);
   }
 
+  /** QR de secours longue durée (12h) — à récupérer pendant qu'on est en ligne
+   * et conserver en stockage sécurisé côté app pour affichage sans réseau. */
+  @Get('me/qr-token/offline')
+  issueMyOfflineQrToken(@CurrentUser() user: AuthenticatedUser) {
+    return this.attendanceService.issueMyOfflineQrToken(user.userId);
+  }
+
   @Get('me/attendance')
   getMyHistory(@CurrentUser() user: AuthenticatedUser) {
     return this.attendanceService.getMyAttendanceHistory(user.userId);

@@ -6,7 +6,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "experiments": {
       "typedRoutes": true
     },
@@ -38,7 +38,15 @@
         {
           "cameraPermission": "MuscleUP a besoin de la caméra pour scanner les QR de présence aux cours."
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "MuscleUP a besoin d'accéder à vos photos pour changer votre photo de profil.",
+          "cameraPermission": "MuscleUP a besoin de l'appareil photo pour prendre une photo de votre séance."
+        }
+      ],
+      "expo-video"
     ]
   }
 }

@@ -30,6 +30,11 @@ export class AttendanceService {
     return this.qrTokenService.issueToken(userId);
   }
 
+  /** QR de secours longue durée à mettre en cache côté app pour le mode hors ligne (section 6.6). */
+  async issueMyOfflineQrToken(userId: string) {
+    return this.qrTokenService.issueOfflineToken(userId);
+  }
+
   /** Inscrits du jour pour un cours — mis en cache côté app pour le mode hors ligne (section 6.6). */
   async getRoster(sessionId: string) {
     const session = await this.prisma.classSession.findUnique({ where: { id: sessionId } });

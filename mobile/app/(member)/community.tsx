@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
-import { colors, fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/ThemeContext';
 import {
   useConversations,
   useCreatePost,
   useFeed,
   useReportPost,
   useToggleReaction,
-  type FeedPost,
 } from '../../src/hooks/useSocial';
+import { Avatar, EmptyState, SegmentedControl } from '../../src/components/ui';
+import { PostCard } from '../../src/components/adherent/PostCard';
 
 export default function CommunityScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [tab, setTab] = useState<'feed' | 'messages'>('feed');
   const { data: posts } = useFeed();
   const { data: conversations } = useConversations();
@@ -24,7 +27,7 @@ export default function CommunityScreen() {
 
   const handlePost = () => {
     if (!draft.trim()) return;
-    createPost.mutate(draft.trim(), { onSuccess: () => setDraft('') });
+    createPost.mutate({ body: draft.trim() }, { onSuccess: () => setDraft('') });
   };
 
   const handleReport = (postId: string) => {
@@ -41,16 +44,15 @@ export default function CommunityScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="Communauté" />
-      <View style={styles.tabRow}>
-        <Pressable style={[styles.tabButton, tab === 'feed' && styles.tabButtonActive]} onPress={() => setTab('feed')}>
-          <Text style={[styles.tabText, tab === 'feed' && styles.tabTextActive]}>Fil d'actualité</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tabButton, tab === 'messages' && styles.tabButtonActive]}
-          onPress={() => setTab('messages')}
-        >
-          <Text style={[styles.tabText, tab === 'messages' && styles.tabTextActive]}>Messages</Text>
-        </Pressable>
+      <View style={styles.tabWrap}>
+        <SegmentedControl
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'feed', label: "Fil d'actualité" },
+            { value: 'messages', label: 'Messages' },
+          ]}
+        />
       </View>
 
       {tab === 'feed' ? (
@@ -63,7 +65,7 @@ export default function CommunityScreen() {
               <TextInput
                 value={draft}
                 onChangeText={setDraft}
-                placeholder="Partage quelque chose avec la communauté..."
+                placeholder="Partagez une séance, un record ou une question..."
                 placeholderTextColor={colors.muted}
                 style={styles.composerInput}
                 multiline
@@ -74,9 +76,27 @@ export default function CommunityScreen() {
             </View>
           }
           renderItem={({ item }) => (
-            <PostCard post={item} onReact={() => toggleReaction.mutate(item.id)} onReport={() => handleReport(item.id)} />
+            <PostCard
+              authorName={`${item.author.firstName} ${item.author.lastName}`}
+              authorInitial={item.author.firstName[0]}
+              authorPhotoUrl={item.author.photoUrl}
+              createdAt={item.createdAt}
+              body={item.body}
+              imageUrl={item.imageUrl}
+              likeCount={item._count.reactions}
+              commentCount={item._count.comments}
+              onReact={() => toggleReaction.mutate(item.id)}
+              onReport={() => handleReport(item.id)}
+            />
           )}
-          ListEmptyComponent={<Text style={styles.empty}>Aucune publication pour l'instant.</Text>}
+          ListEmptyComponent={
+            <EmptyState
+              icon="forum"
+              title="Le fil est calme"
+              text="Partagez une séance, un record ou une question à la communauté."
+              tone="primary"
+            />
+          }
         />
       ) : (
         <FlatList
@@ -84,14 +104,10 @@ export default function CommunityScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => {
-            const lastMessage = item.messages[0]
+            const lastMessage = item.messages[0];
             return (
               <View style={styles.card}>
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {item.participants[0]?.user.firstName[0]}
-                  </Text>
-                </View>
+                <Avatar initials={item.participants[0]?.user.firstName[0] ?? '?'} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.coachName}>
                     {item.participants.map((p) => p.user.firstName).join(', ')}
@@ -101,81 +117,37 @@ export default function CommunityScreen() {
                   </Text>
                 </View>
               </View>
-            )
+            );
           }}
-          ListEmptyComponent={<Text style={styles.empty}>Aucune conversation.</Text>}
+          ListEmptyComponent={
+            <EmptyState icon="chat" title="Aucune conversation" text="Écrivez à votre coach ou à l'accueil de la salle." tone="primary" />
+          }
         />
       )}
     </SafeAreaView>
   );
 }
 
-function PostCard({ post, onReact, onReport }: { post: FeedPost; onReact: () => void; onReport: () => void }) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.postHeader}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{post.author.firstName[0]}</Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.coachName}>
-            {post.author.firstName} {post.author.lastName}
-          </Text>
-          <Text style={styles.postDate}>{new Date(post.createdAt).toLocaleDateString('fr-FR')}</Text>
-        </View>
-        <Pressable onPress={onReport} hitSlop={8}>
-          <MaterialIcons name="flag" size={18} color={colors.muted} />
-        </Pressable>
-      </View>
-      <Text style={styles.postBody}>{post.body}</Text>
-      <View style={styles.postFooter}>
-        <Pressable onPress={onReact} style={styles.reactionButton}>
-          <MaterialIcons name="favorite-border" size={18} color={colors.primaryInk} />
-          <Text style={styles.reactionCount}>{post._count.reactions}</Text>
-        </Pressable>
-        <View style={styles.reactionButton}>
-          <MaterialIcons name="chat-bubble-outline" size={18} color={colors.muted} />
-          <Text style={styles.reactionCount}>{post._count.comments}</Text>
-        </View>
-      </View>
-    </View>
-  );
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    tabWrap: { paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
+    list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
+    composer: {
+      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      padding: spacing.md, gap: spacing.sm, marginBottom: spacing.sm,
+    },
+    composerInput: { fontFamily: fonts.body, fontSize: 14, color: colors.text, minHeight: 60 },
+    composerButton: {
+      alignSelf: 'flex-end', backgroundColor: colors.primary, borderRadius: radii.xs,
+      paddingHorizontal: 14, paddingVertical: 8,
+    },
+    composerButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryContrast },
+    card: {
+      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 10,
+    },
+    coachName: { fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.text },
+    lastMessage: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
+  });
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  tabRow: { flexDirection: 'row', paddingHorizontal: spacing.lg, gap: 8, marginBottom: spacing.sm },
-  tabButton: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surface2 },
-  tabButtonActive: { backgroundColor: colors.primarySoft },
-  tabText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.muted },
-  tabTextActive: { color: colors.primaryInk },
-  list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
-  composer: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, gap: spacing.sm, marginBottom: spacing.sm,
-  },
-  composerInput: { fontFamily: fonts.body, fontSize: 14, color: colors.text, minHeight: 60 },
-  composerButton: {
-    alignSelf: 'flex-end', backgroundColor: colors.primary, borderRadius: radii.xs,
-    paddingHorizontal: 14, paddingVertical: 8,
-  },
-  composerButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryContrast },
-  card: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, gap: 10,
-  },
-  postHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  avatar: {
-    width: 36, height: 36, borderRadius: 999, backgroundColor: colors.secondarySoft,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  avatarText: { fontFamily: fonts.headBold, color: colors.secondaryInk, fontSize: 13 },
-  coachName: { fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.text },
-  postDate: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
-  postBody: { fontFamily: fonts.body, fontSize: 14, color: colors.text, lineHeight: 20 },
-  postFooter: { flexDirection: 'row', gap: 16 },
-  reactionButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  reactionCount: { fontFamily: fonts.bodyMedium, fontSize: 12.5, color: colors.muted },
-  lastMessage: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
-  empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
-});

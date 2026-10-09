@@ -147,6 +147,49 @@ export class StatsService {
     };
   }
 
+  /**
+   * Présences quotidiennes sur les 7 derniers jours + variation vs les 7
+   * jours précédents — pour le graphique "Présences 7 jours" de l'accueil admin.
+   */
+  async getDailyAttendance(branchId?: string) {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const days: { date: string; count: number }[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(startOfToday.getTime() - i * 86_400_000);
+      const dayEnd = new Date(dayStart.getTime() + 86_400_000);
+      const count = await this.prisma.booking.count({
+        where: {
+          status: 'ATTENDED',
+          attendedAt: { gte: dayStart, lt: dayEnd },
+          ...(branchId ? { session: { branchId } } : {}),
+        },
+      });
+      days.push({ date: dayStart.toISOString().slice(0, 10), count });
+    }
+
+    const previousWeekStart = new Date(startOfToday.getTime() - 13 * 86_400_000);
+    const previousWeekEnd = new Date(startOfToday.getTime() - 6 * 86_400_000);
+    const currentWeekTotal = days.reduce((sum, d) => sum + d.count, 0);
+    const previousWeekTotal = await this.prisma.booking.count({
+      where: {
+        status: 'ATTENDED',
+        attendedAt: { gte: previousWeekStart, lt: previousWeekEnd },
+        ...(branchId ? { session: { branchId } } : {}),
+      },
+    });
+
+    const changePercent =
+      previousWeekTotal > 0
+        ? Math.round(((currentWeekTotal - previousWeekTotal) / previousWeekTotal) * 100)
+        : currentWeekTotal > 0
+          ? 100
+          : 0;
+
+    return { days, currentWeekTotal, previousWeekTotal, changePercent };
+  }
+
   /** Vue d'ensemble combinée pour le back-office (section 11). */
   async getOverview(filter: PeriodFilter) {
     const [attendance, revenue, newMembers, retention] = await Promise.all([

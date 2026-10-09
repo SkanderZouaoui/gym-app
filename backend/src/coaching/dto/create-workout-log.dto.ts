@@ -24,7 +24,19 @@ class WorkoutSetInputDto {
 export class CreateWorkoutLogDto {
   @IsOptional()
   @IsString()
+  programId?: string;
+
+  @IsOptional()
+  @IsString()
+  dayId?: string;
+
+  @IsOptional()
+  @IsString()
   feeling?: string;
+
+  @IsOptional()
+  @IsInt()
+  durationMinutes?: number;
 
   @IsArray()
   @ArrayMinSize(1)

@@ -99,6 +99,7 @@ model User {
   homeBranchId String?    @map("home_branch_id")
   status       UserStatus @default(ACTIVE)
   consents     Json       @default("{}")
+  referralCode String?    @unique @map("referral_code")
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
@@ -113,6 +114,7 @@ model User {
   checkedInBookings        Booking[]                 @relation("CheckedInByUser")
   coachingSessionsAsMember CoachingSession[]         @relation("CoachingMember")
   refreshTokens            RefreshToken[]
+  otpCodes                 OtpCode[]
   notifications            Notification[]
   announcementsCreated     Announcement[]            @relation("AnnouncementCreatedBy")
   reportsFiled             Report[]                  @relation("ReportReportedBy")
@@ -155,9 +157,13 @@ model UserBranchRole {
 }
 
 model CoachProfile {
-  userId      String   @id @map("user_id")
-  bio         String?
-  specialties String[]
+  userId          String   @id @map("user_id")
+  bio             String?
+  specialties     String[]
+  yearsExperience Int?     @map("years_experience")
+  sessionPrice    Decimal? @map("session_price") @db.Decimal(10, 2)
+  rating          Decimal? @db.Decimal(2, 1)
+  reviewCount     Int      @default(0) @map("review_count")
 
   user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   coachBranches    CoachBranch[]
@@ -223,6 +229,33 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+enum OtpPurpose {
+  PASSWORD_RESET
+  EMAIL_CHANGE
+}
+
+/**
+ * Code à usage unique (6 chiffres) envoyé par e-mail — mot de passe oublié
+ * et changement d'e-mail (section Compte/Profil). Vérifié paresseusement via
+ * expiresAt/consumedAt, même convention que RefreshToken/UsedQrToken : pas de
+ * cron de nettoyage.
+ */
+model OtpCode {
+  id         String     @id @default(uuid())
+  userId     String     @map("user_id")
+  purpose    OtpPurpose
+  codeHash   String     @map("code_hash")
+  newEmail   String?    @map("new_email")
+  expiresAt  DateTime   @map("expires_at")
+  consumedAt DateTime?  @map("consumed_at")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("otp_codes")
 }
 
 // ---------------------------------------------------------------------------
@@ -514,6 +547,7 @@ model CoachingSession {
   startsAt  DateTime              @map("starts_at")
   endsAt    DateTime              @map("ends_at")
   status    CoachingSessionStatus @default(PENDING)
+  objective String? // objectif facultatif saisi par l'adhérent à la réservation
   createdAt DateTime              @default(now()) @map("created_at")
 
   branch Branch       @relation(fields: [branchId], references: [id])
@@ -532,6 +566,7 @@ model Exercise {
   id           String  @id @default(uuid())
   name         String
   muscleGroup  String? @map("muscle_group")
+  equipment    String?
   mediaKey     String? @map("media_key")
   instructions String?
   createdById  String? @map("created_by")
@@ -553,9 +588,10 @@ model Program {
   endDate      DateTime? @map("end_date")
   createdAt    DateTime  @default(now()) @map("created_at")
 
-  createdBy  User         @relation("ProgramCreatedBy", fields: [createdById], references: [id])
-  assignedTo User         @relation("ProgramAssignedTo", fields: [assignedToId], references: [id])
-  days       ProgramDay[]
+  createdBy   User         @relation("ProgramCreatedBy", fields: [createdById], references: [id])
+  assignedTo  User         @relation("ProgramAssignedTo", fields: [assignedToId], references: [id])
+  days        ProgramDay[]
+  workoutLogs WorkoutLog[]
 
   @@index([assignedToId])
   @@map("programs")
@@ -567,8 +603,9 @@ model ProgramDay {
   dayOfWeek Int     @map("day_of_week") // 0-6
   label     String?
 
-  program   Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
-  exercises ProgramExercise[]
+  program     Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  exercises   ProgramExercise[]
+  workoutLogs WorkoutLog[]
 
   @@index([programId])
   @@map("program_days")
@@ -579,27 +616,51 @@ model ProgramExercise {
   programDayId String  @map("program_day_id")
   exerciseId   String  @map("exercise_id")
   order        Int     @default(0)
-  sets         Int
-  reps         String // ex. "8-12" ou "AMRAP"
+  sets         Int // résumé rapide (nombre de séries) — le détail par série vit dans `setDetails`
+  reps         String // résumé rapide, ex. "8-12" ou "AMRAP"
   restSeconds  Int?    @map("rest_seconds")
   notes        String?
 
-  programDay ProgramDay @relation(fields: [programDayId], references: [id], onDelete: Cascade)
-  exercise   Exercise   @relation(fields: [exerciseId], references: [id])
+  programDay ProgramDay           @relation(fields: [programDayId], references: [id], onDelete: Cascade)
+  exercise   Exercise             @relation(fields: [exerciseId], references: [id])
+  setDetails ProgramExerciseSet[]
 
   @@index([programDayId])
   @@map("program_exercises")
 }
 
-model WorkoutLog {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  date      DateTime @default(now())
-  feeling   String? // ressenti libre
-  createdAt DateTime @default(now()) @map("created_at")
+/**
+ * Détail personnalisable d'une série (reps et poids propres à chaque série,
+ * au lieu d'un réglage unique répété sur toutes les séries).
+ */
+model ProgramExerciseSet {
+  id                String   @id @default(uuid())
+  programExerciseId String   @map("program_exercise_id")
+  setNumber         Int      @map("set_number")
+  reps              Int?
+  weightKg          Decimal? @map("weight_kg") @db.Decimal(6, 2)
+  restSeconds       Int?     @map("rest_seconds")
 
-  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sets WorkoutSet[]
+  programExercise ProgramExercise @relation(fields: [programExerciseId], references: [id], onDelete: Cascade)
+
+  @@index([programExerciseId])
+  @@map("program_exercise_sets")
+}
+
+model WorkoutLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  programId       String?  @map("program_id")
+  dayId           String?  @map("day_id")
+  date            DateTime @default(now())
+  feeling         String? // ressenti libre
+  durationMinutes Int?     @map("duration_minutes")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program Program?     @relation(fields: [programId], references: [id])
+  day     ProgramDay?  @relation(fields: [dayId], references: [id])
+  sets    WorkoutSet[]
 
   @@index([userId, date])
   @@map("workout_logs")
@@ -652,6 +713,7 @@ enum NotificationType {
   ATTENDANCE_CONFIRMED
   MESSAGE
   CHALLENGE
+  PERSONAL_RECORD
 }
 
 model Notification {
@@ -837,23 +899,28 @@ model ChallengeParticipation {
 }
 
 enum ReferralStatus {
-  PENDING
   COMPLETED
   REWARDED
 }
 
+/**
+ * Une ligne par filleul inscrit (section Compte/Profil — parrainage).
+ * Le code partagé lui-même vit sur `User.referralCode` (stable, réutilisable
+ * par plusieurs filleuls) ; chaque inscription réussie via ce code crée ici
+ * une nouvelle ligne, donc un parrain peut apparaître plusieurs fois.
+ */
 model Referral {
   id           String         @id @default(uuid())
   referrerId   String         @map("referrer_id")
-  refereeId    String?        @map("referee_id") // renseigné une fois le filleul inscrit
-  code         String         @unique
-  status       ReferralStatus @default(PENDING)
+  refereeId    String         @unique @map("referee_id")
+  code         String
+  status       ReferralStatus @default(COMPLETED)
   rewardPoints Int?           @map("reward_points")
   createdAt    DateTime       @default(now()) @map("created_at")
   completedAt  DateTime?      @map("completed_at")
 
-  referrer User  @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referee  User? @relation("ReferralReferee", fields: [refereeId], references: [id])
+  referrer User @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User @relation("ReferralReferee", fields: [refereeId], references: [id])
 
   @@index([referrerId])
   @@map("referrals")

@@ -17,6 +17,7 @@ export interface MeResponse {
   firstName: string;
   lastName: string;
   photoKey: string | null;
+  photoUrl: string | null;
   homeBranchId: string | null;
   status: string;
   branchRoles: { role: Role; branchId: string | null }[];
@@ -39,6 +40,11 @@ export interface ClassSessionSummary {
   room: { id: string; name: string } | null;
   coach: { user: { firstName: string; lastName: string } } | null;
   _count: { bookings: number };
+}
+
+export interface ClassSessionDetail extends ClassSessionSummary {
+  classType: { id: string; name: string; description: string | null };
+  branch: { id: string; name: string; address: string | null };
 }
 
 export interface Booking {

@@ -113,7 +113,13 @@ export class ClassesService {
   async findSession(id: string) {
     const session = await this.prisma.classSession.findUnique({
       where: { id },
-      include: { classType: true, room: true, branch: true, coach: { include: { user: true } } },
+      include: {
+        classType: true,
+        room: true,
+        branch: true,
+        coach: { include: { user: true } },
+        _count: { select: { bookings: { where: { status: { in: ['CONFIRMED', 'ATTENDED'] } } } } },
+      },
     });
     if (!session) throw new NotFoundException('SESSION_NOT_FOUND');
     return session;

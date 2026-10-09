@@ -35,8 +35,22 @@ export class CoachingService {
   async getCoachAvailabilityForMembers(branchId: string) {
     return this.prisma.coachAvailability.findMany({
       where: { branchId },
-      include: { coach: { include: { user: { select: { firstName: true, lastName: true } } } } },
+      include: {
+        coach: {
+          include: { user: { select: { firstName: true, lastName: true } } },
+        },
+      },
     });
+  }
+
+  /** Fiche coach (bio, spécialités) pour la fiche détail côté adhérent. */
+  async getCoachProfile(coachId: string) {
+    const coach = await this.prisma.coachProfile.findUnique({
+      where: { userId: coachId },
+      include: { user: { select: { firstName: true, lastName: true } } },
+    });
+    if (!coach) throw new NotFoundException('COACH_NOT_FOUND');
+    return coach;
   }
 
   // --- Séances individuelles ----------------------------------------------
@@ -51,6 +65,7 @@ export class CoachingService {
         startsAt: new Date(dto.startsAt),
         endsAt: new Date(dto.endsAt),
         status: 'PENDING',
+        objective: dto.objective,
       },
     });
   }
@@ -93,6 +108,30 @@ export class CoachingService {
       include: { coach: { include: { user: { select: { firstName: true, lastName: true } } } } },
       orderBy: { startsAt: 'desc' },
     });
+  }
+
+  /** Liste des élèves suivis par le coach — fusion programmes assignés + séances individuelles
+   * passées/à venir (section 4.2 : "les adhérents apparaissent après une séance ou une
+   * assignation de programme"). */
+  async getStudents(coachId: string) {
+    const [programs, sessions] = await Promise.all([
+      this.prisma.program.findMany({
+        where: { createdById: coachId },
+        select: { assignedTo: { select: { id: true, firstName: true, lastName: true, photoKey: true } } },
+        distinct: ['assignedToId'],
+      }),
+      this.prisma.coachingSession.findMany({
+        where: { coachId },
+        select: { member: { select: { id: true, firstName: true, lastName: true, photoKey: true } } },
+        distinct: ['memberId'],
+      }),
+    ]);
+
+    const byId = new Map<string, { id: string; firstName: string; lastName: string; photoKey: string | null }>();
+    for (const p of programs) byId.set(p.assignedTo.id, p.assignedTo);
+    for (const s of sessions) byId.set(s.member.id, s.member);
+
+    return Array.from(byId.values()).sort((a, b) => a.firstName.localeCompare(b.firstName));
   }
 
   private async findOwnedByCoach(id: string, coachId: string) {

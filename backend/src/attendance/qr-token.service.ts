@@ -5,9 +5,10 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { QrKeysService } from './qr-keys.service.js';
 
 const TOKEN_TTL_SECONDS = 45; // entre 30 et 60s — section 6.3
+const OFFLINE_TOKEN_TTL_SECONDS = 12 * 60 * 60; // 12h — QR de secours hors ligne (section 6.6)
 
 export type QrVerifyResult =
-  | { valid: true; userId: string; jti: string }
+  | { valid: true; userId: string; jti: string; offline: boolean }
   | { valid: false; reason: 'TOKEN_INVALID' | 'TOKEN_EXPIRED' | 'TOKEN_REPLAYED' };
 
 @Injectable()
@@ -19,6 +20,23 @@ export class QrTokenService {
 
   /** Émission du token QR court-vécu pour l'adhérent — GET /v1/me/qr-token. */
   async issueToken(userId: string) {
+    const { token, jti } = await this.sign(userId, TOKEN_TTL_SECONDS, false);
+    return { token, expiresInSeconds: TOKEN_TTL_SECONDS, jti };
+  }
+
+  /**
+   * QR de secours longue durée (12h) — à récupérer pendant qu'on est en
+   * ligne et conserver en stockage sécurisé côté app pour affichage sans
+   * réseau (section 6.6). Vérifié par le même mécanisme signature + anti-
+   * rejeu `jti` que le token court : un seul passage possible par émission,
+   * la fenêtre plus longue n'affaiblit pas l'usage unique.
+   */
+  async issueOfflineToken(userId: string) {
+    const { token, jti } = await this.sign(userId, OFFLINE_TOKEN_TTL_SECONDS, true);
+    return { token, expiresInSeconds: OFFLINE_TOKEN_TTL_SECONDS, jti };
+  }
+
+  private async sign(userId: string, ttlSeconds: number, offline: boolean) {
     const signingKey = await this.qrKeysService.getActiveSigningKey();
     const privateKey = await this.qrKeysService.getPrivateKey(signingKey.kid);
     if (!privateKey) throw new Error('QR_SIGNING_KEY_UNAVAILABLE');
@@ -26,14 +44,14 @@ export class QrTokenService {
     const jti = randomUUID();
     const now = Math.floor(Date.now() / 1000);
 
-    const token = await new SignJWT({ sub: userId })
+    const token = await new SignJWT({ sub: userId, offline })
       .setProtectedHeader({ alg: 'ES256', kid: signingKey.kid })
       .setIssuedAt(now)
-      .setExpirationTime(now + TOKEN_TTL_SECONDS)
+      .setExpirationTime(now + ttlSeconds)
       .setJti(jti)
       .sign(privateKey);
 
-    return { token, expiresInSeconds: TOKEN_TTL_SECONDS };
+    return { token, jti };
   }
 
   /**
@@ -42,7 +60,7 @@ export class QrTokenService {
    * capture d'écran partagée, section 6.3).
    */
   async verifyAndConsume(token: string): Promise<QrVerifyResult> {
-    let payload: { sub?: string; jti?: string };
+    let payload: { sub?: string; jti?: string; exp?: number; offline?: boolean };
     let kid: string | undefined;
 
     try {
@@ -65,10 +83,14 @@ export class QrTokenService {
     const alreadyUsed = await this.prisma.usedQrToken.findUnique({ where: { jti: payload.jti } });
     if (alreadyUsed) return { valid: false, reason: 'TOKEN_REPLAYED' };
 
+    // Garder le jti bloqué jusqu'à l'expiration réelle du token (+marge) —
+    // crucial pour le QR offline dont le TTL dépasse largement celui du
+    // token court-vécu.
+    const expiresAt = payload.exp ? new Date(payload.exp * 1000 + 60_000) : new Date(Date.now() + TOKEN_TTL_SECONDS * 1000 + 60_000);
     await this.prisma.usedQrToken.create({
-      data: { jti: payload.jti, expiresAt: new Date(Date.now() + TOKEN_TTL_SECONDS * 1000 + 60_000) },
+      data: { jti: payload.jti, expiresAt },
     });
 
-    return { valid: true, userId: payload.sub, jti: payload.jti };
+    return { valid: true, userId: payload.sub, jti: payload.jti, offline: payload.offline === true };
   }
 }

@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { colors, fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/ThemeContext';
 import { useMemberSearch } from '../../src/hooks/useStaff';
 import { apiRequest } from '../../src/api/client';
 
 export default function AdminMembersScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [query, setQuery] = useState('');
   const { data: results } = useMemberSearch(query);
   const queryClient = useQueryClient();
@@ -78,27 +81,29 @@ export default function AdminMembersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  header: { padding: spacing.lg, paddingBottom: spacing.sm, gap: spacing.sm },
-  title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondary },
-  searchBox: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.surface,
-    borderWidth: 1, borderColor: colors.border, borderRadius: radii.sm, paddingHorizontal: 12, height: 46,
-  },
-  searchInput: { flex: 1, fontFamily: fonts.body, fontSize: 14, color: colors.text },
-  list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
-  empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
-  card: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
-  },
-  name: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
-  meta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-  actionButton: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: radii.xs },
-  suspendButton: { backgroundColor: colors.dangerSoft },
-  reactivateButton: { backgroundColor: colors.successSoft },
-  actionText: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
-  suspendText: { color: colors.dangerInk },
-  reactivateText: { color: colors.successInk },
-});
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    header: { padding: spacing.lg, paddingBottom: spacing.sm, gap: spacing.sm },
+    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    searchBox: {
+      flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.surface,
+      borderWidth: 1, borderColor: colors.border, borderRadius: radii.sm, paddingHorizontal: 12, height: 46,
+    },
+    searchInput: { flex: 1, fontFamily: fonts.body, fontSize: 14, color: colors.text },
+    list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
+    empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
+    card: {
+      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
+    },
+    name: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
+    meta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    actionButton: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: radii.xs },
+    suspendButton: { backgroundColor: colors.dangerSoft },
+    reactivateButton: { backgroundColor: colors.successSoft },
+    actionText: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
+    suspendText: { color: colors.dangerInk },
+    reactivateText: { color: colors.successInk },
+  });
+}

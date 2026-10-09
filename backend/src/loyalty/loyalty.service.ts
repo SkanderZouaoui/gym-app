@@ -228,35 +228,129 @@ export class LoyaltyService {
     });
   }
 
-  // --- Parrainage -------------------------------------------------------------
+  /** Défis actifs + progression de l'utilisateur courant (null si pas encore rejoint). */
+  async getMyActiveChallengesWithProgress(userId: string, branchId?: string) {
+    const challenges = await this.findActiveChallenges(branchId);
+    if (challenges.length === 0) return [];
 
-  async createReferralCode(referrerId: string) {
-    const code = `REF-${referrerId.slice(0, 8).toUpperCase()}`;
-    return this.prisma.referral.upsert({
-      where: { code },
-      update: {},
-      create: { referrerId, code },
+    const participations = await this.prisma.challengeParticipation.findMany({
+      where: { userId, challengeId: { in: challenges.map((c) => c.id) } },
+    });
+    const progressByChallenge = new Map(participations.map((p) => [p.challengeId, p]));
+
+    return challenges.map((challenge) => {
+      const participation = progressByChallenge.get(challenge.id);
+      return {
+        ...challenge,
+        myProgress: participation?.progress ?? 0,
+        joined: !!participation,
+        completedAt: participation?.completedAt ?? null,
+      };
     });
   }
 
-  /** Appelé à l'inscription si un code de parrainage est fourni. */
-  async completeReferral(code: string, refereeId: string) {
-    const referral = await this.prisma.referral.findUnique({ where: { code } });
-    if (!referral || referral.status !== 'PENDING') return null;
+  // --- Badges -----------------------------------------------------------------
 
-    const updated = await this.prisma.referral.update({
-      where: { id: referral.id },
-      data: { refereeId, status: 'COMPLETED', completedAt: new Date() },
+  async getUserBadges(userId: string) {
+    const [allBadges, earned] = await Promise.all([
+      this.prisma.badge.findMany({ where: { isActive: true }, orderBy: { criterionValue: 'asc' } }),
+      this.prisma.userBadge.findMany({ where: { userId }, select: { badgeId: true, earnedAt: true } }),
+    ]);
+    const earnedByBadgeId = new Map(earned.map((e) => [e.badgeId, e.earnedAt]));
+
+    return allBadges.map((badge) => ({
+      id: badge.id,
+      name: badge.name,
+      description: badge.description,
+      iconKey: badge.iconKey,
+      criterionType: badge.criterionType,
+      criterionValue: badge.criterionValue,
+      earned: earnedByBadgeId.has(badge.id),
+      earnedAt: earnedByBadgeId.get(badge.id) ?? null,
+    }));
+  }
+
+  // --- Parrainage -------------------------------------------------------------
+
+  private static readonly REFERRAL_REWARD_POINTS = 50;
+  private static readonly MAX_REFERRALS_PER_YEAR = 10;
+
+  /** Code stable réutilisable par plusieurs filleuls — généré une seule fois
+   * puis renvoyé tel quel (idempotent, contrairement à une ligne Referral
+   * par invitation). */
+  async createReferralCode(referrerId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: referrerId }, select: { referralCode: true } });
+    if (user?.referralCode) return { code: user.referralCode };
+
+    const code = `REF-${referrerId.slice(0, 8).toUpperCase()}`;
+    await this.prisma.user.update({ where: { id: referrerId }, data: { referralCode: code } });
+    return { code };
+  }
+
+  /** Appelé à l'inscription si un code de parrainage est fourni — crée une
+   * nouvelle ligne Referral par filleul (section Compte/Profil, limite
+   * annuelle de MAX_REFERRALS_PER_YEAR par parrain). */
+  async completeReferral(code: string, refereeId: string) {
+    const referrer = await this.prisma.user.findUnique({ where: { referralCode: code } });
+    if (!referrer || referrer.id === refereeId) return null;
+
+    const yearStart = new Date();
+    yearStart.setMonth(0, 1);
+    yearStart.setHours(0, 0, 0, 0);
+    const referralsThisYear = await this.prisma.referral.count({
+      where: { referrerId: referrer.id, createdAt: { gte: yearStart } },
+    });
+    if (referralsThisYear >= LoyaltyService.MAX_REFERRALS_PER_YEAR) return null;
+
+    const referral = await this.prisma.referral.create({
+      data: {
+        referrerId: referrer.id,
+        refereeId,
+        code,
+        completedAt: new Date(),
+        rewardPoints: LoyaltyService.REFERRAL_REWARD_POINTS,
+      },
     });
 
-    const REFERRAL_REWARD_POINTS = 50;
     await this.awardPoints(
-      referral.referrerId,
-      REFERRAL_REWARD_POINTS,
+      referrer.id,
+      LoyaltyService.REFERRAL_REWARD_POINTS,
       'REFERRAL_COMPLETED',
       `referral.completed:${referral.id}`,
     );
 
-    return updated;
+    return referral;
+  }
+
+  /** Vue d'ensemble parrainage de l'adhérent : code, filleuls et statistiques
+   * (section Compte/Profil, écran dédié Parrainage). */
+  async getReferralOverview(referrerId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: referrerId }, select: { referralCode: true } });
+
+    const yearStart = new Date();
+    yearStart.setMonth(0, 1);
+    yearStart.setHours(0, 0, 0, 0);
+
+    const [referrals, pointsEarned, referralsThisYear] = await Promise.all([
+      this.prisma.referral.findMany({
+        where: { referrerId },
+        orderBy: { createdAt: 'desc' },
+        include: { referee: { select: { firstName: true, lastName: true } } },
+      }),
+      this.prisma.pointsTransaction.aggregate({
+        where: { userId: referrerId, reason: 'REFERRAL_COMPLETED' },
+        _sum: { points: true },
+      }),
+      this.prisma.referral.count({ where: { referrerId, createdAt: { gte: yearStart } } }),
+    ]);
+
+    return {
+      code: user?.referralCode ?? null,
+      referrals,
+      invitedCount: referrals.length,
+      pointsEarned: pointsEarned._sum.points ?? 0,
+      limitReached: referralsThisYear >= LoyaltyService.MAX_REFERRALS_PER_YEAR,
+      maxReferralsPerYear: LoyaltyService.MAX_REFERRALS_PER_YEAR,
+    };
   }
 }

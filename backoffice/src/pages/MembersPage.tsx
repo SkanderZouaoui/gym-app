@@ -1,17 +1,18 @@
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { membersApi } from '../api/endpoints'
 import { useSessionStore } from '../store/session'
+import { MemberMembershipPanel } from '../components/MemberMembershipPanel'
 
 export function MembersPage() {
   const [query, setQuery] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const activeBranchId = useSessionStore((s) => s.activeBranchId)
   const queryClient = useQueryClient()
 
   const { data: members, isFetching } = useQuery({
     queryKey: ['members', 'search', query, activeBranchId],
     queryFn: () => membersApi.search(query, activeBranchId ?? undefined),
-    enabled: query.length >= 2,
   })
 
   const suspend = useMutation({
@@ -56,45 +57,57 @@ export function MembersPage() {
           </thead>
           <tbody>
             {(members ?? []).map((m) => (
-              <tr key={m.id} className="border-b border-(--color-border) last:border-0">
-                <td className="px-4 py-3 font-semibold">
-                  {m.firstName} {m.lastName}
-                </td>
-                <td className="px-4 py-3 text-(--color-muted)">{m.phone ?? m.email ?? '—'}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                      m.status === 'ACTIVE'
-                        ? 'bg-(--color-success-soft) text-(--color-success-ink)'
-                        : 'bg-(--color-warning-soft) text-(--color-warning-ink)'
-                    }`}
-                  >
-                    {m.status === 'ACTIVE' ? 'Actif' : m.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {m.status === 'ACTIVE' ? (
-                    <button
-                      onClick={() => suspend.mutate(m.id)}
-                      className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-danger-soft) hover:text-(--color-danger-ink)"
+              <Fragment key={m.id}>
+                <tr
+                  onClick={() => setExpandedId((id) => (id === m.id ? null : m.id))}
+                  className="cursor-pointer border-b border-(--color-border) last:border-0 hover:bg-(--color-surface-2)"
+                >
+                  <td className="px-4 py-3 font-semibold">
+                    {m.firstName} {m.lastName}
+                  </td>
+                  <td className="px-4 py-3 text-(--color-muted)">{m.phone ?? m.email ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                        m.status === 'ACTIVE'
+                          ? 'bg-(--color-success-soft) text-(--color-success-ink)'
+                          : 'bg-(--color-warning-soft) text-(--color-warning-ink)'
+                      }`}
                     >
-                      Suspendre
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => reactivate.mutate(m.id)}
-                      className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-success-soft) hover:text-(--color-success-ink)"
-                    >
-                      Réactiver
-                    </button>
-                  )}
-                </td>
-              </tr>
+                      {m.status === 'ACTIVE' ? 'Actif' : m.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    {m.status === 'ACTIVE' ? (
+                      <button
+                        onClick={() => suspend.mutate(m.id)}
+                        className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-danger-soft) hover:text-(--color-danger-ink)"
+                      >
+                        Suspendre
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => reactivate.mutate(m.id)}
+                        className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-success-soft) hover:text-(--color-success-ink)"
+                      >
+                        Réactiver
+                      </button>
+                    )}
+                  </td>
+                </tr>
+                {expandedId === m.id ? (
+                  <tr className="border-b border-(--color-border) last:border-0">
+                    <td colSpan={4} className="bg-(--color-surface-2) px-4 py-4">
+                      <MemberMembershipPanel userId={m.id} />
+                    </td>
+                  </tr>
+                ) : null}
+              </Fragment>
             ))}
             {!members || members.length === 0 ? (
               <tr>
                 <td colSpan={4} className="px-4 py-8 text-center text-sm text-(--color-muted)">
-                  {query.length < 2 ? 'Tape au moins 2 caractères pour chercher' : isFetching ? 'Recherche…' : 'Aucun résultat'}
+                  {isFetching ? 'Chargement…' : 'Aucun résultat'}
                 </td>
               </tr>
             ) : null}

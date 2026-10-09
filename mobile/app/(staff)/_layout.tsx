@@ -1,9 +1,13 @@
+import { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
-import { colors, fonts } from '../../src/theme/tokens';
+import { fonts } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 export default function StaffTabsLayout() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Tabs
       screenOptions={{
@@ -11,7 +15,10 @@ export default function StaffTabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontFamily: fonts.bodyBold, fontSize: 11 },
-        tabBarStyle: { height: 88, paddingTop: 8, paddingBottom: 22, borderTopColor: colors.border },
+        tabBarStyle: {
+          height: 88, paddingTop: 8, paddingBottom: 22,
+          backgroundColor: colors.surface, borderTopColor: colors.border,
+        },
       }}
     >
       <Tabs.Screen
@@ -58,21 +65,23 @@ export default function StaffTabsLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  centerButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 999,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: -26,
-    borderWidth: 4,
-    borderColor: colors.surface,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-});
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    centerButton: {
+      width: 60,
+      height: 60,
+      borderRadius: 999,
+      backgroundColor: colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: -26,
+      borderWidth: 4,
+      borderColor: colors.surface,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      elevation: 6,
+    },
+  });
+}

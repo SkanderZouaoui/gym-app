@@ -23,6 +23,8 @@ import { LoyaltyModule } from './loyalty/loyalty.module.js';
 import { MessagingModule } from './messaging/messaging.module.js';
 import { ShopModule } from './shop/shop.module.js';
 import { StatsModule } from './stats/stats.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
+import { StorageModule } from './storage/storage.module.js';
 
 @Module({
   imports: [
@@ -50,6 +52,8 @@ import { StatsModule } from './stats/stats.module.js';
     MessagingModule,
     ShopModule,
     StatsModule,
+    StorageModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

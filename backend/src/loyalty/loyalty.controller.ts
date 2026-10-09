@@ -27,6 +27,11 @@ export class LoyaltyController {
     return { streak: await this.loyaltyService.getCurrentStreak(user.userId) };
   }
 
+  @Get('me/badges')
+  getBadges(@CurrentUser() user: AuthenticatedUser) {
+    return this.loyaltyService.getUserBadges(user.userId);
+  }
+
   @Get('me/attendance-calendar')
   getCalendar(
     @CurrentUser() user: AuthenticatedUser,
@@ -39,6 +44,12 @@ export class LoyaltyController {
   @Get('challenges')
   findActive(@Query('branchId') branchId?: string) {
     return this.loyaltyService.findActiveChallenges(branchId);
+  }
+
+  /** Défis actifs + progression de l'utilisateur courant — pour la carte "Défi en cours" de l'accueil. */
+  @Get('me/challenges')
+  getMyActiveChallenges(@CurrentUser() user: AuthenticatedUser, @Query('branchId') branchId?: string) {
+    return this.loyaltyService.getMyActiveChallengesWithProgress(user.userId, branchId);
   }
 
   @Roles(Role.ADMIN)
@@ -60,5 +71,10 @@ export class LoyaltyController {
   @Post('me/referral-code')
   getReferralCode(@CurrentUser() user: AuthenticatedUser) {
     return this.loyaltyService.createReferralCode(user.userId);
+  }
+
+  @Get('me/referrals')
+  getReferrals(@CurrentUser() user: AuthenticatedUser) {
+    return this.loyaltyService.getReferralOverview(user.userId);
   }
 }

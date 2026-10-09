@@ -1,4 +1,4 @@
-import { IsISO8601, IsString } from 'class-validator';
+import { IsISO8601, IsOptional, IsString } from 'class-validator';
 
 export class RequestSessionDto {
   @IsString()
@@ -12,4 +12,8 @@ export class RequestSessionDto {
 
   @IsISO8601()
   endsAt!: string;
+
+  @IsOptional()
+  @IsString()
+  objective?: string;
 }

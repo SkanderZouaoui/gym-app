@@ -10,6 +10,10 @@ export class CreateExerciseDto {
 
   @IsOptional()
   @IsString()
+  equipment?: string;
+
+  @IsOptional()
+  @IsString()
   instructions?: string;
 
   @IsOptional()

@@ -1,15 +1,19 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { StorageService } from '../storage/storage.service.js';
 import type { CreatePostDto } from './dto/create-post.dto.js';
 import type { CreateCommentDto } from './dto/create-comment.dto.js';
 
 /** Fil d'actualité communautaire (section 4.1/8.7). */
 @Injectable()
 export class SocialFeedService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
-  findFeed(cursor?: string, take = 20) {
-    return this.prisma.post.findMany({
+  async findFeed(cursor?: string, take = 20) {
+    const posts = await this.prisma.post.findMany({
       where: { deletedAt: null },
       include: {
         author: { select: { id: true, firstName: true, lastName: true, photoKey: true } },
@@ -19,6 +23,17 @@ export class SocialFeedService {
       take,
       ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     });
+
+    return Promise.all(
+      posts.map(async (post) => ({
+        ...post,
+        imageUrl: post.imageKey ? await this.storageService.getReadUrl(post.imageKey) : null,
+        author: {
+          ...post.author,
+          photoUrl: post.author.photoKey ? await this.storageService.getReadUrl(post.author.photoKey) : null,
+        },
+      })),
+    );
   }
 
   createPost(authorId: string, dto: CreatePostDto) {

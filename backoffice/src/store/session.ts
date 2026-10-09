@@ -37,3 +37,8 @@ export const useSessionStore = create<SessionState>((set) => ({
 export function hasNetworkScope(user: MeResponse | null): boolean {
   return (user?.branchRoles ?? []).some((r) => r.role === 'ADMIN' && r.branchId === null);
 }
+
+/** true si l'utilisateur a le rôle ADMIN, quel que soit le site (réseau ou local). */
+export function isAdmin(user: MeResponse | null): boolean {
+  return (user?.branchRoles ?? []).some((r) => r.role === 'ADMIN');
+}

@@ -55,6 +55,12 @@ export class StatsController {
     return this.statsService.getRetentionStats({ branchId: query.branchId, to: new Date(query.to) });
   }
 
+  /** Présences des 7 derniers jours + variation vs semaine précédente — accueil admin mobile. */
+  @Get('daily-attendance')
+  getDailyAttendance(@Query('branchId') branchId?: string) {
+    return this.statsService.getDailyAttendance(branchId);
+  }
+
   @Get('export/payments.csv')
   async exportPayments(@Query() query: StatsQueryDto, @Res() res: Response) {
     const csv = await this.statsService.exportPaymentsCsv({

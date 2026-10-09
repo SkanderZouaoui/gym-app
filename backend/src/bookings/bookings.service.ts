@@ -16,7 +16,11 @@ export class BookingsService {
   findForUser(userId: string) {
     return this.prisma.booking.findMany({
       where: { userId },
-      include: { session: { include: { classType: true, branch: true, room: true } } },
+      include: {
+        session: {
+          include: { classType: true, branch: true, room: true, coach: { include: { user: true } } },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

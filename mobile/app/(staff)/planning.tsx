@@ -1,10 +1,14 @@
+import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/ThemeContext';
 import { useMe } from '../../src/hooks/useMe';
 import { useSessions } from '../../src/hooks/useClasses';
 
 export default function StaffPlanningScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
   const { data: sessions } = useSessions(user?.homeBranchId ?? undefined);
 
@@ -37,17 +41,19 @@ export default function StaffPlanningScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  header: { padding: spacing.lg, paddingBottom: spacing.sm },
-  title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondary },
-  list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
-  empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
-  card: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
-  },
-  className: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
-  meta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
-  count: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
-});
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    header: { padding: spacing.lg, paddingBottom: spacing.sm },
+    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
+    empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
+    card: {
+      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
+    },
+    className: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
+    meta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
+    count: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
+  });
+}

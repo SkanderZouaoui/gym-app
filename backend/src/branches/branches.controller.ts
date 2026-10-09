@@ -21,6 +21,11 @@ export class BranchesController {
     return this.branchesService.findOne(id);
   }
 
+  @Get(':id/occupancy')
+  getOccupancy(@Param('id') id: string) {
+    return this.branchesService.getOccupancy(id);
+  }
+
   @Roles(Role.ADMIN)
   @Post()
   create(@Body() dto: CreateBranchDto) {

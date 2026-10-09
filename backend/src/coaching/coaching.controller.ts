@@ -18,6 +18,11 @@ export class CoachingController {
     return this.coachingService.getCoachAvailabilityForMembers(branchId);
   }
 
+  @Get('coaching/coaches/:id')
+  getCoachProfile(@Param('id') id: string) {
+    return this.coachingService.getCoachProfile(id);
+  }
+
   @Roles(Role.COACH)
   @Post('coach/availability')
   setAvailability(@Body() dto: CreateAvailabilityDto, @CurrentUser() user: AuthenticatedUser) {
@@ -28,6 +33,12 @@ export class CoachingController {
   @Get('coach/availability')
   getMyAvailability(@CurrentUser() user: AuthenticatedUser) {
     return this.coachingService.getAvailability(user.userId);
+  }
+
+  @Roles(Role.COACH)
+  @Get('coach/students')
+  getStudents(@CurrentUser() user: AuthenticatedUser) {
+    return this.coachingService.getStudents(user.userId);
   }
 
   @Roles(Role.COACH)

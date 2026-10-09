@@ -9,10 +9,12 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { RolesGuard } from './guards/roles.guard.js';
 import { BranchScopeGuard } from './guards/branch-scope.guard.js';
+import { OtpModule } from '../otp/otp.module.js';
 
 @Module({
   imports: [
     PassportModule,
+    OtpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

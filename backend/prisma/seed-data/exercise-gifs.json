@@ -1,0 +1,2550 @@
+[
+  {
+    "name": "Ab Wheel Rollout",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ab-wheel-rollout-peak.webp"
+  },
+  {
+    "name": "Air Bike",
+    "gifUrl": "https://exercise-dataset.com/images/flat/air-bike-main.webp"
+  },
+  {
+    "name": "Archer Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/archer-pull-ups-peak.webp"
+  },
+  {
+    "name": "Archer Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/archer-push-ups-peak.webp"
+  },
+  {
+    "name": "Arnold Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/arnold-press-peak.webp"
+  },
+  {
+    "name": "Machine Assisted Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/assisted-dips-peak.webp"
+  },
+  {
+    "name": "Assisted Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/assisted-pull-ups-peak.webp"
+  },
+  {
+    "name": "Back Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/back-extension-peak.webp"
+  },
+  {
+    "name": "Back Lever",
+    "gifUrl": "https://exercise-dataset.com/images/flat/back-lever-main.webp"
+  },
+  {
+    "name": "Stability Ball Leg Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ball-leg-curl-peak.webp"
+  },
+  {
+    "name": "Ball Pike",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ball-pike-peak.webp"
+  },
+  {
+    "name": "Band Assisted Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/band-assisted-pull-ups-peak.webp"
+  },
+  {
+    "name": "Band Pull Apart",
+    "gifUrl": "https://exercise-dataset.com/images/flat/band-pull-apart-peak.webp"
+  },
+  {
+    "name": "Banded Adductor Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-adductor-stretch-main.webp"
+  },
+  {
+    "name": "Banded Ankle Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-ankle-stretch-main.webp"
+  },
+  {
+    "name": "Banded Calf Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-calf-stretch-main.webp"
+  },
+  {
+    "name": "Banded Chest Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-chest-stretch-main.webp"
+  },
+  {
+    "name": "Banded Clamshell",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-clamshell-peak.webp"
+  },
+  {
+    "name": "Banded Figure-4 Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-figure-4-stretch-main.webp"
+  },
+  {
+    "name": "Banded Fire Hydrant",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-fire-hydrant-peak.webp"
+  },
+  {
+    "name": "Banded Glute Bridge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-glute-bridge-peak.webp"
+  },
+  {
+    "name": "Banded Good Morning",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-good-morning-peak.webp"
+  },
+  {
+    "name": "Banded Hamstring Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-hamstring-stretch-main.webp"
+  },
+  {
+    "name": "Banded Hip Thrust",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-hip-thrust-peak.webp"
+  },
+  {
+    "name": "Banded IT-Band Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-it-band-stretch-main.webp"
+  },
+  {
+    "name": "Banded Kneeling Hip Thrust",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-kneeling-hip-thrust-peak.webp"
+  },
+  {
+    "name": "Banded Lat Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-lat-stretch-main.webp"
+  },
+  {
+    "name": "Banded Lateral Walk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-lateral-walk-peak.webp"
+  },
+  {
+    "name": "Banded Rear Delt Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-rear-delt-stretch-main.webp"
+  },
+  {
+    "name": "Banded Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "Banded Seated Hip Abduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-seated-hip-abduction-peak.webp"
+  },
+  {
+    "name": "Banded Shoulder Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-shoulder-stretch-main.webp"
+  },
+  {
+    "name": "Banded Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-squat-peak.webp"
+  },
+  {
+    "name": "Banded Standing Leg Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-standing-curl-peak.webp"
+  },
+  {
+    "name": "Banded Standing Hip Abduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-standing-hip-abduction-peak.webp"
+  },
+  {
+    "name": "Banded Standing Hip Adduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-standing-hip-adduction-peak.webp"
+  },
+  {
+    "name": "Banded Sumo Walk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-sumo-walk-peak.webp"
+  },
+  {
+    "name": "Banded Terminal Knee Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-terminal-knee-extension-peak.webp"
+  },
+  {
+    "name": "Banded Triceps Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/banded-triceps-stretch-main.webp"
+  },
+  {
+    "name": "Barbell Ab Rollout",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-ab-rollout-peak.webp"
+  },
+  {
+    "name": "Barbell Bulgarian Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-bulgarian-split-squat-peak.webp"
+  },
+  {
+    "name": "Barbell Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-calf-raise-peak.webp"
+  },
+  {
+    "name": "Barbell Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-curl-peak.webp"
+  },
+  {
+    "name": "Barbell Front Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-front-raise-peak.webp"
+  },
+  {
+    "name": "Barbell Glute Bridge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-glute-bridge-peak.webp"
+  },
+  {
+    "name": "Barbell Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-lunge-peak.webp"
+  },
+  {
+    "name": "Barbell Overhead Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-overhead-extension-peak.webp"
+  },
+  {
+    "name": "Barbell Preacher Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-preacher-curl-peak.webp"
+  },
+  {
+    "name": "Barbell Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-pullover-peak.webp"
+  },
+  {
+    "name": "Barbell Rear Delt Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-rear-delt-row-peak.webp"
+  },
+  {
+    "name": "Barbell Reverse Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-reverse-lunge-peak.webp"
+  },
+  {
+    "name": "Bent-Over Barbell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-row-peak.webp"
+  },
+  {
+    "name": "Barbell Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/barbell-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Battle Rope Double Slam",
+    "gifUrl": "https://exercise-dataset.com/images/flat/battle-rope-double-slam-peak.webp"
+  },
+  {
+    "name": "Battle Ropes",
+    "gifUrl": "https://exercise-dataset.com/images/flat/battle-ropes-main.webp"
+  },
+  {
+    "name": "Bear Crawl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bear-crawl-peak.webp"
+  },
+  {
+    "name": "Bear Plank Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bear-plank-hold-main.webp"
+  },
+  {
+    "name": "Behind the Back Barbell Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/behind-the-back-barbell-shrug-peak.webp"
+  },
+  {
+    "name": "Behind-the-Neck Lat Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/behind-the-neck-lat-pulldown-peak.webp"
+  },
+  {
+    "name": "Behind the Neck Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/behind-the-neck-press-peak.webp"
+  },
+  {
+    "name": "Behind-the-Neck Pull-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/behind-the-neck-pull-ups-peak.webp"
+  },
+  {
+    "name": "Bench Adductor Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-adductor-stretch-main.webp"
+  },
+  {
+    "name": "Bench Ankle Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-ankle-stretch-main.webp"
+  },
+  {
+    "name": "Bench Bulgarian Split Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-bulgarian-split-stretch-main.webp"
+  },
+  {
+    "name": "Bench Calf Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-calf-stretch-main.webp"
+  },
+  {
+    "name": "Bench Chest Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-chest-stretch-main.webp"
+  },
+  {
+    "name": "Bench Child's Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-childs-pose-main.webp"
+  },
+  {
+    "name": "Bench Couch Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-couch-stretch-main.webp"
+  },
+  {
+    "name": "Bench Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-dips-peak.webp"
+  },
+  {
+    "name": "Bench Figure-4 Glute Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-figure-4-glute-stretch-main.webp"
+  },
+  {
+    "name": "Bench Hamstring Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-hamstring-stretch-main.webp"
+  },
+  {
+    "name": "Bench Hollow Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-hollow-hold-main.webp"
+  },
+  {
+    "name": "Bench Lat Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-lat-stretch-main.webp"
+  },
+  {
+    "name": "Bench Leg Pull-In",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-leg-pull-in-peak.webp"
+  },
+  {
+    "name": "Barbell Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-press-peak.webp"
+  },
+  {
+    "name": "Bench Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bench-pull-peak.webp"
+  },
+  {
+    "name": "Bent Arm Barbell Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bent-arm-barbell-pullover-peak.webp"
+  },
+  {
+    "name": "Bent-Arm EZ-Bar Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bent-arm-ez-bar-pullover-peak.webp"
+  },
+  {
+    "name": "Bent-Over Dumbbell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bent-over-db-row-peak.webp"
+  },
+  {
+    "name": "Bent-Over EZ-Bar Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bent-over-ez-bar-row-peak.webp"
+  },
+  {
+    "name": "Dumbbell Bicep Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bicep-curl-peak.webp"
+  },
+  {
+    "name": "Bicycle Crunch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bicycle-crunch-peak.webp"
+  },
+  {
+    "name": "Bird-Dog",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bird-dog-peak.webp"
+  },
+  {
+    "name": "Bird Dog Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bird-dog-hold-main.webp"
+  },
+  {
+    "name": "Boat Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/boat-pose-main.webp"
+  },
+  {
+    "name": "Bodyweight Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bodyweight-calf-raise-peak.webp"
+  },
+  {
+    "name": "Bodyweight Good Morning",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bodyweight-good-morning-peak.webp"
+  },
+  {
+    "name": "Bodyweight Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bodyweight-lateral-raise-peak.webp"
+  },
+  {
+    "name": "Bodyweight Overhead Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bodyweight-overhead-press-peak.webp"
+  },
+  {
+    "name": "Bodyweight Reverse Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bodyweight-reverse-lunge-peak.webp"
+  },
+  {
+    "name": "Bodyweight Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bodyweight-squat-peak.webp"
+  },
+  {
+    "name": "Bow Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bow-pose-main.webp"
+  },
+  {
+    "name": "Box Jump",
+    "gifUrl": "https://exercise-dataset.com/images/flat/box-jump-peak.webp"
+  },
+  {
+    "name": "Box Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/box-squat-peak.webp"
+  },
+  {
+    "name": "Bulgarian Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/bulgarian-split-squat-peak.webp"
+  },
+  {
+    "name": "Burpees",
+    "gifUrl": "https://exercise-dataset.com/images/flat/burpees-main.webp"
+  },
+  {
+    "name": "Butterfly Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/butterfly-stretch-main.webp"
+  },
+  {
+    "name": "Cable Bent-Over Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-bent-over-row-peak.webp"
+  },
+  {
+    "name": "Cable Chest Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-chest-press-peak.webp"
+  },
+  {
+    "name": "Cable Crunch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-crunch-peak.webp"
+  },
+  {
+    "name": "Cable Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-curl-peak.webp"
+  },
+  {
+    "name": "Cable External Rotation",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-external-rotation-peak.webp"
+  },
+  {
+    "name": "Cable Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-fly-peak.webp"
+  },
+  {
+    "name": "Cable Front Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-front-raise-peak.webp"
+  },
+  {
+    "name": "Cable Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-hammer-curl-peak.webp"
+  },
+  {
+    "name": "Cable Glute Kickback",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-kickback-peak.webp"
+  },
+  {
+    "name": "Cable Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-lateral-raise-peak.webp"
+  },
+  {
+    "name": "Cable Pallof Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-pallof-press-peak.webp"
+  },
+  {
+    "name": "Cable Pull-Through",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-pull-through-peak.webp"
+  },
+  {
+    "name": "Cable Tricep Kickback",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-tricep-kickback-peak.webp"
+  },
+  {
+    "name": "Cable Upright Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-upright-row-peak.webp"
+  },
+  {
+    "name": "Cable Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cable-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Camel Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/camel-pose-main.webp"
+  },
+  {
+    "name": "Captain's Chair Knee Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/captains-chair-knee-raise-peak.webp"
+  },
+  {
+    "name": "Captain's Chair Leg Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/captains-chair-leg-raise-peak.webp"
+  },
+  {
+    "name": "Cat-Cow",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cat-cow-main.webp"
+  },
+  {
+    "name": "Cat Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cat-stretch-main.webp"
+  },
+  {
+    "name": "Chair Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chair-pose-main.webp"
+  },
+  {
+    "name": "Cheat Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cheat-curl-peak.webp"
+  },
+  {
+    "name": "Machine Chest Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chest-press-machine-peak.webp"
+  },
+  {
+    "name": "Chest-Supported Dumbbell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chest-supported-db-row-peak.webp"
+  },
+  {
+    "name": "Chest Supported Dumbbell Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chest-supported-dumbbell-shrug-peak.webp"
+  },
+  {
+    "name": "Chest-Supported Kettlebell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chest-supported-kettlebell-row-peak.webp"
+  },
+  {
+    "name": "Chest-Supported Smith Machine Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chest-supported-smith-machine-row-peak.webp"
+  },
+  {
+    "name": "Child's Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/childs-pose-main.webp"
+  },
+  {
+    "name": "Chin Tuck Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chin-tuck-hold-main.webp"
+  },
+  {
+    "name": "Chin-Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/chin-ups-peak.webp"
+  },
+  {
+    "name": "Clamshells",
+    "gifUrl": "https://exercise-dataset.com/images/flat/clamshells-peak.webp"
+  },
+  {
+    "name": "Clamshell Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/clamshells-hold-main.webp"
+  },
+  {
+    "name": "Clap Push-Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/clap-push-ups-peak.webp"
+  },
+  {
+    "name": "Clean",
+    "gifUrl": "https://exercise-dataset.com/images/flat/clean-peak.webp"
+  },
+  {
+    "name": "Clean and Jerk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/clean-and-jerk-peak.webp"
+  },
+  {
+    "name": "Close-Grip Barbell Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-barbell-curl-peak.webp"
+  },
+  {
+    "name": "Close-Grip Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-bench-press-peak.webp"
+  },
+  {
+    "name": "Close-Grip Dumbbell Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-db-bench-press-peak.webp"
+  },
+  {
+    "name": "Close-Grip EZ-Bar Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-ez-bar-bench-press-peak.webp"
+  },
+  {
+    "name": "Close-Grip EZ-Bar Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-ez-bar-curl-peak.webp"
+  },
+  {
+    "name": "Close-Grip Incline Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-incline-bench-peak.webp"
+  },
+  {
+    "name": "Close Grip Lat Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-lat-pulldown-peak.webp"
+  },
+  {
+    "name": "Close-Grip Pull-Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-pull-ups-peak.webp"
+  },
+  {
+    "name": "Close Grip Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-grip-push-ups-peak.webp"
+  },
+  {
+    "name": "Close-Stance Leg Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/close-stance-leg-press-peak.webp"
+  },
+  {
+    "name": "Cobra Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cobra-stretch-main.webp"
+  },
+  {
+    "name": "Cocoons",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cocoons-peak.webp"
+  },
+  {
+    "name": "Commando Pull-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/commando-pull-up-peak.webp"
+  },
+  {
+    "name": "Concentration Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/concentration-curl-peak.webp"
+  },
+  {
+    "name": "Cossack Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cossack-squat-peak.webp"
+  },
+  {
+    "name": "Cow Face Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cow-face-pose-main.webp"
+  },
+  {
+    "name": "Crab Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/crab-dips-peak.webp"
+  },
+  {
+    "name": "Crescent Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/crescent-lunge-main.webp"
+  },
+  {
+    "name": "Cross-Body Crunch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cross-body-crunch-peak.webp"
+  },
+  {
+    "name": "Cross Body Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cross-body-hammer-curl-peak.webp"
+  },
+  {
+    "name": "Cross-Body Shoulder Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/cross-body-shoulder-stretch-main.webp"
+  },
+  {
+    "name": "Crow Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/crow-pose-main.webp"
+  },
+  {
+    "name": "Crunches",
+    "gifUrl": "https://exercise-dataset.com/images/flat/crunches-peak.webp"
+  },
+  {
+    "name": "Dancer Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dancer-pose-main.webp"
+  },
+  {
+    "name": "Dumbbell Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-bench-press-peak.webp"
+  },
+  {
+    "name": "Dumbbell Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-fly-peak.webp"
+  },
+  {
+    "name": "Dumbbell Kickstand Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-kickstand-deadlift-peak.webp"
+  },
+  {
+    "name": "Dumbbell Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-lunge-peak.webp"
+  },
+  {
+    "name": "Dumbbell Overhead Carry",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-overhead-carry-main.webp"
+  },
+  {
+    "name": "Dumbbell Preacher Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-preacher-curl-peak.webp"
+  },
+  {
+    "name": "Dumbbell Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-pullover-peak.webp"
+  },
+  {
+    "name": "Dumbbell Reverse Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-reverse-curl-peak.webp"
+  },
+  {
+    "name": "Dumbbell Reverse Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-reverse-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Dumbbell Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-shrug-peak.webp"
+  },
+  {
+    "name": "Dumbbell Skull Crusher",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-skull-crusher-peak.webp"
+  },
+  {
+    "name": "Dumbbell Somersault Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-somersault-squat-peak.webp"
+  },
+  {
+    "name": "Dumbbell Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-squat-peak.webp"
+  },
+  {
+    "name": "Dumbbell Sumo Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-sumo-squat-peak.webp"
+  },
+  {
+    "name": "Dumbbell Svend Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/db-svend-press-peak.webp"
+  },
+  {
+    "name": "Dead Bug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dead-bug-peak.webp"
+  },
+  {
+    "name": "Dead Bug Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dead-bug-hold-main.webp"
+  },
+  {
+    "name": "Dead Hang",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dead-hang-main.webp"
+  },
+  {
+    "name": "Barbell Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/deadlift-peak.webp"
+  },
+  {
+    "name": "Decline Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/decline-bench-press-peak.webp"
+  },
+  {
+    "name": "Decline Barbell Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/decline-bench-press-barbell-peak.webp"
+  },
+  {
+    "name": "Decline EZ-Bar Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/decline-bench-press-ez-bar-peak.webp"
+  },
+  {
+    "name": "Decline Crunch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/decline-crunch-peak.webp"
+  },
+  {
+    "name": "Decline Dumbbell Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/decline-db-fly-peak.webp"
+  },
+  {
+    "name": "Decline Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/decline-push-up-peak.webp"
+  },
+  {
+    "name": "Deep Squat Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/deep-squat-hold-main.webp"
+  },
+  {
+    "name": "Deficit Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/deficit-deadlift-peak.webp"
+  },
+  {
+    "name": "Deficit Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/deficit-push-ups-peak.webp"
+  },
+  {
+    "name": "Diamond Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/diamond-push-ups-peak.webp"
+  },
+  {
+    "name": "Chest Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dips-peak.webp"
+  },
+  {
+    "name": "Dolphin Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dolphin-pose-main.webp"
+  },
+  {
+    "name": "Donkey Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/donkey-calf-raise-peak.webp"
+  },
+  {
+    "name": "Doorway Chest Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/doorway-chest-stretch-main.webp"
+  },
+  {
+    "name": "Double Dumbbell Kickstand Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-db-kickstand-deadlift-peak.webp"
+  },
+  {
+    "name": "Double Dumbbell Overhead Carry",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-db-overhead-carry-main.webp"
+  },
+  {
+    "name": "Double Kettlebell Bicep Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-bicep-curl-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Clean",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-clean-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Clean and Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-clean-and-press-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Dead Clean",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-dead-clean-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Dead Split Snatch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-dead-split-snatch-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Jerk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-jerk-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Overhead Carry",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-overhead-carry-main.webp"
+  },
+  {
+    "name": "Double Kettlebell Overhead Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-overhead-press-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Push Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-push-press-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Rear Delt Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-rear-delt-row-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-row-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Split Jerk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-split-jerk-peak.webp"
+  },
+  {
+    "name": "Double Kettlebell Swing Snatch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/double-kettlebell-swing-snatch-peak.webp"
+  },
+  {
+    "name": "Downward-Facing Dog",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-main.webp"
+  },
+  {
+    "name": "Downward Dog Knee Tuck",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-knee-tuck-peak.webp"
+  },
+  {
+    "name": "Downward Dog Pedal",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-pedal-peak.webp"
+  },
+  {
+    "name": "Downward Dog to Knee Drive",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-to-knee-drive-peak.webp"
+  },
+  {
+    "name": "Downward Dog to Low Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-to-low-lunge-peak.webp"
+  },
+  {
+    "name": "Downward Dog to Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-to-plank-peak.webp"
+  },
+  {
+    "name": "Downward Dog to Upward Dog",
+    "gifUrl": "https://exercise-dataset.com/images/flat/downward-dog-to-upward-dog-peak.webp"
+  },
+  {
+    "name": "Drag Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/drag-curl-peak.webp"
+  },
+  {
+    "name": "Dragon Flag",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dragon-flag-peak.webp"
+  },
+  {
+    "name": "Dumbbell Bench Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-bench-pull-peak.webp"
+  },
+  {
+    "name": "Dumbbell Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-calf-raise-peak.webp"
+  },
+  {
+    "name": "Dumbbell Clean and Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-clean-and-press-peak.webp"
+  },
+  {
+    "name": "Dumbbell Curl and Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-curl-and-press-peak.webp"
+  },
+  {
+    "name": "Dumbbell Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-deadlift-peak.webp"
+  },
+  {
+    "name": "Dumbbell Face Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-face-pull-peak.webp"
+  },
+  {
+    "name": "Dumbbell Farmer's Walk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-farmers-walk-main.webp"
+  },
+  {
+    "name": "Dumbbell Floor Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-floor-press-peak.webp"
+  },
+  {
+    "name": "Dumbbell Front Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-front-raise-peak.webp"
+  },
+  {
+    "name": "Dumbbell Front Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-front-squat-peak.webp"
+  },
+  {
+    "name": "Dumbbell Hip Thrust",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-hip-thrust-peak.webp"
+  },
+  {
+    "name": "Dumbbell Pistol Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-pistol-squat-peak.webp"
+  },
+  {
+    "name": "Dumbbell Push Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-push-press-peak.webp"
+  },
+  {
+    "name": "Dumbbell Reverse Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-reverse-fly-peak.webp"
+  },
+  {
+    "name": "Dumbbell Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "Dumbbell Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-shoulder-press-peak.webp"
+  },
+  {
+    "name": "Dumbbell Side Bend",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-side-bend-peak.webp"
+  },
+  {
+    "name": "Dumbbell Snatch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-snatch-peak.webp"
+  },
+  {
+    "name": "Dumbbell Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-split-squat-peak.webp"
+  },
+  {
+    "name": "Dumbbell Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-tricep-extension-peak.webp"
+  },
+  {
+    "name": "Dumbbell Upright Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-upright-row-peak.webp"
+  },
+  {
+    "name": "Dumbbell Windmill",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-windmill-peak.webp"
+  },
+  {
+    "name": "Dumbbell Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/dumbbell-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Eagle Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/eagle-pose-main.webp"
+  },
+  {
+    "name": "Easy Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/easy-pose-main.webp"
+  },
+  {
+    "name": "Elliptical Trainer",
+    "gifUrl": "https://exercise-dataset.com/images/flat/elliptical-trainer-main.webp"
+  },
+  {
+    "name": "Extended Side Angle Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/extended-side-angle-main.webp"
+  },
+  {
+    "name": "EZ-Bar Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-bench-press-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-curl-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Front Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-front-raise-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Lying Triceps Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-lying-tricep-extension-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Overhead Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-overhead-extension-peak.webp"
+  },
+  {
+    "name": "EZ Bar Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-pullover-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Reverse Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-reverse-curl-peak.webp"
+  },
+  {
+    "name": "EZ Bar Reverse Grip Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-reverse-grip-row-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-shrug-peak.webp"
+  },
+  {
+    "name": "EZ Bar Spider Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-spider-curl-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Upright Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-upright-row-peak.webp"
+  },
+  {
+    "name": "EZ-Bar Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ez-bar-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Cable Face Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/face-pull-peak.webp"
+  },
+  {
+    "name": "Fire Hydrant",
+    "gifUrl": "https://exercise-dataset.com/images/flat/fire-hydrant-peak.webp"
+  },
+  {
+    "name": "Fish Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/fish-pose-main.webp"
+  },
+  {
+    "name": "Flexed Arm Hang",
+    "gifUrl": "https://exercise-dataset.com/images/flat/flexed-arm-hang-main.webp"
+  },
+  {
+    "name": "Floor EZ-Bar Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/floor-ez-bar-press-peak.webp"
+  },
+  {
+    "name": "Floor Kettlebell Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/floor-kettlebell-pullover-peak.webp"
+  },
+  {
+    "name": "Floor Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/floor-press-peak.webp"
+  },
+  {
+    "name": "Flutter Kicks",
+    "gifUrl": "https://exercise-dataset.com/images/flat/flutter-kicks-peak.webp"
+  },
+  {
+    "name": "Front Lever",
+    "gifUrl": "https://exercise-dataset.com/images/flat/front-lever-main.webp"
+  },
+  {
+    "name": "Front Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/front-squat-peak.webp"
+  },
+  {
+    "name": "Garland Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/garland-pose-main.webp"
+  },
+  {
+    "name": "Glute Bridge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/glute-bridge-peak.webp"
+  },
+  {
+    "name": "Glute Bridge Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/glute-bridge-hold-main.webp"
+  },
+  {
+    "name": "Glute Kickback",
+    "gifUrl": "https://exercise-dataset.com/images/flat/glute-kickback-peak.webp"
+  },
+  {
+    "name": "Glute Kickback Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/glute-kickback-hold-main.webp"
+  },
+  {
+    "name": "Goblet Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/goblet-squat-peak.webp"
+  },
+  {
+    "name": "Good Morning",
+    "gifUrl": "https://exercise-dataset.com/images/flat/good-morning-peak.webp"
+  },
+  {
+    "name": "Hack Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hack-squat-peak.webp"
+  },
+  {
+    "name": "Hack Squat Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hack-squat-calf-raise-peak.webp"
+  },
+  {
+    "name": "Half-Kneeling Hip Flexor Rock",
+    "gifUrl": "https://exercise-dataset.com/images/flat/half-kneeling-hip-flexor-rock-peak.webp"
+  },
+  {
+    "name": "Half Moon Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/half-moon-pose-main.webp"
+  },
+  {
+    "name": "Dumbbell Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hammer-curl-peak.webp"
+  },
+  {
+    "name": "Handstand Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/handstand-hold-main.webp"
+  },
+  {
+    "name": "Handstand Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/handstand-push-ups-peak.webp"
+  },
+  {
+    "name": "Hang Clean",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hang-clean-peak.webp"
+  },
+  {
+    "name": "Hang Power Clean",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hang-power-clean-peak.webp"
+  },
+  {
+    "name": "Hang Snatch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hang-snatch-peak.webp"
+  },
+  {
+    "name": "Hanging Knee Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hanging-knee-raise-peak.webp"
+  },
+  {
+    "name": "Hanging L-Sit",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hanging-l-sit-main.webp"
+  },
+  {
+    "name": "Hanging Leg Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hanging-leg-raise-peak.webp"
+  },
+  {
+    "name": "Hanging Pike",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hanging-pike-peak.webp"
+  },
+  {
+    "name": "Hanging Tuck Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hanging-tuck-hold-main.webp"
+  },
+  {
+    "name": "Happy Baby Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/happy-baby-main.webp"
+  },
+  {
+    "name": "Head-to-Knee Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/head-to-knee-pose-main.webp"
+  },
+  {
+    "name": "Heel-Elevated Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/heel-elevated-squat-peak.webp"
+  },
+  {
+    "name": "Heel Flicks",
+    "gifUrl": "https://exercise-dataset.com/images/flat/heel-flicks-main.webp"
+  },
+  {
+    "name": "Heel-to-Toe Walk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/heel-to-toe-walk-main.webp"
+  },
+  {
+    "name": "Heel Touches",
+    "gifUrl": "https://exercise-dataset.com/images/flat/heel-touches-peak.webp"
+  },
+  {
+    "name": "Hero Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hero-pose-main.webp"
+  },
+  {
+    "name": "Hex Bar Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hex-bar-deadlift-peak.webp"
+  },
+  {
+    "name": "High-Foot Leg Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/high-foot-leg-press-peak.webp"
+  },
+  {
+    "name": "High Knees",
+    "gifUrl": "https://exercise-dataset.com/images/flat/high-knees-main.webp"
+  },
+  {
+    "name": "High Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/high-plank-main.webp"
+  },
+  {
+    "name": "Machine Hip Abduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hip-abduction-peak.webp"
+  },
+  {
+    "name": "Hip Adduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hip-adduction-peak.webp"
+  },
+  {
+    "name": "Barbell Hip Thrust",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hip-thrust-peak.webp"
+  },
+  {
+    "name": "Hollow Body Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/hollow-body-hold-main.webp"
+  },
+  {
+    "name": "Horizontal Leg Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/horizontal-leg-press-peak.webp"
+  },
+  {
+    "name": "Human Flag",
+    "gifUrl": "https://exercise-dataset.com/images/flat/human-flag-main.webp"
+  },
+  {
+    "name": "Incline EZ-Bar Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-bench-ez-bar-press-peak.webp"
+  },
+  {
+    "name": "Incline Barbell Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-bench-press-peak.webp"
+  },
+  {
+    "name": "Incline Dumbbell Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-db-curl-peak.webp"
+  },
+  {
+    "name": "Incline Dumbbell Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-db-press-peak.webp"
+  },
+  {
+    "name": "Incline Dumbbell Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-dumbbell-fly-peak.webp"
+  },
+  {
+    "name": "Incline Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-hammer-curl-peak.webp"
+  },
+  {
+    "name": "Incline Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-push-ups-peak.webp"
+  },
+  {
+    "name": "Incline Treadmill Walk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/incline-treadmill-walk-main.webp"
+  },
+  {
+    "name": "Inverted Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/inverted-row-peak.webp"
+  },
+  {
+    "name": "Isometric Neck Lateral Flexion",
+    "gifUrl": "https://exercise-dataset.com/images/flat/isometric-neck-side-main.webp"
+  },
+  {
+    "name": "Jackknife Sit-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/jackknife-sit-up-peak.webp"
+  },
+  {
+    "name": "Jefferson Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/jefferson-curl-peak.webp"
+  },
+  {
+    "name": "Jump Rope",
+    "gifUrl": "https://exercise-dataset.com/images/flat/jump-rope-main.webp"
+  },
+  {
+    "name": "Jump Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/jump-squat-peak.webp"
+  },
+  {
+    "name": "Jumping Jacks",
+    "gifUrl": "https://exercise-dataset.com/images/flat/jumping-jacks-peak.webp"
+  },
+  {
+    "name": "Kettlebell Bulgarian Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-bulgarian-split-squat-peak.webp"
+  },
+  {
+    "name": "Kettlebell Close-Grip Floor Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-close-grip-floor-press-peak.webp"
+  },
+  {
+    "name": "Kettlebell Concentration Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-concentration-curl-peak.webp"
+  },
+  {
+    "name": "Kettlebell Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-deadlift-peak.webp"
+  },
+  {
+    "name": "Kettlebell Farmer's Walk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-farmers-walk-main.webp"
+  },
+  {
+    "name": "Kettlebell Floor Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-floor-press-peak.webp"
+  },
+  {
+    "name": "Kettlebell Goblet Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-goblet-lunge-peak.webp"
+  },
+  {
+    "name": "Kettlebell Halo",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-halo-peak.webp"
+  },
+  {
+    "name": "Kettlebell Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-hammer-curl-peak.webp"
+  },
+  {
+    "name": "Kettlebell Hip Thrust",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-hip-thrust-peak.webp"
+  },
+  {
+    "name": "Kettlebell Kickstand Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-kickstand-deadlift-peak.webp"
+  },
+  {
+    "name": "Kettlebell Lunge Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-lunge-press-peak.webp"
+  },
+  {
+    "name": "Kettlebell Offset Reverse Lunge and Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-offset-reverse-lunge-and-press-peak.webp"
+  },
+  {
+    "name": "Kettlebell Overhead Carry",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-overhead-carry-main.webp"
+  },
+  {
+    "name": "Kettlebell Overhead Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-overhead-tricep-extension-peak.webp"
+  },
+  {
+    "name": "Kettlebell Pistol Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-pistol-squat-peak.webp"
+  },
+  {
+    "name": "Kettlebell Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-pullover-peak.webp"
+  },
+  {
+    "name": "Kettlebell Reverse Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-reverse-lunge-peak.webp"
+  },
+  {
+    "name": "Kettlebell Reverse Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-reverse-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Kettlebell Rotational Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-rotational-lunge-peak.webp"
+  },
+  {
+    "name": "Kettlebell Russian Twist",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-russian-twist-peak.webp"
+  },
+  {
+    "name": "Kettlebell Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-shrug-peak.webp"
+  },
+  {
+    "name": "Kettlebell Single Leg Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-single-leg-deadlift-peak.webp"
+  },
+  {
+    "name": "Kettlebell Skull Crusher",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-skull-crusher-peak.webp"
+  },
+  {
+    "name": "Kettlebell Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-squat-peak.webp"
+  },
+  {
+    "name": "Kettlebell Sumo Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-sumo-deadlift-peak.webp"
+  },
+  {
+    "name": "Kettlebell Sumo High Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-sumo-high-pull-peak.webp"
+  },
+  {
+    "name": "Kettlebell Svend Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-svend-press-peak.webp"
+  },
+  {
+    "name": "Kettlebell Swing",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-swing-peak.webp"
+  },
+  {
+    "name": "Kettlebell Swing Clean",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-swing-clean-peak.webp"
+  },
+  {
+    "name": "Kettlebell Tibialis Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-tibialis-raise-peak.webp"
+  },
+  {
+    "name": "Kettlebell Turkish Get Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-turkish-get-ups-peak.webp"
+  },
+  {
+    "name": "Kettlebell Windmills",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-windmills-peak.webp"
+  },
+  {
+    "name": "Kettlebell Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kettlebell-wrist-curl-peak.webp"
+  },
+  {
+    "name": "Knee Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/knee-push-ups-peak.webp"
+  },
+  {
+    "name": "Knee-to-Chest Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/knee-to-chest-stretch-main.webp"
+  },
+  {
+    "name": "Kneeling Cable Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kneeling-cable-row-peak.webp"
+  },
+  {
+    "name": "Kneeling Hip Flexor Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kneeling-hip-flexor-stretch-main.webp"
+  },
+  {
+    "name": "Kneeling Wrist Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/kneeling-wrist-stretch-main.webp"
+  },
+  {
+    "name": "L Sit",
+    "gifUrl": "https://exercise-dataset.com/images/flat/l-sit-main.webp"
+  },
+  {
+    "name": "Landmine Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/landmine-press-peak.webp"
+  },
+  {
+    "name": "Lat Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lat-pulldown-peak.webp"
+  },
+  {
+    "name": "Lateral Leg Swing",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lateral-leg-swing-peak.webp"
+  },
+  {
+    "name": "Dumbbell Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lateral-raise-peak.webp"
+  },
+  {
+    "name": "Lying Leg Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/leg-curl-peak.webp"
+  },
+  {
+    "name": "Leg Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/leg-extension-peak.webp"
+  },
+  {
+    "name": "Leg Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/leg-press-peak.webp"
+  },
+  {
+    "name": "Front-to-Back Leg Swing",
+    "gifUrl": "https://exercise-dataset.com/images/flat/leg-swing-front-to-back-peak.webp"
+  },
+  {
+    "name": "Legs-Up-the-Wall Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/legs-up-the-wall-main.webp"
+  },
+  {
+    "name": "Lizard Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lizard-stretch-main.webp"
+  },
+  {
+    "name": "Locust Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/locust-pose-main.webp"
+  },
+  {
+    "name": "Low Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/low-lunge-main.webp"
+  },
+  {
+    "name": "Low Lunge to Half Split",
+    "gifUrl": "https://exercise-dataset.com/images/flat/low-lunge-to-half-split-peak.webp"
+  },
+  {
+    "name": "Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lunge-peak.webp"
+  },
+  {
+    "name": "Lying Leg Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lying-leg-raise-peak.webp"
+  },
+  {
+    "name": "Lying Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/lying-tricep-extension-peak.webp"
+  },
+  {
+    "name": "Machine Back Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-back-extension-peak.webp"
+  },
+  {
+    "name": "Machine Bicep Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-bicep-curl-peak.webp"
+  },
+  {
+    "name": "Machine Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-calf-raise-peak.webp"
+  },
+  {
+    "name": "Machine Chest Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-chest-fly-peak.webp"
+  },
+  {
+    "name": "Machine Preacher Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-preacher-curl-peak.webp"
+  },
+  {
+    "name": "Machine Seated Crunch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-seated-crunch-peak.webp"
+  },
+  {
+    "name": "Machine Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-shoulder-press-peak.webp"
+  },
+  {
+    "name": "Machine Triceps Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/machine-triceps-extension-peak.webp"
+  },
+  {
+    "name": "Medicine Ball Slam",
+    "gifUrl": "https://exercise-dataset.com/images/flat/medicine-ball-slam-peak.webp"
+  },
+  {
+    "name": "Mountain Climbers",
+    "gifUrl": "https://exercise-dataset.com/images/flat/mountain-climbers-peak.webp"
+  },
+  {
+    "name": "Mountain Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/mountain-pose-main.webp"
+  },
+  {
+    "name": "Muscle Snatch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/muscle-snatch-peak.webp"
+  },
+  {
+    "name": "Muscle Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/muscle-ups-peak.webp"
+  },
+  {
+    "name": "Neck Side Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/neck-side-stretch-main.webp"
+  },
+  {
+    "name": "Negative Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/negative-pull-ups-peak.webp"
+  },
+  {
+    "name": "Neutral Grip Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/neutral-grip-pull-ups-peak.webp"
+  },
+  {
+    "name": "Nordic Hamstring Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/nordic-hamstring-curl-peak.webp"
+  },
+  {
+    "name": "Barbell Overhead Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ohp-peak.webp"
+  },
+  {
+    "name": "One Arm Dumbbell Preacher Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-dumbbell-preacher-curl-peak.webp"
+  },
+  {
+    "name": "One-Arm Dumbbell Push Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-dumbbell-push-press-peak.webp"
+  },
+  {
+    "name": "One Arm Dumbbell Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-dumbbell-shoulder-press-peak.webp"
+  },
+  {
+    "name": "One-Arm Dumbbell Swing",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-dumbbell-swing-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Bicep Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-bicep-curl-peak.webp"
+  },
+  {
+    "name": "One-Arm Kettlebell Bottoms-Up Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-bottoms-up-press-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Floor Glute Bridge Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-floor-glute-bridge-press-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Floor Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-floor-press-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Front Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-front-squat-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Push Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-push-press-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-row-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-shoulder-press-peak.webp"
+  },
+  {
+    "name": "One Arm Kettlebell Swing",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-swing-peak.webp"
+  },
+  {
+    "name": "One-Arm Kettlebell Tricep Kickback",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-kettlebell-tricep-kickback-peak.webp"
+  },
+  {
+    "name": "One-Arm Landmine Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-landmine-press-peak.webp"
+  },
+  {
+    "name": "One-Arm Lat Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-lat-pulldown-peak.webp"
+  },
+  {
+    "name": "One-Arm Seated Cable Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-seated-cable-row-peak.webp"
+  },
+  {
+    "name": "One-Arm Single-Leg Dumbbell Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-single-leg-dumbbell-romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "One-Arm Single-Leg Kettlebell Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/one-arm-single-leg-kettlebell-romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "Overhead Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/overhead-squat-peak.webp"
+  },
+  {
+    "name": "Overhead Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/overhead-tricep-extension-peak.webp"
+  },
+  {
+    "name": "Overhead Triceps Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/overhead-triceps-stretch-main.webp"
+  },
+  {
+    "name": "Pause Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pause-deadlift-peak.webp"
+  },
+  {
+    "name": "Pause Pull-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pause-pull-up-peak.webp"
+  },
+  {
+    "name": "Pause Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pause-squat-peak.webp"
+  },
+  {
+    "name": "Paused Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/paused-bench-press-peak.webp"
+  },
+  {
+    "name": "Paused Incline Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/paused-incline-bench-press-peak.webp"
+  },
+  {
+    "name": "Paused Overhead Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/paused-ohp-peak.webp"
+  },
+  {
+    "name": "Pec Deck",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pec-deck-peak.webp"
+  },
+  {
+    "name": "Pendlay Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pendlay-row-peak.webp"
+  },
+  {
+    "name": "Pigeon Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pigeon-stretch-main.webp"
+  },
+  {
+    "name": "Pike Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pike-push-ups-peak.webp"
+  },
+  {
+    "name": "Pilates Kneeling Side Kick",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-kneeling-side-kick-peak.webp"
+  },
+  {
+    "name": "Pilates Leg Pull Back",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-leg-pull-back-peak.webp"
+  },
+  {
+    "name": "Pilates Leg Pull Front",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-leg-pull-front-peak.webp"
+  },
+  {
+    "name": "Pilates Roll Down",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-roll-down-peak.webp"
+  },
+  {
+    "name": "Pilates Roll Over",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-roll-over-peak.webp"
+  },
+  {
+    "name": "Pilates Saw",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-saw-peak.webp"
+  },
+  {
+    "name": "Pilates Side Bend",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-side-bend-peak.webp"
+  },
+  {
+    "name": "Pilates Spine Stretch Forward",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-spine-stretch-forward-peak.webp"
+  },
+  {
+    "name": "Pilates Spine Twist",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pilates-spine-twist-peak.webp"
+  },
+  {
+    "name": "Pistol Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pistol-squat-peak.webp"
+  },
+  {
+    "name": "Planche",
+    "gifUrl": "https://exercise-dataset.com/images/flat/planche-main.webp"
+  },
+  {
+    "name": "Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plank-main.webp"
+  },
+  {
+    "name": "Plank Knee Tuck",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plank-knee-tuck-peak.webp"
+  },
+  {
+    "name": "Plate-Loaded Donkey Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plate-loaded-donkey-calf-raise-peak.webp"
+  },
+  {
+    "name": "Plate-Loaded Glute Drive",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plate-loaded-glute-drive-peak.webp"
+  },
+  {
+    "name": "Plate-Loaded Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plate-loaded-lateral-raise-peak.webp"
+  },
+  {
+    "name": "Plate-Loaded Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plate-loaded-shrug-peak.webp"
+  },
+  {
+    "name": "Plate Pinch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plate-pinch-peak.webp"
+  },
+  {
+    "name": "Plate Pullover",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plate-pullover-peak.webp"
+  },
+  {
+    "name": "Plow Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plow-pose-main.webp"
+  },
+  {
+    "name": "Plyo Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plyo-lunge-peak.webp"
+  },
+  {
+    "name": "Plyo Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/plyo-push-up-peak.webp"
+  },
+  {
+    "name": "Preacher Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/preacher-curl-peak.webp"
+  },
+  {
+    "name": "Preacher Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/preacher-hammer-curl-peak.webp"
+  },
+  {
+    "name": "Pseudo Planche Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pseudo-planche-push-ups-peak.webp"
+  },
+  {
+    "name": "Pull-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pull-up-peak.webp"
+  },
+  {
+    "name": "Puppy Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/puppy-pose-main.webp"
+  },
+  {
+    "name": "Push Jerk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/push-jerk-peak.webp"
+  },
+  {
+    "name": "Push Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/push-press-peak.webp"
+  },
+  {
+    "name": "Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/push-up-peak.webp"
+  },
+  {
+    "name": "Pyramid Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/pyramid-pose-main.webp"
+  },
+  {
+    "name": "Rack Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/rack-pull-peak.webp"
+  },
+  {
+    "name": "Rear Delt Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/rear-delt-fly-peak.webp"
+  },
+  {
+    "name": "Renegade Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/renegade-row-peak.webp"
+  },
+  {
+    "name": "Reverse Crunches",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-crunches-peak.webp"
+  },
+  {
+    "name": "Reverse Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-curl-peak.webp"
+  },
+  {
+    "name": "Reverse Grip Bent Over Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-grip-bent-over-row-peak.webp"
+  },
+  {
+    "name": "Reverse Grip Lat Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-grip-lat-pulldown-peak.webp"
+  },
+  {
+    "name": "Reverse Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-lunge-peak.webp"
+  },
+  {
+    "name": "Reverse Nordic Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-nordic-curl-peak.webp"
+  },
+  {
+    "name": "Reverse Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-plank-main.webp"
+  },
+  {
+    "name": "Reverse Plank Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-plank-dips-peak.webp"
+  },
+  {
+    "name": "Reverse Tabletop Hip Pulses",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-tabletop-hip-pulses-peak.webp"
+  },
+  {
+    "name": "Reverse Tabletop Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/reverse-tabletop-hold-main.webp"
+  },
+  {
+    "name": "Revolved Chair Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/revolved-chair-pose-main.webp"
+  },
+  {
+    "name": "Revolved Crescent Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/revolved-crescent-lunge-main.webp"
+  },
+  {
+    "name": "Ring Dead Hang",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-dead-hang-main.webp"
+  },
+  {
+    "name": "Ring Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-dips-peak.webp"
+  },
+  {
+    "name": "Ring Face Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-face-pull-peak.webp"
+  },
+  {
+    "name": "Ring L-Sit",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-l-sit-main.webp"
+  },
+  {
+    "name": "Ring Muscle-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-muscle-up-peak.webp"
+  },
+  {
+    "name": "Ring Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-plank-main.webp"
+  },
+  {
+    "name": "Ring Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-push-up-peak.webp"
+  },
+  {
+    "name": "Ring Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ring-row-peak.webp"
+  },
+  {
+    "name": "Rings Inverted Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/rings-inverted-row-peak.webp"
+  },
+  {
+    "name": "Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "Rope Climb",
+    "gifUrl": "https://exercise-dataset.com/images/flat/rope-climb-main.webp"
+  },
+  {
+    "name": "Rowing Machine",
+    "gifUrl": "https://exercise-dataset.com/images/flat/rowing-machine-peak.webp"
+  },
+  {
+    "name": "Running",
+    "gifUrl": "https://exercise-dataset.com/images/flat/running-main.webp"
+  },
+  {
+    "name": "Russian Twist",
+    "gifUrl": "https://exercise-dataset.com/images/flat/russian-twist-peak.webp"
+  },
+  {
+    "name": "Corpse Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/savasana-main.webp"
+  },
+  {
+    "name": "Scapular Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/scapular-pull-ups-peak.webp"
+  },
+  {
+    "name": "Scissor Kicks",
+    "gifUrl": "https://exercise-dataset.com/images/flat/scissor-kicks-peak.webp"
+  },
+  {
+    "name": "Seated Barbell Overhead Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-barbell-overhead-press-peak.webp"
+  },
+  {
+    "name": "Seated Cable Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-cable-row-peak.webp"
+  },
+  {
+    "name": "Seated Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-calf-raise-peak.webp"
+  },
+  {
+    "name": "Seated Dumbbell Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-db-press-peak.webp"
+  },
+  {
+    "name": "Seated Dumbbell Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-dumbbell-curl-peak.webp"
+  },
+  {
+    "name": "Seated Dumbbell Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-dumbbell-lateral-raise-peak.webp"
+  },
+  {
+    "name": "Seated Dumbbell Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-dumbbell-tricep-extension-peak.webp"
+  },
+  {
+    "name": "Seated Forward Fold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-forward-fold-main.webp"
+  },
+  {
+    "name": "Seated Leg Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-leg-curl-peak.webp"
+  },
+  {
+    "name": "Seated Smith Machine Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-smith-machine-shoulder-press-peak.webp"
+  },
+  {
+    "name": "Seated Spinal Twist",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-spinal-twist-main.webp"
+  },
+  {
+    "name": "Seated Straddle Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/seated-straddle-stretch-main.webp"
+  },
+  {
+    "name": "Barbell Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/shrug-peak.webp"
+  },
+  {
+    "name": "Side Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-lunge-peak.webp"
+  },
+  {
+    "name": "Side-Lying Hip Abduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-lying-hip-abduction-peak.webp"
+  },
+  {
+    "name": "Side-Lying Hip Abduction Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-lying-hip-abduction-hold-main.webp"
+  },
+  {
+    "name": "Side Lying Hip Adduction",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-lying-hip-adduction-peak.webp"
+  },
+  {
+    "name": "Side-Lying Hip Adduction Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-lying-hip-adduction-hold-main.webp"
+  },
+  {
+    "name": "Side-Lying Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-lying-lateral-raise-peak.webp"
+  },
+  {
+    "name": "Side Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-plank-main.webp"
+  },
+  {
+    "name": "Side Plank with Leg Lift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-plank-leg-lift-peak.webp"
+  },
+  {
+    "name": "Side Plank Leg Lift Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/side-plank-leg-lift-hold-main.webp"
+  },
+  {
+    "name": "Single-Arm Chest-Supported Dumbbell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-chest-supported-dumbbell-row-peak.webp"
+  },
+  {
+    "name": "Single-Arm Dumbbell Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-db-row-peak.webp"
+  },
+  {
+    "name": "Single Arm Dumbbell Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-dumbbell-bench-press-peak.webp"
+  },
+  {
+    "name": "Single-Arm Dumbbell Overhead Tricep Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-dumbbell-overhead-tricep-extension-peak.webp"
+  },
+  {
+    "name": "Single-Arm Hammer Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-hammer-curl-peak.webp"
+  },
+  {
+    "name": "Single-Arm Machine Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-machine-shoulder-press-peak.webp"
+  },
+  {
+    "name": "Single-Arm Plate-Loaded Lateral Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-plate-loaded-lateral-raise-peak.webp"
+  },
+  {
+    "name": "Single Arm Tricep Pushdown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-arm-tricep-pushdown-peak.webp"
+  },
+  {
+    "name": "Single Dumbbell Svend Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-db-svend-press-peak.webp"
+  },
+  {
+    "name": "Single Leg Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-calf-raise-peak.webp"
+  },
+  {
+    "name": "Single Leg Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-extension-peak.webp"
+  },
+  {
+    "name": "Single Leg Glute Bridge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-glute-bridge-peak.webp"
+  },
+  {
+    "name": "Single-Leg Glute Bridge Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-glute-bridge-hold-main.webp"
+  },
+  {
+    "name": "Single Leg Lying Leg Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-lying-leg-curl-peak.webp"
+  },
+  {
+    "name": "Single Leg Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-press-peak.webp"
+  },
+  {
+    "name": "Single Leg RDL Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-rdl-hold-main.webp"
+  },
+  {
+    "name": "Single Leg Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/single-leg-romanian-deadlift-peak.webp"
+  },
+  {
+    "name": "Sit-Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/sit-ups-peak.webp"
+  },
+  {
+    "name": "Six Inch Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/six-inch-hold-main.webp"
+  },
+  {
+    "name": "SkiErg",
+    "gifUrl": "https://exercise-dataset.com/images/flat/ski-erg-peak.webp"
+  },
+  {
+    "name": "Skull Crusher",
+    "gifUrl": "https://exercise-dataset.com/images/flat/skull-crusher-peak.webp"
+  },
+  {
+    "name": "Sled Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/sled-row-peak.webp"
+  },
+  {
+    "name": "Smith Machine Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-bench-press-peak.webp"
+  },
+  {
+    "name": "Smith Machine Bent Over Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-bent-over-row-peak.webp"
+  },
+  {
+    "name": "Smith Machine Bulgarian Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-bulgarian-split-peak.webp"
+  },
+  {
+    "name": "Smith Machine Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-calf-raise-peak.webp"
+  },
+  {
+    "name": "Smith Machine Decline Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-decline-bench-press-peak.webp"
+  },
+  {
+    "name": "Smith Machine Front Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-front-squat-peak.webp"
+  },
+  {
+    "name": "Smith Machine Good Morning",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-good-morning-peak.webp"
+  },
+  {
+    "name": "Smith Machine Hip Thrust",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-hip-thrust-peak.webp"
+  },
+  {
+    "name": "Smith Machine Incline Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-incline-bench-press-peak.webp"
+  },
+  {
+    "name": "Smith Machine Romanian Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-rdl-peak.webp"
+  },
+  {
+    "name": "Smith Machine Reverse Grip Bent Over Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-reverse-grip-bent-over-row-peak.webp"
+  },
+  {
+    "name": "Smith Machine Reverse Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-reverse-lunge-peak.webp"
+  },
+  {
+    "name": "Smith Machine Shoulder Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-shoulder-press-peak.webp"
+  },
+  {
+    "name": "Smith Machine Shrug",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-shrug-peak.webp"
+  },
+  {
+    "name": "Smith Machine Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-split-squat-peak.webp"
+  },
+  {
+    "name": "Smith Machine Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-squat-peak.webp"
+  },
+  {
+    "name": "Smith Machine Upright Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/smith-machine-upright-row-peak.webp"
+  },
+  {
+    "name": "Snatch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/snatch-peak.webp"
+  },
+  {
+    "name": "Sphinx Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/sphinx-pose-main.webp"
+  },
+  {
+    "name": "Spider Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/spider-curl-peak.webp"
+  },
+  {
+    "name": "Spiderman Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/spiderman-push-up-peak.webp"
+  },
+  {
+    "name": "Split Jerk",
+    "gifUrl": "https://exercise-dataset.com/images/flat/split-jerk-peak.webp"
+  },
+  {
+    "name": "Split Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/split-squat-peak.webp"
+  },
+  {
+    "name": "Spoto Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/spoto-press-peak.webp"
+  },
+  {
+    "name": "Barbell Back Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/squat-peak.webp"
+  },
+  {
+    "name": "Squat Hold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/squat-hold-main.webp"
+  },
+  {
+    "name": "Squat Pulse",
+    "gifUrl": "https://exercise-dataset.com/images/flat/squat-pulse-peak.webp"
+  },
+  {
+    "name": "Stability Ball Hip Bridge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stability-ball-hip-bridge-peak.webp"
+  },
+  {
+    "name": "Stability Ball Knee Tuck",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stability-ball-knee-tuck-peak.webp"
+  },
+  {
+    "name": "Stability Ball Push-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stability-ball-push-up-peak.webp"
+  },
+  {
+    "name": "Stability Ball Push-Up (Hands on Ball)",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stability-ball-push-up-hands-on-ball-peak.webp"
+  },
+  {
+    "name": "Stability Ball Wall Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stability-ball-wall-squat-peak.webp"
+  },
+  {
+    "name": "Stair Climber",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stair-climber-main.webp"
+  },
+  {
+    "name": "Standing Calf Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-calf-raise-peak.webp"
+  },
+  {
+    "name": "Standing Calf Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-calf-stretch-main.webp"
+  },
+  {
+    "name": "Standing Forward Fold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-forward-fold-main.webp"
+  },
+  {
+    "name": "Standing Forward Fold to Half Lift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-forward-fold-to-half-lift-peak.webp"
+  },
+  {
+    "name": "Standing Quad Stretch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-quad-stretch-main.webp"
+  },
+  {
+    "name": "Standing Side Bend",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-side-bend-main.webp"
+  },
+  {
+    "name": "Standing Side Bend Flow",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-side-bend-flow-peak.webp"
+  },
+  {
+    "name": "Standing Split",
+    "gifUrl": "https://exercise-dataset.com/images/flat/standing-split-main.webp"
+  },
+  {
+    "name": "Stationary Bike",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stationary-bike-main.webp"
+  },
+  {
+    "name": "Step Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/step-ups-peak.webp"
+  },
+  {
+    "name": "Stiff Leg Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/stiff-leg-deadlift-peak.webp"
+  },
+  {
+    "name": "Straight-Arm Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/straight-arm-pulldown-peak.webp"
+  },
+  {
+    "name": "Straight-Bar Cable Front Raise",
+    "gifUrl": "https://exercise-dataset.com/images/flat/straight-bar-cable-front-raise-peak.webp"
+  },
+  {
+    "name": "Straight Bar Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/straight-bar-dips-peak.webp"
+  },
+  {
+    "name": "Strict Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/strict-curl-peak.webp"
+  },
+  {
+    "name": "Suitcase Carry",
+    "gifUrl": "https://exercise-dataset.com/images/flat/suitcase-carry-main.webp"
+  },
+  {
+    "name": "Sumo Deadlift",
+    "gifUrl": "https://exercise-dataset.com/images/flat/sumo-deadlift-peak.webp"
+  },
+  {
+    "name": "Sumo Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/sumo-squat-peak.webp"
+  },
+  {
+    "name": "Superman",
+    "gifUrl": "https://exercise-dataset.com/images/flat/superman-peak.webp"
+  },
+  {
+    "name": "Supine Spinal Twist",
+    "gifUrl": "https://exercise-dataset.com/images/flat/supine-spinal-twist-main.webp"
+  },
+  {
+    "name": "Supine Windshield Wipers",
+    "gifUrl": "https://exercise-dataset.com/images/flat/supine-windshield-wipers-peak.webp"
+  },
+  {
+    "name": "Supported Shoulderstand",
+    "gifUrl": "https://exercise-dataset.com/images/flat/supported-shoulderstand-main.webp"
+  },
+  {
+    "name": "Svend Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/svend-press-peak.webp"
+  },
+  {
+    "name": "T-Bar Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/t-bar-row-peak.webp"
+  },
+  {
+    "name": "Thoracic Bridge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/thoracic-bridge-main.webp"
+  },
+  {
+    "name": "Thread the Needle",
+    "gifUrl": "https://exercise-dataset.com/images/flat/thread-the-needle-main.webp"
+  },
+  {
+    "name": "Thread the Needle Flow",
+    "gifUrl": "https://exercise-dataset.com/images/flat/thread-the-needle-flow-peak.webp"
+  },
+  {
+    "name": "Three-Legged Downward Dog",
+    "gifUrl": "https://exercise-dataset.com/images/flat/three-legged-dog-main.webp"
+  },
+  {
+    "name": "Thruster",
+    "gifUrl": "https://exercise-dataset.com/images/flat/thruster-peak.webp"
+  },
+  {
+    "name": "Toes to Bar",
+    "gifUrl": "https://exercise-dataset.com/images/flat/toes-to-bar-peak.webp"
+  },
+  {
+    "name": "Torso Twists",
+    "gifUrl": "https://exercise-dataset.com/images/flat/torso-twists-main.webp"
+  },
+  {
+    "name": "Treadmill Running",
+    "gifUrl": "https://exercise-dataset.com/images/flat/treadmill-running-main.webp"
+  },
+  {
+    "name": "Tree Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/tree-pose-main.webp"
+  },
+  {
+    "name": "Triangle Pose",
+    "gifUrl": "https://exercise-dataset.com/images/flat/triangle-pose-main.webp"
+  },
+  {
+    "name": "Dumbbell Tricep Kickback",
+    "gifUrl": "https://exercise-dataset.com/images/flat/tricep-kickback-peak.webp"
+  },
+  {
+    "name": "Cable Tricep Pushdown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/tricep-pushdown-peak.webp"
+  },
+  {
+    "name": "TRX Bicep Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-bicep-curl-peak.webp"
+  },
+  {
+    "name": "TRX Chest Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-chest-press-peak.webp"
+  },
+  {
+    "name": "TRX Face Pull",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-face-pull-peak.webp"
+  },
+  {
+    "name": "TRX Hamstring Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-hamstring-curl-peak.webp"
+  },
+  {
+    "name": "TRX Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-lunge-peak.webp"
+  },
+  {
+    "name": "TRX Pistol Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-pistol-squat-peak.webp"
+  },
+  {
+    "name": "TRX Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-plank-main.webp"
+  },
+  {
+    "name": "TRX Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-row-peak.webp"
+  },
+  {
+    "name": "TRX Side Plank",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-side-plank-main.webp"
+  },
+  {
+    "name": "TRX Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-squat-peak.webp"
+  },
+  {
+    "name": "TRX Triceps Extension",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-tricep-extension-peak.webp"
+  },
+  {
+    "name": "TRX Y-Fly",
+    "gifUrl": "https://exercise-dataset.com/images/flat/trx-y-fly-peak.webp"
+  },
+  {
+    "name": "Barbell Upright Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/upright-row-peak.webp"
+  },
+  {
+    "name": "Upward-Facing Dog",
+    "gifUrl": "https://exercise-dataset.com/images/flat/upward-dog-main.webp"
+  },
+  {
+    "name": "V-Bar Lat Pulldown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/v-bar-lat-pulldown-peak.webp"
+  },
+  {
+    "name": "V-Bar Tricep Pushdown",
+    "gifUrl": "https://exercise-dataset.com/images/flat/v-bar-tricep-pushdown-peak.webp"
+  },
+  {
+    "name": "V-Sit",
+    "gifUrl": "https://exercise-dataset.com/images/flat/v-sit-main.webp"
+  },
+  {
+    "name": "V Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/v-ups-peak.webp"
+  },
+  {
+    "name": "Walking",
+    "gifUrl": "https://exercise-dataset.com/images/flat/walking-main.webp"
+  },
+  {
+    "name": "Walking Lunge",
+    "gifUrl": "https://exercise-dataset.com/images/flat/walking-lunge-peak.webp"
+  },
+  {
+    "name": "Wall Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wall-push-ups-peak.webp"
+  },
+  {
+    "name": "Wall Sit",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wall-sit-main.webp"
+  },
+  {
+    "name": "Warrior I",
+    "gifUrl": "https://exercise-dataset.com/images/flat/warrior-one-main.webp"
+  },
+  {
+    "name": "Warrior III",
+    "gifUrl": "https://exercise-dataset.com/images/flat/warrior-three-main.webp"
+  },
+  {
+    "name": "Warrior II",
+    "gifUrl": "https://exercise-dataset.com/images/flat/warrior-two-main.webp"
+  },
+  {
+    "name": "Weighted Dips",
+    "gifUrl": "https://exercise-dataset.com/images/flat/weighted-dips-peak.webp"
+  },
+  {
+    "name": "Weighted Pull-Up",
+    "gifUrl": "https://exercise-dataset.com/images/flat/weighted-pull-up-peak.webp"
+  },
+  {
+    "name": "Weighted Wall Crunch",
+    "gifUrl": "https://exercise-dataset.com/images/flat/weighted-wall-crunch-peak.webp"
+  },
+  {
+    "name": "Wide-Grip Bench Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wide-grip-bench-press-peak.webp"
+  },
+  {
+    "name": "Wide Grip Pull Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wide-grip-pull-ups-peak.webp"
+  },
+  {
+    "name": "Wide Grip Push Ups",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wide-grip-push-ups-peak.webp"
+  },
+  {
+    "name": "Wide Grip Seated Cable Row",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wide-grip-seated-cable-row-peak.webp"
+  },
+  {
+    "name": "Wide-Legged Forward Fold",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wide-legged-forward-fold-main.webp"
+  },
+  {
+    "name": "Wide-Stance Leg Press",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wide-stance-leg-press-peak.webp"
+  },
+  {
+    "name": "Bilateral Dumbbell Wrist Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wrist-curl-peak.webp"
+  },
+  {
+    "name": "Wrist Roller",
+    "gifUrl": "https://exercise-dataset.com/images/flat/wrist-roller-peak.webp"
+  },
+  {
+    "name": "Zercher Squat",
+    "gifUrl": "https://exercise-dataset.com/images/flat/zercher-squat-peak.webp"
+  },
+  {
+    "name": "Zottman Curl",
+    "gifUrl": "https://exercise-dataset.com/images/flat/zottman-curl-peak.webp"
+  }
+]

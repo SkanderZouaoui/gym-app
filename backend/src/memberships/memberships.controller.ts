@@ -5,6 +5,9 @@ import { MembershipsService } from './memberships.service.js';
 import { CreatePlanDto } from './dto/create-plan.dto.js';
 import { UpdatePlanDto } from './dto/update-plan.dto.js';
 import { CreateMembershipDto } from './dto/create-membership.dto.js';
+import { ExtendMembershipDto } from './dto/extend-membership.dto.js';
+import { CancelMembershipDto } from './dto/cancel-membership.dto.js';
+import { RenewMembershipDto } from './dto/renew-membership.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
@@ -48,6 +51,12 @@ export class MembershipsController {
   }
 
   @Roles(Role.STAFF, Role.ADMIN)
+  @Get('admin/members/:userId/memberships')
+  findForMember(@Param('userId') userId: string) {
+    return this.membershipsService.findForUser(userId);
+  }
+
+  @Roles(Role.STAFF, Role.ADMIN)
   @Post('admin/memberships')
   create(@Body() dto: CreateMembershipDto, @CurrentUser() user: AuthenticatedUser) {
     return this.membershipsService.create(dto, user.userId);
@@ -69,9 +78,29 @@ export class MembershipsController {
   @Patch('admin/memberships/:id/extend')
   extend(
     @Param('id') id: string,
-    @Body('days') days: number,
+    @Body() dto: ExtendMembershipDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    return this.membershipsService.extend(id, days, user.userId);
+    return this.membershipsService.extend(id, dto.days, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/memberships/:id/cancel')
+  cancel(
+    @Param('id') id: string,
+    @Body() dto: CancelMembershipDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.membershipsService.cancel(id, dto.reason, user.userId);
+  }
+
+  @Roles(Role.STAFF, Role.ADMIN)
+  @Patch('admin/memberships/:id/renew')
+  renew(
+    @Param('id') id: string,
+    @Body() dto: RenewMembershipDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.membershipsService.renew(id, dto, user.userId);
   }
 }
