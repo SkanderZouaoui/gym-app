@@ -17,11 +17,10 @@ const PUBLIC_USER_SELECT = {
   firstName: true,
   lastName: true,
   photoKey: true,
-  homeBranchId: true,
   status: true,
   consents: true,
   createdAt: true,
-  branchRoles: { select: { role: true, branchId: true } },
+  roles: { select: { role: true } },
 } as const;
 
 @Injectable()
@@ -155,7 +154,7 @@ export class UsersService {
   }
 
   /** Recherche d'adhérent par nom ou téléphone (section 4.3 — Staff). */
-  async search(query: string, branchId?: string) {
+  async search(query: string) {
     return this.prisma.user.findMany({
       where: {
         deletedAt: null,
@@ -165,7 +164,6 @@ export class UsersService {
           { phone: { contains: query } },
           { email: { contains: query, mode: 'insensitive' } },
         ],
-        ...(branchId ? { homeBranchId: branchId } : {}),
       },
       select: PUBLIC_USER_SELECT,
       take: 25,
@@ -220,8 +218,7 @@ export class UsersService {
         passwordHash,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        homeBranchId: dto.branchId,
-        branchRoles: { create: { role: dto.role, branchId: dto.branchId ?? null } },
+        roles: { create: { role: dto.role } },
         ...(dto.role === Role.COACH ? { coachProfile: { create: {} } } : {}),
       },
       select: PUBLIC_USER_SELECT,
@@ -233,7 +230,7 @@ export class UsersService {
         action: 'CREATE_PRIVILEGED_USER',
         entity: 'User',
         entityId: user.id,
-        newValue: { role: dto.role, branchId: dto.branchId ?? null },
+        newValue: { role: dto.role },
       },
     });
 
@@ -243,12 +240,12 @@ export class UsersService {
   async assignRole(userId: string, dto: AssignRoleDto, actorId: string) {
     await this.findOne(userId);
 
-    const grant = await this.prisma.userBranchRole.upsert({
+    const grant = await this.prisma.userRole.upsert({
       where: {
-        userId_role_branchId: { userId, role: dto.role, branchId: dto.branchId ?? null as any },
+        userId_role: { userId, role: dto.role },
       },
       update: {},
-      create: { userId, role: dto.role, branchId: dto.branchId },
+      create: { userId, role: dto.role },
     });
 
     if (dto.role === Role.COACH) {
@@ -265,16 +262,16 @@ export class UsersService {
         action: 'ASSIGN_ROLE',
         entity: 'User',
         entityId: userId,
-        newValue: { role: dto.role, branchId: dto.branchId ?? null },
+        newValue: { role: dto.role },
       },
     });
 
     return grant;
   }
 
-  async revokeRole(userId: string, role: Role, branchId: string | undefined, actorId: string) {
-    await this.prisma.userBranchRole.deleteMany({
-      where: { userId, role, branchId: branchId ?? null },
+  async revokeRole(userId: string, role: Role, actorId: string) {
+    await this.prisma.userRole.deleteMany({
+      where: { userId, role },
     });
 
     await this.prisma.auditLog.create({
@@ -283,7 +280,7 @@ export class UsersService {
         action: 'REVOKE_ROLE',
         entity: 'User',
         entityId: userId,
-        oldValue: { role, branchId: branchId ?? null },
+        oldValue: { role },
       },
     });
   }

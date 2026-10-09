@@ -27,13 +27,12 @@ export default function AdminDashboardScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user, isLoading: userLoading } = useMe();
-  const branchId = user?.homeBranchId ?? undefined;
-  const { data, isLoading: dashboardLoading } = useAdminDashboard(branchId);
-  const { data: dailyAttendance } = useDailyAttendance(branchId);
-  const { data: expiring } = useExpiringMemberships(branchId);
+  const { data, isLoading: dashboardLoading } = useAdminDashboard();
+  const { data: dailyAttendance } = useDailyAttendance();
+  const { data: expiring } = useExpiringMemberships();
   const { data: reports } = useOpenReports();
-  const { data: payments } = usePayments(branchId);
-  const { data: staffToday } = useStaffToday(branchId);
+  const { data: payments } = usePayments();
+  const { data: staffToday } = useStaffToday();
   const { isOnline, lastSyncAt } = useNetworkStatus();
 
   const now = Date.now();

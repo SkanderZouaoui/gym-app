@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { branchesApi, membershipsApi, plansApi, type Membership } from '../api/endpoints'
+import { membershipsApi, plansApi, type Membership } from '../api/endpoints'
 import { getApiErrorMessage } from '../api/client'
 import { useSessionStore, isAdmin } from '../store/session'
 
@@ -32,11 +32,9 @@ export function MemberMembershipPanel({ userId }: { userId: string }) {
     queryFn: () => membershipsApi.findForMember(userId),
   })
   const { data: plans } = useQuery({ queryKey: ['plans'], queryFn: plansApi.findAll })
-  const { data: branches } = useQuery({ queryKey: ['branches'], queryFn: branchesApi.findAll })
 
   const [createOpen, setCreateOpen] = useState(false)
   const [planId, setPlanId] = useState('')
-  const [homeBranchId, setHomeBranchId] = useState('')
   const [startDate, setStartDate] = useState('')
   const [extendingId, setExtendingId] = useState<string | null>(null)
   const [extendDays, setExtendDays] = useState(30)
@@ -50,7 +48,6 @@ export function MemberMembershipPanel({ userId }: { userId: string }) {
       invalidate()
       setCreateOpen(false)
       setPlanId('')
-      setHomeBranchId('')
       setStartDate('')
     },
     onError: (err) => setError(getApiErrorMessage(err)),
@@ -119,7 +116,6 @@ export function MemberMembershipPanel({ userId }: { userId: string }) {
               userId,
               planId,
               startDate: startDate || undefined,
-              homeBranchId: homeBranchId || undefined,
             })
           }}
           className="flex flex-wrap items-end gap-3 rounded-lg border border-(--color-border) bg-(--color-surface) p-3"
@@ -138,21 +134,6 @@ export function MemberMembershipPanel({ userId }: { userId: string }) {
               {(plans ?? []).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-(--color-muted)">Site</label>
-            <select
-              value={homeBranchId}
-              onChange={(e) => setHomeBranchId(e.target.value)}
-              className="h-9 w-40 rounded-lg border border-(--color-border) px-2 text-sm outline-none focus:border-(--color-primary)"
-            >
-              <option value="">—</option>
-              {(branches ?? []).map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
                 </option>
               ))}
             </select>

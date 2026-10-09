@@ -1,11 +1,5 @@
 import type { Role } from '@muscleup/shared';
 
-export interface BranchRoleGrant {
-  role: Role;
-  /** null = portée réseau (toutes les branches) pour ce rôle. */
-  branchId: string | null;
-}
-
 /**
  * Utilisateur authentifié tel qu'attaché à `request.user` par JwtStrategy.
  * `activeRole` est le rôle sous lequel l'utilisateur agit dans cette requête
@@ -15,7 +9,6 @@ export interface BranchRoleGrant {
 export interface AuthenticatedUser {
   userId: string;
   activeRole: Role;
-  /** Toutes les attributions rôle/branche de l'utilisateur. */
-  grants: BranchRoleGrant[];
-  homeBranchId: string | null;
+  /** Tous les rôles attribués à l'utilisateur. */
+  roles: Role[];
 }

@@ -5,7 +5,6 @@ import { OrganizationService } from './organization.service.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
-import { UpdateMultiBranchPolicyDto } from './dto/update-multi-branch-policy.dto.js';
 import { UpdateAttendancePolicyDto } from './dto/update-attendance-policy.dto.js';
 
 @ApiTags('organization')
@@ -16,15 +15,6 @@ export class OrganizationController {
   @Get()
   getSettings() {
     return this.organizationService.getSettings();
-  }
-
-  @Roles(Role.ADMIN)
-  @Put('multi-branch')
-  updateMultiBranchPolicy(
-    @Body() dto: UpdateMultiBranchPolicyDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    return this.organizationService.updateMultiBranchPolicy(dto, user.userId);
   }
 
   @Roles(Role.ADMIN)

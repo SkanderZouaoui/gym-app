@@ -1,10 +1,7 @@
-import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { branchesApi } from '../api/endpoints'
 import { tokenStorage } from '../api/storage'
 import { authApi } from '../api/endpoints'
-import { hasNetworkScope, useSessionStore } from '../store/session'
+import { useSessionStore } from '../store/session'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Tableau de bord', icon: 'dashboard', end: true },
@@ -18,24 +15,8 @@ const NAV_ITEMS = [
 
 export function AppLayout() {
   const user = useSessionStore((s) => s.user)
-  const activeBranchId = useSessionStore((s) => s.activeBranchId)
-  const setActiveBranchId = useSessionStore((s) => s.setActiveBranchId)
   const clearSession = useSessionStore((s) => s.clear)
   const navigate = useNavigate()
-  const [siteMenuOpen, setSiteMenuOpen] = useState(false)
-
-  const isNetworkAdmin = hasNetworkScope(user)
-  const { data: branches } = useQuery({
-    queryKey: ['branches'],
-    queryFn: branchesApi.findAll,
-    enabled: isNetworkAdmin,
-  })
-
-  useEffect(() => {
-    if (isNetworkAdmin && !activeBranchId && branches && branches.length > 0) {
-      setActiveBranchId(branches[0].id)
-    }
-  }, [isNetworkAdmin, activeBranchId, branches, setActiveBranchId])
 
   const handleLogout = async () => {
     const refreshToken = tokenStorage.getRefreshToken()
@@ -44,8 +25,6 @@ export function AppLayout() {
     clearSession()
     navigate('/login')
   }
-
-  const activeBranchName = branches?.find((b) => b.id === activeBranchId)?.name ?? 'Tous les sites'
 
   return (
     <div className="flex min-h-screen bg-(--color-bg)">
@@ -87,43 +66,6 @@ export function AppLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 flex-none items-center gap-4 border-b border-(--color-border) bg-(--color-surface) px-6">
           <div className="flex-1" />
-          {isNetworkAdmin ? (
-            <div className="relative">
-              <button
-                onClick={() => setSiteMenuOpen((o) => !o)}
-                className="flex h-10 items-center gap-1.5 rounded-lg border border-(--color-border) px-3 text-sm font-semibold"
-              >
-                <span className="material-symbols-rounded text-[18px] text-(--color-primary)">location_on</span>
-                {activeBranchName}
-                <span className="material-symbols-rounded text-[18px]">expand_more</span>
-              </button>
-              {siteMenuOpen ? (
-                <div className="absolute right-0 top-[calc(100%+6px)] z-10 w-56 rounded-lg border border-(--color-border) bg-(--color-surface) p-1.5 shadow-lg">
-                  <button
-                    onClick={() => {
-                      setActiveBranchId(null)
-                      setSiteMenuOpen(false)
-                    }}
-                    className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-(--color-surface-2)"
-                  >
-                    Tous les sites
-                  </button>
-                  {branches?.map((b) => (
-                    <button
-                      key={b.id}
-                      onClick={() => {
-                        setActiveBranchId(b.id)
-                        setSiteMenuOpen(false)
-                      }}
-                      className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium hover:bg-(--color-surface-2)"
-                    >
-                      {b.name}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-(--color-accent) text-xs font-bold">
             {user?.firstName?.[0]}
             {user?.lastName?.[0]}

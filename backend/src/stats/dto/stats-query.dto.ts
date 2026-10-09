@@ -1,10 +1,6 @@
-import { IsISO8601, IsOptional, IsString } from 'class-validator';
+import { IsISO8601 } from 'class-validator';
 
 export class StatsQueryDto {
-  @IsOptional()
-  @IsString()
-  branchId?: string;
-
   @IsISO8601()
   from!: string;
 

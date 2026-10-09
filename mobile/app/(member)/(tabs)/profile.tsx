@@ -7,7 +7,6 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMe, useMyBookings, useMyMemberships, useMyPoints, useMyStreak } from '../../../src/hooks/useMe';
 import { useNotifications } from '../../../src/hooks/useProfile';
-import { useBranches } from '../../../src/hooks/useBranches';
 import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { useSessionStore } from '../../../src/store/session';
@@ -25,16 +24,14 @@ export default function ProfileScreen() {
   const { data: points } = useMyPoints();
   const { data: streak } = useMyStreak();
   const { data: notifications } = useNotifications();
-  const { data: branches } = useBranches();
-  const grants = useSessionStore((s) => s.grants);
+  const roles = useSessionStore((s) => s.roles);
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
   const [logoutVisible, setLogoutVisible] = useState(false);
 
-  const hasCoachRole = grants.some((g) => g.role === 'COACH');
+  const hasCoachRole = roles.some((r) => r === 'COACH');
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
-  const homeBranch = branches?.find((b) => b.id === user?.homeBranchId);
 
   const activeMembership = memberships?.find((m) => m.status === 'ACTIVE');
   const now = Date.now();
@@ -96,7 +93,6 @@ export default function ProfileScreen() {
             </Text>
             <View style={styles.identityMetaRow}>
               <Pill label="Adhérent" tone="accent" />
-              {homeBranch ? <Text style={styles.metaText} numberOfLines={1}>{homeBranch.name}</Text> : null}
             </View>
           </View>
           <Pressable style={styles.editButton} onPress={() => router.push('/(member)/profile-edit')}>
@@ -292,7 +288,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     avatarText: { fontFamily: fonts.head, color: colors.onAccent, fontSize: 24 },
     name: { fontFamily: fonts.headBold, fontSize: 22, color: colors.text },
     identityMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' },
-    metaText: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
     editButton: {
       height: 36, paddingHorizontal: 12, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
       alignItems: 'center', justifyContent: 'center',

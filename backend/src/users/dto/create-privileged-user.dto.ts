@@ -22,9 +22,4 @@ export class CreatePrivilegedUserDto {
 
   @IsIn([Role.COACH, Role.STAFF, Role.ADMIN])
   role!: typeof Role.COACH | typeof Role.STAFF | typeof Role.ADMIN;
-
-  /** null/absent = portée réseau (tous les sites). */
-  @IsOptional()
-  @IsString()
-  branchId?: string;
 }

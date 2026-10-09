@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 interface PeriodFilter {
-  branchId?: string;
   from: Date;
   to: Date;
 }
@@ -12,12 +11,11 @@ export class StatsService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Présence et remplissage des cours sur la période (section 11). */
-  async getAttendanceStats({ branchId, from, to }: PeriodFilter) {
+  async getAttendanceStats({ from, to }: PeriodFilter) {
     const sessions = await this.prisma.classSession.findMany({
       where: {
         startsAt: { gte: from, lte: to },
         status: { not: 'CANCELLED' },
-        ...(branchId ? { branchId } : {}),
       },
       select: {
         id: true,
@@ -33,13 +31,13 @@ export class StatsService {
     const attended = await this.prisma.booking.count({
       where: {
         status: 'ATTENDED',
-        session: { startsAt: { gte: from, lte: to }, ...(branchId ? { branchId } : {}) },
+        session: { startsAt: { gte: from, lte: to } },
       },
     });
     const noShow = await this.prisma.booking.count({
       where: {
         status: 'NO_SHOW',
-        session: { startsAt: { gte: from, lte: to }, ...(branchId ? { branchId } : {}) },
+        session: { startsAt: { gte: from, lte: to } },
       },
     });
 
@@ -59,10 +57,10 @@ export class StatsService {
   }
 
   /** Revenus par mode de paiement sur la période (section 11). */
-  async getRevenueStats({ branchId, from, to }: PeriodFilter) {
+  async getRevenueStats({ from, to }: PeriodFilter) {
     const payments = await this.prisma.payment.groupBy({
       by: ['method'],
-      where: { recordedAt: { gte: from, lte: to }, deletedAt: null, ...(branchId ? { branchId } : {}) },
+      where: { recordedAt: { gte: from, lte: to }, deletedAt: null },
       _sum: { amount: true },
       _count: true,
     });
@@ -80,13 +78,12 @@ export class StatsService {
   }
 
   /** Nouveaux adhérents sur la période, agrégés par jour (section 11). */
-  async getNewMembersStats({ branchId, from, to }: PeriodFilter) {
+  async getNewMembersStats({ from, to }: PeriodFilter) {
     const users = await this.prisma.user.findMany({
       where: {
         createdAt: { gte: from, lte: to },
         deletedAt: null,
-        ...(branchId ? { homeBranchId: branchId } : {}),
-        branchRoles: { some: { role: 'MEMBER' } },
+        roles: { some: { role: 'MEMBER' } },
       },
       select: { createdAt: true },
     });
@@ -108,14 +105,13 @@ export class StatsService {
    * était actif 30 jours avant `to`, quelle proportion a toujours un
    * abonnement actif à `to` (section 11).
    */
-  async getRetentionStats({ branchId, to }: { branchId?: string; to: Date }) {
+  async getRetentionStats({ to }: { to: Date }) {
     const referenceDate = new Date(to.getTime() - 30 * 86_400_000);
 
     const activeAtReference = await this.prisma.membership.findMany({
       where: {
         startDate: { lte: referenceDate },
         endDate: { gte: referenceDate },
-        ...(branchId ? { homeBranchId: branchId } : {}),
       },
       select: { userId: true },
     });
@@ -151,7 +147,7 @@ export class StatsService {
    * Présences quotidiennes sur les 7 derniers jours + variation vs les 7
    * jours précédents — pour le graphique "Présences 7 jours" de l'accueil admin.
    */
-  async getDailyAttendance(branchId?: string) {
+  async getDailyAttendance() {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
     const days: { date: string; count: number }[] = [];
@@ -163,7 +159,6 @@ export class StatsService {
         where: {
           status: 'ATTENDED',
           attendedAt: { gte: dayStart, lt: dayEnd },
-          ...(branchId ? { session: { branchId } } : {}),
         },
       });
       days.push({ date: dayStart.toISOString().slice(0, 10), count });
@@ -176,7 +171,6 @@ export class StatsService {
       where: {
         status: 'ATTENDED',
         attendedAt: { gte: previousWeekStart, lt: previousWeekEnd },
-        ...(branchId ? { session: { branchId } } : {}),
       },
     });
 
@@ -196,16 +190,16 @@ export class StatsService {
       this.getAttendanceStats(filter),
       this.getRevenueStats(filter),
       this.getNewMembersStats(filter),
-      this.getRetentionStats({ branchId: filter.branchId, to: filter.to }),
+      this.getRetentionStats({ to: filter.to }),
     ]);
 
     return { attendance, revenue, newMembers, retention };
   }
 
   /** Export CSV des encaissements sur la période (section 11). */
-  async exportPaymentsCsv({ branchId, from, to }: PeriodFilter): Promise<string> {
+  async exportPaymentsCsv({ from, to }: PeriodFilter): Promise<string> {
     const payments = await this.prisma.payment.findMany({
-      where: { recordedAt: { gte: from, lte: to }, deletedAt: null, ...(branchId ? { branchId } : {}) },
+      where: { recordedAt: { gte: from, lte: to }, deletedAt: null },
       include: {
         membership: { include: { user: true, plan: true } },
         recordedBy: { select: { firstName: true, lastName: true } },

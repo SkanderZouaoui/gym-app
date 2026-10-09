@@ -6,9 +6,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useMe } from '../../../src/hooks/useMe';
 import { useCoachAvailability, useCoachProfile, useRequestCoachingSession } from '../../../src/hooks/useMemberCoaching';
-import { useBranches } from '../../../src/hooks/useBranches';
 import { Avatar, Banner, BottomSheet, EmptyState, Pill } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { ApiError } from '../../../src/api/client';
@@ -31,12 +29,9 @@ export default function CoachDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
   const { data: coach, isLoading } = useCoachProfile(id);
-  const { data: availability } = useCoachAvailability(user?.homeBranchId ?? undefined);
-  const { data: branches } = useBranches();
+  const { data: availability } = useCoachAvailability();
   const requestSession = useRequestCoachingSession();
-  const branchName = branches?.find((b) => b.id === user?.homeBranchId)?.name;
 
   const weekDays = useMemo(buildWeekDays, []);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -73,7 +68,7 @@ export default function CoachDetailScreen() {
   const selectedSlot = slotsForDay.find((s) => s.startTime === selectedTime);
 
   const handleConfirm = () => {
-    if (!selectedSlot || !user?.homeBranchId) return;
+    if (!selectedSlot) return;
     setError(null);
     const [startH, startM] = selectedSlot.startTime!.split(':').map(Number);
     const [endH, endM] = (selectedSlot.endTime ?? selectedSlot.startTime!).split(':').map(Number);
@@ -85,7 +80,6 @@ export default function CoachDetailScreen() {
     requestSession.mutate(
       {
         coachId: id!,
-        branchId: user.homeBranchId,
         startsAt: startsAt.toISOString(),
         endsAt: endsAt.toISOString(),
         objective: objective.trim() || undefined,
@@ -147,7 +141,6 @@ export default function CoachDetailScreen() {
         <View style={styles.factsGrid}>
           <FactTile value={coach.yearsExperience ? `${coach.yearsExperience} ans` : '—'} label="expérience" />
           <FactTile value="60 min" label="séance" />
-          <FactTile value={branchName ?? '—'} label="site" />
         </View>
 
         <Text style={styles.sectionTitle}>Disponibilités</Text>
@@ -218,7 +211,6 @@ export default function CoachDetailScreen() {
             label="Date"
             value={selectedSlot ? `${selectedDate.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} · ${selectedSlot.startTime}` : '—'}
           />
-          <RecapRow label="Lieu" value={user?.homeBranchId ? 'Votre salle habituelle' : '—'} />
           {coach.sessionPrice ? <RecapRow label="Tarif" value={`${coach.sessionPrice} DT à l’accueil`} /> : null}
         </View>
 

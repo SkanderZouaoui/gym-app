@@ -4,14 +4,12 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
 import { useStaffToday, type StaffTodaySession } from '../../src/hooks/useStaff';
 
 export default function StaffTodayScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
-  const { data } = useStaffToday(user?.homeBranchId ?? undefined);
+  const { data } = useStaffToday();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

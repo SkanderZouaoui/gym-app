@@ -4,9 +4,6 @@ export class RequestSessionDto {
   @IsString()
   coachId!: string;
 
-  @IsString()
-  branchId!: string;
-
   @IsISO8601()
   startsAt!: string;
 

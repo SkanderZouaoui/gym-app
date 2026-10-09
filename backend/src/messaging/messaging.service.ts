@@ -17,8 +17,8 @@ export class MessagingService {
     if (userId === otherUserId) throw new BadRequestException('CANNOT_MESSAGE_SELF');
 
     const [userRoles, otherRoles] = await Promise.all([
-      this.prisma.userBranchRole.findMany({ where: { userId } }),
-      this.prisma.userBranchRole.findMany({ where: { userId: otherUserId } }),
+      this.prisma.userRole.findMany({ where: { userId } }),
+      this.prisma.userRole.findMany({ where: { userId: otherUserId } }),
     ]);
 
     const isPrivileged = (roles: { role: string }[]) =>

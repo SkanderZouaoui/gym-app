@@ -59,8 +59,8 @@ export class UsersController {
 
   @Roles(Role.STAFF, Role.COACH, Role.ADMIN)
   @Get('members')
-  search(@Query('search') search: string, @Query('branchId') branchId?: string) {
-    return this.usersService.search(search ?? '', branchId);
+  search(@Query('search') search: string) {
+    return this.usersService.search(search ?? '');
   }
 
   @Roles(Role.STAFF, Role.COACH, Role.ADMIN)

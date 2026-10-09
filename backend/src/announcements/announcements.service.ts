@@ -25,7 +25,6 @@ export class AnnouncementsService {
       data: {
         title: dto.title,
         body: dto.body,
-        branchId: dto.branchId,
         planId: dto.planId,
         createdById: actorId,
         sentAt: new Date(),
@@ -55,7 +54,6 @@ export class AnnouncementsService {
         action: 'SEND_ANNOUNCEMENT',
         entity: 'Announcement',
         entityId: announcement.id,
-        branchId: dto.branchId,
         newValue: { recipientCount: recipients.length },
       },
     });
@@ -67,7 +65,7 @@ export class AnnouncementsService {
   async findForMember(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { homeBranchId: true, memberships: { where: { status: 'ACTIVE' }, select: { planId: true } } },
+      select: { memberships: { where: { status: 'ACTIVE' }, select: { planId: true } } },
     });
     if (!user) return [];
 
@@ -76,14 +74,7 @@ export class AnnouncementsService {
     return this.prisma.announcement.findMany({
       where: {
         sentAt: { not: null },
-        OR: [
-          { branchId: null, planId: null },
-          ...(user.homeBranchId ? [{ branchId: user.homeBranchId, planId: null }] : []),
-          ...(planIds.length > 0 ? [{ branchId: null, planId: { in: planIds } }] : []),
-          ...(user.homeBranchId && planIds.length > 0
-            ? [{ branchId: user.homeBranchId, planId: { in: planIds } }]
-            : []),
-        ],
+        OR: [{ planId: null }, ...(planIds.length > 0 ? [{ planId: { in: planIds } }] : [])],
       },
       orderBy: { sentAt: 'desc' },
       take: 20,
@@ -93,7 +84,6 @@ export class AnnouncementsService {
   private targetFilter(dto: CreateAnnouncementDto) {
     return {
       deletedAt: null,
-      ...(dto.branchId ? { homeBranchId: dto.branchId } : {}),
       ...(dto.planId
         ? { memberships: { some: { planId: dto.planId, status: 'ACTIVE' as const } } }
         : {}),

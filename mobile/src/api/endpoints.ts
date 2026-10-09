@@ -1,7 +1,6 @@
 import { apiRequest } from './client';
 import type {
   Booking,
-  Branch,
   ClassSessionDetail,
   ClassSessionSummary,
   MeResponse,
@@ -10,10 +9,11 @@ import type {
   QrTokenResponse,
   TokenPair,
 } from './types';
+import type { Role } from '@muscleup/shared';
 
 export const authApi = {
   login: (email: string, password: string) =>
-    apiRequest<TokenPair & { grants: unknown[] }>('/v1/auth/login', {
+    apiRequest<TokenPair & { roles: Role[] }>('/v1/auth/login', {
       method: 'POST',
       body: { email, password },
       auth: false,
@@ -24,7 +24,6 @@ export const authApi = {
     firstName: string;
     lastName: string;
     phone?: string;
-    homeBranchId?: string;
     referralCode?: string;
   }) => apiRequest<TokenPair>('/v1/auth/register', { method: 'POST', body: data, auth: false }),
   logout: (refreshToken: string) =>
@@ -49,16 +48,13 @@ export const meApi = {
   getStreak: () => apiRequest<{ streak: number }>('/v1/me/streak'),
 };
 
-export const branchesApi = {
-  findAll: () => apiRequest<Branch[]>('/v1/branches'),
-};
-
 export const classesApi = {
-  findSessions: (branchId: string, from?: string, to?: string) => {
-    const params = new URLSearchParams({ branchId });
+  findSessions: (from?: string, to?: string) => {
+    const params = new URLSearchParams();
     if (from) params.set('from', from);
     if (to) params.set('to', to);
-    return apiRequest<ClassSessionSummary[]>(`/v1/classes/sessions?${params.toString()}`);
+    const query = params.toString();
+    return apiRequest<ClassSessionSummary[]>(`/v1/classes/sessions${query ? `?${query}` : ''}`);
   },
   findSession: (id: string) => apiRequest<ClassSessionDetail>(`/v1/classes/sessions/${id}`),
 };

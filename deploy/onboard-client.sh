@@ -54,10 +54,10 @@ docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" -p 
 echo "== 3. Attente de la disponibilité de l'API =="
 API_PORT=$(grep -E "^API_PORT=" "$ENV_FILE" | cut -d'=' -f2 || echo 3000)
 for _ in $(seq 1 30); do
-  if curl -sf "http://localhost:${API_PORT}/v1/branches" -o /dev/null 2>/dev/null; then
+  if curl -sf "http://localhost:${API_PORT}/v1/admin/settings" -o /dev/null 2>/dev/null; then
     break
   fi
-  if curl -s "http://localhost:${API_PORT}/v1/branches" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q "401"; then
+  if curl -s "http://localhost:${API_PORT}/v1/admin/settings" -o /dev/null -w "%{http_code}" 2>/dev/null | grep -q "401"; then
     break
   fi
   sleep 2
@@ -75,6 +75,6 @@ echo "== 5. Prochaine étape manuelle : créer le premier compte admin =="
 echo "  curl -X POST http://localhost:${API_PORT}/v1/auth/register -H 'Content-Type: application/json' \\"
 echo "    -d '{\"email\":\"admin@${CLIENT_NAME}.com\",\"password\":\"change-me\",\"firstName\":\"Admin\",\"lastName\":\"${CLIENT_NAME}\"}'"
 echo "  Puis promouvoir ce compte en ADMIN directement en base (premier admin, avant que le back-office existe) :"
-echo "    UPDATE user_branch_roles SET role = 'ADMIN' WHERE user_id = '<id-du-compte>';"
+echo "    UPDATE user_roles SET role = 'ADMIN' WHERE user_id = '<id-du-compte>';"
 echo
 echo "Onboarding de '$CLIENT_NAME' terminé."

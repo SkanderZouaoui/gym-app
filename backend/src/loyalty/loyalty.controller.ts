@@ -42,14 +42,14 @@ export class LoyaltyController {
   }
 
   @Get('challenges')
-  findActive(@Query('branchId') branchId?: string) {
-    return this.loyaltyService.findActiveChallenges(branchId);
+  findActive() {
+    return this.loyaltyService.findActiveChallenges();
   }
 
   /** Défis actifs + progression de l'utilisateur courant — pour la carte "Défi en cours" de l'accueil. */
   @Get('me/challenges')
-  getMyActiveChallenges(@CurrentUser() user: AuthenticatedUser, @Query('branchId') branchId?: string) {
-    return this.loyaltyService.getMyActiveChallengesWithProgress(user.userId, branchId);
+  getMyActiveChallenges(@CurrentUser() user: AuthenticatedUser) {
+    return this.loyaltyService.getMyActiveChallengesWithProgress(user.userId);
   }
 
   @Roles(Role.ADMIN)

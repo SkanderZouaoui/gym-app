@@ -13,7 +13,6 @@ export class CoachingService {
     return this.prisma.coachAvailability.create({
       data: {
         coachId,
-        branchId: dto.branchId,
         dayOfWeek: dto.dayOfWeek,
         startTime: dto.startTime,
         endTime: dto.endTime,
@@ -32,9 +31,8 @@ export class CoachingService {
   }
 
   /** Disponibilités visibles par l'adhérent pour réserver une séance (section 4.1). */
-  async getCoachAvailabilityForMembers(branchId: string) {
+  async getCoachAvailabilityForMembers() {
     return this.prisma.coachAvailability.findMany({
-      where: { branchId },
       include: {
         coach: {
           include: { user: { select: { firstName: true, lastName: true } } },
@@ -60,7 +58,6 @@ export class CoachingService {
     return this.prisma.coachingSession.create({
       data: {
         coachId: dto.coachId,
-        branchId: dto.branchId,
         memberId,
         startsAt: new Date(dto.startsAt),
         endsAt: new Date(dto.endsAt),

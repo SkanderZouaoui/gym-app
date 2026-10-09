@@ -5,11 +5,6 @@ export interface TokenPair {
   refreshToken: string;
 }
 
-export interface BranchRoleGrant {
-  role: Role;
-  branchId: string | null;
-}
-
 export interface MeResponse {
   id: string;
   email: string | null;
@@ -18,16 +13,8 @@ export interface MeResponse {
   lastName: string;
   photoKey: string | null;
   photoUrl: string | null;
-  homeBranchId: string | null;
   status: string;
-  branchRoles: { role: Role; branchId: string | null }[];
-}
-
-export interface Branch {
-  id: string;
-  name: string;
-  address: string | null;
-  timezone: string;
+  roles: { role: Role }[];
 }
 
 export interface ClassSessionSummary {
@@ -44,7 +31,6 @@ export interface ClassSessionSummary {
 
 export interface ClassSessionDetail extends ClassSessionSummary {
   classType: { id: string; name: string; description: string | null };
-  branch: { id: string; name: string; address: string | null };
 }
 
 export interface Booking {

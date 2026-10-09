@@ -18,10 +18,6 @@ export class UpdateProfileDto {
   photoKey?: string;
 
   @IsOptional()
-  @IsString()
-  homeBranchId?: string;
-
-  @IsOptional()
   @IsObject()
   consents?: Record<string, unknown>;
 }

@@ -25,8 +25,4 @@ export class CreateChallengeDto {
   @IsInt()
   @Min(0)
   pointsReward?: number;
-
-  @IsOptional()
-  @IsString()
-  branchId?: string;
 }

@@ -8,66 +8,31 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
-// Organisation et sites (section 8.1)
+// Organisation (section 8.1)
 // ---------------------------------------------------------------------------
 
 model OrganizationSettings {
-  id                String   @id @default(uuid())
-  name              String
-  branding          Json     @default("{}")
-  features          Json     @default("{}")
-  multiBranchPolicy Json     @map("multi_branch_policy")
-  attendancePolicy  Json     @map("attendance_policy")
-  version           Int      @default(1)
-  updatedBy         String?  @map("updated_by")
-  updatedAt         DateTime @updatedAt @map("updated_at")
-  createdAt         DateTime @default(now()) @map("created_at")
+  id               String   @id @default(uuid())
+  name             String
+  branding         Json     @default("{}")
+  features         Json     @default("{}")
+  attendancePolicy Json     @map("attendance_policy")
+  version          Int      @default(1)
+  updatedBy        String?  @map("updated_by")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  createdAt        DateTime @default(now()) @map("created_at")
 
   @@map("organization_settings")
 }
 
-model Branch {
-  id           String   @id @default(uuid())
-  name         String
-  address      String?
-  timezone     String   @default("Africa/Tunis")
-  phone        String?
-  email        String?
-  openingHours Json     @default("{}") @map("opening_hours")
-  maxCapacity  Int?     @map("max_capacity")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  rooms               Room[]
-  userBranchRoles     UserBranchRole[]
-  coachBranches       CoachBranch[]
-  coachAvailabilities CoachAvailability[]
-  planBranches        PlanBranch[]
-  memberships         Membership[]        @relation("HomeBranch")
-  payments            Payment[]
-  classTemplates      ClassTemplate[]
-  classSessions       ClassSession[]
-  coachingSessions    CoachingSession[]
-  users               User[]              @relation("HomeBranchUsers")
-  announcements       Announcement[]
-  challenges          Challenge[]
-  products            Product[]
-
-  @@map("branches")
-}
-
 model Room {
   id       String @id @default(uuid())
-  branchId String @map("branch_id")
   name     String
   capacity Int
 
-  branch         Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
   classTemplates ClassTemplate[]
   classSessions  ClassSession[]
 
-  @@index([branchId])
   @@map("rooms")
 }
 
@@ -96,7 +61,6 @@ model User {
   firstName    String     @map("first_name")
   lastName     String     @map("last_name")
   photoKey     String?    @map("photo_key")
-  homeBranchId String?    @map("home_branch_id")
   status       UserStatus @default(ACTIVE)
   consents     Json       @default("{}")
   referralCode String?    @unique @map("referral_code")
@@ -104,8 +68,7 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
 
-  homeBranch               Branch?                   @relation("HomeBranchUsers", fields: [homeBranchId], references: [id])
-  branchRoles              UserBranchRole[]
+  roles                    UserRole[]
   coachProfile             CoachProfile?
   deviceTokens             DeviceToken[]
   memberships              Membership[]
@@ -141,19 +104,17 @@ model User {
   @@map("users")
 }
 
-model UserBranchRole {
+model UserRole {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")
   role      RoleName
-  branchId  String?  @map("branch_id") // null = toutes les branches (réseau)
   createdAt DateTime @default(now()) @map("created_at")
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, role, branchId])
+  @@unique([userId, role])
   @@index([userId])
-  @@map("user_branch_roles")
+  @@map("user_roles")
 }
 
 model CoachProfile {
@@ -166,7 +127,6 @@ model CoachProfile {
   reviewCount     Int      @default(0) @map("review_count")
 
   user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coachBranches    CoachBranch[]
   availabilities   CoachAvailability[]
   classTemplates   ClassTemplate[]
   classSessions    ClassSession[]
@@ -175,30 +135,16 @@ model CoachProfile {
   @@map("coach_profiles")
 }
 
-model CoachBranch {
-  id       String @id @default(uuid())
-  coachId  String @map("coach_id")
-  branchId String @map("branch_id")
-
-  coach  CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
-  branch Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
-
-  @@unique([coachId, branchId])
-  @@map("coach_branches")
-}
-
 model CoachAvailability {
   id        String    @id @default(uuid())
   coachId   String    @map("coach_id")
-  branchId  String    @map("branch_id")
   dayOfWeek Int?      @map("day_of_week") // récurrent: 0-6
   startsAt  DateTime? @map("starts_at") // ponctuel
   endsAt    DateTime? @map("ends_at")
   startTime String?   @map("start_time") // récurrent "HH:mm"
   endTime   String?   @map("end_time")
 
-  coach  CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
-  branch Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  coach CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
 
   @@index([coachId])
   @@map("coach_availabilities")
@@ -262,51 +208,22 @@ model OtpCode {
 // Abonnements et encaissements (section 8.3)
 // ---------------------------------------------------------------------------
 
-enum AccessScope {
-  INHERIT
-  HOME_ONLY
-  ALL
-  SELECTED
-}
-
-enum CrossBranchBookingMode {
-  INHERIT
-  ENABLED
-  DISABLED
-}
-
 model MembershipPlan {
-  id                      String                 @id @default(uuid())
-  name                    String
-  description             String?
-  durationDays            Int                    @map("duration_days")
-  price                   Decimal                @db.Decimal(10, 2)
-  accessCount             Int?                   @map("access_count") // null = illimité
-  accessScope             AccessScope            @default(INHERIT) @map("access_scope")
-  crossBranchBooking      CrossBranchBookingMode @default(INHERIT) @map("cross_branch_booking")
-  crossBranchMonthlyQuota Int?                   @map("cross_branch_monthly_quota")
-  isContractual           Boolean                @default(false) @map("is_contractual")
-  isActive                Boolean                @default(true) @map("is_active")
-  createdAt               DateTime               @default(now()) @map("created_at")
-  updatedAt               DateTime               @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  durationDays  Int      @map("duration_days")
+  price         Decimal  @db.Decimal(10, 2)
+  accessCount   Int?     @map("access_count") // null = illimité
+  isContractual Boolean  @default(false) @map("is_contractual")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  branches      PlanBranch[]
   memberships   Membership[]
   announcements Announcement[]
 
   @@map("membership_plans")
-}
-
-model PlanBranch {
-  id       String @id @default(uuid())
-  planId   String @map("plan_id")
-  branchId String @map("branch_id")
-
-  plan   MembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  branch Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
-
-  @@unique([planId, branchId])
-  @@map("plan_branches")
 }
 
 enum MembershipStatus {
@@ -317,21 +234,18 @@ enum MembershipStatus {
 }
 
 model Membership {
-  id                String           @id @default(uuid())
-  userId            String           @map("user_id")
-  planId            String           @map("plan_id")
-  homeBranchId      String?          @map("home_branch_id")
-  startDate         DateTime         @map("start_date")
-  endDate           DateTime         @map("end_date")
-  status            MembershipStatus @default(ACTIVE)
-  frozenAccessScope AccessScope?     @map("frozen_access_scope")
-  createdAt         DateTime         @default(now()) @map("created_at")
-  updatedAt         DateTime         @updatedAt @map("updated_at")
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  planId    String           @map("plan_id")
+  startDate DateTime         @map("start_date")
+  endDate   DateTime         @map("end_date")
+  status    MembershipStatus @default(ACTIVE)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
 
-  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan       MembershipPlan @relation(fields: [planId], references: [id])
-  homeBranch Branch?        @relation("HomeBranch", fields: [homeBranchId], references: [id])
-  payments   Payment[]
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan     MembershipPlan @relation(fields: [planId], references: [id])
+  payments Payment[]
 
   @@index([userId])
   @@index([status])
@@ -348,7 +262,6 @@ enum PaymentMethod {
 model Payment {
   id                  String        @id @default(uuid())
   membershipId        String        @map("membership_id")
-  branchId            String        @map("branch_id")
   amount              Decimal       @db.Decimal(10, 2)
   method              PaymentMethod
   recordedById        String        @map("recorded_by")
@@ -358,10 +271,8 @@ model Payment {
   deletedAt           DateTime?     @map("deleted_at")
 
   membership Membership @relation(fields: [membershipId], references: [id])
-  branch     Branch     @relation(fields: [branchId], references: [id])
   recordedBy User       @relation("RecordedByUser", fields: [recordedById], references: [id])
 
-  @@index([branchId])
   @@index([membershipId])
   @@map("payments")
 }
@@ -391,7 +302,6 @@ enum RecurrenceFrequency {
 model ClassTemplate {
   id          String              @id @default(uuid())
   classTypeId String              @map("class_type_id")
-  branchId    String              @map("branch_id")
   roomId      String?             @map("room_id")
   coachId     String?             @map("coach_id")
   capacity    Int
@@ -403,12 +313,10 @@ model ClassTemplate {
   createdAt   DateTime            @default(now()) @map("created_at")
 
   classType ClassType      @relation(fields: [classTypeId], references: [id])
-  branch    Branch         @relation(fields: [branchId], references: [id])
   room      Room?          @relation(fields: [roomId], references: [id])
   coach     CoachProfile?  @relation(fields: [coachId], references: [userId])
   sessions  ClassSession[]
 
-  @@index([branchId])
   @@map("class_templates")
 }
 
@@ -419,31 +327,28 @@ enum ClassSessionStatus {
 }
 
 model ClassSession {
-  id                  String             @id @default(uuid())
-  templateId          String?            @map("template_id")
-  classTypeId         String             @map("class_type_id")
-  branchId            String             @map("branch_id")
-  roomId              String?            @map("room_id")
-  coachId             String?            @map("coach_id")
-  startsAt            DateTime           @map("starts_at")
-  endsAt              DateTime           @map("ends_at")
-  capacity            Int
-  status              ClassSessionStatus @default(SCHEDULED)
-  openToOtherBranches Boolean            @default(false) @map("open_to_other_branches")
-  cancelledAt         DateTime?          @map("cancelled_at")
-  cancelledReason     String?            @map("cancelled_reason")
-  noShowProcessedAt   DateTime?          @map("no_show_processed_at")
-  createdAt           DateTime           @default(now()) @map("created_at")
+  id                String             @id @default(uuid())
+  templateId        String?            @map("template_id")
+  classTypeId       String             @map("class_type_id")
+  roomId            String?            @map("room_id")
+  coachId           String?            @map("coach_id")
+  startsAt          DateTime           @map("starts_at")
+  endsAt            DateTime           @map("ends_at")
+  capacity          Int
+  status            ClassSessionStatus @default(SCHEDULED)
+  cancelledAt       DateTime?          @map("cancelled_at")
+  cancelledReason   String?            @map("cancelled_reason")
+  noShowProcessedAt DateTime?          @map("no_show_processed_at")
+  createdAt         DateTime           @default(now()) @map("created_at")
 
   template  ClassTemplate?      @relation(fields: [templateId], references: [id])
   classType ClassType           @relation(fields: [classTypeId], references: [id])
-  branch    Branch              @relation(fields: [branchId], references: [id])
   room      Room?               @relation(fields: [roomId], references: [id])
   coach     CoachProfile?       @relation(fields: [coachId], references: [userId])
   bookings  Booking[]
   scanLogs  AttendanceScanLog[]
 
-  @@index([branchId, startsAt])
+  @@index([startsAt])
   @@index([coachId, startsAt])
   @@map("class_sessions")
 }
@@ -472,7 +377,6 @@ model Booking {
   attendedAt       DateTime?      @map("attended_at")
   checkedInBy      String?        @map("checked_in_by")
   checkInMethod    CheckInMethod? @map("check_in_method")
-  isCrossBranch    Boolean        @default(false) @map("is_cross_branch")
   createdAt        DateTime       @default(now()) @map("created_at")
   cancelledAt      DateTime?      @map("cancelled_at")
 
@@ -541,7 +445,6 @@ enum CoachingSessionStatus {
 
 model CoachingSession {
   id        String                @id @default(uuid())
-  branchId  String                @map("branch_id")
   coachId   String                @map("coach_id")
   memberId  String                @map("member_id")
   startsAt  DateTime              @map("starts_at")
@@ -550,7 +453,6 @@ model CoachingSession {
   objective String? // objectif facultatif saisi par l'adhérent à la réservation
   createdAt DateTime              @default(now()) @map("created_at")
 
-  branch Branch       @relation(fields: [branchId], references: [id])
   coach  CoachProfile @relation(fields: [coachId], references: [userId])
   member User         @relation("CoachingMember", fields: [memberId], references: [id])
 
@@ -736,13 +638,11 @@ model Announcement {
   id          String    @id @default(uuid())
   title       String
   body        String
-  branchId    String?   @map("branch_id") // null = tous les sites
   planId      String?   @map("plan_id") // ciblage par formule
   createdById String    @map("created_by")
   sentAt      DateTime? @map("sent_at")
   createdAt   DateTime  @default(now()) @map("created_at")
 
-  branch    Branch?         @relation(fields: [branchId], references: [id])
   plan      MembershipPlan? @relation(fields: [planId], references: [id])
   createdBy User            @relation("AnnouncementCreatedBy", fields: [createdById], references: [id])
 
@@ -800,7 +700,6 @@ model AuditLog {
   action    String
   entity    String
   entityId  String?  @map("entity_id")
-  branchId  String?  @map("branch_id")
   oldValue  Json?    @map("old_value")
   newValue  Json?    @map("new_value")
   createdAt DateTime @default(now()) @map("created_at")
@@ -875,9 +774,7 @@ model Challenge {
   startDate    DateTime        @map("start_date")
   endDate      DateTime        @map("end_date")
   pointsReward Int             @default(0) @map("points_reward")
-  branchId     String?         @map("branch_id") // null = réseau
 
-  branch         Branch?                  @relation(fields: [branchId], references: [id])
   participations ChallengeParticipation[]
 
   @@map("challenges")
@@ -1020,7 +917,6 @@ model Message {
 
 model Product {
   id          String  @id @default(uuid())
-  branchId    String  @map("branch_id")
   name        String
   description String?
   price       Decimal @db.Decimal(10, 2)
@@ -1028,10 +924,8 @@ model Product {
   imageKey    String? @map("image_key")
   isActive    Boolean @default(true) @map("is_active")
 
-  branch       Branch               @relation(fields: [branchId], references: [id])
   reservations ProductReservation[]
 
-  @@index([branchId])
   @@map("products")
 }
 

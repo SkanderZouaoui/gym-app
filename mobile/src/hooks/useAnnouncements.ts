@@ -5,7 +5,6 @@ export interface Announcement {
   id: string;
   title: string;
   body: string;
-  branchId: string | null;
   planId: string | null;
   sentAt: string | null;
   createdAt: string;

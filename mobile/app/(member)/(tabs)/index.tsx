@@ -7,8 +7,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
-import { useBranches } from '../../../src/hooks/useBranches';
-import { useBranchOccupancy } from '../../../src/hooks/useOccupancy';
 import { useMyActiveChallenges } from '../../../src/hooks/useLoyalty';
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
 import { useNotifications } from '../../../src/hooks/useProfile';
@@ -16,7 +14,7 @@ import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
 import { useCancelBooking } from '../../../src/hooks/useClasses';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
-import { Banner, BarHistogram, OfflineBanner, Pill, ProgressBar, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { Banner, OfflineBanner, Pill, ProgressBar, SkeletonBlock, Toast } from '../../../src/components/ui';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
@@ -25,8 +23,6 @@ export default function HomeScreen() {
   const { data: user, isLoading: userLoading } = useMe();
   const { data: memberships, isLoading: membershipsLoading } = useMyMemberships();
   const { data: bookings } = useMyBookings();
-  const { data: branches } = useBranches();
-  const { data: occupancy } = useBranchOccupancy(user?.homeBranchId ?? undefined);
   const { data: challenges } = useMyActiveChallenges();
   const { data: announcements } = useMyAnnouncements();
   const { data: notifications } = useNotifications();
@@ -38,7 +34,6 @@ export default function HomeScreen() {
 
   const activeChallenge = challenges?.find((c) => !c.completedAt);
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
-  const homeBranch = branches?.find((b) => b.id === user?.homeBranchId);
 
   useEffect(() => {
     if (!params.booked) return;
@@ -81,25 +76,6 @@ export default function HomeScreen() {
     return `dans ${hours}h${String(minutes).padStart(2, '0')}`;
   };
 
-  const occupancyLabel = (percent: number | null) => {
-    if (percent === null) return { label: '—', tone: colors.muted };
-    if (percent >= 75) return { label: 'Dense', tone: colors.dangerInk };
-    if (percent >= 40) return { label: 'Modérée', tone: colors.warningInk };
-    return { label: 'Calme', tone: colors.successInk };
-  };
-
-  // Regroupe les 24 tranches horaires en 4 blocs (8h/12h/16h/20h) comme la maquette.
-  const hourlyBuckets = useMemo(() => {
-    if (!occupancy?.hourly) return null;
-    const buckets = [0, 0, 0, 0];
-    occupancy.hourly.forEach((v, h) => {
-      if (h < 8) return;
-      const idx = Math.min(3, Math.floor((h - 8) / 4));
-      buckets[idx] += v;
-    });
-    return buckets;
-  }, [occupancy?.hourly]);
-
   const isLoading = userLoading || membershipsLoading;
 
   if (isLoading) {
@@ -127,7 +103,6 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <AppHeader
-          siteName={homeBranch?.name}
           hasUnreadNotification={unreadCount > 0}
           onPressNotifications={() => router.push('/(member)/notifications')}
         />
@@ -172,35 +147,6 @@ export default function HomeScreen() {
           <View style={styles.qrCardIcon}>
             <MaterialIcons name="qr-code-2" size={48} color={colors.primaryContrast} />
           </View>
-        </Pressable>
-
-        <Pressable style={styles.affluenceCard} onPress={() => router.push('/(member)/occupancy')}>
-          <View style={styles.affluenceHeaderRow}>
-            <View style={styles.affluenceHeader}>
-              <View style={styles.liveDot} />
-              <Text style={styles.affluenceLabel}>Affluence en direct</Text>
-            </View>
-          </View>
-          <View style={styles.affluenceValueRow}>
-            <Text style={[styles.affluenceValue, { color: occupancyLabel(occupancy?.percent ?? null).tone }]}>
-              {occupancy?.percent ?? '—'}{occupancy?.percent !== null && occupancy?.percent !== undefined ? ' %' : ''}
-            </Text>
-            <Text style={[styles.affluenceStateLabel, { color: occupancyLabel(occupancy?.percent ?? null).tone }]}>
-              {occupancyLabel(occupancy?.percent ?? null).label}
-              {occupancy?.percent !== null && occupancy?.percent !== undefined && occupancy.percent < 40 ? ' · idéal maintenant' : ''}
-            </Text>
-          </View>
-          {hourlyBuckets ? (
-            <>
-              <BarHistogram values={hourlyBuckets} height={48} />
-              <View style={styles.histogramLabels}>
-                <Text style={styles.histogramLabel}>8h</Text>
-                <Text style={styles.histogramLabel}>12h</Text>
-                <Text style={styles.histogramLabel}>16h</Text>
-                <Text style={styles.histogramLabel}>20h</Text>
-              </View>
-            </>
-          ) : null}
         </Pressable>
 
         {expiredMembership ? null : nextBooking?.session ? (
@@ -345,21 +291,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     width: 72, height: 72, borderRadius: radii.md, backgroundColor: colors.primary,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
-  affluenceCard: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, gap: 10,
-    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 3,
-  },
-  affluenceHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  affluenceHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success },
-  affluenceLabel: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.text },
-  affluenceValueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  affluenceValue: { fontFamily: fonts.headBold, fontSize: 30 },
-  affluenceStateLabel: { fontFamily: fonts.bodyBold, fontSize: 13 },
-  affluenceSub: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
-  histogramLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  histogramLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted },
   emptyCourseCard: {
     backgroundColor: colors.surface, borderRadius: radii.lg,
     padding: spacing.md,

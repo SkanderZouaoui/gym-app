@@ -21,7 +21,7 @@ export function LoginPage() {
       const tokens = await authApi.login(email, password)
       tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken)
       const user = await meApi.getMe()
-      const isAdmin = user.branchRoles.some((r) => r.role === 'ADMIN')
+      const isAdmin = user.roles.some((r) => r.role === 'ADMIN')
       if (!isAdmin) {
         tokenStorage.clear()
         setError("Ce compte n'a pas accès au back-office")

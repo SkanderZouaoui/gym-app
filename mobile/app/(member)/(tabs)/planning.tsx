@@ -4,10 +4,7 @@ import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useMe } from '../../../src/hooks/useMe';
 import { useCreateBooking, useSessions } from '../../../src/hooks/useClasses';
-import { useBranches } from '../../../src/hooks/useBranches';
-import { useUpdateProfile } from '../../../src/hooks/useProfile';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { ApiError } from '../../../src/api/client';
 import { Banner, BottomSheet, Chip, EmptyState, SkeletonBlock, SkeletonGroup } from '../../../src/components/ui';
@@ -30,12 +27,7 @@ function buildWeek() {
 export default function PlanningScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user, isLoading: userLoading } = useMe();
-  const branchId = user?.homeBranchId ?? undefined;
-  const { data: sessions, isLoading, isError, refetch } = useSessions(branchId);
-  const { data: branches } = useBranches();
-  const updateProfile = useUpdateProfile();
-  const [branchSheetOpen, setBranchSheetOpen] = useState(false);
+  const { data: sessions, isLoading, isError, refetch } = useSessions();
   const createBooking = useCreateBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -79,40 +71,6 @@ export default function PlanningScreen() {
   }, [sessions, days, selectedDay, classTypeFilter, coachFilter]);
 
   const activeFilterCount = (classTypeFilter ? 1 : 0) + (coachFilter ? 1 : 0);
-
-  if (!userLoading && user && !user.homeBranchId) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Planning</Text>
-        </View>
-        <EmptyState
-          icon="location-off"
-          title="Aucune salle sélectionnée"
-          text="Choisissez votre salle habituelle pour voir les cours disponibles."
-          tone="primary"
-          actionLabel="Choisir ma salle"
-          onAction={() => setBranchSheetOpen(true)}
-        />
-        <BottomSheet visible={branchSheetOpen} onClose={() => setBranchSheetOpen(false)}>
-          <Text style={styles.sheetTitle}>Choisir une salle</Text>
-          <View style={styles.optionsWrap}>
-            {branches?.map((b) => (
-              <Pressable
-                key={b.id}
-                style={styles.optionRow}
-                onPress={() => {
-                  updateProfile.mutate({ homeBranchId: b.id }, { onSuccess: () => setBranchSheetOpen(false) });
-                }}
-              >
-                <Text style={styles.optionText}>{b.name}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </BottomSheet>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

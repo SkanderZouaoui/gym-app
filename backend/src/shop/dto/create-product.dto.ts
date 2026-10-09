@@ -2,9 +2,6 @@ import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
-  branchId!: string;
-
-  @IsString()
   name!: string;
 
   @IsOptional()

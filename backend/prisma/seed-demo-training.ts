@@ -7,10 +7,9 @@ const prisma = new PrismaClient();
  */
 async function main() {
   const coach = await prisma.coachProfile.findFirst();
-  const branch = await prisma.branch.findFirst({ where: { name: 'Salle Centre' } });
   const member = await prisma.user.findFirst({ where: { email: 'member-phase2@muscleup.dev' } });
 
-  if (!coach || !branch) throw new Error('Coach ou branche introuvable — lancez les seeds de base avant.');
+  if (!coach) throw new Error('Coach introuvable — lancez les seeds de base avant.');
 
   // Bio et spécialités du coach
   await prisma.coachProfile.update({
@@ -34,7 +33,7 @@ async function main() {
       { dayOfWeek: 5, startTime: '19:00', endTime: '20:00' },
     ];
     for (const s of slots) {
-      await prisma.coachAvailability.create({ data: { coachId: coach.userId, branchId: branch.id, ...s } });
+      await prisma.coachAvailability.create({ data: { coachId: coach.userId, ...s } });
     }
     console.log(`Disponibilités : ${slots.length} créneaux créés pour ${coach.userId}.`);
   } else {

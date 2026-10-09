@@ -8,8 +8,4 @@ export class RenewMembershipDto {
   @IsOptional()
   @IsISO8601()
   startDate?: string;
-
-  @IsOptional()
-  @IsString()
-  homeBranchId?: string;
 }

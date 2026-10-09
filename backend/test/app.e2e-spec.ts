@@ -17,7 +17,7 @@ describe('AppModule (e2e)', () => {
   });
 
   it('refuse une route protégée sans token', () => {
-    return request(app.getHttpServer()).get('/v1/branches').expect(401);
+    return request(app.getHttpServer()).get('/v1/admin/dashboard').expect(401);
   });
 
   it('accepte une inscription sur une route publique', () => {

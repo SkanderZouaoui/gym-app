@@ -7,23 +7,20 @@ const prisma = new PrismaClient();
  *   npx tsx prisma/seed-classes.ts
  */
 async function main() {
-  const branch = await prisma.branch.findFirst({ where: { name: 'Salle Centre' } });
-  if (!branch) throw new Error('Branche "Salle Centre" introuvable — lancez les migrations/seed de base avant.');
-
   const coach = await prisma.coachProfile.findFirst();
 
+  const roomDefs = [
+    { name: 'Studio 1', capacity: 20 },
+    { name: 'Studio 2', capacity: 14 },
+    { name: 'Salle de force', capacity: 16 },
+  ];
+
   const rooms = await Promise.all(
-    [
-      { name: 'Studio 1', capacity: 20 },
-      { name: 'Studio 2', capacity: 14 },
-      { name: 'Salle de force', capacity: 16 },
-    ].map((r) =>
-      prisma.room.upsert({
-        where: { id: `${branch.id}-${r.name}` },
-        update: {},
-        create: { id: `${branch.id}-${r.name}`, branchId: branch.id, name: r.name, capacity: r.capacity },
-      }),
-    ),
+    roomDefs.map(async (r) => {
+      const existing = await prisma.room.findFirst({ where: { name: r.name } });
+      if (existing) return existing;
+      return prisma.room.create({ data: { name: r.name, capacity: r.capacity } });
+    }),
   );
 
   const classTypeDefs = [
@@ -75,13 +72,12 @@ async function main() {
     startsAt.setHours(slot.hour, 0, 0, 0);
     const endsAt = new Date(startsAt.getTime() + slot.durationMin * 60_000);
 
-    const existing = await prisma.classSession.findFirst({ where: { branchId: branch.id, startsAt } });
+    const existing = await prisma.classSession.findFirst({ where: { startsAt } });
     if (existing) continue;
 
     await prisma.classSession.create({
       data: {
         classTypeId: typeByName.get(slot.classType)!.id,
-        branchId: branch.id,
         roomId: roomByName.get(slot.room)!.id,
         coachId: coach?.userId,
         startsAt,

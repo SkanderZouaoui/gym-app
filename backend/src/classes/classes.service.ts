@@ -20,9 +20,9 @@ export class ClassesService {
 
   // --- Modèles récurrents ---------------------------------------------------
 
-  findTemplatesForBranch(branchId: string) {
+  findAllTemplates() {
     return this.prisma.classTemplate.findMany({
-      where: { branchId, isActive: true },
+      where: { isActive: true },
       include: { classType: true, room: true, coach: { include: { user: true } } },
     });
   }
@@ -70,7 +70,6 @@ export class ClassesService {
         data: {
           templateId,
           classTypeId: template.classTypeId,
-          branchId: template.branchId,
           roomId: template.roomId,
           coachId: template.coachId,
           startsAt,
@@ -86,10 +85,9 @@ export class ClassesService {
 
   // --- Séances --------------------------------------------------------------
 
-  findSessions(branchId: string, from?: string, to?: string) {
+  findSessions(from?: string, to?: string) {
     return this.prisma.classSession.findMany({
       where: {
-        branchId,
         status: { not: 'CANCELLED' },
         ...(from || to
           ? {
@@ -116,7 +114,6 @@ export class ClassesService {
       include: {
         classType: true,
         room: true,
-        branch: true,
         coach: { include: { user: true } },
         _count: { select: { bookings: { where: { status: { in: ['CONFIRMED', 'ATTENDED'] } } } } },
       },
@@ -168,7 +165,6 @@ export class ClassesService {
         action: 'CANCEL_SESSION',
         entity: 'ClassSession',
         entityId: id,
-        branchId: session.branchId,
         newValue: { reason },
       },
     });
@@ -186,7 +182,6 @@ export class ClassesService {
         action: 'UPDATE_SESSION_CAPACITY',
         entity: 'ClassSession',
         entityId: id,
-        branchId: session.branchId,
         oldValue: { capacity: session.capacity },
         newValue: { capacity },
       },
@@ -205,7 +200,6 @@ export class ClassesService {
         action: 'REPLACE_SESSION_COACH',
         entity: 'ClassSession',
         entityId: id,
-        branchId: session.branchId,
         oldValue: { coachId: session.coachId },
         newValue: { coachId },
       },

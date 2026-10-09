@@ -56,6 +56,6 @@ export class AuthController {
 
   @Post('select-role')
   selectRole(@CurrentUser() user: AuthenticatedUser, @Body() dto: SelectRoleDto) {
-    return this.authService.selectRole(user.userId, dto.role, dto.branchId);
+    return this.authService.selectRole(user.userId, dto.role);
   }
 }

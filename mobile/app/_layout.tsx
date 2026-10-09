@@ -46,8 +46,9 @@ export default function RootLayout() {
       if (token) {
         try {
           const user = await meApi.getMe();
-          const activeRole = user.branchRoles[0]?.role ?? 'MEMBER';
-          setSession(user, user.branchRoles, activeRole);
+          const roles = user.roles.map((r) => r.role);
+          const activeRole = roles[0] ?? 'MEMBER';
+          setSession(user, roles, activeRole);
         } catch {
           await tokenStorage.clear();
         }

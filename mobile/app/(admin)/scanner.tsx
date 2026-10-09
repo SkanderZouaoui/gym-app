@@ -5,15 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Scanner } from '../../src/components/Scanner';
 import { fonts, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
 import { useSessions } from '../../src/hooks/useClasses';
 
 export default function AdminScannerScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const params = useLocalSearchParams<{ sessionId?: string }>();
-  const { data: user } = useMe();
-  const { data: sessions } = useSessions(user?.homeBranchId ?? undefined);
+  const { data: sessions } = useSessions();
   const [sessionId, setSessionId] = useState(params.sessionId);
 
   const now = Date.now();

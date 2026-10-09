@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
 import { useMyReservations, useProducts, useReserveProduct } from '../../src/hooks/useShop';
 import { Banner, EmptyState, Pill } from '../../src/components/ui';
 import { ProductCard } from '../../src/components/adherent/ProductCard';
@@ -25,8 +24,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default function ShopScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
-  const { data: products } = useProducts(user?.homeBranchId ?? undefined);
+  const { data: products } = useProducts();
   const { data: reservations } = useMyReservations();
   const reserve = useReserveProduct();
 

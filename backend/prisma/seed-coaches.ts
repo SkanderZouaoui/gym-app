@@ -8,9 +8,6 @@ const prisma = new PrismaClient();
  *   npx tsx prisma/seed-coaches.ts
  */
 async function main() {
-  const branch = await prisma.branch.findFirst({ where: { name: 'Salle Centre' } });
-  if (!branch) throw new Error('Branche "Salle Centre" introuvable — lancez les seeds de base avant.');
-
   // Coach existant : ajoute prix/note s'ils manquent encore.
   const existingCoach = await prisma.coachProfile.findFirst();
   if (existingCoach && existingCoach.sessionPrice === null) {
@@ -72,8 +69,7 @@ async function main() {
         passwordHash,
         firstName: c.firstName,
         lastName: c.lastName,
-        homeBranchId: branch.id,
-        branchRoles: { create: { role: 'COACH', branchId: branch.id } },
+        roles: { create: { role: 'COACH' } },
         coachProfile: {
           create: {
             bio: c.bio,
@@ -89,7 +85,7 @@ async function main() {
 
     for (const slot of c.slots) {
       await prisma.coachAvailability.create({
-        data: { coachId: user.id, branchId: branch.id, ...slot },
+        data: { coachId: user.id, ...slot },
       });
     }
 

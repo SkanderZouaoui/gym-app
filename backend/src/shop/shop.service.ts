@@ -8,8 +8,8 @@ import type { CreateReservationDto } from './dto/create-reservation.dto.js';
 export class ShopService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findForBranch(branchId: string) {
-    return this.prisma.product.findMany({ where: { branchId, isActive: true }, orderBy: { name: 'asc' } });
+  findAll() {
+    return this.prisma.product.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
   }
 
   async findOne(id: string) {
@@ -64,9 +64,9 @@ export class ShopService {
     });
   }
 
-  findForBranchStaff(branchId: string) {
+  findPendingForStaff() {
     return this.prisma.productReservation.findMany({
-      where: { product: { branchId }, status: { in: ['PENDING', 'READY'] } },
+      where: { status: { in: ['PENDING', 'READY'] } },
       include: { product: true, user: { select: { firstName: true, lastName: true } } },
       orderBy: { createdAt: 'asc' },
     });

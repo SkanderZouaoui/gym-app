@@ -19,11 +19,10 @@ export interface StaffToday {
   attendedToday: number;
 }
 
-export function useStaffToday(branchId: string | undefined) {
+export function useStaffToday() {
   return useQuery({
-    queryKey: ['staff', 'today', branchId],
-    queryFn: () => apiRequest<StaffToday>(`/v1/staff/today?branchId=${branchId}`),
-    enabled: !!branchId,
+    queryKey: ['staff', 'today'],
+    queryFn: () => apiRequest<StaffToday>('/v1/staff/today'),
   });
 }
 

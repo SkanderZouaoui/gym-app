@@ -9,9 +9,5 @@ export class CreateAnnouncementDto {
 
   @IsOptional()
   @IsString()
-  branchId?: string;
-
-  @IsOptional()
-  @IsString()
   planId?: string;
 }

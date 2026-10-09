@@ -15,7 +15,6 @@ describe('BookingsService — concurrence et liste d\'attente (e2e)', () => {
   let prisma: PrismaClient;
   let bookingsService: BookingsService;
 
-  let branchId: string;
   let planId: string;
   let sessionId: string;
   let userIds: string[] = [];
@@ -32,9 +31,6 @@ describe('BookingsService — concurrence et liste d\'attente (e2e)', () => {
     prisma = new PrismaClient();
     bookingsService = app.get(BookingsService);
 
-    const branch = await prisma.branch.create({ data: { name: 'Test Branch Concurrency' } });
-    branchId = branch.id;
-
     const classType = await prisma.classType.create({ data: { name: 'Test Class Concurrency' } });
 
     const plan = await prisma.membershipPlan.create({
@@ -45,7 +41,6 @@ describe('BookingsService — concurrence et liste d\'attente (e2e)', () => {
     const session = await prisma.classSession.create({
       data: {
         classTypeId: classType.id,
-        branchId,
         startsAt: new Date(),
         endsAt: new Date(Date.now() + 3_600_000),
         capacity: 2, // capacité volontairement petite pour forcer la liste d'attente
@@ -62,15 +57,13 @@ describe('BookingsService — concurrence et liste d\'attente (e2e)', () => {
           passwordHash: 'x',
           firstName: `Test${i}`,
           lastName: 'Concurrency',
-          homeBranchId: branchId,
-          branchRoles: { create: { role: 'MEMBER', branchId } },
+          roles: { create: { role: 'MEMBER' } },
         },
       });
       await prisma.membership.create({
         data: {
           userId: user.id,
           planId,
-          homeBranchId: branchId,
           startDate: new Date(),
           endDate: new Date(Date.now() + 30 * 86_400_000),
           status: 'ACTIVE',
@@ -84,12 +77,11 @@ describe('BookingsService — concurrence et liste d\'attente (e2e)', () => {
     // Nettoyage dans l'ordre des contraintes de clé étrangère.
     await prisma.booking.deleteMany({ where: { sessionId } });
     await prisma.membership.deleteMany({ where: { userId: { in: userIds } } });
-    await prisma.userBranchRole.deleteMany({ where: { userId: { in: userIds } } });
+    await prisma.userRole.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     await prisma.classSession.deleteMany({ where: { id: sessionId } });
     await prisma.membershipPlan.deleteMany({ where: { id: planId } });
     await prisma.classType.deleteMany({ where: { name: 'Test Class Concurrency' } });
-    await prisma.branch.deleteMany({ where: { id: branchId } });
     await prisma.$disconnect();
     await app.close();
   });

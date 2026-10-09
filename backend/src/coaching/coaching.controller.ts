@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { CoachingService } from './coaching.service.js';
@@ -14,8 +14,8 @@ export class CoachingController {
   constructor(private readonly coachingService: CoachingService) {}
 
   @Get('coaching/availability')
-  getAvailabilityForMembers(@Query('branchId') branchId: string) {
-    return this.coachingService.getCoachAvailabilityForMembers(branchId);
+  getAvailabilityForMembers() {
+    return this.coachingService.getCoachAvailabilityForMembers();
   }
 
   @Get('coaching/coaches/:id')

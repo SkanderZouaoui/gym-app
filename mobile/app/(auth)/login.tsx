@@ -32,8 +32,9 @@ export default function LoginScreen() {
       const tokens = await authApi.login(email.trim(), password);
       await tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
       const user = await meApi.getMe();
-      const activeRole = user.branchRoles[0]?.role ?? 'MEMBER';
-      setSession(user, user.branchRoles, activeRole);
+      const roles = user.roles.map((r) => r.role);
+      const activeRole = roles[0] ?? 'MEMBER';
+      setSession(user, roles, activeRole);
       router.replace(rootRouteForRole(activeRole) as any);
     } catch (e) {
       if (e instanceof ApiError) {

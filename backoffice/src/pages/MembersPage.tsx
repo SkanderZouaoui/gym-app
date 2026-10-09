@@ -1,18 +1,16 @@
 import { Fragment, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { membersApi } from '../api/endpoints'
-import { useSessionStore } from '../store/session'
 import { MemberMembershipPanel } from '../components/MemberMembershipPanel'
 
 export function MembersPage() {
   const [query, setQuery] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const activeBranchId = useSessionStore((s) => s.activeBranchId)
   const queryClient = useQueryClient()
 
   const { data: members, isFetching } = useQuery({
-    queryKey: ['members', 'search', query, activeBranchId],
-    queryFn: () => membersApi.search(query, activeBranchId ?? undefined),
+    queryKey: ['members', 'search', query],
+    queryFn: () => membersApi.search(query),
   })
 
   const suspend = useMutation({

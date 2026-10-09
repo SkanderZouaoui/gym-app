@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { statsApi } from '../api/endpoints'
-import { useSessionStore } from '../store/session'
 
 function startOfMonthIso() {
   const d = new Date()
@@ -22,22 +21,19 @@ const METHOD_LABELS: Record<string, string> = {
 }
 
 export function StatsPage() {
-  const activeBranchId = useSessionStore((s) => s.activeBranchId)
   const [from] = useState(startOfMonthIso())
   const [to] = useState(nowIso())
   const [exporting, setExporting] = useState(false)
 
   const { data } = useQuery({
-    queryKey: ['stats', 'overview', activeBranchId, from, to],
-    queryFn: () => statsApi.getOverview(activeBranchId!, from, to),
-    enabled: !!activeBranchId,
+    queryKey: ['stats', 'overview', from, to],
+    queryFn: () => statsApi.getOverview(from, to),
   })
 
   const handleExport = async () => {
-    if (!activeBranchId) return
     setExporting(true)
     try {
-      const blob = await statsApi.exportPaymentsCsv(activeBranchId, from, to)
+      const blob = await statsApi.exportPaymentsCsv(from, to)
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

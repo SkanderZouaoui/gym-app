@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { branchesApi, plansApi, type CreatePlanInput, type MembershipPlan } from '../api/endpoints'
+import { plansApi, type CreatePlanInput, type MembershipPlan } from '../api/endpoints'
 import { getApiErrorMessage } from '../api/client'
-
-const ACCESS_SCOPES: CreatePlanInput['accessScope'][] = ['INHERIT', 'HOME_ONLY', 'ALL', 'SELECTED']
-const CROSS_BRANCH_MODES: CreatePlanInput['crossBranchBooking'][] = ['INHERIT', 'ENABLED', 'DISABLED']
 
 const emptyForm = {
   name: '',
@@ -12,11 +9,7 @@ const emptyForm = {
   durationDays: 30,
   price: 0,
   accessCount: '' as number | '',
-  accessScope: 'INHERIT' as NonNullable<CreatePlanInput['accessScope']>,
-  crossBranchBooking: 'INHERIT' as NonNullable<CreatePlanInput['crossBranchBooking']>,
-  crossBranchMonthlyQuota: '' as number | '',
   isContractual: false,
-  branchIds: [] as string[],
 }
 
 function toInput(form: typeof emptyForm): CreatePlanInput {
@@ -26,11 +19,7 @@ function toInput(form: typeof emptyForm): CreatePlanInput {
     durationDays: form.durationDays,
     price: form.price,
     accessCount: form.accessCount === '' ? undefined : form.accessCount,
-    accessScope: form.accessScope,
-    crossBranchBooking: form.crossBranchBooking,
-    crossBranchMonthlyQuota: form.crossBranchMonthlyQuota === '' ? undefined : form.crossBranchMonthlyQuota,
     isContractual: form.isContractual,
-    branchIds: form.branchIds,
   }
 }
 
@@ -41,18 +30,13 @@ function fromPlan(plan: MembershipPlan): typeof emptyForm {
     durationDays: plan.durationDays,
     price: Number(plan.price),
     accessCount: plan.accessCount ?? '',
-    accessScope: plan.accessScope,
-    crossBranchBooking: plan.crossBranchBooking,
-    crossBranchMonthlyQuota: plan.crossBranchMonthlyQuota ?? '',
     isContractual: plan.isContractual,
-    branchIds: plan.branches.map((b) => b.branchId),
   }
 }
 
 export function PlansPage() {
   const queryClient = useQueryClient()
   const { data: plans } = useQuery({ queryKey: ['plans'], queryFn: plansApi.findAll })
-  const { data: branches } = useQuery({ queryKey: ['branches'], queryFn: branchesApi.findAll })
   const [formOpen, setFormOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
@@ -90,15 +74,6 @@ export function PlansPage() {
     setEditingId(plan.id)
     setError(null)
     setFormOpen(true)
-  }
-
-  const toggleBranch = (branchId: string) => {
-    setForm((f) => ({
-      ...f,
-      branchIds: f.branchIds.includes(branchId)
-        ? f.branchIds.filter((id) => id !== branchId)
-        : [...f.branchIds, branchId],
-    }))
   }
 
   return (
@@ -177,49 +152,6 @@ export function PlansPage() {
                 className="h-10 rounded-lg border border-(--color-border) px-3 text-sm outline-none focus:border-(--color-primary)"
               />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-(--color-muted)">Portée d'accès (sites)</label>
-              <select
-                value={form.accessScope}
-                onChange={(e) => setForm((f) => ({ ...f, accessScope: e.target.value as typeof f.accessScope }))}
-                className="h-10 rounded-lg border border-(--color-border) px-3 text-sm outline-none focus:border-(--color-primary)"
-              >
-                {ACCESS_SCOPES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-(--color-muted)">Réservation inter-sites</label>
-              <select
-                value={form.crossBranchBooking}
-                onChange={(e) => setForm((f) => ({ ...f, crossBranchBooking: e.target.value as typeof f.crossBranchBooking }))}
-                className="h-10 rounded-lg border border-(--color-border) px-3 text-sm outline-none focus:border-(--color-primary)"
-              >
-                {CROSS_BRANCH_MODES.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {form.crossBranchBooking !== 'DISABLED' ? (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-(--color-muted)">Quota mensuel inter-sites</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={form.crossBranchMonthlyQuota}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, crossBranchMonthlyQuota: e.target.value === '' ? '' : Number(e.target.value) }))
-                  }
-                  placeholder="Illimité"
-                  className="h-10 rounded-lg border border-(--color-border) px-3 text-sm outline-none focus:border-(--color-primary)"
-                />
-              </div>
-            ) : null}
           </div>
 
           <label className="flex items-center gap-2 text-sm font-medium">
@@ -229,25 +161,8 @@ export function PlansPage() {
               onChange={(e) => setForm((f) => ({ ...f, isContractual: e.target.checked }))}
               className="h-4 w-4"
             />
-            Formule contractuelle (portée d'accès figée à la souscription)
+            Formule contractuelle
           </label>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-(--color-muted)">Sites éligibles</label>
-            <div className="flex flex-wrap gap-3">
-              {(branches ?? []).map((b) => (
-                <label key={b.id} className="flex items-center gap-1.5 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={form.branchIds.includes(b.id)}
-                    onChange={() => toggleBranch(b.id)}
-                    className="h-4 w-4"
-                  />
-                  {b.name}
-                </label>
-              ))}
-            </div>
-          </div>
 
           {error ? <p className="text-sm font-medium text-(--color-danger)">{error}</p> : null}
 
@@ -288,7 +203,7 @@ export function PlansPage() {
             </div>
             <p className="text-2xl font-extrabold text-(--color-primary-ink)">{plan.price} DT</p>
             <p className="text-xs text-(--color-muted)">
-              {plan.durationDays} jours · {plan.accessScope}
+              {plan.durationDays} jours
               {plan.accessCount ? ` · ${plan.accessCount} accès` : ' · accès illimité'}
             </p>
             <div className="mt-2 flex items-center gap-2">

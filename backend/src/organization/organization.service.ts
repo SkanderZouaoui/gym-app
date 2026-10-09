@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DEFAULT_ATTENDANCE_POLICY,
-  DEFAULT_MULTI_BRANCH_POLICY,
-  attendancePolicySchema,
-  multiBranchPolicySchema,
-} from '@muscleup/shared';
+import { DEFAULT_ATTENDANCE_POLICY, attendancePolicySchema } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
-import type { UpdateMultiBranchPolicyDto } from './dto/update-multi-branch-policy.dto.js';
 import type { UpdateAttendancePolicyDto } from './dto/update-attendance-policy.dto.js';
 
 @Injectable()
@@ -23,37 +17,9 @@ export class OrganizationService {
         name: 'MuscleUP',
         branding: {},
         features: {},
-        multiBranchPolicy: DEFAULT_MULTI_BRANCH_POLICY,
         attendancePolicy: DEFAULT_ATTENDANCE_POLICY,
       },
     });
-  }
-
-  async updateMultiBranchPolicy(dto: UpdateMultiBranchPolicyDto, updatedBy: string) {
-    const parsed = multiBranchPolicySchema.parse(dto);
-    const settings = await this.getSettings();
-
-    const updated = await this.prisma.organizationSettings.update({
-      where: { id: settings.id },
-      data: {
-        multiBranchPolicy: parsed,
-        version: { increment: 1 },
-        updatedBy,
-      },
-    });
-
-    await this.prisma.auditLog.create({
-      data: {
-        actorId: updatedBy,
-        action: 'UPDATE_MULTI_BRANCH_POLICY',
-        entity: 'OrganizationSettings',
-        entityId: settings.id,
-        oldValue: settings.multiBranchPolicy as any,
-        newValue: parsed,
-      },
-    });
-
-    return updated;
   }
 
   async updateAttendancePolicy(dto: UpdateAttendancePolicyDto, updatedBy: string) {

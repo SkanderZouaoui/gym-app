@@ -4,9 +4,6 @@ export class CreatePaymentDto {
   @IsString()
   membershipId!: string;
 
-  @IsString()
-  branchId!: string;
-
   @IsInt()
   @Min(0)
   amount!: number;

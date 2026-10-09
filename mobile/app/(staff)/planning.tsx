@@ -3,14 +3,12 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
 import { useSessions } from '../../src/hooks/useClasses';
 
 export default function StaffPlanningScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
-  const { data: sessions } = useSessions(user?.homeBranchId ?? undefined);
+  const { data: sessions } = useSessions();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

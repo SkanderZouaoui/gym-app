@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { ShopService } from './shop.service.js';
@@ -15,8 +15,8 @@ export class ShopController {
   constructor(private readonly shopService: ShopService) {}
 
   @Get('shop/products')
-  findForBranch(@Query('branchId') branchId: string) {
-    return this.shopService.findForBranch(branchId);
+  findAll() {
+    return this.shopService.findAll();
   }
 
   @Roles(Role.ADMIN)
@@ -54,8 +54,8 @@ export class ShopController {
 
   @Roles(Role.STAFF, Role.ADMIN)
   @Get('staff/reservations')
-  findForBranchStaff(@Query('branchId') branchId: string) {
-    return this.shopService.findForBranchStaff(branchId);
+  findPendingForStaff() {
+    return this.shopService.findPendingForStaff();
   }
 
   @Roles(Role.STAFF, Role.ADMIN)

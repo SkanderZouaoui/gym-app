@@ -1,15 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { classesApi } from '../api/endpoints'
-import { useSessionStore } from '../store/session'
 
 export function PlanningPage() {
-  const activeBranchId = useSessionStore((s) => s.activeBranchId)
   const queryClient = useQueryClient()
 
   const { data: sessions } = useQuery({
-    queryKey: ['classes', 'sessions', activeBranchId],
-    queryFn: () => classesApi.findSessions(activeBranchId!),
-    enabled: !!activeBranchId,
+    queryKey: ['classes', 'sessions'],
+    queryFn: () => classesApi.findSessions(),
   })
 
   const cancelSession = useMutation({
@@ -27,7 +24,7 @@ export function PlanningPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-head text-2xl font-extrabold text-(--color-secondary)">Planning</h1>
-        <p className="text-sm text-(--color-muted)">Séances du site sélectionné</p>
+        <p className="text-sm text-(--color-muted)">Séances programmées</p>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface)">

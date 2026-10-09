@@ -4,15 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
 import { useSessions } from '../../src/hooks/useClasses';
 import { apiRequest } from '../../src/api/client';
 
 export default function AdminPlanningScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
-  const { data: sessions } = useSessions(user?.homeBranchId ?? undefined);
+  const { data: sessions } = useSessions();
   const queryClient = useQueryClient();
 
   const cancelSession = useMutation({

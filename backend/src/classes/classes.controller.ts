@@ -7,7 +7,6 @@ import { CreateTemplateDto } from './dto/create-template.dto.js';
 import { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 import { CancelSessionDto } from './dto/cancel-session.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
-import { BranchScope } from '../auth/decorators/branch-scope.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
 
@@ -28,14 +27,12 @@ export class ClassesController {
   }
 
   @Roles(Role.ADMIN)
-  @BranchScope({ source: 'query', field: 'branchId' })
   @Get('admin/class-templates')
-  findTemplates(@Query('branchId') branchId: string) {
-    return this.classesService.findTemplatesForBranch(branchId);
+  findTemplates() {
+    return this.classesService.findAllTemplates();
   }
 
   @Roles(Role.ADMIN)
-  @BranchScope({ source: 'body', field: 'branchId' })
   @Post('admin/class-templates')
   createTemplate(@Body() dto: CreateTemplateDto) {
     return this.classesService.createTemplate(dto);
@@ -54,13 +51,8 @@ export class ClassesController {
   }
 
   @Get('classes/sessions')
-  @BranchScope({ source: 'query', field: 'branchId' })
-  findSessions(
-    @Query('branchId') branchId: string,
-    @Query('from') from?: string,
-    @Query('to') to?: string,
-  ) {
-    return this.classesService.findSessions(branchId, from, to);
+  findSessions(@Query('from') from?: string, @Query('to') to?: string) {
+    return this.classesService.findSessions(from, to);
   }
 
   @Get('classes/sessions/:id')

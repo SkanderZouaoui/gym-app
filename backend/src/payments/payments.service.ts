@@ -23,7 +23,6 @@ export class PaymentsService {
     const payment = await this.prisma.payment.create({
       data: {
         membershipId: dto.membershipId,
-        branchId: dto.branchId,
         amount: dto.amount,
         method: dto.method,
         reference: dto.reference,
@@ -37,7 +36,6 @@ export class PaymentsService {
         action: 'RECORD_PAYMENT',
         entity: 'Payment',
         entityId: payment.id,
-        branchId: dto.branchId,
         newValue: { amount: dto.amount, method: dto.method, membershipId: dto.membershipId },
       },
     });
@@ -45,9 +43,9 @@ export class PaymentsService {
     return payment;
   }
 
-  findForBranch(branchId: string) {
+  findAll() {
     return this.prisma.payment.findMany({
-      where: { branchId, deletedAt: null },
+      where: { deletedAt: null },
       include: {
         membership: { include: { user: { select: { firstName: true, lastName: true } }, plan: { select: { name: true } } } },
       },

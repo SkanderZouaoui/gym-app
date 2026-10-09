@@ -11,11 +11,10 @@ export interface AdminDashboard {
   alerts: { expiringMemberships: number; underfilledClasses: number };
 }
 
-export function useAdminDashboard(branchId: string | undefined) {
+export function useAdminDashboard() {
   return useQuery({
-    queryKey: ['admin', 'dashboard', branchId],
-    queryFn: () => apiRequest<AdminDashboard>(`/v1/admin/dashboard?branchId=${branchId}`),
-    enabled: !!branchId,
+    queryKey: ['admin', 'dashboard'],
+    queryFn: () => apiRequest<AdminDashboard>('/v1/admin/dashboard'),
   });
 }
 
@@ -27,11 +26,10 @@ export interface DailyAttendance {
 }
 
 /** Présences des 7 derniers jours + variation vs semaine précédente. */
-export function useDailyAttendance(branchId: string | undefined) {
+export function useDailyAttendance() {
   return useQuery({
-    queryKey: ['admin', 'stats', 'daily-attendance', branchId],
-    queryFn: () => apiRequest<DailyAttendance>(`/v1/admin/stats/daily-attendance?branchId=${branchId}`),
-    enabled: !!branchId,
+    queryKey: ['admin', 'stats', 'daily-attendance'],
+    queryFn: () => apiRequest<DailyAttendance>('/v1/admin/stats/daily-attendance'),
   });
 }
 
@@ -42,10 +40,9 @@ export interface ExpiringMembership {
   plan: { name: string };
 }
 
-export function useExpiringMemberships(branchId: string | undefined) {
+export function useExpiringMemberships() {
   return useQuery({
-    queryKey: ['admin', 'alerts', 'expiring-memberships', branchId],
-    queryFn: () => apiRequest<ExpiringMembership[]>(`/v1/admin/alerts/expiring-memberships?branchId=${branchId}`),
-    enabled: !!branchId,
+    queryKey: ['admin', 'alerts', 'expiring-memberships'],
+    queryFn: () => apiRequest<ExpiringMembership[]>('/v1/admin/alerts/expiring-memberships'),
   });
 }

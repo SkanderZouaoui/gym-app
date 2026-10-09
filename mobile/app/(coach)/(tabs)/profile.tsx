@@ -17,11 +17,11 @@ export default function CoachProfileScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
-  const grants = useSessionStore((s) => s.grants);
+  const roles = useSessionStore((s) => s.roles);
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
 
-  const hasMemberRole = grants.some((g) => g.role === 'MEMBER');
+  const hasMemberRole = roles.some((r) => r === 'MEMBER');
 
   const handleSwitchToMember = () => {
     setActiveRole('MEMBER');

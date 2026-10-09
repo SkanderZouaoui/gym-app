@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { attendanceApi } from '../api/endpoints'
-import { useSessionStore } from '../store/session'
 
 const REASON_LABELS: Record<string, string> = {
   OK: 'Présence confirmée',
@@ -17,11 +16,9 @@ const REASON_LABELS: Record<string, string> = {
 }
 
 export function AttendancePage() {
-  const activeBranchId = useSessionStore((s) => s.activeBranchId)
   const { data: logs } = useQuery({
-    queryKey: ['attendance', 'logs', activeBranchId],
-    queryFn: () => attendanceApi.getLogs(activeBranchId!),
-    enabled: !!activeBranchId,
+    queryKey: ['attendance', 'logs'],
+    queryFn: attendanceApi.getLogs,
   })
 
   return (
@@ -71,7 +68,7 @@ export function AttendancePage() {
             {!logs || logs.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-sm text-(--color-muted)">
-                  Aucun scan enregistré pour ce site.
+                  Aucun scan enregistré.
                 </td>
               </tr>
             ) : null}

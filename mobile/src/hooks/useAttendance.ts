@@ -38,9 +38,9 @@ export function useRoster(sessionId: string | undefined) {
   });
 }
 
-export function useTodaySessions(branchId: string | undefined) {
+export function useTodaySessions() {
   return useQuery({
-    queryKey: ['classes', 'sessions', 'today', branchId],
+    queryKey: ['classes', 'sessions', 'today'],
     queryFn: () => {
       const today = new Date();
       const from = new Date(today);
@@ -48,7 +48,6 @@ export function useTodaySessions(branchId: string | undefined) {
       const to = new Date(today);
       to.setHours(23, 59, 59, 999);
       const params = new URLSearchParams({
-        branchId: branchId!,
         from: from.toISOString(),
         to: to.toISOString(),
       });
@@ -64,6 +63,5 @@ export function useTodaySessions(branchId: string | undefined) {
         }[]
       >(`/v1/classes/sessions?${params.toString()}`);
     },
-    enabled: !!branchId,
   });
 }

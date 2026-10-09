@@ -15,7 +15,7 @@ import { OtpService } from '../otp/otp.service.js';
 import { AppEvent, type UserRegisteredEvent } from '../common/events.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import type { LoginDto } from './dto/login.dto.js';
-import type { AuthenticatedUser, BranchRoleGrant } from './types/authenticated-user.js';
+import type { AuthenticatedUser } from './types/authenticated-user.js';
 import type { AccessTokenPayload } from './types/jwt-payload.js';
 
 export interface TokenPair {
@@ -50,12 +50,11 @@ export class AuthService {
         passwordHash,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        homeBranchId: dto.homeBranchId,
-        branchRoles: {
-          create: { role: Role.MEMBER, branchId: dto.homeBranchId ?? null },
+        roles: {
+          create: { role: Role.MEMBER },
         },
       },
-      include: { branchRoles: true },
+      include: { roles: true },
     });
 
     this.events.emit(AppEvent.USER_REGISTERED, {
@@ -63,13 +62,13 @@ export class AuthService {
       referralCode: dto.referralCode,
     } satisfies UserRegisteredEvent);
 
-    return this.issueTokensForRole(user.id, Role.MEMBER, dto.homeBranchId ?? null);
+    return this.issueTokensForRole(user.id, Role.MEMBER, [Role.MEMBER]);
   }
 
-  async login(dto: LoginDto): Promise<TokenPair & { grants: BranchRoleGrant[] }> {
+  async login(dto: LoginDto): Promise<TokenPair & { roles: Role[] }> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
-      include: { branchRoles: true },
+      include: { roles: true },
     });
     if (!user || user.status !== 'ACTIVE') {
       throw new UnauthorizedException('INVALID_CREDENTIALS');
@@ -80,42 +79,34 @@ export class AuthService {
       throw new UnauthorizedException('INVALID_CREDENTIALS');
     }
 
-    const grants: BranchRoleGrant[] = user.branchRoles.map((r) => ({
-      role: r.role as Role,
-      branchId: r.branchId,
-    }));
+    const roles: Role[] = user.roles.map((r) => r.role as Role);
 
     // Rôle par défaut au login : le premier rôle attribué (l'app propose
     // ensuite le sélecteur de rôle si l'utilisateur en cumule plusieurs).
-    const defaultGrant = grants[0] ?? { role: Role.MEMBER, branchId: user.homeBranchId };
+    const defaultRole = roles[0] ?? Role.MEMBER;
 
-    const tokens = await this.issueTokens(user.id, defaultGrant.role, grants, user.homeBranchId);
-    return { ...tokens, grants };
+    const tokens = await this.issueTokens(user.id, defaultRole, roles);
+    return { ...tokens, roles };
   }
 
   /** Changement de rôle actif depuis le profil (section 3 : sélecteur de rôle). */
-  async selectRole(userId: string, role: Role, branchId: string | undefined): Promise<TokenPair> {
+  async selectRole(userId: string, role: Role): Promise<TokenPair> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { branchRoles: true },
+      include: { roles: true },
     });
     if (!user) {
       throw new UnauthorizedException('INVALID_CREDENTIALS');
     }
 
-    const grants: BranchRoleGrant[] = user.branchRoles.map((r) => ({
-      role: r.role as Role,
-      branchId: r.branchId,
-    }));
+    const roles: Role[] = user.roles.map((r) => r.role as Role);
 
-    const authorized = grants.some(
-      (g) => g.role === role && (g.branchId === null || g.branchId === branchId),
-    );
+    const authorized = roles.includes(role);
     if (!authorized) {
       throw new ForbiddenException('ROLE_NOT_AUTHORIZED');
     }
 
-    return this.issueTokens(user.id, role, grants, user.homeBranchId);
+    return this.issueTokens(user.id, role, roles);
   }
 
   async refresh(rawRefreshToken: string): Promise<TokenPair> {
@@ -127,7 +118,7 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: stored.userId },
-      include: { branchRoles: true },
+      include: { roles: true },
     });
     if (!user || user.status !== 'ACTIVE') {
       throw new UnauthorizedException('TOKEN_INVALID');
@@ -139,14 +130,11 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    const grants: BranchRoleGrant[] = user.branchRoles.map((r) => ({
-      role: r.role as Role,
-      branchId: r.branchId,
-    }));
+    const roles: Role[] = user.roles.map((r) => r.role as Role);
     const payload = this.jwt.decode(rawRefreshToken) as { activeRole?: Role } | null;
-    const activeRole = payload?.activeRole ?? grants[0]?.role ?? Role.MEMBER;
+    const activeRole = payload?.activeRole ?? roles[0] ?? Role.MEMBER;
 
-    return this.issueTokens(user.id, activeRole, grants, user.homeBranchId);
+    return this.issueTokens(user.id, activeRole, roles);
   }
 
   async logout(rawRefreshToken: string): Promise<void> {
@@ -185,17 +173,12 @@ export class AuthService {
     ]);
   }
 
-  private async issueTokensForRole(userId: string, role: Role, branchId: string | null) {
-    return this.issueTokens(userId, role, [{ role, branchId }], branchId);
+  private async issueTokensForRole(userId: string, role: Role, roles: Role[]) {
+    return this.issueTokens(userId, role, roles);
   }
 
-  private async issueTokens(
-    userId: string,
-    activeRole: Role,
-    grants: BranchRoleGrant[],
-    homeBranchId: string | null,
-  ): Promise<TokenPair> {
-    const payload: AccessTokenPayload = { sub: userId, activeRole, grants, homeBranchId };
+  private async issueTokens(userId: string, activeRole: Role, roles: Role[]): Promise<TokenPair> {
+    const payload: AccessTokenPayload = { sub: userId, activeRole, roles };
 
     const accessToken = await this.jwt.signAsync(payload, {
       secret: this.config.getOrThrow('JWT_ACCESS_SECRET'),
@@ -233,9 +216,5 @@ export class AuthService {
     const unit = match[2];
     const unitMs = { s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000 }[unit] ?? 86_400_000;
     return value * unitMs;
-  }
-
-  toPublicGrants(grants: BranchRoleGrant[]) {
-    return grants;
   }
 }

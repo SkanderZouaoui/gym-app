@@ -158,15 +158,14 @@ export class AttendanceService {
   async getMyAttendanceHistory(userId: string) {
     return this.prisma.booking.findMany({
       where: { userId, status: { in: ['ATTENDED', 'NO_SHOW'] } },
-      include: { session: { include: { classType: true, branch: true } } },
+      include: { session: { include: { classType: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   /** Journal des scans acceptés/refusés pour le back-office (section 11). */
-  async getScanLogsForBranch(branchId: string, take = 100) {
+  async getScanLogs(take = 100) {
     const logs = await this.prisma.attendanceScanLog.findMany({
-      where: { session: { branchId } },
       include: {
         session: { select: { startsAt: true, classType: { select: { name: true } } } },
       },

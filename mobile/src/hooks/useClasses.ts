@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { bookingsApi, classesApi } from '../api/endpoints';
 
-export function useSessions(branchId: string | undefined) {
+export function useSessions() {
   return useQuery({
-    queryKey: ['classes', 'sessions', branchId],
-    queryFn: () => classesApi.findSessions(branchId!),
-    enabled: !!branchId,
+    queryKey: ['classes', 'sessions'],
+    queryFn: () => classesApi.findSessions(),
   });
 }
 

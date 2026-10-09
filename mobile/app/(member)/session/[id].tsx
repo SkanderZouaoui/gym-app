@@ -5,8 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useSession } from '../../../src/hooks/useClasses';
-import { useCreateBooking } from '../../../src/hooks/useClasses';
+import { useCreateBooking, useSession } from '../../../src/hooks/useClasses';
 import { useMyBookings } from '../../../src/hooks/useMe';
 import { Banner, ProgressBar } from '../../../src/components/ui';
 import { ApiError } from '../../../src/api/client';
@@ -88,7 +87,6 @@ export default function SessionDetailScreen() {
           <InfoTile icon="sports" label="Coach" value={session.coach?.user.firstName ?? '—'} />
           <InfoTile icon="meeting-room" label="Salle" value={session.room?.name ?? '—'} />
           <InfoTile icon="timer" label="Durée" value={`${durationMinutes} min`} />
-          <InfoTile icon="location-on" label="Site" value={session.branch?.name ?? '—'} />
         </View>
 
         <View style={styles.spotsCard}>
@@ -167,8 +165,6 @@ function traduireErreurReservation(e: ApiError): string {
       return 'Votre abonnement est suspendu.';
     case 'SESSION_FULL':
       return 'Ce cours est complet.';
-    case 'PLAN_NOT_VALID_AT_BRANCH':
-      return "Votre formule n'est pas valable sur ce site.";
     default:
       return e.message;
   }

@@ -5,7 +5,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { OrganizationModule } from './organization/organization.module.js';
-import { BranchesModule } from './branches/branches.module.js';
 import { UsersModule } from './users/users.module.js';
 import { MembershipsModule } from './memberships/memberships.module.js';
 import { PaymentsModule } from './payments/payments.module.js';
@@ -34,7 +33,6 @@ import { StorageModule } from './storage/storage.module.js';
     PrismaModule,
     AuthModule,
     OrganizationModule,
-    BranchesModule,
     UsersModule,
     MembershipsModule,
     PaymentsModule,

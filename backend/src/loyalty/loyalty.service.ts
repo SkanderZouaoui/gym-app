@@ -176,13 +176,12 @@ export class LoyaltyService {
 
   // --- Défis ----------------------------------------------------------------
 
-  findActiveChallenges(branchId?: string) {
+  findActiveChallenges() {
     const now = new Date();
     return this.prisma.challenge.findMany({
       where: {
         startDate: { lte: now },
         endDate: { gte: now },
-        ...(branchId ? { OR: [{ branchId }, { branchId: null }] } : {}),
       },
     });
   }
@@ -195,7 +194,6 @@ export class LoyaltyService {
     startDate: string;
     endDate: string;
     pointsReward?: number;
-    branchId?: string;
   }) {
     return this.prisma.challenge.create({
       data: {
@@ -206,7 +204,6 @@ export class LoyaltyService {
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         pointsReward: data.pointsReward ?? 0,
-        branchId: data.branchId,
       },
     });
   }
@@ -229,8 +226,8 @@ export class LoyaltyService {
   }
 
   /** Défis actifs + progression de l'utilisateur courant (null si pas encore rejoint). */
-  async getMyActiveChallengesWithProgress(userId: string, branchId?: string) {
-    const challenges = await this.findActiveChallenges(branchId);
+  async getMyActiveChallengesWithProgress(userId: string) {
+    const challenges = await this.findActiveChallenges();
     if (challenges.length === 0) return [];
 
     const participations = await this.prisma.challengeParticipation.findMany({

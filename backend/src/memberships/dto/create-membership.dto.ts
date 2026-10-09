@@ -10,8 +10,4 @@ export class CreateMembershipDto {
   @IsOptional()
   @IsISO8601()
   startDate?: string;
-
-  @IsOptional()
-  @IsString()
-  homeBranchId?: string;
 }

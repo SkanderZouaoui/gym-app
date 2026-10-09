@@ -5,7 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
 import { useCoachAvailability, useMyCoachingSessions } from '../../src/hooks/useMemberCoaching';
 import { EmptyState, Pill } from '../../src/components/ui';
 import { CoachCard } from '../../src/components/training/CoachCard';
@@ -27,8 +26,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default function CoachingScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
-  const { data: availability } = useCoachAvailability(user?.homeBranchId ?? undefined);
+  const { data: availability } = useCoachAvailability();
   const { data: sessions } = useMyCoachingSessions();
 
   const coaches = Array.from(

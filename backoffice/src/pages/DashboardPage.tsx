@@ -1,13 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { adminApi } from '../api/endpoints'
-import { useSessionStore } from '../store/session'
 
 export function DashboardPage() {
-  const activeBranchId = useSessionStore((s) => s.activeBranchId)
   const { data, isLoading } = useQuery({
-    queryKey: ['admin', 'dashboard', activeBranchId],
-    queryFn: () => adminApi.getDashboard(activeBranchId ?? undefined),
-    enabled: !!activeBranchId,
+    queryKey: ['admin', 'dashboard'],
+    queryFn: adminApi.getDashboard,
   })
 
   const kpis = [
@@ -23,7 +20,7 @@ export function DashboardPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-head text-2xl font-extrabold text-(--color-secondary)">Tableau de bord</h1>
-        <p className="text-sm text-(--color-muted)">Vue d'ensemble du site</p>
+        <p className="text-sm text-(--color-muted)">Vue d'ensemble de la salle</p>
       </div>
 
       {isLoading ? (

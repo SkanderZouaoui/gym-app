@@ -17,7 +17,6 @@ export interface UpdateProfileInput {
   lastName?: string;
   phone?: string;
   photoKey?: string;
-  homeBranchId?: string;
 }
 
 export function useUpdateProfile() {

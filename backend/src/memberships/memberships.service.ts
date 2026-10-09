@@ -13,47 +13,23 @@ export class MembershipsService {
   findAllPlans() {
     return this.prisma.membershipPlan.findMany({
       where: { isActive: true },
-      include: { branches: true },
       orderBy: { name: 'asc' },
     });
   }
 
   async findPlan(id: string) {
-    const plan = await this.prisma.membershipPlan.findUnique({
-      where: { id },
-      include: { branches: true },
-    });
+    const plan = await this.prisma.membershipPlan.findUnique({ where: { id } });
     if (!plan) throw new NotFoundException('PLAN_NOT_FOUND');
     return plan;
   }
 
   createPlan(dto: CreatePlanDto) {
-    const { branchIds, ...data } = dto;
-    return this.prisma.membershipPlan.create({
-      data: {
-        ...data,
-        branches: branchIds ? { create: branchIds.map((branchId) => ({ branchId })) } : undefined,
-      },
-      include: { branches: true },
-    });
+    return this.prisma.membershipPlan.create({ data: dto });
   }
 
   async updatePlan(id: string, dto: UpdatePlanDto) {
     await this.findPlan(id);
-    const { branchIds, ...data } = dto;
-
-    if (branchIds) {
-      await this.prisma.planBranch.deleteMany({ where: { planId: id } });
-    }
-
-    return this.prisma.membershipPlan.update({
-      where: { id },
-      data: {
-        ...data,
-        branches: branchIds ? { create: branchIds.map((branchId) => ({ branchId })) } : undefined,
-      },
-      include: { branches: true },
-    });
+    return this.prisma.membershipPlan.update({ where: { id }, data: dto });
   }
 
   async deactivatePlan(id: string) {
@@ -66,16 +42,11 @@ export class MembershipsService {
   async findForUser(userId: string) {
     return this.prisma.membership.findMany({
       where: { userId },
-      include: { plan: true, homeBranch: true },
+      include: { plan: true },
       orderBy: { startDate: 'desc' },
     });
   }
 
-  /**
-   * Souscription. Si la formule est contractuelle (`isContractual`), la
-   * portée d'accès est figée sur l'abonnement (`frozenAccessScope`) — les
-   * changements de règle réseau ne s'appliquent alors pas (section 7.5).
-   */
   async create(dto: CreateMembershipDto, actorId: string) {
     const plan = await this.findPlan(dto.planId);
     const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
@@ -85,11 +56,9 @@ export class MembershipsService {
       data: {
         userId: dto.userId,
         planId: dto.planId,
-        homeBranchId: dto.homeBranchId,
         startDate,
         endDate,
         status: 'ACTIVE',
-        frozenAccessScope: plan.isContractual ? plan.accessScope : null,
       },
       include: { plan: true },
     });
@@ -169,12 +138,11 @@ export class MembershipsService {
 
   /**
    * Renouvellement : crée une nouvelle ligne d'abonnement (historique préservé),
-   * en héritant plan/site de l'abonnement source si non précisés (section 1.3 du plan).
+   * en héritant de la formule source si non précisée (section 1.3 du plan).
    */
-  async renew(id: string, dto: { planId?: string; startDate?: string; homeBranchId?: string }, actorId: string) {
+  async renew(id: string, dto: { planId?: string; startDate?: string }, actorId: string) {
     const source = await this.findOne(id);
     const planId = dto.planId ?? source.planId;
-    const homeBranchId = dto.homeBranchId ?? source.homeBranchId ?? undefined;
     const plan = await this.findPlan(planId);
     const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
     const endDate = new Date(startDate.getTime() + plan.durationDays * 86_400_000);
@@ -183,11 +151,9 @@ export class MembershipsService {
       data: {
         userId: source.userId,
         planId,
-        homeBranchId,
         startDate,
         endDate,
         status: 'ACTIVE',
-        frozenAccessScope: plan.isContractual ? plan.accessScope : null,
       },
       include: { plan: true },
     });

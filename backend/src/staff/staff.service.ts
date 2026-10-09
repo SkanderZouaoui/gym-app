@@ -6,7 +6,7 @@ export class StaffService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Aujourd'hui : cours du jour, remplissage, présences en cours (section 4.3/4.4). */
-  async today(branchId: string) {
+  async today() {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date();
@@ -14,7 +14,6 @@ export class StaffService {
 
     const sessions = await this.prisma.classSession.findMany({
       where: {
-        branchId,
         startsAt: { gte: startOfDay, lte: endOfDay },
       },
       include: {
@@ -31,7 +30,7 @@ export class StaffService {
     const attendedCount = await this.prisma.booking.count({
       where: {
         status: 'ATTENDED',
-        session: { branchId, startsAt: { gte: startOfDay, lte: endOfDay } },
+        session: { startsAt: { gte: startOfDay, lte: endOfDay } },
       },
     });
 

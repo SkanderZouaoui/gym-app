@@ -4,9 +4,6 @@ export class CreateTemplateDto {
   @IsString()
   classTypeId!: string;
 
-  @IsString()
-  branchId!: string;
-
   @IsOptional()
   @IsString()
   roomId?: string;

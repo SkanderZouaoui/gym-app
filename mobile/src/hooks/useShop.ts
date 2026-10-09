@@ -16,11 +16,10 @@ export interface ProductReservation {
   product: Product;
 }
 
-export function useProducts(branchId: string | undefined) {
+export function useProducts() {
   return useQuery({
-    queryKey: ['shop', 'products', branchId],
-    queryFn: () => apiRequest<Product[]>(`/v1/shop/products?branchId=${branchId}`),
-    enabled: !!branchId,
+    queryKey: ['shop', 'products'],
+    queryFn: () => apiRequest<Product[]>('/v1/shop/products'),
   });
 }
 

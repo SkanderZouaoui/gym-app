@@ -18,7 +18,7 @@ export class BookingsService {
       where: { userId },
       include: {
         session: {
-          include: { classType: true, branch: true, room: true, coach: { include: { user: true } } },
+          include: { classType: true, room: true, coach: { include: { user: true } } },
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -53,23 +53,18 @@ export class BookingsService {
 
     return this.prisma.$transaction(async (tx) => {
       const session = await tx.$queryRaw<
-        { id: string; capacity: number; branch_id: string; starts_at: Date; status: string; open_to_other_branches: boolean }[]
-      >`SELECT id, capacity, branch_id, starts_at, status, open_to_other_branches FROM class_sessions WHERE id = ${sessionId} FOR UPDATE`;
+        { id: string; capacity: number; starts_at: Date; status: string }[]
+      >`SELECT id, capacity, starts_at, status FROM class_sessions WHERE id = ${sessionId} FOR UPDATE`;
 
       if (session.length === 0) throw new NotFoundException('SESSION_NOT_FOUND');
       const s = session[0];
       if (s.status === 'CANCELLED') throw new BadRequestException('SESSION_CANCELLED');
 
-      const sessionForPolicy: Pick<
-        ClassSession,
-        'id' | 'capacity' | 'branchId' | 'startsAt' | 'status' | 'openToOtherBranches'
-      > = {
+      const sessionForPolicy: Pick<ClassSession, 'id' | 'capacity' | 'startsAt' | 'status'> = {
         id: s.id,
         capacity: s.capacity,
-        branchId: s.branch_id,
         startsAt: s.starts_at,
         status: s.status as ClassSession['status'],
-        openToOtherBranches: s.open_to_other_branches,
       };
 
       const policyCheck = await this.accessPolicyService.canBook(
@@ -90,13 +85,12 @@ export class BookingsService {
         where: { sessionId, status: { in: ['CONFIRMED', 'ATTENDED'] } },
       });
 
-      const isCrossBranch = activeMembership?.homeBranchId !== s.branch_id;
       const bookingCode = await this.uniqueBookingCode(tx);
 
       if (confirmedCount < s.capacity) {
         return tx.booking.create({
-          data: { sessionId, userId, status: 'CONFIRMED', bookingCode, isCrossBranch },
-          include: { session: { include: { classType: true, branch: true } } },
+          data: { sessionId, userId, status: 'CONFIRMED', bookingCode },
+          include: { session: { include: { classType: true } } },
         });
       }
 
@@ -111,9 +105,8 @@ export class BookingsService {
           status: 'WAITLISTED',
           waitlistPosition: waitlistCount + 1,
           bookingCode,
-          isCrossBranch,
         },
-        include: { session: { include: { classType: true, branch: true } } },
+        include: { session: { include: { classType: true } } },
       });
     });
   }

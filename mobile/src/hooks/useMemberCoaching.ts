@@ -13,7 +13,6 @@ export interface CoachProfileSummary {
 export interface CoachAvailability {
   id: string;
   coachId: string;
-  branchId: string;
   dayOfWeek: number | null;
   startTime: string | null;
   endTime: string | null;
@@ -41,11 +40,10 @@ export interface MyCoachingSession {
   coach: { user: { firstName: string; lastName: string } };
 }
 
-export function useCoachAvailability(branchId: string | undefined) {
+export function useCoachAvailability() {
   return useQuery({
-    queryKey: ['coaching', 'availability', branchId],
-    queryFn: () => apiRequest<CoachAvailability[]>(`/v1/coaching/availability?branchId=${branchId}`),
-    enabled: !!branchId,
+    queryKey: ['coaching', 'availability'],
+    queryFn: () => apiRequest<CoachAvailability[]>('/v1/coaching/availability'),
   });
 }
 
@@ -59,7 +57,7 @@ export function useMyCoachingSessions() {
 export function useRequestCoachingSession() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { coachId: string; branchId: string; startsAt: string; endsAt: string; objective?: string }) =>
+    mutationFn: (payload: { coachId: string; startsAt: string; endsAt: string; objective?: string }) =>
       apiRequest('/v1/coaching-sessions', { method: 'POST', body: payload }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'coaching-sessions'] }),
   });

@@ -19,7 +19,6 @@ const REASON_LABELS: Record<string, string> = {
   NO_MEMBERSHIP: 'Aucun abonnement actif',
   MEMBERSHIP_EXPIRED: 'Abonnement expiré',
   MEMBERSHIP_SUSPENDED: 'Abonnement suspendu',
-  PLAN_NOT_VALID_AT_BRANCH: 'Formule non valable sur ce site',
 };
 
 export function ScanResultOverlay({ outcome, onDismiss }: { outcome: ScanOutcome; onDismiss: () => void }) {

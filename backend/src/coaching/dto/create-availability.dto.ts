@@ -1,9 +1,6 @@
 import { IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 
 export class CreateAvailabilityDto {
-  @IsString()
-  branchId!: string;
-
   @IsOptional()
   @IsInt()
   @Min(0)

@@ -8,7 +8,6 @@ import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { RolesGuard } from './guards/roles.guard.js';
-import { BranchScopeGuard } from './guards/branch-scope.guard.js';
 import { OtpModule } from '../otp/otp.module.js';
 
 @Module({
@@ -30,7 +29,6 @@ import { OtpModule } from '../otp/otp.module.js';
     JwtStrategy,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
-    { provide: APP_GUARD, useClass: BranchScopeGuard },
   ],
   exports: [AuthService],
 })
