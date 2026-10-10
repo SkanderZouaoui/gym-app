@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { deriveColorFamily, type Branding } from '@muscleup/shared';
 import { colors as lightColors } from './tokens';
 import { darkColors } from './darkColors';
+import { useRemoteConfig } from '../config/RemoteConfigContext';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type ResolvedScheme = 'light' | 'dark';
@@ -26,11 +28,42 @@ async function setPreferenceStorage(preference: ThemePreference): Promise<void> 
   await SecureStore.setItemAsync(THEME_PREFERENCE_KEY, preference);
 }
 
+/** Superpose le branding publié par le back-office (primary/secondary/accent)
+ * sur la palette statique de base — tout le reste (success/warning/danger/info,
+ * surfaces, textes) reste piloté par les tokens par défaut. */
+function applyBranding(base: ColorPalette, branding: Branding, dark: boolean): ColorPalette {
+  const surface = base.surface;
+  const primary = deriveColorFamily(branding.primary, surface, dark);
+  const secondary = deriveColorFamily(branding.secondary, surface, dark);
+  const accent = deriveColorFamily(branding.accent, surface, dark);
+
+  return {
+    ...base,
+    primary: primary.base,
+    primaryHover: primary.hover,
+    primaryPressed: primary.pressed,
+    primarySoft: primary.soft,
+    primaryBorder: primary.border,
+    primaryInk: primary.ink,
+    primaryContrast: branding.primaryContrast,
+    secondary: secondary.base,
+    secondarySoft: secondary.soft,
+    secondaryInk: secondary.ink,
+    onSecondary: secondary.on,
+    accent: accent.base,
+    accentSoft: accent.soft,
+    accentBorder: accent.border,
+    accentInk: accent.ink,
+    onAccent: accent.on,
+  };
+}
+
 interface ThemeContextValue {
   colors: ColorPalette;
   scheme: ResolvedScheme;
   preference: ThemePreference;
   setScheme: (preference: ThemePreference) => void;
+  radius: number;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -38,6 +71,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const deviceScheme = useColorScheme();
   const [preference, setPreference] = useState<ThemePreference>('system');
+  const { config } = useRemoteConfig();
 
   useEffect(() => {
     getPreference().then((stored) => {
@@ -52,11 +86,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const resolvedScheme: ResolvedScheme =
     preference === 'system' ? (deviceScheme === 'dark' ? 'dark' : 'light') : preference;
-  const colors = resolvedScheme === 'dark' ? darkColors : lightColors;
+  const baseColors = resolvedScheme === 'dark' ? darkColors : lightColors;
+  const colors = useMemo(
+    () => applyBranding(baseColors, config.branding, resolvedScheme === 'dark'),
+    [baseColors, config.branding, resolvedScheme],
+  );
 
   const value = useMemo(
-    () => ({ colors, scheme: resolvedScheme, preference, setScheme }),
-    [colors, resolvedScheme, preference],
+    () => ({ colors, scheme: resolvedScheme, preference, setScheme, radius: config.branding.radius }),
+    [colors, resolvedScheme, preference, config.branding.radius],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

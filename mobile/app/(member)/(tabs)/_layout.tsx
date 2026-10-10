@@ -4,14 +4,33 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { StyleSheet, View } from 'react-native';
 import { fonts } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { useRemoteConfig } from '../../../src/config/RemoteConfigContext';
+import type { TabId } from '@muscleup/shared';
 
-/** Barre d'onglets Adhérent — cf. Design System/FZ TabBar.dc.html : 5 cols,
- * bouton QR central surélevé (60px, sans libellé), icône active en FILL 1 / primaryInk.
- * Les écrans de détail vivent au niveau parent (member)/_layout.tsx (Stack) pour
- * garder un vrai historique de navigation (bouton retour + swipe iOS). */
+const ICONS: Record<TabId, keyof typeof MaterialIcons.glyphMap> = {
+  home: 'home',
+  planning: 'calendar-month',
+  training: 'fitness-center',
+  profile: 'person',
+};
+
+/** Barre d'onglets Adhérent — cf. Design System/FZ TabBar.dc.html : jusqu'à
+ * 5 cols, bouton QR central surélevé (60px, sans libellé, toujours affiché),
+ * icône active en FILL 1 / primaryInk. L'ordre, les libellés (FR/AR) et la
+ * visibilité de "planning" sont pilotés par la configuration publiée
+ * (back-office → Navigation). home/training/profile restent toujours actifs.
+ * Les écrans de détail vivent au niveau parent (member)/_layout.tsx (Stack)
+ * pour garder un vrai historique de navigation (bouton retour + swipe iOS). */
 export default function MemberTabsLayout() {
   const { colors } = useTheme();
+  const { config } = useRemoteConfig();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+
+  const orderedTabs = config.tabs.filter((t) => t.on || t.id !== 'planning');
+  const midIndex = Math.ceil(orderedTabs.length / 2);
+  const before = orderedTabs.slice(0, midIndex);
+  const after = orderedTabs.slice(midIndex);
+
   return (
     <Tabs
       screenOptions={{
@@ -25,20 +44,18 @@ export default function MemberTabsLayout() {
         },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Accueil',
-          tabBarIcon: ({ color, focused }) => <MaterialIcons name="home" size={24} color={color} style={{ opacity: focused ? 1 : 0.9 }} />,
-        }}
-      />
-      <Tabs.Screen
-        name="planning"
-        options={{
-          title: 'Planning',
-          tabBarIcon: ({ color }) => <MaterialIcons name="calendar-month" size={24} color={color} />,
-        }}
-      />
+      {before.map((tab) => (
+        <Tabs.Screen
+          key={tab.id}
+          name={tab.id === 'home' ? 'index' : tab.id}
+          options={{
+            title: tab.fr,
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialIcons name={ICONS[tab.id]} size={24} color={color} style={{ opacity: focused ? 1 : 0.9 }} />
+            ),
+          }}
+        />
+      ))}
       <Tabs.Screen
         name="qr"
         options={{
@@ -51,20 +68,21 @@ export default function MemberTabsLayout() {
           tabBarLabel: () => null,
         }}
       />
-      <Tabs.Screen
-        name="training"
-        options={{
-          title: 'Entraînement',
-          tabBarIcon: ({ color }) => <MaterialIcons name="fitness-center" size={24} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profil',
-          tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,
-        }}
-      />
+      {after.map((tab) => (
+        <Tabs.Screen
+          key={tab.id}
+          name={tab.id === 'home' ? 'index' : tab.id}
+          options={{
+            title: tab.fr,
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialIcons name={ICONS[tab.id]} size={24} color={color} style={{ opacity: focused ? 1 : 0.9 }} />
+            ),
+          }}
+        />
+      ))}
+      {!orderedTabs.some((t) => t.id === 'planning') ? (
+        <Tabs.Screen name="planning" options={{ href: null }} />
+      ) : null}
     </Tabs>
   );
 }

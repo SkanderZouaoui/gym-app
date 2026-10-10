@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { ExercisesService } from './exercises.service.js';
 import { CreateExerciseDto } from './dto/create-exercise.dto.js';
+import { UpdateExerciseDto } from './dto/update-exercise.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
@@ -32,6 +33,21 @@ export class ExercisesController {
     });
   }
 
+  @Roles(Role.ADMIN)
+  @Get('admin/all')
+  findAllForAdmin(
+    @Query('search') search?: string,
+    @Query('muscleGroup') muscleGroup?: string | string[],
+    @Query('equipment') equipment?: string | string[],
+  ) {
+    return this.exercisesService.findAll({
+      search,
+      muscleGroup: toArray(muscleGroup),
+      equipment: toArray(equipment),
+      includeInactive: true,
+    });
+  }
+
   @Get('muscle-groups')
   findMuscleGroups() {
     return this.exercisesService.findMuscleGroups();
@@ -54,8 +70,20 @@ export class ExercisesController {
   }
 
   @Roles(Role.COACH, Role.ADMIN)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateExerciseDto) {
+    return this.exercisesService.update(id, dto);
+  }
+
+  @Roles(Role.COACH, Role.ADMIN)
   @Patch(':id/deactivate')
   deactivate(@Param('id') id: string) {
     return this.exercisesService.deactivate(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete(':id')
+  delete(@Param('id') id: string) {
+    return this.exercisesService.delete(id);
   }
 }

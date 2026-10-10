@@ -137,4 +137,36 @@ export class CoachingService {
     if (session.coachId !== coachId) throw new ForbiddenException('NOT_YOUR_SESSION');
     return session;
   }
+
+  // --- Vue admin (back-office "Coaching privé") ---------------------------
+
+  findAllForAdmin() {
+    return this.prisma.coachingSession.findMany({
+      include: {
+        member: { select: { firstName: true, lastName: true } },
+        coach: { include: { user: { select: { firstName: true, lastName: true } } } },
+      },
+      orderBy: { startsAt: 'desc' },
+      take: 100,
+    });
+  }
+
+  createForAdmin(dto: { coachId: string; memberId: string; startsAt: string; endsAt: string; objective?: string }) {
+    return this.prisma.coachingSession.create({
+      data: {
+        coachId: dto.coachId,
+        memberId: dto.memberId,
+        startsAt: new Date(dto.startsAt),
+        endsAt: new Date(dto.endsAt),
+        status: 'CONFIRMED',
+        objective: dto.objective,
+      },
+    });
+  }
+
+  async markCompleted(id: string) {
+    const session = await this.prisma.coachingSession.findUnique({ where: { id } });
+    if (!session) throw new NotFoundException('SESSION_NOT_FOUND');
+    return this.prisma.coachingSession.update({ where: { id }, data: { status: 'COMPLETED' } });
+  }
 }

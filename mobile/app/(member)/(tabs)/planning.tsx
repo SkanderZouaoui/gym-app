@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useCreateBooking, useSessions } from '../../../src/hooks/useClasses';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { ApiError } from '../../../src/api/client';
@@ -26,7 +28,9 @@ function buildWeek() {
 
 export default function PlanningScreen() {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const { data: sessions, isLoading, isError, refetch } = useSessions();
   const createBooking = useCreateBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -54,7 +58,7 @@ export default function PlanningScreen() {
   const handleBook = (sessionId: string) => {
     setBookingError(null);
     createBooking.mutate(sessionId, {
-      onError: (e) => setBookingError(e instanceof ApiError ? e.message : 'Erreur de réservation'),
+      onError: (e) => setBookingError(e instanceof ApiError ? e.message : t('planning.bookingError')),
     });
   };
 
@@ -75,9 +79,9 @@ export default function PlanningScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Planning</Text>
+        <Text style={styles.title}>{t('planning.title')}</Text>
         <Pressable onPress={() => router.push('/(member)/reservations')}>
-          <Text style={styles.myBookingsLink}>Mes réservations</Text>
+          <Text style={styles.myBookingsLink}>{t('planning.myBookings')}</Text>
         </Pressable>
       </View>
 
@@ -85,7 +89,7 @@ export default function PlanningScreen() {
         <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
           <Chip
-            label={activeFilterCount > 0 ? `Filtres (${activeFilterCount})` : 'Filtres'}
+            label={activeFilterCount > 0 ? t('planning.filtersCount', { count: activeFilterCount }) : t('planning.filters')}
             icon="tune"
             active={activeFilterCount > 0}
             onPress={() => {
@@ -94,13 +98,13 @@ export default function PlanningScreen() {
             }}
           />
           <Chip
-            label={classTypeFilter ?? 'Type de cours'}
+            label={classTypeFilter ?? t('planning.classType')}
             trailingIcon="expand-more"
             active={!!classTypeFilter}
             onPress={() => setOpenSheet('classType')}
           />
           <Chip
-            label={coachFilter ?? 'Coach'}
+            label={coachFilter ?? t('planning.coach')}
             trailingIcon="expand-more"
             active={!!coachFilter}
             onPress={() => setOpenSheet('coach')}
@@ -125,10 +129,10 @@ export default function PlanningScreen() {
       ) : isError ? (
         <EmptyState
           icon="cloud-off"
-          title="Planning indisponible"
-          text="Impossible de charger les cours. Vérifiez votre connexion."
+          title={t('planning.unavailableTitle')}
+          text={t('planning.unavailableText')}
           tone="danger"
-          actionLabel="Réessayer"
+          actionLabel={t('common.retry')}
           onAction={() => refetch()}
         />
       ) : (
@@ -147,8 +151,8 @@ export default function PlanningScreen() {
           ListEmptyComponent={
             <EmptyState
               icon="event-busy"
-              title="Aucun cours ce jour-là"
-              text="Essayez un autre jour ou retirez un filtre."
+              title={t('planning.emptyDayTitle')}
+              text={t('planning.emptyDayText')}
               tone="primary"
             />
           }
@@ -156,7 +160,7 @@ export default function PlanningScreen() {
       )}
 
       <BottomSheet visible={openSheet === 'classType'} onClose={() => setOpenSheet(null)}>
-        <Text style={styles.sheetTitle}>Type de cours</Text>
+        <Text style={styles.sheetTitle}>{t('planning.classType')}</Text>
         <View style={styles.optionsWrap}>
           {classTypeOptions.map((name) => (
             <Pressable
@@ -171,14 +175,14 @@ export default function PlanningScreen() {
             </Pressable>
           ))}
         </View>
-        <Button label="Fermer" variant="ghost" onPress={() => setOpenSheet(null)} />
+        <Button label={t('common.close')} variant="ghost" onPress={() => setOpenSheet(null)} />
       </BottomSheet>
 
       <BottomSheet visible={openSheet === 'coach'} onClose={() => setOpenSheet(null)}>
-        <Text style={styles.sheetTitle}>Coach</Text>
+        <Text style={styles.sheetTitle}>{t('planning.coach')}</Text>
         <View style={styles.optionsWrap}>
           {coachOptions.length === 0 ? (
-            <Text style={styles.emptyOptionsText}>Aucun coach sur les cours affichés.</Text>
+            <Text style={styles.emptyOptionsText}>{t('planning.noCoachOptions')}</Text>
           ) : (
             coachOptions.map((name) => (
               <Pressable
@@ -194,7 +198,7 @@ export default function PlanningScreen() {
             ))
           )}
         </View>
-        <Button label="Fermer" variant="ghost" onPress={() => setOpenSheet(null)} />
+        <Button label={t('common.close')} variant="ghost" onPress={() => setOpenSheet(null)} />
       </BottomSheet>
     </SafeAreaView>
   );
@@ -211,6 +215,7 @@ function SessionCard({
   onPress: () => void;
   booking: boolean;
 }) {
+  const { t } = useTranslation();
   const spotsLeft = session.capacity - session._count.bookings;
   const isFull = spotsLeft <= 0;
   const progress = session._count.bookings / Math.max(session.capacity, 1);
@@ -224,21 +229,21 @@ function SessionCard({
       duration={`${durationMinutes} min`}
       name={session.classType.name}
       meta={[session.coach?.user.firstName, session.room?.name].filter(Boolean).join(' · ') || 'Salle'}
-      spotsLabel={isFull ? 'Complet · liste d’attente' : `${spotsLeft} places`}
+      spotsLabel={isFull ? t('planning.full') : t('planning.spotsLeft', { count: spotsLeft })}
       statusTone={isFull ? 'danger' : spotsLeft <= 3 ? 'warning' : 'success'}
       progress={progress}
-      ctaLabel={booking ? '...' : isFull ? 'Liste d’attente' : 'Réserver'}
+      ctaLabel={booking ? t('planning.booking') : isFull ? t('planning.waitlist') : t('planning.book')}
       onPress={onPress}
       onPressCta={onBook}
     />
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     header: {
-      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+      flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center',
       paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.sm,
     },
     title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },

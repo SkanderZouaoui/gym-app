@@ -1,5 +1,16 @@
 import { api } from './client';
 import type { MeResponse } from '../store/session';
+import type {
+  AppConfigContent,
+  Branding,
+  HomeModule,
+  AppTab,
+  AppString,
+  AppLanguages,
+  NotifSettings,
+  BookingRules,
+  Role,
+} from '@muscleup/shared';
 
 export const authApi = {
   login: (email: string, password: string) =>
@@ -32,13 +43,67 @@ export interface MemberListItem {
   email: string | null;
   phone: string | null;
   status: string;
+  roles: { role: Role }[];
+}
+
+export interface CreateMemberInput {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+}
+
+export interface UpdateMemberInput {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  status?: 'ACTIVE' | 'SUSPENDED';
 }
 
 export const membersApi = {
   search: (query: string) =>
     api.get<MemberListItem[]>('/v1/members', { params: { search: query } }).then((r) => r.data),
+  create: (data: CreateMemberInput) => api.post<MemberListItem>('/v1/members', data).then((r) => r.data),
+  update: (id: string, data: UpdateMemberInput) =>
+    api.patch<MemberListItem>(`/v1/members/${id}`, data).then((r) => r.data),
+  delete: (id: string) => api.delete(`/v1/members/${id}`),
   suspend: (id: string) => api.patch(`/v1/members/${id}/suspend`),
   reactivate: (id: string) => api.patch(`/v1/members/${id}/reactivate`),
+};
+
+// ---------------------------------------------------------------------------
+// Équipe (comptes internes Staff + Admin)
+// ---------------------------------------------------------------------------
+
+export interface TeamMemberItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  status: string;
+  roles: { role: Role }[];
+}
+
+export interface CreateTeamMemberInput {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  role: 'STAFF' | 'ADMIN';
+}
+
+export const teamApi = {
+  findAll: () => api.get<TeamMemberItem[]>('/v1/admin/team').then((r) => r.data),
+  create: (data: CreateTeamMemberInput) => api.post<TeamMemberItem>('/v1/admin/users', data).then((r) => r.data),
+  update: (id: string, data: UpdateMemberInput) =>
+    api.patch<TeamMemberItem>(`/v1/admin/team/${id}`, data).then((r) => r.data),
+  delete: (id: string) => api.delete(`/v1/admin/team/${id}`),
+  assignRole: (id: string, role: Role) => api.post(`/v1/admin/users/${id}/roles`, { role }),
+  revokeRole: (id: string, role: Role) => api.delete(`/v1/admin/users/${id}/roles/${role}`),
 };
 
 export interface MembershipPlan {
@@ -50,6 +115,10 @@ export interface MembershipPlan {
   accessCount: number | null;
   isContractual: boolean;
   isActive: boolean;
+  isVisibleInApp: boolean;
+  isPopular: boolean;
+  includesLabel: string | null;
+  displayOrder: number;
 }
 
 export interface CreatePlanInput {
@@ -59,14 +128,20 @@ export interface CreatePlanInput {
   price: number;
   accessCount?: number;
   isContractual?: boolean;
+  isVisibleInApp?: boolean;
+  isPopular?: boolean;
+  includesLabel?: string;
+  displayOrder?: number;
 }
 
 export const plansApi = {
   findAll: () => api.get<MembershipPlan[]>('/v1/plans').then((r) => r.data),
-  create: (data: CreatePlanInput) => api.post('/v1/admin/plans', data).then((r) => r.data),
+  findAllForAdmin: () => api.get<MembershipPlan[]>('/v1/admin/plans').then((r) => r.data),
+  create: (data: CreatePlanInput) => api.post<MembershipPlan>('/v1/admin/plans', data).then((r) => r.data),
   update: (id: string, data: Partial<CreatePlanInput>) =>
-    api.patch(`/v1/admin/plans/${id}`, data).then((r) => r.data),
+    api.patch<MembershipPlan>(`/v1/admin/plans/${id}`, data).then((r) => r.data),
   deactivate: (id: string) => api.patch(`/v1/admin/plans/${id}/deactivate`),
+  reactivate: (id: string) => api.patch(`/v1/admin/plans/${id}/reactivate`),
 };
 
 export interface Membership {
@@ -194,4 +269,263 @@ export const statsApi = {
     api
       .get('/v1/admin/stats/export/payments.csv', { params: { from, to }, responseType: 'blob' })
       .then((r) => r.data as Blob),
+};
+
+// ---------------------------------------------------------------------------
+// Configuration de l'app mobile (CMS back-office : brouillon + publication)
+// ---------------------------------------------------------------------------
+
+export interface AppConfigVersion extends AppConfigContent {
+  id: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  versionNumber: number;
+  note: string | null;
+  changedKeys: string[];
+  publishedById: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppConfigHistoryItem extends AppConfigVersion {
+  publishedBy: { firstName: string; lastName: string } | null;
+}
+
+export interface PatchAppConfigInput {
+  branding?: Partial<Branding>;
+  homeModules?: HomeModule[];
+  tabs?: AppTab[];
+  strings?: AppString[];
+  languages?: Partial<AppLanguages>;
+  notifSettings?: Partial<NotifSettings>;
+  bookingRules?: Partial<BookingRules>;
+  changeLabel?: string;
+}
+
+export const appConfigApi = {
+  getDraft: () => api.get<AppConfigVersion>('/v1/admin/app-config/draft').then((r) => r.data),
+  patchDraft: (data: PatchAppConfigInput) =>
+    api.patch<AppConfigVersion>('/v1/admin/app-config/draft', data).then((r) => r.data),
+  discardDraft: () => api.post<AppConfigVersion>('/v1/admin/app-config/draft/discard').then((r) => r.data),
+  history: () => api.get<AppConfigHistoryItem[]>('/v1/admin/app-config/history').then((r) => r.data),
+  publish: (note?: string) =>
+    api.post<AppConfigVersion>('/v1/admin/app-config/publish', { note }).then((r) => r.data),
+  restore: (versionId: string) =>
+    api.post<AppConfigVersion>(`/v1/admin/app-config/history/${versionId}/restore`).then((r) => r.data),
+  getPublic: () => api.get<AppConfigContent & { version: number; publishedAt: string | null }>('/v1/config').then((r) => r.data),
+};
+
+export interface PermissionRow {
+  permission: string;
+  roles: { role: Role; allowed: boolean }[];
+}
+
+export const permissionsApi = {
+  findAll: () => api.get<PermissionRow[]>('/v1/admin/app-config/permissions').then((r) => r.data),
+  set: (permission: string, role: Role, allowed: boolean) =>
+    api.patch('/v1/admin/app-config/permissions', { permission, role, allowed }),
+};
+
+// ---------------------------------------------------------------------------
+// Coachs
+// ---------------------------------------------------------------------------
+
+export interface CoachListItem {
+  userId: string;
+  bio: string | null;
+  specialties: string[];
+  yearsExperience: number | null;
+  sessionPrice: string | null;
+  rating: string | null;
+  reviewCount: number;
+  status: 'ACTIVE' | 'ON_LEAVE' | 'INACTIVE';
+  weeklyClasses: number;
+  privateClientsCount: number;
+  user: { id: string; firstName: string; lastName: string; email: string | null; phone: string | null };
+}
+
+export interface CreateCoachInput {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  bio?: string;
+  specialties?: string[];
+  sessionPrice?: number;
+  status?: CoachListItem['status'];
+}
+
+export const coachesApi = {
+  findAll: () => api.get<CoachListItem[]>('/v1/admin/coaches').then((r) => r.data),
+  create: (data: CreateCoachInput) => api.post<CoachListItem>('/v1/admin/coaches', data).then((r) => r.data),
+  update: (userId: string, data: Partial<Omit<CreateCoachInput, 'password'>>) =>
+    api.patch<CoachListItem>(`/v1/admin/coaches/${userId}`, data).then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Exercices
+// ---------------------------------------------------------------------------
+
+export interface ExerciseItem {
+  id: string;
+  name: string;
+  muscleGroup: string | null;
+  equipment: string | null;
+  mediaKey: string | null;
+  instructions: string | null;
+  isActive: boolean;
+  type: 'STRENGTH' | 'CARDIO' | 'MOBILITY';
+  level: string | null;
+}
+
+export interface CreateExerciseInput {
+  name: string;
+  muscleGroup?: string;
+  equipment?: string;
+  instructions?: string;
+  mediaKey?: string;
+  type?: ExerciseItem['type'];
+  level?: string;
+}
+
+export const exercisesApi = {
+  findAllForAdmin: (params?: { search?: string }) =>
+    api.get<ExerciseItem[]>('/v1/exercises/admin/all', { params }).then((r) => r.data),
+  create: (data: CreateExerciseInput) => api.post<ExerciseItem>('/v1/exercises', data).then((r) => r.data),
+  update: (id: string, data: Partial<CreateExerciseInput>) =>
+    api.patch<ExerciseItem>(`/v1/exercises/${id}`, data).then((r) => r.data),
+  delete: (id: string) => api.delete(`/v1/exercises/${id}`),
+};
+
+// ---------------------------------------------------------------------------
+// Catalogue de cours (types) & modèles récurrents (planning)
+// ---------------------------------------------------------------------------
+
+export interface ClassTypeItem {
+  id: string;
+  name: string;
+  description: string | null;
+  level: string | null;
+  isActive: boolean;
+  icon: string;
+  tone: string;
+  isBookable: boolean;
+  defaultCapacity: number;
+  defaultDurationMin: number;
+}
+
+export interface CreateClassTypeInput {
+  name: string;
+  description?: string;
+  level?: string;
+  icon?: string;
+  tone?: string;
+  isBookable?: boolean;
+  defaultCapacity?: number;
+  defaultDurationMin?: number;
+}
+
+export const classTypesApi = {
+  findAllForAdmin: () => api.get<ClassTypeItem[]>('/v1/admin/class-types').then((r) => r.data),
+  create: (data: CreateClassTypeInput) => api.post<ClassTypeItem>('/v1/admin/class-types', data).then((r) => r.data),
+  update: (id: string, data: Partial<CreateClassTypeInput>) =>
+    api.patch<ClassTypeItem>(`/v1/admin/class-types/${id}`, data).then((r) => r.data),
+};
+
+export interface ClassTemplateItem {
+  id: string;
+  classTypeId: string;
+  roomId: string | null;
+  coachId: string | null;
+  capacity: number;
+  dayOfWeek: number;
+  startTime: string;
+  durationMin: number;
+  isActive: boolean;
+  classType: ClassTypeItem;
+  room: { id: string; name: string } | null;
+  coach: { user: { firstName: string; lastName: string } } | null;
+}
+
+export interface CreateClassTemplateInput {
+  classTypeId: string;
+  roomId?: string;
+  coachId?: string;
+  capacity: number;
+  dayOfWeek: number;
+  startTime: string;
+  durationMin: number;
+}
+
+// ---------------------------------------------------------------------------
+// Annonces (envoi immédiat vers l'app adhérent)
+// ---------------------------------------------------------------------------
+
+export interface AnnouncementItem {
+  id: string;
+  title: string;
+  body: string;
+  planId: string | null;
+  tone: 'info' | 'accent' | 'danger';
+  sentAt: string | null;
+  createdAt: string;
+}
+
+export interface CreateAnnouncementInput {
+  title: string;
+  body: string;
+  planId?: string;
+  tone?: AnnouncementItem['tone'];
+}
+
+export const announcementsApi = {
+  findAll: () => api.get<AnnouncementItem[]>('/v1/admin/announcements').then((r) => r.data),
+  preview: (data: CreateAnnouncementInput) =>
+    api.post<{ recipientCount: number }>('/v1/admin/announcements/preview', data).then((r) => r.data),
+  send: (data: CreateAnnouncementInput) =>
+    api.post<{ announcement: AnnouncementItem; recipientCount: number }>('/v1/admin/announcements', data).then((r) => r.data),
+};
+
+// ---------------------------------------------------------------------------
+// Coaching privé (séances individuelles)
+// ---------------------------------------------------------------------------
+
+export interface CoachingSessionItem {
+  id: string;
+  coachId: string;
+  memberId: string;
+  startsAt: string;
+  endsAt: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+  objective: string | null;
+  member: { firstName: string; lastName: string };
+  coach: { user: { firstName: string; lastName: string } };
+}
+
+export interface CreateCoachingSessionInput {
+  coachId: string;
+  memberId: string;
+  startsAt: string;
+  endsAt: string;
+  objective?: string;
+}
+
+export const coachingSessionsApi = {
+  findAllForAdmin: () => api.get<CoachingSessionItem[]>('/v1/admin/coaching-sessions').then((r) => r.data),
+  create: (data: CreateCoachingSessionInput) =>
+    api.post<CoachingSessionItem>('/v1/admin/coaching-sessions', data).then((r) => r.data),
+  markCompleted: (id: string) => api.patch(`/v1/admin/coaching-sessions/${id}/complete`),
+};
+
+export const classTemplatesApi = {
+  findAll: () => api.get<ClassTemplateItem[]>('/v1/admin/class-templates').then((r) => r.data),
+  create: (data: CreateClassTemplateInput) =>
+    api.post<ClassTemplateItem>('/v1/admin/class-templates', data).then((r) => r.data),
+  update: (id: string, data: Partial<CreateClassTemplateInput>) =>
+    api.patch<ClassTemplateItem>(`/v1/admin/class-templates/${id}`, data).then((r) => r.data),
+  deactivate: (id: string) => api.patch(`/v1/admin/class-templates/${id}/deactivate`),
+  delete: (id: string) => api.delete(`/v1/admin/class-templates/${id}`),
+  generateSessions: (id: string, from: string, to: string) =>
+    api.post(`/v1/admin/class-templates/${id}/generate-sessions`, { from, to }),
 };

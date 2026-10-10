@@ -4,8 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
+import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { meApi } from '../../../src/api/endpoints';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useOfflineQrToken } from '../../../src/hooks/useOfflineQrToken';
@@ -18,7 +20,9 @@ const FALLBACK_REFRESH_SECONDS = 45;
 /** Écran "QR d'accès" — FitZone App Adherent.dc.html, C3. */
 export default function QrScreen() {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const [token, setToken] = useState<string | null>(null);
   const [totalSeconds, setTotalSeconds] = useState(FALLBACK_REFRESH_SECONDS);
   const [secondsLeft, setSecondsLeft] = useState(FALLBACK_REFRESH_SECONDS);
@@ -68,10 +72,10 @@ export default function QrScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>QR d'accès</Text>
+          <Text style={styles.title}>{t('qr.title')}</Text>
           <View style={styles.brightnessRow}>
             <MaterialIcons name="brightness-high" size={16} color={colors.muted} />
-            <Text style={styles.brightnessText}>Luminosité max</Text>
+            <Text style={styles.brightnessText}>{t('qr.brightness')}</Text>
           </View>
         </View>
 
@@ -81,8 +85,10 @@ export default function QrScreen() {
             icon="wifi-off"
             text={
               offlineQr.token
-                ? `Mode hors ligne : code de secours valable jusqu'à ${new Date(offlineQr.expiresAt!).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}.`
-                : "Mode hors ligne : aucun code de secours en cache. Connectez-vous au réseau pour en générer un."
+                ? t('qr.offlineWithFallback', {
+                    time: new Date(offlineQr.expiresAt!).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                  })
+                : t('qr.offlineNoFallback')
             }
           />
         ) : null}
@@ -107,17 +113,17 @@ export default function QrScreen() {
           {!offline ? (
             <View style={styles.countdownRow}>
               <CircularTimer progress={secondsLeft / totalSeconds} size={26} color="#FFFFFF" trackColor="rgba(255,255,255,0.25)" filled />
-              <Text style={styles.countdownText}>Nouveau code dans 0:{String(secondsLeft).padStart(2, '0')}</Text>
+              <Text style={styles.countdownText}>{t('qr.newCodeIn', { seconds: String(secondsLeft).padStart(2, '0') })}</Text>
             </View>
           ) : offlineQr.token ? (
             <View style={styles.countdownPill}>
               <MaterialIcons name="verified-user" size={16} color={colors.secondary} />
-              <Text style={styles.countdownPillText}>Code de secours · usage unique</Text>
+              <Text style={styles.countdownPillText}>{t('qr.fallbackCode')}</Text>
             </View>
           ) : (
             <View style={styles.countdownPill}>
               <MaterialIcons name="error-outline" size={16} color={colors.dangerInk} />
-              <Text style={[styles.countdownPillText, { color: colors.dangerInk }]}>Aucun code disponible hors ligne</Text>
+              <Text style={[styles.countdownPillText, { color: colors.dangerInk }]}>{t('qr.noOfflineCode')}</Text>
             </View>
           )}
         </LinearGradient>
@@ -127,11 +133,11 @@ export default function QrScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.identityName}>{user?.firstName} {user?.lastName}</Text>
             <Text style={styles.identityMeta}>
-              {activeMembership?.plan.name ?? 'Sans abonnement'}
-              {activeMembership ? ` · jusqu'au ${new Date(activeMembership.endDate).toLocaleDateString('fr-FR')}` : ''}
+              {activeMembership?.plan.name ?? t('home.membershipNone')}
+              {activeMembership ? t('qr.membershipUntil', { date: new Date(activeMembership.endDate).toLocaleDateString('fr-FR') }) : ''}
             </Text>
           </View>
-          {activeMembership ? <Pill label="Actif" tone="success" /> : null}
+          {activeMembership ? <Pill label={t('qr.membershipActive')} tone="success" /> : null}
         </View>
 
         {nextBooking?.session ? (
@@ -140,7 +146,7 @@ export default function QrScreen() {
               <MaterialIcons name="local-fire-department" size={22} color={colors.primaryInk} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.bookingLabel}>PROCHAIN COURS</Text>
+              <Text style={styles.bookingLabel}>{t('qr.nextCourse')}</Text>
               <Text style={styles.bookingClass}>{nextBooking.session.classType.name}</Text>
               <Text style={styles.bookingMeta}>
                 {new Date(nextBooking.session.startsAt).toLocaleString('fr-FR', {
@@ -157,11 +163,11 @@ export default function QrScreen() {
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { flex: 1, padding: spacing.lg, gap: spacing.md },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerRow: { flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
     title: { fontFamily: fonts.head, fontSize: 26, color: colors.text },
     brightnessRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     brightnessText: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },

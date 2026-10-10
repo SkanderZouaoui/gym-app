@@ -26,6 +26,7 @@ export class AnnouncementsService {
         title: dto.title,
         body: dto.body,
         planId: dto.planId,
+        tone: dto.tone ?? 'info',
         createdById: actorId,
         sentAt: new Date(),
       },

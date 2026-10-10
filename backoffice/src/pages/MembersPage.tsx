@@ -1,17 +1,20 @@
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { membersApi } from '../api/endpoints'
-import { MemberMembershipPanel } from '../components/MemberMembershipPanel'
+import { membersApi, type MemberListItem } from '../api/endpoints'
+import { Pagination } from '../components/ui/Pagination'
+import { usePagination } from '../lib/usePagination'
+import { MemberDrawer } from '../components/MemberDrawer'
 
 export function MembersPage() {
   const [query, setQuery] = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [drawer, setDrawer] = useState<{ item: MemberListItem | null } | null>(null)
   const queryClient = useQueryClient()
 
   const { data: members, isFetching } = useQuery({
     queryKey: ['members', 'search', query],
     queryFn: () => membersApi.search(query),
   })
+  const { page, pageCount, pageItems, setPage, totalItems, pageSize } = usePagination(members ?? [])
 
   const suspend = useMutation({
     mutationFn: membersApi.suspend,
@@ -27,8 +30,15 @@ export function MembersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-head text-2xl font-extrabold text-(--color-secondary)">Adhérents</h1>
-          <p className="text-sm text-(--color-muted)">Recherche, suspension, réactivation</p>
+          <p className="text-sm text-(--color-muted)">Création, modification, suspension, suppression</p>
         </div>
+        <button
+          onClick={() => setDrawer({ item: null })}
+          className="flex h-10 items-center gap-1.5 rounded-lg bg-(--color-primary) px-3.5 text-[13.5px] font-bold text-(--color-primary-contrast) hover:bg-(--color-primary-hover)"
+        >
+          <span className="material-symbols-rounded text-[18px]">person_add</span>
+          Nouvel adhérent
+        </button>
       </div>
 
       <div className="relative max-w-sm">
@@ -54,53 +64,45 @@ export function MembersPage() {
             </tr>
           </thead>
           <tbody>
-            {(members ?? []).map((m) => (
-              <Fragment key={m.id}>
-                <tr
-                  onClick={() => setExpandedId((id) => (id === m.id ? null : m.id))}
-                  className="cursor-pointer border-b border-(--color-border) last:border-0 hover:bg-(--color-surface-2)"
-                >
-                  <td className="px-4 py-3 font-semibold">
-                    {m.firstName} {m.lastName}
-                  </td>
-                  <td className="px-4 py-3 text-(--color-muted)">{m.phone ?? m.email ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                        m.status === 'ACTIVE'
-                          ? 'bg-(--color-success-soft) text-(--color-success-ink)'
-                          : 'bg-(--color-warning-soft) text-(--color-warning-ink)'
-                      }`}
+            {pageItems.map((m) => (
+              <tr
+                key={m.id}
+                onClick={() => setDrawer({ item: m })}
+                className="cursor-pointer border-b border-(--color-border) last:border-0 hover:bg-(--color-surface-2)"
+              >
+                <td className="px-4 py-3 font-semibold">
+                  {m.firstName} {m.lastName}
+                </td>
+                <td className="px-4 py-3 text-(--color-muted)">{m.phone ?? m.email ?? '—'}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                      m.status === 'ACTIVE'
+                        ? 'bg-(--color-success-soft) text-(--color-success-ink)'
+                        : 'bg-(--color-warning-soft) text-(--color-warning-ink)'
+                    }`}
+                  >
+                    {m.status === 'ACTIVE' ? 'Actif' : m.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                  {m.status === 'ACTIVE' ? (
+                    <button
+                      onClick={() => suspend.mutate(m.id)}
+                      className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-danger-soft) hover:text-(--color-danger-ink)"
                     >
-                      {m.status === 'ACTIVE' ? 'Actif' : m.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                    {m.status === 'ACTIVE' ? (
-                      <button
-                        onClick={() => suspend.mutate(m.id)}
-                        className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-danger-soft) hover:text-(--color-danger-ink)"
-                      >
-                        Suspendre
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => reactivate.mutate(m.id)}
-                        className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-success-soft) hover:text-(--color-success-ink)"
-                      >
-                        Réactiver
-                      </button>
-                    )}
-                  </td>
-                </tr>
-                {expandedId === m.id ? (
-                  <tr className="border-b border-(--color-border) last:border-0">
-                    <td colSpan={4} className="bg-(--color-surface-2) px-4 py-4">
-                      <MemberMembershipPanel userId={m.id} />
-                    </td>
-                  </tr>
-                ) : null}
-              </Fragment>
+                      Suspendre
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => reactivate.mutate(m.id)}
+                      className="rounded-md border border-(--color-border-strong) px-3 py-1.5 text-xs font-bold hover:bg-(--color-success-soft) hover:text-(--color-success-ink)"
+                    >
+                      Réactiver
+                    </button>
+                  )}
+                </td>
+              </tr>
             ))}
             {!members || members.length === 0 ? (
               <tr>
@@ -111,7 +113,10 @@ export function MembersPage() {
             ) : null}
           </tbody>
         </table>
+        <Pagination page={page} pageCount={pageCount} onChange={setPage} totalItems={totalItems} pageSize={pageSize} />
       </div>
+
+      {drawer ? <MemberDrawer item={drawer.item} onClose={() => setDrawer(null)} /> : null}
     </div>
   )
 }

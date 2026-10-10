@@ -13,8 +13,19 @@ export class MembershipsService {
   findAllPlans() {
     return this.prisma.membershipPlan.findMany({
       where: { isActive: true },
-      orderBy: { name: 'asc' },
+      orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
     });
+  }
+
+  findAllPlansForAdmin() {
+    return this.prisma.membershipPlan.findMany({
+      orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+    });
+  }
+
+  async reactivatePlan(id: string) {
+    await this.findPlan(id);
+    return this.prisma.membershipPlan.update({ where: { id }, data: { isActive: true } });
   }
 
   async findPlan(id: string) {

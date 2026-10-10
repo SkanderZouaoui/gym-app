@@ -9,7 +9,16 @@ import type {
   QrTokenResponse,
   TokenPair,
 } from './types';
-import type { Role } from '@muscleup/shared';
+import type { AppConfigContent, Role } from '@muscleup/shared';
+
+export const configApi = {
+  /** Configuration publiée (branding, accueil, navigation, textes, règles) —
+   * lue au démarrage, sans authentification nécessaire. */
+  getConfig: () =>
+    apiRequest<AppConfigContent & { version: number; publishedAt: string | null }>('/v1/config', {
+      auth: false,
+    }),
+};
 
 export const authApi = {
   login: (email: string, password: string) =>

@@ -85,4 +85,24 @@ export class CoachingController {
   decline(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.coachingService.declineSession(id, user.userId);
   }
+
+  @Roles(Role.ADMIN)
+  @Get('admin/coaching-sessions')
+  findAllForAdmin() {
+    return this.coachingService.findAllForAdmin();
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/coaching-sessions')
+  createForAdmin(
+    @Body() dto: { coachId: string; memberId: string; startsAt: string; endsAt: string; objective?: string },
+  ) {
+    return this.coachingService.createForAdmin(dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/coaching-sessions/:id/complete')
+  markCompleted(@Param('id') id: string) {
+    return this.coachingService.markCompleted(id);
+  }
 }

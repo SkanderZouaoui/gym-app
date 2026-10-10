@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateClassTypeDto } from './dto/create-class-type.dto.js';
+import type { UpdateClassTypeDto } from './dto/update-class-type.dto.js';
 import type { CreateTemplateDto } from './dto/create-template.dto.js';
 import type { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 
@@ -10,12 +11,26 @@ export class ClassesService {
 
   // --- Types de cours -----------------------------------------------------
 
-  findAllTypes() {
-    return this.prisma.classType.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+  findAllTypes(includeInactive = false) {
+    return this.prisma.classType.findMany({
+      where: includeInactive ? {} : { isActive: true },
+      orderBy: { name: 'asc' },
+    });
   }
 
   createType(dto: CreateClassTypeDto) {
     return this.prisma.classType.create({ data: dto });
+  }
+
+  async updateType(id: string, dto: UpdateClassTypeDto) {
+    await this.findType(id);
+    return this.prisma.classType.update({ where: { id }, data: dto });
+  }
+
+  private async findType(id: string) {
+    const type = await this.prisma.classType.findUnique({ where: { id } });
+    if (!type) throw new NotFoundException('CLASS_TYPE_NOT_FOUND');
+    return type;
   }
 
   // --- Modèles récurrents ---------------------------------------------------
@@ -34,6 +49,16 @@ export class ClassesService {
   async deactivateTemplate(id: string) {
     await this.findTemplate(id);
     return this.prisma.classTemplate.update({ where: { id }, data: { isActive: false } });
+  }
+
+  async updateTemplate(id: string, dto: Partial<CreateTemplateDto>) {
+    await this.findTemplate(id);
+    return this.prisma.classTemplate.update({ where: { id }, data: dto });
+  }
+
+  async deleteTemplate(id: string) {
+    await this.findTemplate(id);
+    await this.prisma.classTemplate.delete({ where: { id } });
   }
 
   private async findTemplate(id: string) {

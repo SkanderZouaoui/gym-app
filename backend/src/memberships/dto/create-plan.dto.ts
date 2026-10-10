@@ -24,4 +24,21 @@ export class CreatePlanDto {
   @IsOptional()
   @IsBoolean()
   isContractual?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isVisibleInApp?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isPopular?: boolean;
+
+  @IsOptional()
+  @IsString()
+  includesLabel?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  displayOrder?: number;
 }

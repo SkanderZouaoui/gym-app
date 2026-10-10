@@ -3,8 +3,10 @@ import { router } from 'expo-router';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useMe, useMyBookings, useMyMemberships, useMyPoints, useMyStreak } from '../../../src/hooks/useMe';
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { tokenStorage } from '../../../src/api/storage';
@@ -17,7 +19,9 @@ import { Button } from '../../../src/components/Button';
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const { data: user } = useMe();
   const { data: memberships } = useMyMemberships();
   const { data: bookings } = useMyBookings();
@@ -70,7 +74,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Profil</Text>
+          <Text style={styles.title}>{t('profile.title')}</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <IconCircleButton icon="qr-code-2" onPress={() => router.push('/(member)/(tabs)/qr')} />
             <IconCircleButton icon="settings" onPress={() => router.push('/(member)/settings')} />
@@ -92,28 +96,30 @@ export default function ProfileScreen() {
               {user?.firstName} {user?.lastName}
             </Text>
             <View style={styles.identityMetaRow}>
-              <Pill label="Adhérent" tone="accent" />
+              <Pill label={t('profile.member')} tone="accent" />
             </View>
           </View>
           <Pressable style={styles.editButton} onPress={() => router.push('/(member)/profile-edit')}>
-            <Text style={styles.editButtonText}>Modifier</Text>
+            <Text style={styles.editButtonText}>{t('profile.edit')}</Text>
           </Pressable>
         </View>
 
         <View style={styles.heroCard}>
           <View style={styles.heroTopRow}>
-            <Text style={styles.heroKicker}>Mon abonnement</Text>
-            <Pill label={activeMembership ? 'Actif' : 'Aucun'} tone={activeMembership ? 'success' : 'muted'} />
+            <Text style={styles.heroKicker}>{t('profile.myMembership')}</Text>
+            <Pill label={activeMembership ? t('profile.active') : t('profile.none')} tone={activeMembership ? 'success' : 'muted'} />
           </View>
           <View>
-            <Text style={styles.heroTitle}>{activeMembership?.plan.name ?? 'Sans abonnement'}</Text>
+            <Text style={styles.heroTitle}>{activeMembership?.plan.name ?? t('profile.membershipNone')}</Text>
             {activeMembership ? (
               <Text style={styles.heroSub}>
-                Du {new Date(activeMembership.startDate).toLocaleDateString('fr-FR')} au{' '}
-                {new Date(activeMembership.endDate).toLocaleDateString('fr-FR')}
+                {t('profile.membershipPeriod', {
+                  start: new Date(activeMembership.startDate).toLocaleDateString('fr-FR'),
+                  end: new Date(activeMembership.endDate).toLocaleDateString('fr-FR'),
+                })}
               </Text>
             ) : (
-              <Text style={styles.heroSub}>Souscrivez une formule à l’accueil pour accéder à la salle.</Text>
+              <Text style={styles.heroSub}>{t('profile.membershipNoneText')}</Text>
             )}
           </View>
           {activeMembership ? (
@@ -124,9 +130,11 @@ export default function ProfileScreen() {
                 trackColor="rgba(255,255,255,0.2)"
               />
               <View style={styles.heroBottomRow}>
-                <Text style={styles.heroBottomText}>Jour {elapsedDays} sur {totalDays}</Text>
+                <Text style={styles.heroBottomText}>{t('profile.dayOf', { elapsed: elapsedDays, total: totalDays })}</Text>
                 <Text style={styles.heroBottomText}>
-                  {daysLeft > 0 ? `Renouveler avant le ${new Date(activeMembership.endDate).toLocaleDateString('fr-FR')}` : 'Expiré'}
+                  {daysLeft > 0
+                    ? t('profile.renewBefore', { date: new Date(activeMembership.endDate).toLocaleDateString('fr-FR') })
+                    : t('profile.expired')}
                 </Text>
               </View>
             </>
@@ -136,63 +144,63 @@ export default function ProfileScreen() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{attendedThisMonth}</Text>
-            <Text style={styles.statLabel}>séances ce mois-ci</Text>
+            <Text style={styles.statLabel}>{t('profile.statSessions')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{streak?.streak ?? 0}</Text>
-            <Text style={styles.statLabel}>semaines d’affilée</Text>
+            <Text style={styles.statLabel}>{t('profile.statStreak')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{points?.points ?? 0}</Text>
-            <Text style={styles.statLabel}>points fidélité</Text>
+            <Text style={styles.statLabel}>{t('profile.statPoints')}</Text>
           </View>
         </View>
 
         <View style={styles.quickGrid}>
-          <QuickAction icon="qr-code-2" label="Mon QR" primary onPress={() => router.push('/(member)/(tabs)/qr')} />
-          <QuickAction icon="event-note" label="Réservations" onPress={() => router.push('/(member)/reservations')} />
-          <QuickAction icon="emoji-events" label="Fidélité" onPress={() => router.push('/(member)/loyalty')} />
-          <QuickAction icon="card-giftcard" label="Parrainer" onPress={() => router.push('/(member)/referral')} />
+          <QuickAction icon="qr-code-2" label={t('profile.quickQr')} primary onPress={() => router.push('/(member)/(tabs)/qr')} />
+          <QuickAction icon="event-note" label={t('profile.quickBookings')} onPress={() => router.push('/(member)/reservations')} />
+          <QuickAction icon="emoji-events" label={t('profile.quickLoyalty')} onPress={() => router.push('/(member)/loyalty')} />
+          <QuickAction icon="card-giftcard" label={t('profile.quickReferral')} onPress={() => router.push('/(member)/referral')} />
         </View>
 
-        <Text style={styles.sectionTitle}>Mon compte</Text>
+        <Text style={styles.sectionTitle}>{t('profile.sectionAccount')}</Text>
         <View style={styles.menuCard}>
-          <MenuRow icon="badge" label="Infos personnelles" onPress={() => router.push('/(member)/profile-edit')} />
+          <MenuRow icon="badge" label={t('profile.menuPersonalInfo')} onPress={() => router.push('/(member)/profile-edit')} />
           <Divider />
-          <MenuRow icon="sports" label="Coaching" onPress={() => router.push('/(member)/coaching')} />
+          <MenuRow icon="sports" label={t('profile.menuCoaching')} onPress={() => router.push('/(member)/coaching')} />
           <Divider />
-          <MenuRow icon="forum" label="Communauté" onPress={() => router.push('/(member)/community')} />
+          <MenuRow icon="forum" label={t('profile.menuCommunity')} onPress={() => router.push('/(member)/community')} />
           <Divider />
-          <MenuRow icon="storefront" label="Boutique" onPress={() => router.push('/(member)/shop')} />
+          <MenuRow icon="storefront" label={t('profile.menuShop')} onPress={() => router.push('/(member)/shop')} />
         </View>
 
-        <Text style={styles.sectionTitle}>Préférences</Text>
+        <Text style={styles.sectionTitle}>{t('profile.sectionPreferences')}</Text>
         <View style={styles.menuCard}>
-          <MenuRow icon="settings" label="Paramètres" onPress={() => router.push('/(member)/settings')} />
+          <MenuRow icon="settings" label={t('profile.menuSettings')} onPress={() => router.push('/(member)/settings')} />
           <Divider />
           <MenuRow
             icon="notifications"
-            label="Notifications"
+            label={t('profile.menuNotifications')}
             value={unreadCount > 0 ? String(unreadCount) : undefined}
             onPress={() => router.push('/(member)/notifications')}
           />
           <Divider />
-          <MenuRow icon="lock-outline" label="Confidentialité & sécurité" onPress={() => router.push('/(member)/account-security')} />
+          <MenuRow icon="lock-outline" label={t('profile.menuSecurity')} onPress={() => router.push('/(member)/account-security')} />
           <Divider />
-          <MenuRow icon="help" label="Aide & infos pratiques" onPress={() => router.push('/(member)/app-info')} />
+          <MenuRow icon="help" label={t('profile.menuHelp')} onPress={() => router.push('/(member)/app-info')} />
         </View>
 
         {hasCoachRole ? (
           <>
-            <Text style={styles.sectionTitle}>Utiliser l’app en tant que</Text>
+            <Text style={styles.sectionTitle}>{t('profile.useAppAs')}</Text>
             <View style={styles.switchTrack}>
               <View style={[styles.switchSegment, styles.switchSegmentActive]}>
                 <MaterialIcons name="person" size={18} color={colors.text} />
-                <Text style={[styles.switchLabel, styles.switchLabelActive]}>Adhérent</Text>
+                <Text style={[styles.switchLabel, styles.switchLabelActive]}>{t('profile.roleMember')}</Text>
               </View>
               <Pressable style={styles.switchSegment} onPress={handleSwitchToCoach}>
                 <MaterialIcons name="sports" size={18} color={colors.muted} />
-                <Text style={styles.switchLabel}>Coach</Text>
+                <Text style={styles.switchLabel}>{t('profile.roleCoach')}</Text>
               </Pressable>
             </View>
           </>
@@ -200,19 +208,17 @@ export default function ProfileScreen() {
 
         <Pressable style={styles.logoutButton} onPress={() => setLogoutVisible(true)}>
           <MaterialIcons name="logout" size={20} color={colors.dangerInk} />
-          <Text style={styles.logoutButtonText}>Se déconnecter</Text>
+          <Text style={styles.logoutButtonText}>{t('profile.logout')}</Text>
         </Pressable>
       </ScrollView>
 
       <BottomSheet visible={logoutVisible} onClose={() => setLogoutVisible(false)}>
-        <Text style={styles.sheetTitle}>Se déconnecter ?</Text>
-        <Text style={styles.sheetText}>
-          Votre QR hors ligne sera supprimé de ce téléphone. Vous devrez vous reconnecter pour réserver ou pointer.
-        </Text>
+        <Text style={styles.sheetTitle}>{t('profile.logoutConfirmTitle')}</Text>
+        <Text style={styles.sheetText}>{t('profile.logoutConfirmText')}</Text>
         <Pressable style={styles.sheetDangerButton} onPress={handleLogout}>
-          <Text style={styles.sheetDangerButtonText}>Se déconnecter</Text>
+          <Text style={styles.sheetDangerButtonText}>{t('profile.logout')}</Text>
         </Pressable>
-        <Button label="Annuler" onPress={() => setLogoutVisible(false)} variant="outline" />
+        <Button label={t('common.cancel')} onPress={() => setLogoutVisible(false)} variant="outline" />
       </BottomSheet>
     </SafeAreaView>
   );
@@ -230,7 +236,8 @@ function QuickAction({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   return (
     <Pressable
       style={[styles.quickAction, primary ? styles.quickActionPrimary : styles.quickActionDefault]}
@@ -256,13 +263,14 @@ function MenuRow({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   return (
     <Pressable style={styles.menuRow} onPress={onPress}>
       <MaterialIcons name={icon} size={22} color={colors.muted} />
       <Text style={styles.menuLabel}>{label}</Text>
       {value ? <Text style={styles.menuValue}>{value}</Text> : null}
-      <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+      <MaterialIcons name={isRtl ? 'chevron-left' : 'chevron-right'} size={22} color={colors.muted} />
     </Pressable>
   );
 }
@@ -272,21 +280,22 @@ function Divider() {
   return <View style={{ height: 1, backgroundColor: colors.border }} />;
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
+  const textAlign = isRtl ? 'right' as const : 'left' as const;
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    header: { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between' },
     title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },
 
-    identityRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    identityRow: { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: spacing.md },
     avatar: {
       width: 72, height: 72, borderRadius: 999, backgroundColor: colors.accent,
       alignItems: 'center', justifyContent: 'center',
     },
     avatarImage: { width: 72, height: 72, borderRadius: 999, backgroundColor: colors.surface2 },
     avatarText: { fontFamily: fonts.head, color: colors.onAccent, fontSize: 24 },
-    name: { fontFamily: fonts.headBold, fontSize: 22, color: colors.text },
+    name: { fontFamily: fonts.headBold, fontSize: 22, color: colors.text, textAlign },
     identityMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' },
     editButton: {
       height: 36, paddingHorizontal: 12, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
@@ -333,9 +342,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       overflow: 'hidden',
     },
     menuRow: {
-      flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: spacing.md,
+      flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: spacing.md,
     },
-    menuLabel: { flex: 1, fontFamily: fonts.bodyMedium, fontSize: 14.5, color: colors.text },
+    menuLabel: { flex: 1, fontFamily: fonts.bodyMedium, fontSize: 14.5, color: colors.text, textAlign },
     menuValue: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.primaryInk },
 
     switchTrack: {

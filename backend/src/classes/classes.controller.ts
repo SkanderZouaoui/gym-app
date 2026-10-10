@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { ClassesService } from './classes.service.js';
 import { CreateClassTypeDto } from './dto/create-class-type.dto.js';
+import { UpdateClassTypeDto } from './dto/update-class-type.dto.js';
 import { CreateTemplateDto } from './dto/create-template.dto.js';
 import { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 import { CancelSessionDto } from './dto/cancel-session.dto.js';
@@ -21,9 +22,21 @@ export class ClassesController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('admin/class-types')
+  findAllTypesForAdmin() {
+    return this.classesService.findAllTypes(true);
+  }
+
+  @Roles(Role.ADMIN)
   @Post('admin/class-types')
   createType(@Body() dto: CreateClassTypeDto) {
     return this.classesService.createType(dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/class-types/:id')
+  updateType(@Param('id') id: string, @Body() dto: UpdateClassTypeDto) {
+    return this.classesService.updateType(id, dto);
   }
 
   @Roles(Role.ADMIN)
@@ -39,9 +52,21 @@ export class ClassesController {
   }
 
   @Roles(Role.ADMIN)
+  @Patch('admin/class-templates/:id')
+  updateTemplate(@Param('id') id: string, @Body() dto: Partial<CreateTemplateDto>) {
+    return this.classesService.updateTemplate(id, dto);
+  }
+
+  @Roles(Role.ADMIN)
   @Patch('admin/class-templates/:id/deactivate')
   deactivateTemplate(@Param('id') id: string) {
     return this.classesService.deactivateTemplate(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/class-templates/:id')
+  deleteTemplate(@Param('id') id: string) {
+    return this.classesService.deleteTemplate(id);
   }
 
   @Roles(Role.ADMIN)

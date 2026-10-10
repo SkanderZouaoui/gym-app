@@ -3,6 +3,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { UsersService } from './users.service.js';
 import { CreatePrivilegedUserDto } from './dto/create-privileged-user.dto.js';
+import { CreateMemberDto } from './dto/create-member.dto.js';
+import { UpdateMemberDto } from './dto/update-member.dto.js';
 import { AssignRoleDto } from './dto/assign-role.dto.js';
 import { UpdateProfileDto } from './dto/update-profile.dto.js';
 import { DeleteAccountDto } from './dto/delete-account.dto.js';
@@ -69,6 +71,29 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Roles(Role.STAFF, Role.ADMIN)
+  @Post('members')
+  createMember(@Body() dto: CreateMemberDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.createMember(dto, user.userId);
+  }
+
+  @Roles(Role.STAFF, Role.ADMIN)
+  @Patch('members/:id')
+  updateMember(
+    @Param('id') id: string,
+    @Body() dto: UpdateMemberDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.usersService.updateMember(id, dto, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('members/:id')
+  @HttpCode(204)
+  async deleteMember(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    await this.usersService.deleteMember(id, user.userId);
+  }
+
   @Roles(Role.ADMIN)
   @Patch('members/:id/suspend')
   suspend(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
@@ -82,9 +107,32 @@ export class UsersController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('admin/team')
+  findAllTeam() {
+    return this.usersService.findAllTeam();
+  }
+
+  @Roles(Role.ADMIN)
   @Post('admin/users')
   createPrivilegedUser(@Body() dto: CreatePrivilegedUserDto, @CurrentUser() user: AuthenticatedUser) {
     return this.usersService.createPrivilegedUser(dto, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/team/:id')
+  updateTeamMember(
+    @Param('id') id: string,
+    @Body() dto: UpdateMemberDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.usersService.updateTeamMember(id, dto, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/team/:id')
+  @HttpCode(204)
+  async deleteTeamMember(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    await this.usersService.deleteMember(id, user.userId);
   }
 
   @Roles(Role.ADMIN)
@@ -95,5 +143,15 @@ export class UsersController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.usersService.assignRole(id, dto, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/users/:id/roles/:role')
+  revokeRole(
+    @Param('id') id: string,
+    @Param('role') role: Role,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.usersService.revokeRole(id, role, user.userId);
   }
 }

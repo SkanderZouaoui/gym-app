@@ -4,8 +4,11 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { useLanguage } from '../../../src/i18n/LanguageContext';
+import { useRemoteConfig } from '../../../src/config/RemoteConfigContext';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useMyActiveChallenges } from '../../../src/hooks/useLoyalty';
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
@@ -18,7 +21,10 @@ import { Banner, OfflineBanner, Pill, ProgressBar, SkeletonBlock, Toast } from '
 
 export default function HomeScreen() {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
+  const { isRtl, language } = useLanguage();
+  const { config } = useRemoteConfig();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const params = useLocalSearchParams<{ booked?: string }>();
   const { data: user, isLoading: userLoading } = useMe();
   const { data: memberships, isLoading: membershipsLoading } = useMyMemberships();
@@ -69,11 +75,11 @@ export default function HomeScreen() {
 
   const countdownLabel = (startsAt: string) => {
     const diffMs = new Date(startsAt).getTime() - now;
-    if (diffMs <= 0) return 'En cours';
+    if (diffMs <= 0) return t('home.inProgress');
     const hours = Math.floor(diffMs / 3_600_000);
     const minutes = Math.floor((diffMs % 3_600_000) / 60_000);
-    if (hours === 0) return `dans ${minutes} min`;
-    return `dans ${hours}h${String(minutes).padStart(2, '0')}`;
+    if (hours === 0) return t('home.inMinutes', { minutes });
+    return t('home.inHours', { hours, minutes: String(minutes).padStart(2, '0') });
   };
 
   const isLoading = userLoading || membershipsLoading;
@@ -108,9 +114,9 @@ export default function HomeScreen() {
         />
 
         <View>
-          <Text style={styles.hello}>Bonjour, {user?.firstName ?? ''}</Text>
+          <Text style={styles.hello}>{greetingText(config, language, user?.firstName)}</Text>
           <Text style={styles.sub}>
-            {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} · {activeMembership?.plan.name ?? 'Sans abonnement'}
+            {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} · {activeMembership?.plan.name ?? t('home.membershipNone')}
           </Text>
         </View>
 
@@ -120,15 +126,15 @@ export default function HomeScreen() {
           <Banner
             tone="danger"
             icon="event-busy"
-            title="Abonnement expiré"
-            text="Vos réservations sont suspendues et votre QR est refusé au pointage. Renouvelez à l'accueil (espèces, virement ou chèque)."
+            title={t('home.membershipExpired')}
+            text={t('home.membershipExpiredText')}
           />
         ) : expiringSoon && activeMembership ? (
           <Banner
             tone="warning"
             icon="event"
-            title={`Abonnement : expire le ${new Date(activeMembership.endDate).toLocaleDateString('fr-FR')}`}
-            text="Renouvelez à l'accueil de votre salle."
+            title={t('home.membershipExpiringTitle', { date: new Date(activeMembership.endDate).toLocaleDateString('fr-FR') })}
+            text={t('home.membershipExpiringText')}
           />
         ) : null}
 
@@ -137,11 +143,11 @@ export default function HomeScreen() {
           onPress={() => router.push('/(member)/(tabs)/qr')}
         >
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.qrCardTitle}>Mon QR de présence</Text>
-            <Text style={styles.qrCardSub}>À faire scanner à l’entrée du cours</Text>
+            <Text style={styles.qrCardTitle}>{t('home.qrCardTitle')}</Text>
+            <Text style={styles.qrCardSub}>{t('home.qrCardSub')}</Text>
             <View style={styles.qrCardButton}>
               <MaterialIcons name="qr-code-2" size={20} color={colors.primaryContrast} />
-              <Text style={styles.qrCardButtonText}>Afficher mon QR</Text>
+              <Text style={styles.qrCardButtonText}>{t('home.qrCardButton')}</Text>
             </View>
           </View>
           <View style={styles.qrCardIcon}>
@@ -162,27 +168,27 @@ export default function HomeScreen() {
             <View style={styles.onboardIcon}>
               <MaterialIcons name="event-available" size={34} color={colors.primaryInk} />
             </View>
-            <Text style={styles.onboardTitle}>Aucune réservation pour l’instant</Text>
-            <Text style={styles.onboardText}>Réservez votre premier cours en deux gestes.</Text>
+            <Text style={styles.onboardTitle}>{t('home.noBookingTitle')}</Text>
+            <Text style={styles.onboardText}>{t('home.noBookingText')}</Text>
             <Pressable style={styles.onboardButton} onPress={() => router.push('/(member)/(tabs)/planning')}>
-              <Text style={styles.onboardButtonText}>Explorer le planning</Text>
+              <Text style={styles.onboardButtonText}>{t('home.explorePlanning')}</Text>
             </Pressable>
           </View>
         ) : (
           <View style={styles.emptyCourseCard}>
-            <Text style={styles.cardLabel}>AUCUN COURS À VENIR</Text>
+            <Text style={styles.cardLabel}>{t('home.noUpcomingCourse')}</Text>
             <Pressable onPress={() => router.push('/(member)/(tabs)/planning')} style={{ marginTop: 8 }}>
-              <Text style={styles.linkText}>Voir le planning →</Text>
+              <Text style={styles.linkText}>{t('home.viewPlanning')}</Text>
             </Pressable>
           </View>
         )}
 
         {isNewMember ? (
           <View style={styles.onboardList}>
-            <Text style={styles.onboardListTitle}>Pour bien démarrer</Text>
-            <OnboardRow icon="check-circle" label="Compléter mon profil" done onPress={() => router.push('/(member)/profile-edit')} />
-            <OnboardRow icon="event-available" label="Réserver un premier cours" onPress={() => router.push('/(member)/(tabs)/planning')} />
-            <OnboardRow icon="notifications" label="Activer les notifications" onPress={() => router.push('/(member)/settings')} />
+            <Text style={styles.onboardListTitle}>{t('home.onboardTitle')}</Text>
+            <OnboardRow icon="check-circle" label={t('home.onboardCompleteProfile')} done onPress={() => router.push('/(member)/profile-edit')} />
+            <OnboardRow icon="event-available" label={t('home.onboardFirstBooking')} onPress={() => router.push('/(member)/(tabs)/planning')} />
+            <OnboardRow icon="notifications" label={t('home.onboardNotifications')} onPress={() => router.push('/(member)/settings')} />
           </View>
         ) : null}
 
@@ -192,7 +198,7 @@ export default function HomeScreen() {
             onPress={() => cancelBooking.mutate(nextBooking.id)}
             disabled={cancelBooking.isPending}
           >
-            <Text style={styles.cancelLinkText}>{cancelBooking.isPending ? 'Annulation…' : 'Annuler ce cours'}</Text>
+            <Text style={styles.cancelLinkText}>{cancelBooking.isPending ? t('home.cancelling') : t('home.cancelBooking')}</Text>
           </Pressable>
         ) : null}
 
@@ -203,7 +209,7 @@ export default function HomeScreen() {
                 <MaterialIcons name="emoji-events" size={22} color="#FFFFFF" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.challengeLabel}>DÉFI EN COURS</Text>
+                <Text style={styles.challengeLabel}>{t('home.challengeInProgress')}</Text>
                 <Text style={styles.challengeTitle} numberOfLines={1}>{activeChallenge.name}</Text>
               </View>
               <Text style={styles.challengeCount}>
@@ -216,7 +222,10 @@ export default function HomeScreen() {
               trackColor={colors.surface}
             />
             <Text style={styles.challengeMeta}>
-              +{activeChallenge.pointsReward} points à la clé · {Math.max(0, Math.ceil((new Date(activeChallenge.endDate).getTime() - now) / 86_400_000))} jours restants
+              {t('home.challengeMeta', {
+                points: activeChallenge.pointsReward,
+                days: Math.max(0, Math.ceil((new Date(activeChallenge.endDate).getTime() - now) / 86_400_000)),
+              })}
             </Text>
           </Pressable>
         ) : null}
@@ -224,13 +233,13 @@ export default function HomeScreen() {
         {announcements && announcements.length > 0 ? (
           <View style={{ gap: spacing.sm }}>
             <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>Annonces</Text>
+              <Text style={styles.sectionTitle}>{t('home.announcementsTitle')}</Text>
             </View>
             {announcements.slice(0, 3).map((a, i) => (
               <View key={a.id} style={styles.announcementRow}>
                 <View style={styles.announcementThumb} />
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Pill label={i === 0 ? 'Nouveau' : 'Info'} tone={i === 0 ? 'primary' : 'info'} />
+                  <Pill label={i === 0 ? t('home.announcementNew') : t('home.announcementInfo')} tone={i === 0 ? 'primary' : 'info'} />
                   <Text style={styles.announcementTitle} numberOfLines={1}>{a.title}</Text>
                   <Text style={styles.announcementMeta} numberOfLines={1}>{a.body}</Text>
                 </View>
@@ -241,10 +250,22 @@ export default function HomeScreen() {
       </ScrollView>
 
       {toastVisible ? (
-        <Toast icon="check-circle" text={`Réservation confirmée${params.booked ? ` · ${params.booked}` : ''}`} iconColor={colors.success} />
+        <Toast
+          icon="check-circle"
+          text={t('home.bookingConfirmed', { detail: params.booked ? ` · ${params.booked}` : '' })}
+          iconColor={colors.success}
+        />
       ) : null}
     </SafeAreaView>
   );
+}
+
+/** Salutation pilotée par le back-office (clé "home.greeting", éditable
+ * côté CMS) — distincte des textes fixes de l'app, traduits statiquement. */
+function greetingText(config: ReturnType<typeof useRemoteConfig>['config'], language: string, firstName?: string): string {
+  const entry = config.strings.find((s) => s.k === 'home.greeting');
+  const template = (language === 'ar' && entry?.ar.trim() ? entry.ar : entry?.fr) ?? 'Bonjour, {prénom}';
+  return template.replace('{prénom}', firstName ?? '');
 }
 
 function OnboardRow({
@@ -259,7 +280,8 @@ function OnboardRow({
   onPress: () => void;
 }) {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   return (
     <Pressable style={styles.onboardRow} onPress={onPress}>
       <MaterialIcons name={done ? 'check-circle' : icon} size={22} color={done ? colors.successInk : colors.muted} />
@@ -268,13 +290,14 @@ function OnboardRow({
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
+  const textAlign = isRtl ? 'right' as const : 'left' as const;
   return StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.bg },
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
   skeletonHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  hello: { fontFamily: fonts.head, fontSize: 28, color: colors.text },
-  sub: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, marginTop: 2 },
+  hello: { fontFamily: fonts.head, fontSize: 28, color: colors.text, textAlign },
+  sub: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, marginTop: 2, textAlign },
   qrCard: {
     flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: colors.secondary,
     borderRadius: radii.lg, padding: 18,

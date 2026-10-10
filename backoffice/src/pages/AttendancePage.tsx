@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { attendanceApi } from '../api/endpoints'
+import { Pagination } from '../components/ui/Pagination'
+import { usePagination } from '../lib/usePagination'
 
 const REASON_LABELS: Record<string, string> = {
   OK: 'Présence confirmée',
@@ -20,6 +22,7 @@ export function AttendancePage() {
     queryKey: ['attendance', 'logs'],
     queryFn: attendanceApi.getLogs,
   })
+  const { page, pageCount, pageItems, setPage, totalItems, pageSize } = usePagination(logs ?? [])
 
   return (
     <div className="flex flex-col gap-6">
@@ -40,7 +43,7 @@ export function AttendancePage() {
             </tr>
           </thead>
           <tbody>
-            {(logs ?? []).map((log) => (
+            {pageItems.map((log) => (
               <tr key={log.id} className="border-b border-(--color-border) last:border-0">
                 <td className="px-4 py-3 font-semibold">
                   {log.user ? `${log.user.firstName} ${log.user.lastName}` : '—'}
@@ -74,6 +77,7 @@ export function AttendancePage() {
             ) : null}
           </tbody>
         </table>
+        <Pagination page={page} pageCount={pageCount} onChange={setPage} totalItems={totalItems} pageSize={pageSize} />
       </div>
     </div>
   )

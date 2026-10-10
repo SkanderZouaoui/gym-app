@@ -6,6 +6,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { StorageService } from '../storage/storage.service.js';
 import { OtpService } from '../otp/otp.service.js';
 import type { CreatePrivilegedUserDto } from './dto/create-privileged-user.dto.js';
+import type { CreateMemberDto } from './dto/create-member.dto.js';
+import type { UpdateMemberDto } from './dto/update-member.dto.js';
 import type { AssignRoleDto } from './dto/assign-role.dto.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
 import type { RequestEmailChangeDto } from './dto/request-email-change.dto.js';
@@ -176,6 +178,77 @@ export class UsersService {
     return user;
   }
 
+  /** Création d'un adhérent par un admin/staff (back-office → Adhérents → Nouvel adhérent). */
+  async createMember(dto: CreateMemberDto, actorId: string) {
+    const existing = await this.prisma.user.findFirst({
+      where: { OR: [{ email: dto.email }, dto.phone ? { phone: dto.phone } : undefined].filter(Boolean) as any },
+    });
+    if (existing) throw new ConflictException('EMAIL_OR_PHONE_ALREADY_USED');
+
+    const passwordHash = await argon2.hash(dto.password);
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        phone: dto.phone,
+        passwordHash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        roles: { create: { role: Role.MEMBER } },
+      },
+      select: PUBLIC_USER_SELECT,
+    });
+
+    await this.prisma.auditLog.create({
+      data: { actorId, action: 'CREATE_MEMBER', entity: 'User', entityId: user.id },
+    });
+
+    return user;
+  }
+
+  /** Édition d'un adhérent par un admin/staff — contrairement à updateProfile
+   * (libre-service), permet aussi de changer l'e-mail et le statut. */
+  async updateMember(id: string, dto: UpdateMemberDto, actorId: string) {
+    const before = await this.findOne(id);
+
+    if (dto.email && dto.email !== before.email) {
+      const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      if (existing) throw new ConflictException('EMAIL_ALREADY_USED');
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: dto,
+      select: PUBLIC_USER_SELECT,
+    });
+
+    await this.prisma.auditLog.create({
+      data: { actorId, action: 'UPDATE_MEMBER', entity: 'User', entityId: id, oldValue: before as any, newValue: dto as any },
+    });
+
+    return user;
+  }
+
+  /** Suppression d'un adhérent par un admin/staff — soft delete, même
+   * mécanisme que la suppression en libre-service mais sans mot de passe
+   * de confirmation (l'admin a déjà l'autorité nécessaire). */
+  async deleteMember(id: string, actorId: string) {
+    await this.findOne(id);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id },
+        data: { status: 'DELETED', deletedAt: new Date() },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId: id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+      this.prisma.auditLog.create({
+        data: { actorId, action: 'ADMIN_DELETE_MEMBER', entity: 'User', entityId: id },
+      }),
+    ]);
+  }
+
   async suspend(id: string, actorId: string) {
     await this.findOne(id);
     const user = await this.prisma.user.update({
@@ -199,6 +272,32 @@ export class UsersService {
     await this.prisma.auditLog.create({
       data: { actorId, action: 'REACTIVATE_USER', entity: 'User', entityId: id },
     });
+    return user;
+  }
+
+  /** Comptes internes (Staff + Admin) — back-office → Équipe. */
+  findAllTeam() {
+    return this.prisma.user.findMany({
+      where: { deletedAt: null, roles: { some: { role: { in: [Role.STAFF, Role.ADMIN] } } } },
+      select: PUBLIC_USER_SELECT,
+      orderBy: { firstName: 'asc' },
+    });
+  }
+
+  async updateTeamMember(id: string, dto: UpdateMemberDto, actorId: string) {
+    const before = await this.findOne(id);
+
+    if (dto.email && dto.email !== before.email) {
+      const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      if (existing) throw new ConflictException('EMAIL_ALREADY_USED');
+    }
+
+    const user = await this.prisma.user.update({ where: { id }, data: dto, select: PUBLIC_USER_SELECT });
+
+    await this.prisma.auditLog.create({
+      data: { actorId, action: 'UPDATE_TEAM_MEMBER', entity: 'User', entityId: id, oldValue: before as any, newValue: dto as any },
+    });
+
     return user;
   }
 

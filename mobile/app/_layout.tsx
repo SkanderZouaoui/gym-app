@@ -20,6 +20,9 @@ import { tokenStorage } from '../src/api/storage';
 import { meApi } from '../src/api/endpoints';
 import { useSessionStore } from '../src/store/session';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
+import { RemoteConfigProvider } from '../src/config/RemoteConfigContext';
+import { LanguageProvider } from '../src/i18n/LanguageContext';
+import '../src/i18n';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -68,9 +71,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <RootLayoutInner />
-        </ThemeProvider>
+        <RemoteConfigProvider>
+          <LanguageProvider>
+            <ThemeProvider>
+              <RootLayoutInner />
+            </ThemeProvider>
+          </LanguageProvider>
+        </RemoteConfigProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

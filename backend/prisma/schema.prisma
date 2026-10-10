@@ -100,6 +100,7 @@ model User {
   conversations            ConversationParticipant[] @relation("ConversationParticipantUser")
   messagesSent             Message[]                 @relation("MessageSender")
   productReservations      ProductReservation[]      @relation("ProductReservationUser")
+  publishedConfigVersions  AppConfigVersion[]
 
   @@map("users")
 }
@@ -117,14 +118,21 @@ model UserRole {
   @@map("user_roles")
 }
 
+enum CoachStatus {
+  ACTIVE
+  ON_LEAVE
+  INACTIVE
+}
+
 model CoachProfile {
-  userId          String   @id @map("user_id")
+  userId          String      @id @map("user_id")
   bio             String?
   specialties     String[]
-  yearsExperience Int?     @map("years_experience")
-  sessionPrice    Decimal? @map("session_price") @db.Decimal(10, 2)
-  rating          Decimal? @db.Decimal(2, 1)
-  reviewCount     Int      @default(0) @map("review_count")
+  yearsExperience Int?        @map("years_experience")
+  sessionPrice    Decimal?    @map("session_price") @db.Decimal(10, 2)
+  rating          Decimal?    @db.Decimal(2, 1)
+  reviewCount     Int         @default(0) @map("review_count")
+  status          CoachStatus @default(ACTIVE)
 
   user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   availabilities   CoachAvailability[]
@@ -209,16 +217,20 @@ model OtpCode {
 // ---------------------------------------------------------------------------
 
 model MembershipPlan {
-  id            String   @id @default(uuid())
-  name          String
-  description   String?
-  durationDays  Int      @map("duration_days")
-  price         Decimal  @db.Decimal(10, 2)
-  accessCount   Int?     @map("access_count") // null = illimité
-  isContractual Boolean  @default(false) @map("is_contractual")
-  isActive      Boolean  @default(true) @map("is_active")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  durationDays    Int      @map("duration_days")
+  price           Decimal  @db.Decimal(10, 2)
+  accessCount     Int?     @map("access_count") // null = illimité
+  isContractual   Boolean  @default(false) @map("is_contractual")
+  isActive        Boolean  @default(true) @map("is_active")
+  isVisibleInApp  Boolean  @default(true) @map("is_visible_in_app") // visible dans le catalogue adhérent
+  isPopular       Boolean  @default(false) @map("is_popular") // badge "Populaire" dans l'app
+  includesLabel   String?  @map("includes_label") // ex. "Accès libre + 2 invitations / mois"
+  displayOrder    Int      @default(0) @map("display_order")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   memberships   Membership[]
   announcements Announcement[]
@@ -282,12 +294,17 @@ model Payment {
 // ---------------------------------------------------------------------------
 
 model ClassType {
-  id          String  @id @default(uuid())
-  name        String
-  description String?
-  level       String?
-  imageKey    String? @map("image_key")
-  isActive    Boolean @default(true) @map("is_active")
+  id             String  @id @default(uuid())
+  name           String
+  description    String?
+  level          String?
+  imageKey       String? @map("image_key")
+  isActive       Boolean @default(true) @map("is_active")
+  icon           String  @default("fitness_center") // pictogramme Material Symbols (app + back-office)
+  tone           String  @default("primary") // couleur de badge (primary|secondary|accent|success|info|warning|danger)
+  isBookable     Boolean @default(true) @map("is_bookable") // visible/réservable dans l'app adhérent
+  defaultCapacity Int    @default(16) @map("default_capacity")
+  defaultDurationMin Int @default(45) @map("default_duration_min")
 
   templates ClassTemplate[]
   sessions  ClassSession[]
@@ -464,15 +481,23 @@ model CoachingSession {
 // Coaching et entraînement (section 8.5)
 // ---------------------------------------------------------------------------
 
+enum ExerciseType {
+  STRENGTH
+  CARDIO
+  MOBILITY
+}
+
 model Exercise {
-  id           String  @id @default(uuid())
+  id           String       @id @default(uuid())
   name         String
-  muscleGroup  String? @map("muscle_group")
+  muscleGroup  String?      @map("muscle_group")
   equipment    String?
-  mediaKey     String? @map("media_key")
+  mediaKey     String?      @map("media_key")
   instructions String?
-  createdById  String? @map("created_by")
-  isActive     Boolean @default(true) @map("is_active")
+  createdById  String?      @map("created_by")
+  isActive     Boolean      @default(true) @map("is_active")
+  type         ExerciseType @default(STRENGTH)
+  level        String?
 
   createdBy        User?             @relation("ExerciseCreatedBy", fields: [createdById], references: [id])
   programExercises ProgramExercise[]
@@ -639,6 +664,7 @@ model Announcement {
   title       String
   body        String
   planId      String?   @map("plan_id") // ciblage par formule
+  tone        String    @default("info") // style de bannière dans l'app : info|accent|danger
   createdById String    @map("created_by")
   sentAt      DateTime? @map("sent_at")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -707,6 +733,66 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Configuration de l'app mobile (back-office "CMS") — brouillon + publication
+// ---------------------------------------------------------------------------
+
+enum AppConfigStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/**
+ * Snapshot versionné de toute la configuration consommée par l'app mobile :
+ * branding, blocs d'accueil, onglets, textes i18n, notifications auto,
+ * règles de réservation/accès et permissions de rôle. Il existe toujours
+ * exactement un DRAFT (modifiable librement) et au plus un PUBLISHED actif
+ * (celui que l'app mobile lit via /v1/config). Publier = dupliquer le
+ * contenu du draft vers une nouvelle version PUBLISHED (les anciennes
+ * passent en ARCHIVED) ; le draft continue ensuite depuis cette base.
+ */
+model AppConfigVersion {
+  id              String           @id @default(uuid())
+  status          AppConfigStatus  @default(DRAFT)
+  versionNumber   Int              @map("version_number") // 0 pour le draft courant, 1..n pour les publications
+  note            String?
+  branding        Json             @default("{}")
+  homeModules     Json             @default("[]") @map("home_modules")
+  tabs            Json             @default("[]")
+  strings         Json             @default("[]")
+  languages       Json             @default("{}")
+  notifSettings   Json             @default("{}") @map("notif_settings")
+  bookingRules    Json             @default("{}") @map("booking_rules")
+  changedKeys     Json             @default("[]") @map("changed_keys") // clés modifiées depuis la dernière publication (brouillon courant)
+  publishedById   String?          @map("published_by")
+  publishedAt     DateTime?        @map("published_at")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  publishedBy User? @relation(fields: [publishedById], references: [id])
+
+  @@index([status])
+  @@map("app_config_versions")
+}
+
+/**
+ * Matrice permission × rôle éditable depuis le back-office (section
+ * "Rôles & permissions"). Les permissions ADMIN restent toujours vraies
+ * côté backend (non pilotées par cette table) ; elle sert à restreindre
+ * MEMBER/COACH/STAFF/MANAGER au-delà du socle @Roles() déjà en place.
+ */
+model RolePermission {
+  id         String   @id @default(uuid())
+  permission String // ex. "classes.cancel", "payments.record"
+  role       RoleName
+  allowed    Boolean  @default(false)
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([permission, role])
+  @@map("role_permissions")
 }
 
 // ---------------------------------------------------------------------------

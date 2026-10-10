@@ -28,6 +28,12 @@ export class MembershipsController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('admin/plans')
+  findAllPlansForAdmin() {
+    return this.membershipsService.findAllPlansForAdmin();
+  }
+
+  @Roles(Role.ADMIN)
   @Post('admin/plans')
   createPlan(@Body() dto: CreatePlanDto) {
     return this.membershipsService.createPlan(dto);
@@ -43,6 +49,12 @@ export class MembershipsController {
   @Patch('admin/plans/:id/deactivate')
   deactivatePlan(@Param('id') id: string) {
     return this.membershipsService.deactivatePlan(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/plans/:id/reactivate')
+  reactivatePlan(@Param('id') id: string) {
+    return this.membershipsService.reactivatePlan(id);
   }
 
   @Get('me/memberships')

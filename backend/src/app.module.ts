@@ -24,6 +24,8 @@ import { ShopModule } from './shop/shop.module.js';
 import { StatsModule } from './stats/stats.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { StorageModule } from './storage/storage.module.js';
+import { AppConfigModule } from './app-config/app-config.module.js';
+import { CoachesModule } from './coaches/coaches.module.js';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { StorageModule } from './storage/storage.module.js';
     StatsModule,
     StorageModule,
     NotificationsModule,
+    AppConfigModule,
+    CoachesModule,
   ],
 })
 export class AppModule {}

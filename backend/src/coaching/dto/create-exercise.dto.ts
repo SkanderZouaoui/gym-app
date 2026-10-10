@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 export class CreateExerciseDto {
   @IsString()
@@ -19,4 +19,12 @@ export class CreateExerciseDto {
   @IsOptional()
   @IsString()
   mediaKey?: string;
+
+  @IsOptional()
+  @IsIn(['STRENGTH', 'CARDIO', 'MOBILITY'])
+  type?: 'STRENGTH' | 'CARDIO' | 'MOBILITY';
+
+  @IsOptional()
+  @IsString()
+  level?: string;
 }

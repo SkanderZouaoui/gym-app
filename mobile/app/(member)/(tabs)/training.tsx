@@ -3,8 +3,10 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { fonts, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { TrainingTabs, type TrainingTab } from '../../../src/components/training/TrainingTabs';
 import { ProgramsView } from '../../../src/components/training/views/ProgramsView';
 import { HistoryView } from '../../../src/components/training/views/HistoryView';
@@ -13,23 +15,25 @@ import { ProgressView } from '../../../src/components/training/views/ProgressVie
 /** Onglet Entraînement — FitZone App Entraînement.dc.html (D1/E1/F1). */
 export default function TrainingScreen() {
   const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
+  const { isRtl } = useLanguage();
+  const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const [tab, setTab] = useState<TrainingTab>('programs');
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Entraînement</Text>
+          <Text style={styles.title}>{t('training.title')}</Text>
           {tab === 'progress' ? (
             <Pressable style={styles.measureButton} onPress={() => router.push('/(member)/measure')}>
               <MaterialIcons name="add" size={18} color={colors.primaryContrast} />
-              <Text style={styles.measureButtonText}>Mesure</Text>
+              <Text style={styles.measureButtonText}>{t('training.measure')}</Text>
             </Pressable>
           ) : (
             <Pressable style={styles.measureButton} onPress={() => router.push('/(member)/exercises')}>
               <MaterialIcons name="menu-book" size={18} color={colors.primaryContrast} />
-              <Text style={styles.measureButtonText}>Bibliothèque</Text>
+              <Text style={styles.measureButtonText}>{t('training.library')}</Text>
             </Pressable>
           )}
         </View>
@@ -42,11 +46,11 @@ export default function TrainingScreen() {
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
-    headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerRow: { flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
     title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },
     measureButton: {
       flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingHorizontal: 14,

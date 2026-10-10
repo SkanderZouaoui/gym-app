@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 
 export class CreateAnnouncementDto {
   @IsString()
@@ -10,4 +10,8 @@ export class CreateAnnouncementDto {
   @IsOptional()
   @IsString()
   planId?: string;
+
+  @IsOptional()
+  @IsIn(['info', 'accent', 'danger'])
+  tone?: 'info' | 'accent' | 'danger';
 }
