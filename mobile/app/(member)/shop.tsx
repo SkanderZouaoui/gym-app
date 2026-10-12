@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMyReservations, useProducts, useReserveProduct } from '../../src/hooks/useShop';
-import { Banner, EmptyState, Pill } from '../../src/components/ui';
+import { Banner, EmptyState, Pill, Toast } from '../../src/components/ui';
 import { ProductCard } from '../../src/components/adherent/ProductCard';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 const STATUS_TONE: Record<string, 'warning' | 'success' | 'muted' | 'danger'> = {
   PENDING: 'warning',
@@ -24,9 +25,12 @@ const STATUS_LABEL: Record<string, string> = {
 export default function ShopScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: products } = useProducts();
-  const { data: reservations } = useMyReservations();
+  const { data: products, refetch: refetchProducts } = useProducts();
+  const { data: reservations, refetch: refetchReservations } = useMyReservations();
   const reserve = useReserveProduct();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([refetchProducts(), refetchReservations()]),
+  );
 
   const activeReservations = reservations?.filter((r) => r.status !== 'CANCELLED' && r.status !== 'COLLECTED') ?? [];
 
@@ -39,6 +43,7 @@ export default function ShopScreen() {
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={
           <View style={{ gap: spacing.sm, marginBottom: spacing.sm }}>
             <Banner
@@ -75,6 +80,10 @@ export default function ShopScreen() {
           <EmptyState icon="inventory-2" title="Rien dans cette catégorie" text="Aucun produit disponible pour le moment." tone="muted" />
         }
       />
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

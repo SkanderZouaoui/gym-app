@@ -10,6 +10,7 @@ import { useCreateWorkoutLog, useExercises, useMyWorkouts } from '../../../src/h
 import { useCreatePost, useUploadPostPhoto } from '../../../src/hooks/useSocial';
 import { Button } from '../../../src/components/Button';
 import { Banner } from '../../../src/components/ui';
+import { clearSessionDraft } from '../../../src/hooks/useSessionDraft';
 
 interface FinishedSet {
   exerciseId: string;
@@ -86,7 +87,10 @@ export default function SessionSummaryScreen() {
         sets: sets.map((s) => ({ exerciseId: s.exerciseId, setNumber: s.setNumber, weightKg: s.weightKg, reps: s.reps })),
       },
       {
-        onSuccess: () => setSaved(true),
+        onSuccess: () => {
+          if (programId && dayId) clearSessionDraft(programId, dayId);
+          setSaved(true);
+        },
         onError: () => setError('Erreur lors de l’enregistrement de la séance.'),
       },
     );

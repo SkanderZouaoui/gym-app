@@ -1,20 +1,21 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
-import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { fonts, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useExercise, useMyWorkouts } from '../../../src/hooks/useCoaching';
-import { Banner, Pill } from '../../../src/components/ui';
+import { Banner, EmptyState, Pill, Toast } from '../../../src/components/ui';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRecordCard';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
  * accessible depuis la visualisation d'un programme. FitZone App Entraînement.dc.html, E3. */
 export default function ViewProgramExerciseScreen() {
-  const { exerciseId, sets, reps, setDetails, programId } = useLocalSearchParams<{
+  const { exerciseId, programId } = useLocalSearchParams<{
     exerciseId: string;
     sets: string;
     reps: string;
@@ -23,12 +24,11 @@ export default function ViewProgramExerciseScreen() {
   }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: exercise, isLoading } = useExercise(exerciseId);
-  const { data: workouts } = useMyWorkouts();
-
-  const parsedSetDetails: { setNumber: number; reps: number | null; weightKg: string | null }[] = setDetails
-    ? JSON.parse(setDetails)
-    : [];
+  const { data: exercise, isLoading, isError, refetch } = useExercise(exerciseId);
+  const { data: workouts, refetch: refetchWorkouts } = useMyWorkouts();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([refetch(), refetchWorkouts()]),
+  );
 
   const parsed = useMemo(() => parseExerciseInstructions(exercise?.instructions ?? null), [exercise]);
 
@@ -51,7 +51,7 @@ export default function ViewProgramExerciseScreen() {
     return { bestWeight: best.weight, bestReps: best.reps, deltaKg, weeksSpan: points.length >= 2 ? weeksSpan : null, series: points.map((p) => p.weight) };
   }, [workouts, exerciseId]);
 
-  if (isLoading || !exercise) {
+  if (isLoading && !exercise) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
@@ -59,10 +59,31 @@ export default function ViewProgramExerciseScreen() {
     );
   }
 
+  if (!exercise) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScreenHeader title="" fallbackHref={programId ? `/(member)/program/${programId}` : '/(member)/(tabs)/training'} />
+        <View style={{ padding: spacing.lg }}>
+          <EmptyState
+            icon="cloud-off"
+            title="Exercice indisponible"
+            text={isError ? 'Impossible de récupérer cet exercice pour le moment. Vérifiez votre connexion.' : 'Cet exercice est introuvable.'}
+            tone="danger"
+            actionLabel={isError ? 'Réessayer' : undefined}
+            onAction={isError ? () => refetch() : undefined}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref={programId ? `/(member)/program/${programId}` : '/(member)/(tabs)/training'} />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.mediaWrap}>
           <ExerciseGif uri={exercise.mediaKey} size={220} />
         </View>
@@ -86,26 +107,6 @@ export default function ViewProgramExerciseScreen() {
           />
         ) : null}
 
-        <View>
-          <Text style={styles.sectionTitle}>Séries du programme</Text>
-          {parsedSetDetails.length > 0 ? (
-            <View style={styles.setsList}>
-              {parsedSetDetails.map((s) => (
-                <View key={s.setNumber} style={styles.setRow}>
-                  <View style={styles.setBadge}>
-                    <Text style={styles.setBadgeText}>{s.setNumber}</Text>
-                  </View>
-                  <Text style={styles.setText}>
-                    {s.reps ?? '—'} répétitions{s.weightKg ? ` · ${s.weightKg} kg` : ''}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          ) : (
-            <Text style={styles.summaryText}>{sets} séries · {reps}</Text>
-          )}
-        </View>
-
         {parsed.steps.length > 0 ? (
           <View>
             <Text style={styles.sectionTitle}>Consignes</Text>
@@ -128,6 +129,10 @@ export default function ViewProgramExerciseScreen() {
           text="Utilisez des pinces et un pareur au-delà de 80 % de votre maximum."
         />
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -141,15 +146,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   equipmentLine: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, textTransform: 'capitalize', marginTop: 2 },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text, marginBottom: spacing.sm },
-  summaryText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
-  setsList: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    paddingHorizontal: spacing.md,
-  },
-  setRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
-  setBadge: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.secondarySoft, alignItems: 'center', justifyContent: 'center' },
-  setBadgeText: { fontFamily: fonts.headBold, fontSize: 11.5, color: colors.secondaryInk },
-  setText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.text },
   stepsList: { gap: spacing.sm },
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   stepBadge: {

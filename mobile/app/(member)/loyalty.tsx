@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -15,9 +15,10 @@ import {
   usePointsHistory,
   useStreak,
 } from '../../src/hooks/useLoyalty';
-import { EmptyState, Pill, SegmentedControl } from '../../src/components/ui';
+import { EmptyState, Pill, SegmentedControl, Toast } from '../../src/components/ui';
 import { ChallengeCard } from '../../src/components/adherent/ChallengeCard';
 import { BadgeTile } from '../../src/components/adherent/BadgeTile';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 const BADGE_ICONS: Record<string, keyof typeof MaterialIcons.glyphMap> = {
   streak_7: 'local-fire-department',
@@ -43,17 +44,32 @@ const PODIUM_TONES = ['accent', 'secondary', 'warning'] as const;
 export default function LoyaltyScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: points } = useMyPoints();
-  const { data: streak } = useStreak();
-  const { data: history } = usePointsHistory();
-  const { data: challenges } = useActiveChallenges();
-  const { data: badges } = useBadges();
+  const { data: points, refetch: refetchPoints } = useMyPoints();
+  const { data: streak, refetch: refetchStreak } = useStreak();
+  const { data: history, refetch: refetchHistory } = usePointsHistory();
+  const { data: challenges, refetch: refetchChallenges } = useActiveChallenges();
+  const { data: badges, refetch: refetchBadges } = useBadges();
   const joinChallenge = useJoinChallenge();
   const [tab, setTab] = useState<'points' | 'challenges' | 'ranking'>('points');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | undefined>(undefined);
 
   const activeChallengeId = selectedChallengeId ?? challenges?.[0]?.id;
-  const { data: leaderboard } = useChallengeLeaderboard(tab === 'ranking' ? activeChallengeId : undefined);
+  const { data: leaderboard, refetch: refetchLeaderboard } = useChallengeLeaderboard(
+    tab === 'ranking' ? activeChallengeId : undefined,
+  );
+
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([
+      refetchPoints(),
+      refetchStreak(),
+      refetchHistory(),
+      refetchChallenges(),
+      refetchBadges(),
+      // Le leaderboard est désactivé (enabled: false) tant qu'aucun défi n'est actif ;
+      // son refetch n'est appelé que lorsqu'il a effectivement une query à rejouer.
+      ...(activeChallengeId && tab === 'ranking' ? [refetchLeaderboard()] : []),
+    ]),
+  );
 
   const podium = leaderboard?.slice(0, 3) ?? [];
   const rest = leaderboard?.slice(3) ?? [];
@@ -61,7 +77,10 @@ export default function LoyaltyScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="Fidélité" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.heroCard}>
           <View style={{ flex: 1 }}>
             <Text style={styles.heroLabelTop}>MON SOLDE</Text>
@@ -234,6 +253,10 @@ export default function LoyaltyScreen() {
           </View>
         )}
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

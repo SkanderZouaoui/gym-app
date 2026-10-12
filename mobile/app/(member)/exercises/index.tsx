@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useEquipmentOptions, useExercises } from '../../../src/hooks/useCoaching';
-import { EmptyState, SkeletonBlock } from '../../../src/components/ui';
+import { EmptyState, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { ExerciseListItem } from '../../../src/components/training/ExerciseListItem';
 import { MuscleGroupPickerSheet } from '../../../src/components/training/MuscleGroupPickerSheet';
 import { GroupedFilterSheet, type FilterGroup } from '../../../src/components/training/GroupedFilterSheet';
@@ -33,11 +34,12 @@ export default function ExercisesLibraryScreen() {
   const [bodyMapVisible, setBodyMapVisible] = useState(true);
   const [equipmentSheetVisible, setEquipmentSheetVisible] = useState(false);
   const { data: availableEquipment } = useEquipmentOptions();
-  const { data: exercises, isLoading } = useExercises({
+  const { data: exercises, isLoading, isError, refetch } = useExercises({
     search: search || undefined,
     muscleGroup: muscleGroup ? [muscleGroup] : undefined,
     equipment: equipment.length ? equipment : undefined,
   });
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const equipmentFilterGroups: FilterGroup[] = useMemo(() => {
     const byCategory = equipmentOptionsByCategory(availableEquipment ?? []);
@@ -116,6 +118,7 @@ export default function ExercisesLibraryScreen() {
           data={exercises ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           renderItem={({ item }) => (
             <ExerciseListItem
               name={item.name}
@@ -125,10 +128,25 @@ export default function ExercisesLibraryScreen() {
             />
           )}
           ListEmptyComponent={
-            <EmptyState icon="search-off" title="Aucun résultat" text="Vérifiez l’orthographe ou essayez un autre filtre." tone="muted" />
+            isError ? (
+              <EmptyState
+                icon="cloud-off"
+                title="Bibliothèque indisponible"
+                text="Impossible de récupérer les exercices pour le moment. Vérifiez votre connexion."
+                tone="danger"
+                actionLabel="Réessayer"
+                onAction={() => refetch()}
+              />
+            ) : (
+              <EmptyState icon="search-off" title="Aucun résultat" text="Vérifiez l’orthographe ou essayez un autre filtre." tone="muted" />
+            )
           }
         />
       )}
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

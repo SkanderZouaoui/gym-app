@@ -13,9 +13,22 @@ const DAY_LABELS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendr
 export function ProgramsView() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: programs, isLoading } = useMyPrograms();
+  const { data: programs, isLoading, isError, refetch } = useMyPrograms();
 
   if (isLoading) return null;
+
+  if (isError && !programs) {
+    return (
+      <EmptyState
+        icon="cloud-off"
+        title="Programmes indisponibles"
+        text="Impossible de récupérer vos programmes pour le moment. Vérifiez votre connexion."
+        tone="danger"
+        actionLabel="Réessayer"
+        onAction={() => refetch()}
+      />
+    );
+  }
 
   if (!programs || programs.length === 0) {
     return (

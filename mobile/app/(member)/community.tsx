@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
@@ -11,19 +11,23 @@ import {
   useReportPost,
   useToggleReaction,
 } from '../../src/hooks/useSocial';
-import { Avatar, EmptyState, SegmentedControl } from '../../src/components/ui';
+import { Avatar, EmptyState, SegmentedControl, Toast } from '../../src/components/ui';
 import { PostCard } from '../../src/components/adherent/PostCard';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 export default function CommunityScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [tab, setTab] = useState<'feed' | 'messages'>('feed');
-  const { data: posts } = useFeed();
-  const { data: conversations } = useConversations();
+  const { data: posts, refetch: refetchFeed } = useFeed();
+  const { data: conversations, refetch: refetchConversations } = useConversations();
   const createPost = useCreatePost();
   const toggleReaction = useToggleReaction();
   const reportPost = useReportPost();
   const [draft, setDraft] = useState('');
+  const feedRefresh = useOfflineAwareRefresh(refetchFeed);
+  const conversationsRefresh = useOfflineAwareRefresh(refetchConversations);
+  const { offlineToastVisible } = tab === 'feed' ? feedRefresh : conversationsRefresh;
 
   const handlePost = () => {
     if (!draft.trim()) return;
@@ -60,6 +64,7 @@ export default function CommunityScreen() {
           data={posts ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={feedRefresh.refreshing} onRefresh={feedRefresh.onRefresh} />}
           ListHeaderComponent={
             <View style={styles.composer}>
               <TextInput
@@ -103,6 +108,9 @@ export default function CommunityScreen() {
           data={conversations ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          refreshControl={
+            <RefreshControl refreshing={conversationsRefresh.refreshing} onRefresh={conversationsRefresh.onRefresh} />
+          }
           renderItem={({ item }) => {
             const lastMessage = item.messages[0];
             return (
@@ -124,6 +132,10 @@ export default function CommunityScreen() {
           }
         />
       )}
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

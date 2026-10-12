@@ -29,18 +29,16 @@ const MEASUREMENT_UNITS: Record<string, string> = { waist: 'cm', bodyFat: '%', a
 export function ProgressView() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: metrics, isLoading } = useBodyMetrics();
+  const { data: metrics, isLoading, isError, refetch } = useBodyMetrics();
   const { data: streak } = useStreak();
 
-  const eightWeeksAgo = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 56);
-    return d;
+  const { from: attendanceFrom, to: attendanceTo } = useMemo(() => {
+    const to = new Date();
+    const from = new Date(to);
+    from.setDate(from.getDate() - 56);
+    return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
   }, []);
-  const { data: attendanceDates } = useAttendanceCalendar(
-    eightWeeksAgo.toISOString().slice(0, 10),
-    new Date().toISOString().slice(0, 10),
-  );
+  const { data: attendanceDates } = useAttendanceCalendar(attendanceFrom, attendanceTo);
 
   const weightSeries = useMemo(() => {
     if (!metrics) return [];
@@ -64,6 +62,19 @@ export function ProgressView() {
   }, [attendanceDates]);
 
   if (isLoading) return null;
+
+  if (isError && !metrics) {
+    return (
+      <EmptyState
+        icon="cloud-off"
+        title="Progression indisponible"
+        text="Impossible de récupérer vos mesures pour le moment. Vérifiez votre connexion."
+        tone="danger"
+        actionLabel="Réessayer"
+        onAction={() => refetch()}
+      />
+    );
+  }
 
   const latest = metrics?.[0];
   const previous = metrics?.[1];

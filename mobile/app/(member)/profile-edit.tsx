@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,17 +16,22 @@ import {
   useRequestEmailChange,
   useUpdateProfile,
 } from '../../src/hooks/useProfile';
-import { Banner } from '../../src/components/ui';
+import { Banner, Toast } from '../../src/components/ui';
 import { ApiError } from '../../src/api/client';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 export default function ProfileEditScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
+  const { data: user, refetch } = useMe();
   const updateProfile = useUpdateProfile();
   const requestUploadUrl = useRequestAvatarUploadUrl();
   const requestEmailChange = useRequestEmailChange();
   const confirmEmailChange = useConfirmEmailChange();
+  // Les champs (firstName/lastName/phone) sont initialisés une seule fois depuis `user`
+  // via useState, sans useEffect de resynchronisation : un refetch met à jour `user` et
+  // l'email affiché plus bas, mais n'écrase jamais une saisie déjà en cours dans les champs.
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const [firstName, setFirstName] = useState(user?.firstName ?? '');
   const [lastName, setLastName] = useState(user?.lastName ?? '');
@@ -123,7 +128,10 @@ export default function ProfileEditScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="Modifier le profil" fallbackHref="/(member)/(tabs)/profile" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.avatarSection}>
           <Pressable onPress={pickPhoto} style={styles.avatarWrap} disabled={uploading}>
             {displayedPhoto ? (
@@ -213,6 +221,10 @@ export default function ProfileEditScreen() {
           )}
         </View>
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

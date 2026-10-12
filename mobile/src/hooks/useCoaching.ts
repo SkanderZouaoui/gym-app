@@ -177,6 +177,7 @@ export interface CreateOwnProgramInput {
 export function useCreateOwnProgram() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['createOwnProgram'],
     mutationFn: (payload: CreateOwnProgramInput) =>
       apiRequest<Program>('/v1/me/programs', { method: 'POST', body: payload }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'programs'] }),
@@ -186,6 +187,7 @@ export function useCreateOwnProgram() {
 export function useUpdateOwnProgram() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['updateOwnProgram'],
     mutationFn: ({ id, payload }: { id: string; payload: CreateOwnProgramInput }) =>
       apiRequest<Program>(`/v1/me/programs/${id}`, { method: 'PATCH', body: payload }),
     onSuccess: (_data, variables) => {
@@ -198,6 +200,7 @@ export function useUpdateOwnProgram() {
 export function useDeleteOwnProgram() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['deleteOwnProgram'],
     mutationFn: (id: string) => apiRequest(`/v1/me/programs/${id}`, { method: 'DELETE' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'programs'] }),
   });

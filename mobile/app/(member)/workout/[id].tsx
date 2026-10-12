@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme, type ColorPalette } from '../../../src/theme/ThemeContext';
 import { useMyWorkouts } from '../../../src/hooks/useCoaching';
+import { Toast } from '../../../src/components/ui';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 const FEELING_STYLES: Record<string, { label: string; icon: keyof typeof MaterialIcons.glyphMap; color: (c: ColorPalette) => string; bg: (c: ColorPalette) => string }> = {
   EASY: { label: 'Facile', icon: 'sentiment-very-satisfied', color: (c) => c.successInk, bg: (c) => c.successSoft },
@@ -19,8 +21,9 @@ export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: workouts, isLoading } = useMyWorkouts();
+  const { data: workouts, isLoading, refetch } = useMyWorkouts();
   const log = workouts?.find((w) => w.id === id);
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const exerciseGroups = useMemo(() => {
     const groups = new Map<string, NonNullable<typeof log>['sets']>();
@@ -75,7 +78,10 @@ export default function WorkoutDetailScreen() {
         </View>
       ) : null}
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {exerciseGroups.map(([exId, exSets], exIndex) => (
           <View key={exId} style={styles.exerciseBlock}>
             <View style={styles.exerciseHeaderRow}>
@@ -108,6 +114,10 @@ export default function WorkoutDetailScreen() {
           </View>
         ))}
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

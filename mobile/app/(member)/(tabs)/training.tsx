@@ -11,6 +11,8 @@ import { TrainingTabs, type TrainingTab } from '../../../src/components/training
 import { ProgramsView } from '../../../src/components/training/views/ProgramsView';
 import { HistoryView } from '../../../src/components/training/views/HistoryView';
 import { ProgressView } from '../../../src/components/training/views/ProgressView';
+import { OfflineBanner } from '../../../src/components/ui';
+import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 
 /** Onglet Entraînement — FitZone App Entraînement.dc.html (D1/E1/F1). */
 export default function TrainingScreen() {
@@ -19,9 +21,15 @@ export default function TrainingScreen() {
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const [tab, setTab] = useState<TrainingTab>('programs');
+  const { isOnline, lastSyncAt } = useNetworkStatusContext();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {!isOnline ? (
+        <View style={styles.offlineBannerWrap}>
+          <OfflineBanner lastSyncAt={lastSyncAt} />
+        </View>
+      ) : null}
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>{t('training.title')}</Text>
@@ -49,6 +57,7 @@ export default function TrainingScreen() {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
+    offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
     headerRow: { flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
     title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },

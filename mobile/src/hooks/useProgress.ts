@@ -37,6 +37,7 @@ export interface CreateBodyMetricInput {
 export function useCreateBodyMetric() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['createBodyMetric'],
     mutationFn: (payload: CreateBodyMetricInput) => apiRequest<BodyMetric>('/v1/me/body-metrics', { method: 'POST', body: payload }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'body-metrics'] }),
   });
@@ -45,6 +46,7 @@ export function useCreateBodyMetric() {
 export function useDeleteBodyMetric() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['deleteBodyMetric'],
     mutationFn: (id: string) => apiRequest(`/v1/me/body-metrics/${id}`, { method: 'DELETE' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'body-metrics'] }),
   });

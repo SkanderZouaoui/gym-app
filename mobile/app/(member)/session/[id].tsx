@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCreateBooking, useSession } from '../../../src/hooks/useClasses';
 import { useMyBookings } from '../../../src/hooks/useMe';
-import { Banner, ProgressBar } from '../../../src/components/ui';
+import { Banner, ProgressBar, Toast } from '../../../src/components/ui';
 import { ApiError } from '../../../src/api/client';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Détail d'un cours — FitZone App Adherent.dc.html, C1. */
 export default function SessionDetailScreen() {
@@ -16,9 +17,12 @@ export default function SessionDetailScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: session, isLoading, refetch } = useSession(id);
-  const { data: bookings } = useMyBookings();
+  const { data: bookings, refetch: refetchBookings } = useMyBookings();
   const createBooking = useCreateBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([refetch(), refetchBookings()]),
+  );
 
   const existingBooking = bookings?.find((b) => b.sessionId === id && b.status !== 'CANCELLED');
 
@@ -60,7 +64,11 @@ export default function SessionDetailScreen() {
         </Pressable>
       </View>
 
-      <ScrollView style={styles.panel} contentContainerStyle={styles.panelContent}>
+      <ScrollView
+        style={styles.panel}
+        contentContainerStyle={styles.panelContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.tagsRow}>
           <Tag label="Cours collectif" tone="primary" />
         </View>
@@ -127,6 +135,10 @@ export default function SessionDetailScreen() {
           </Pressable>
         )}
       </View>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

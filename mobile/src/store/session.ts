@@ -7,7 +7,9 @@ interface SessionState {
   user: MeResponse | null;
   activeRole: Role | null;
   roles: Role[];
-  setSession: (user: MeResponse, roles: Role[], activeRole: Role) => void;
+  /** true si la session a été reconstruite depuis le cache local (pas de confirmation réseau récente). */
+  isDegraded: boolean;
+  setSession: (user: MeResponse, roles: Role[], activeRole: Role, options?: { degraded?: boolean }) => void;
   setActiveRole: (role: Role) => void;
   clear: () => void;
 }
@@ -17,8 +19,9 @@ export const useSessionStore = create<SessionState>((set) => ({
   user: null,
   activeRole: null,
   roles: [],
-  setSession: (user, roles, activeRole) =>
-    set({ isAuthenticated: true, user, roles, activeRole }),
+  isDegraded: false,
+  setSession: (user, roles, activeRole, options) =>
+    set({ isAuthenticated: true, user, roles, activeRole, isDegraded: !!options?.degraded }),
   setActiveRole: (role) => set({ activeRole: role }),
-  clear: () => set({ isAuthenticated: false, user: null, activeRole: null, roles: [] }),
+  clear: () => set({ isAuthenticated: false, user: null, activeRole: null, roles: [], isDegraded: false }),
 }));

@@ -26,6 +26,7 @@ export interface CreatePostInput {
 export function useCreatePost() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['createPost'],
     mutationFn: (input: CreatePostInput) => apiRequest('/v1/posts', { method: 'POST', body: input }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feed'] }),
   });
@@ -55,6 +56,7 @@ export function useUploadPostPhoto() {
 export function useToggleReaction() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['toggleReaction'],
     mutationFn: (postId: string) => apiRequest(`/v1/posts/${postId}/reactions`, { method: 'POST' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['feed'] }),
   });

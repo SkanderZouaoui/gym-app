@@ -28,8 +28,8 @@ type HistoryEntry =
 export function HistoryView() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: workouts, isLoading: workoutsLoading } = useMyWorkouts();
-  const { data: bookings, isLoading: bookingsLoading } = useMyBookings();
+  const { data: workouts, isLoading: workoutsLoading, isError: workoutsError, refetch: refetchWorkouts } = useMyWorkouts();
+  const { data: bookings, isLoading: bookingsLoading, isError: bookingsError, refetch: refetchBookings } = useMyBookings();
 
   const entries = useMemo<HistoryEntry[]>(() => {
     const workoutEntries: HistoryEntry[] = (workouts ?? []).map((log) => ({
@@ -99,6 +99,22 @@ export function HistoryView() {
   }, [entries]);
 
   if (workoutsLoading || bookingsLoading) return null;
+
+  if (workoutsError && bookingsError && !workouts && !bookings) {
+    return (
+      <EmptyState
+        icon="cloud-off"
+        title="Historique indisponible"
+        text="Impossible de récupérer votre historique pour le moment. Vérifiez votre connexion."
+        tone="danger"
+        actionLabel="Réessayer"
+        onAction={() => {
+          void refetchWorkouts();
+          void refetchBookings();
+        }}
+      />
+    );
+  }
 
   if (entries.length === 0) {
     return (

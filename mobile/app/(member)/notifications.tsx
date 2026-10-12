@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { EmptyState, SkeletonBlock } from '../../src/components/ui';
+import { EmptyState, SkeletonBlock, Toast } from '../../src/components/ui';
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotifications,
 } from '../../src/hooks/useProfile';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 const TYPE_LABELS: Record<string, string> = {
   CLASS_REMINDER: 'Rappel de cours',
@@ -24,16 +25,20 @@ const TYPE_LABELS: Record<string, string> = {
 export default function NotificationsScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: notifications, isLoading } = useNotifications();
+  const { data: notifications, isLoading, refetch } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const hasUnread = notifications?.some((n) => !n.readAt) ?? false;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="Notifications" fallbackHref="/(member)/(tabs)/profile" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {hasUnread ? (
           <Pressable onPress={() => markAllRead.mutate()} style={styles.markAllButton}>
             <Text style={styles.markAllText}>Tout marquer comme lu</Text>
@@ -73,6 +78,10 @@ export default function NotificationsScreen() {
           />
         )}
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

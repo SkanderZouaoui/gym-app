@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -9,7 +9,9 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../src/hooks/useCoachSessions';
 import { useDeleteOwnProgram } from '../../../src/hooks/useCoaching';
 import { Button } from '../../../src/components/Button';
-import { BottomSheet } from '../../../src/components/ui';
+import { BottomSheet, EmptyState, OfflineBanner, Toast } from '../../../src/components/ui';
+import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 const DAY_LABELS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
@@ -18,16 +20,36 @@ export default function ProgramDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: program, isLoading } = useProgramDetail(id);
+  const { data: program, isLoading, isError, refetch } = useProgramDetail(id);
   const deleteProgram = useDeleteOwnProgram();
+  const { isOnline, lastSyncAt } = useNetworkStatusContext();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  if (isLoading || !program) {
+  if (isLoading && !program) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  if (!program) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScreenHeader title="" fallbackHref="/(member)/(tabs)/training" />
+        <View style={{ padding: spacing.lg }}>
+          <EmptyState
+            icon="cloud-off"
+            title="Programme indisponible"
+            text={isError ? 'Impossible de récupérer ce programme pour le moment. Vérifiez votre connexion.' : 'Ce programme est introuvable.'}
+            tone="danger"
+            actionLabel={isError ? 'Réessayer' : undefined}
+            onAction={isError ? () => refetch() : undefined}
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -48,6 +70,11 @@ export default function ProgramDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {!isOnline ? (
+        <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
+          <OfflineBanner lastSyncAt={lastSyncAt} />
+        </View>
+      ) : null}
       <ScreenHeader title="" fallbackHref="/(member)/(tabs)/training" />
       <View style={styles.header}>
         <View style={styles.headerTopRow}>
@@ -77,7 +104,10 @@ export default function ProgramDetailScreen() {
         ))}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.summaryCard}>
           <View style={styles.summaryItem}>
             <MaterialIcons name="schedule" size={18} color={colors.muted} />
@@ -168,6 +198,10 @@ export default function ProgramDetailScreen() {
           <Button label="Annuler" onPress={() => setConfirmDelete(false)} variant="outline" />
         </View>
       </BottomSheet>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

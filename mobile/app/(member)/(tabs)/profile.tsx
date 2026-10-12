@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,9 @@ import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { useSessionStore } from '../../../src/store/session';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
-import { BottomSheet, IconCircleButton, Pill, ProgressBar } from '../../../src/components/ui';
+import { Banner, BottomSheet, IconCircleButton, OfflineBanner, Pill, ProgressBar, Toast } from '../../../src/components/ui';
+import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { Button } from '../../../src/components/Button';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
@@ -22,15 +24,27 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
-  const { data: user } = useMe();
-  const { data: memberships } = useMyMemberships();
-  const { data: bookings } = useMyBookings();
-  const { data: points } = useMyPoints();
-  const { data: streak } = useMyStreak();
-  const { data: notifications } = useNotifications();
+  const { data: user, refetch: refetchMe } = useMe();
+  const { data: memberships, refetch: refetchMemberships } = useMyMemberships();
+  const { data: bookings, refetch: refetchBookings } = useMyBookings();
+  const { data: points, refetch: refetchPoints } = useMyPoints();
+  const { data: streak, refetch: refetchStreak } = useMyStreak();
+  const { data: notifications, refetch: refetchNotifications } = useNotifications();
   const roles = useSessionStore((s) => s.roles);
+  const isDegraded = useSessionStore((s) => s.isDegraded);
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
+  const { isOnline, lastSyncAt } = useNetworkStatusContext();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([
+      refetchMe(),
+      refetchMemberships(),
+      refetchBookings(),
+      refetchPoints(),
+      refetchStreak(),
+      refetchNotifications(),
+    ]),
+  );
   const [logoutVisible, setLogoutVisible] = useState(false);
 
   const hasCoachRole = roles.some((r) => r === 'COACH');
@@ -72,7 +86,15 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      {!isOnline ? (
+        <View style={styles.offlineBannerWrap}>
+          <OfflineBanner lastSyncAt={lastSyncAt} />
+        </View>
+      ) : null}
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.header}>
           <Text style={styles.title}>{t('profile.title')}</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -80,6 +102,15 @@ export default function ProfileScreen() {
             <IconCircleButton icon="settings" onPress={() => router.push('/(member)/settings')} />
           </View>
         </View>
+
+        {isDegraded ? (
+          <Banner
+            tone="warning"
+            icon="sync-problem"
+            title="Session hors ligne"
+            text="Vos informations n'ont pas pu être vérifiées en ligne récemment. Certaines données peuvent être obsolètes."
+          />
+        ) : null}
 
         <View style={styles.identityRow}>
           <View style={{ position: 'relative' }}>
@@ -220,6 +251,10 @@ export default function ProfileScreen() {
         </Pressable>
         <Button label={t('common.cancel')} onPress={() => setLogoutVisible(false)} variant="outline" />
       </BottomSheet>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -284,6 +319,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   const textAlign = isRtl ? 'right' as const : 'left' as const;
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
+    offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
     header: { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between' },
     title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },

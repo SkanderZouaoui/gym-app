@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
@@ -8,9 +8,10 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useCancelBooking } from '../../src/hooks/useClasses';
 import { useMyBookings } from '../../src/hooks/useMe';
 import type { Booking } from '../../src/api/types';
-import { BottomSheet, EmptyState, Pill, SegmentedControl } from '../../src/components/ui';
+import { BottomSheet, EmptyState, Pill, SegmentedControl, Toast } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
 import { ClassTypeIcon } from '../../src/components/adherent/ClassTypeIcon';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 const STATUS_TONE: Record<Booking['status'], 'success' | 'warning' | 'muted' | 'danger'> = {
   CONFIRMED: 'success',
@@ -31,8 +32,9 @@ const STATUS_LABEL: Record<Booking['status'], string> = {
 export default function ReservationsScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: bookings } = useMyBookings();
+  const { data: bookings, refetch } = useMyBookings();
   const cancelBooking = useCancelBooking();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
 
@@ -69,6 +71,7 @@ export default function ReservationsScreen() {
         data={list}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.row}>
@@ -120,6 +123,10 @@ export default function ReservationsScreen() {
           <Button label="Garder ma place" onPress={() => setCancelTarget(null)} variant="outline" />
         </View>
       </BottomSheet>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

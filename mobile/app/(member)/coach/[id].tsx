@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -7,9 +7,10 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachAvailability, useCoachProfile, useRequestCoachingSession } from '../../../src/hooks/useMemberCoaching';
-import { Avatar, Banner, BottomSheet, EmptyState, Pill } from '../../../src/components/ui';
+import { Avatar, Banner, BottomSheet, EmptyState, Pill, Toast } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { ApiError } from '../../../src/api/client';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 const DAY_LABELS_SHORT = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
@@ -29,9 +30,12 @@ export default function CoachDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: coach, isLoading } = useCoachProfile(id);
-  const { data: availability } = useCoachAvailability();
+  const { data: coach, isLoading, refetch: refetchCoach } = useCoachProfile(id);
+  const { data: availability, refetch: refetchAvailability } = useCoachAvailability();
   const requestSession = useRequestCoachingSession();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([refetchCoach(), refetchAvailability()]),
+  );
 
   const weekDays = useMemo(buildWeekDays, []);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -112,7 +116,10 @@ export default function CoachDetailScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref="/(member)/coaching" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.identityRow}>
           <Avatar initials={`${coach.user.firstName[0] ?? ''}${coach.user.lastName[0] ?? ''}`.toUpperCase()} size={80} background={colors.accent} color={colors.onAccent} />
           <View style={{ flex: 1 }}>
@@ -232,6 +239,10 @@ export default function CoachDetailScreen() {
 
         <Button label={requestSession.isPending ? 'Envoi…' : 'Confirmer la séance'} onPress={handleConfirm} loading={requestSession.isPending} />
       </BottomSheet>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

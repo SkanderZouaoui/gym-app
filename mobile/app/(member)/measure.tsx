@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
@@ -62,7 +62,10 @@ export default function MeasureScreen() {
   };
 
   return (
-    <View style={styles.overlayRoot}>
+    <KeyboardAvoidingView
+      style={styles.overlayRoot}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <Pressable style={styles.overlay} onPress={handleClose} />
       <SafeAreaView style={styles.sheetSafeArea} edges={['bottom']}>
         <View style={styles.sheet}>
@@ -128,7 +131,7 @@ export default function MeasureScreen() {
           {!isToday ? <MaterialIcons name="check" size={18} color={colors.primaryInk} /> : null}
         </Pressable>
       </BottomSheet>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

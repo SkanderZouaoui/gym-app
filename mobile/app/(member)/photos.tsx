@@ -1,22 +1,24 @@
 import { useMemo, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useBodyMetrics, useCreateBodyMetric, useUploadProgressPhoto } from '../../src/hooks/useProgress';
-import { Banner, EmptyState } from '../../src/components/ui';
+import { Banner, EmptyState, Toast } from '../../src/components/ui';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 /** Photos de progression — FitZone App Entraînement.dc.html, F3.
  * Privées par défaut : jamais partagées, URLs présignées à courte durée de vie. */
 export default function PhotosScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: metrics, isLoading } = useBodyMetrics();
+  const { data: metrics, isLoading, refetch } = useBodyMetrics();
   const createMetric = useCreateBodyMetric();
   const uploadPhoto = useUploadProgressPhoto();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -95,6 +97,7 @@ export default function PhotosScreen() {
             keyExtractor={(item) => item.id}
             numColumns={3}
             columnWrapperStyle={styles.gridRow}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             ListHeaderComponent={
               <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
                 {photos.length >= 2 && oldest && newest ? (
@@ -138,6 +141,10 @@ export default function PhotosScreen() {
           />
         )}
       </View>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

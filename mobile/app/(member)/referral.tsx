@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import * as Clipboard from 'expo-clipboard';
-import { ScrollView, Share, StyleSheet, Text, View, Pressable } from 'react-native';
+import { RefreshControl, ScrollView, Share, StyleSheet, Text, View, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -8,13 +8,15 @@ import { Button } from '../../src/components/Button';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useReferralCode, useReferralOverview } from '../../src/hooks/useLoyalty';
-import { EmptyState, Pill, SkeletonBlock } from '../../src/components/ui';
+import { EmptyState, Pill, SkeletonBlock, Toast } from '../../src/components/ui';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 export default function ReferralScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: overview, isLoading } = useReferralOverview();
+  const { data: overview, isLoading, refetch } = useReferralOverview();
   const requestCode = useReferralCode();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const [copied, setCopied] = useState(false);
 
   const code = overview?.code ?? null;
@@ -34,7 +36,10 @@ export default function ReferralScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="Parrainage" fallbackHref="/(member)/loyalty" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>Invitez un ami : gagnez des points</Text>
           <Text style={styles.heroDesc}>
@@ -109,6 +114,10 @@ export default function ReferralScreen() {
           />
         )}
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

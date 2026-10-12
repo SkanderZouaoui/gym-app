@@ -1,13 +1,15 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useCoachAvailability, useMyCoachingSessions } from '../../src/hooks/useMemberCoaching';
-import { EmptyState, Pill } from '../../src/components/ui';
+import { EmptyState, OfflineBanner, Pill, Toast } from '../../src/components/ui';
 import { CoachCard } from '../../src/components/training/CoachCard';
+import { useNetworkStatusContext } from '../../src/hooks/NetworkStatusContext';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 const STATUS_TONE: Record<string, 'warning' | 'success' | 'danger' | 'muted'> = {
   PENDING: 'warning',
@@ -26,8 +28,12 @@ const STATUS_LABEL: Record<string, string> = {
 export default function CoachingScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: availability } = useCoachAvailability();
-  const { data: sessions } = useMyCoachingSessions();
+  const { data: availability, isError: availabilityError, refetch: refetchAvailability } = useCoachAvailability();
+  const { data: sessions, refetch: refetchSessions } = useMyCoachingSessions();
+  const { isOnline, lastSyncAt } = useNetworkStatusContext();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([refetchAvailability(), refetchSessions()]),
+  );
 
   const coaches = Array.from(
     new Map(availability?.map((a) => [a.coachId, a]) ?? []).values(),
@@ -37,11 +43,17 @@ export default function CoachingScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {!isOnline ? (
+        <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
+          <OfflineBanner lastSyncAt={lastSyncAt} />
+        </View>
+      ) : null}
       <ScreenHeader title="Coachs" />
       <FlatList
         data={coaches}
         keyExtractor={(item) => item.coachId}
         contentContainerStyle={styles.list}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         ListHeaderComponent={
           upcomingSessions.length > 0 ? (
             <View style={{ gap: spacing.sm, marginBottom: spacing.md }}>
@@ -75,9 +87,24 @@ export default function CoachingScreen() {
         )}
         ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
         ListEmptyComponent={
-          <EmptyState icon="person-search" title="Aucun coach disponible" text="Aucune disponibilité publiée pour le moment." tone="muted" />
+          availabilityError && !availability ? (
+            <EmptyState
+              icon="cloud-off"
+              title="Coachs indisponibles"
+              text="Impossible de récupérer la liste des coachs pour le moment. Vérifiez votre connexion."
+              tone="danger"
+              actionLabel="Réessayer"
+              onAction={() => refetchAvailability()}
+            />
+          ) : (
+            <EmptyState icon="person-search" title="Aucun coach disponible" text="Aucune disponibilité publiée pour le moment." tone="muted" />
+          )
         }
       />
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

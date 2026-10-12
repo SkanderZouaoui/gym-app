@@ -7,7 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { controlHeight, fonts, radii, spacing } from '../../../../../src/theme/tokens';
 import { useTheme } from '../../../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../../../src/hooks/useCoachSessions';
-import { Banner, BottomSheet, CircularTimer } from '../../../../../src/components/ui';
+import { Banner, BottomSheet, CircularTimer, EmptyState } from '../../../../../src/components/ui';
 import { Button } from '../../../../../src/components/Button';
 import { SetTableRow, type SetRowState } from '../../../../../src/components/training/SetTableRow';
 import {
@@ -17,6 +17,8 @@ import {
   type ProgramExerciseInput,
 } from '../../../../../src/hooks/useCoaching';
 import type { SetDraft } from '../../../../../src/components/training/SetRow';
+import { clearSessionDraft, readSessionDraft, writeSessionDraft } from '../../../../../src/hooks/useSessionDraft';
+import { useNetworkStatusContext } from '../../../../../src/hooks/NetworkStatusContext';
 
 interface LiveSet {
   exerciseId: string;
@@ -56,9 +58,10 @@ export default function LiveSessionScreen() {
   }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: program, isLoading } = useProgramDetail(programId);
+  const { data: program, isLoading, isError, refetch } = useProgramDetail(programId);
   const { data: workouts, isLoading: isLoadingWorkouts } = useMyWorkouts();
   const updateProgram = useUpdateOwnProgram();
+  const { isOnline } = useNetworkStatusContext();
   const day = program?.days.find((d) => d.id === dayId);
   const navigation = useNavigation();
 
@@ -86,7 +89,10 @@ export default function LiveSessionScreen() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [saveChoiceOpen, setSaveChoiceOpen] = useState(false);
   const [removedExerciseIds, setRemovedExerciseIds] = useState<Set<string>>(new Set());
-  const startedAt = useRef(Date.now());
+  const [foundDraft, setFoundDraft] = useState(() => (programId && dayId ? readSessionDraft(programId, dayId) : null));
+  const [draftPromptVisible, setDraftPromptVisible] = useState(() => !!foundDraft);
+  const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
+  const startedAt = useRef<number>(Date.now() - (foundDraft?.elapsedSeconds ?? 0) * 1000);
   const scrollRef = useRef<ScrollView>(null);
   const exerciseOffsets = useRef<Record<string, number>>({});
   const lastScrolledExerciseId = useRef<string | null>(null);
@@ -98,8 +104,24 @@ export default function LiveSessionScreen() {
     return () => parent?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
+  const resumeFromDraft = () => {
+    if (!foundDraft) return;
+    setSets(foundDraft.sets);
+    setAddedExercises(foundDraft.addedExercises);
+    setRemovedExerciseIds(new Set(foundDraft.removedExerciseIds));
+    setElapsedSeconds(foundDraft.elapsedSeconds);
+    hydratedRef.current = true;
+    setDraftPromptVisible(false);
+  };
+
+  const discardDraft = () => {
+    if (programId && dayId) clearSessionDraft(programId, dayId);
+    setFoundDraft(null);
+    setDraftPromptVisible(false);
+  };
+
   useEffect(() => {
-    if (!day || !workouts || hydratedRef.current) return;
+    if (!day || isLoadingWorkouts || hydratedRef.current || draftPromptVisible) return;
     hydratedRef.current = true;
     const flattened: LiveSet[] = [];
     day.exercises.forEach((ex) => {
@@ -124,12 +146,28 @@ export default function LiveSessionScreen() {
       });
     });
     setSets(flattened);
-  }, [day, workouts, lastWeightByExercise]);
+  }, [day, workouts, lastWeightByExercise, isLoadingWorkouts, draftPromptVisible]);
 
   useEffect(() => {
     const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - startedAt.current) / 1000)), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!programId || !dayId || !hydratedRef.current || sets.length === 0) return;
+    const t = setTimeout(() => {
+      writeSessionDraft({
+        programId,
+        dayId,
+        startedAt: startedAt.current,
+        elapsedSeconds,
+        sets,
+        addedExercises,
+        removedExerciseIds: Array.from(removedExerciseIds),
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [programId, dayId, sets, addedExercises, removedExerciseIds, elapsedSeconds]);
 
   useEffect(() => {
     if (restSecondsLeft === null) return;
@@ -370,7 +408,53 @@ export default function LiveSessionScreen() {
     goToSummary();
   };
 
-  if (isLoading || isLoadingWorkouts || !day) {
+  if ((isLoading || isLoadingWorkouts) && !program) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  if ((isError || !isOnline) && !day) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <View style={{ padding: spacing.lg }}>
+          <EmptyState
+            icon="cloud-off"
+            title="Séance indisponible hors ligne"
+            text="Impossible de récupérer ce programme pour le moment. Vérifiez votre connexion."
+            tone="danger"
+            actionLabel="Réessayer"
+            onAction={() => refetch()}
+          />
+          <Pressable style={styles.addExerciseButton} onPress={() => router.back()}>
+            <Text style={styles.addExerciseText}>Retour</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!day) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <View style={{ padding: spacing.lg }}>
+          <EmptyState
+            icon="error-outline"
+            title="Jour introuvable"
+            text="Ce jour de programme n'existe plus. Il a peut-être été modifié ou supprimé."
+            tone="danger"
+          />
+          <Pressable style={styles.addExerciseButton} onPress={() => router.back()}>
+            <Text style={styles.addExerciseText}>Retour</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (isLoadingWorkouts && !workouts) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
@@ -386,7 +470,7 @@ export default function LiveSessionScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.topBar}>
-        <Pressable onPress={() => router.navigate(`/(member)/program/${programId}`)} hitSlop={8}>
+        <Pressable onPress={() => setExitConfirmVisible(true)} hitSlop={8}>
           <MaterialIcons name="close" size={24} color={colors.text} />
         </Pressable>
         <View style={{ alignItems: 'center' }}>
@@ -578,6 +662,39 @@ export default function LiveSessionScreen() {
             loading={updateProgram.isPending}
           />
           <Button label="Garder le programme, enregistrer juste la séance" onPress={handleKeepProgramAndFinish} variant="outline" />
+        </View>
+      </BottomSheet>
+
+      <BottomSheet visible={draftPromptVisible} onClose={discardDraft}>
+        <Text style={styles.sheetTitle}>Reprendre la séance en cours ?</Text>
+        <Text style={styles.sheetText}>
+          Vous avez une progression sauvegardée
+          {foundDraft
+            ? ` du ${new Date(foundDraft.savedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
+            : ''}
+          . Voulez-vous la reprendre ou recommencer cette séance depuis le début ?
+        </Text>
+        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+          <Button label="Reprendre" onPress={resumeFromDraft} />
+          <Button label="Recommencer" onPress={discardDraft} variant="outline" />
+        </View>
+      </BottomSheet>
+
+      <BottomSheet visible={exitConfirmVisible} onClose={() => setExitConfirmVisible(false)}>
+        <Text style={styles.sheetTitle}>Abandonner la séance ?</Text>
+        <Text style={styles.sheetText}>
+          Votre progression reste sauvegardée et vous pourrez la reprendre en revenant sur cette séance.
+        </Text>
+        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+          <Button
+            label="Abandonner"
+            onPress={() => {
+              setExitConfirmVisible(false);
+              router.navigate(`/(member)/program/${programId}`);
+            }}
+            variant="secondary"
+          />
+          <Button label="Continuer la séance" onPress={() => setExitConfirmVisible(false)} variant="outline" />
         </View>
       </BottomSheet>
     </SafeAreaView>

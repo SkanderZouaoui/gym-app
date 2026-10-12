@@ -19,6 +19,7 @@ export function useSession(sessionId: string | undefined) {
 export function useCreateBooking() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['createBooking'],
     mutationFn: (sessionId: string) => bookingsApi.create(sessionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me', 'bookings'] });
@@ -30,6 +31,7 @@ export function useCreateBooking() {
 export function useCancelBooking() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['cancelBooking'],
     mutationFn: (bookingId: string) => bookingsApi.cancel(bookingId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me', 'bookings'] });

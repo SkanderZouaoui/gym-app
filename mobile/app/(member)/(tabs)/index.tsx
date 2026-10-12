@@ -13,8 +13,10 @@ import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe
 import { useMyActiveChallenges } from '../../../src/hooks/useLoyalty';
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
 import { useNotifications } from '../../../src/hooks/useProfile';
-import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
+import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useCancelBooking } from '../../../src/hooks/useClasses';
+import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
 import { Banner, OfflineBanner, Pill, ProgressBar, SkeletonBlock, Toast } from '../../../src/components/ui';
@@ -32,10 +34,11 @@ export default function HomeScreen() {
   const { data: challenges } = useMyActiveChallenges();
   const { data: announcements } = useMyAnnouncements();
   const { data: notifications } = useNotifications();
-  const { isOnline, lastSyncAt } = useNetworkStatus();
+  const { isOnline, lastSyncAt } = useNetworkStatusContext();
+  const isDegraded = useSessionStore((s) => s.isDegraded);
   const cancelBooking = useCancelBooking();
   const queryClient = useQueryClient();
-  const [refreshing, setRefreshing] = useState(false);
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
   const [toastVisible, setToastVisible] = useState(false);
 
   const activeChallenge = challenges?.find((c) => !c.completedAt);
@@ -64,12 +67,6 @@ export default function HomeScreen() {
   const expiringSoon =
     activeMembership?.endDate &&
     new Date(activeMembership.endDate).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await queryClient.invalidateQueries();
-    setRefreshing(false);
-  };
 
   const dateLabel = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -104,6 +101,11 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {!isOnline ? (
+        <View style={styles.offlineBannerWrap}>
+          <OfflineBanner lastSyncAt={lastSyncAt} />
+        </View>
+      ) : null}
       <ScrollView
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -120,7 +122,14 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {!isOnline ? <OfflineBanner lastSyncAt={lastSyncAt} /> : null}
+        {isDegraded ? (
+          <Banner
+            tone="warning"
+            icon="sync-problem"
+            title="Session hors ligne"
+            text="Vos informations n'ont pas pu être vérifiées en ligne récemment. Certaines données peuvent être obsolètes."
+          />
+        ) : null}
 
         {expiredMembership ? (
           <Banner
@@ -256,6 +265,10 @@ export default function HomeScreen() {
           iconColor={colors.success}
         />
       ) : null}
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -294,6 +307,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   const textAlign = isRtl ? 'right' as const : 'left' as const;
   return StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.bg },
+  offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
   skeletonHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   hello: { fontFamily: fonts.head, fontSize: 28, color: colors.text, textAlign },

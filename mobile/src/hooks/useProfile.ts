@@ -22,6 +22,7 @@ export interface UpdateProfileInput {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['updateProfile'],
     mutationFn: (dto: UpdateProfileInput) => apiRequest<MeResponse>('/v1/me', { method: 'PATCH', body: dto }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me'] }),
   });
@@ -50,6 +51,7 @@ export function useNotifications() {
 export function useMarkNotificationRead() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['markNotificationRead'],
     mutationFn: (id: string) => apiRequest(`/v1/me/notifications/${id}/read`, { method: 'PATCH' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
   });
@@ -58,6 +60,7 @@ export function useMarkNotificationRead() {
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['markAllNotificationsRead'],
     mutationFn: () => apiRequest('/v1/me/notifications/read-all', { method: 'PATCH' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
   });
@@ -87,6 +90,7 @@ export function useConfirmEmailChange() {
 
 export function useChangePassword() {
   return useMutation({
+    mutationKey: ['changePassword'],
     mutationFn: (input: { currentPassword: string; newPassword: string }) =>
       apiRequest<void>('/v1/me/change-password', { method: 'POST', body: input }),
   });

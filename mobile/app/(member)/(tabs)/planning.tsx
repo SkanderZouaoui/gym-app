@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
@@ -9,7 +9,9 @@ import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useCreateBooking, useSessions } from '../../../src/hooks/useClasses';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { ApiError } from '../../../src/api/client';
-import { Banner, BottomSheet, Chip, EmptyState, SkeletonBlock, SkeletonGroup } from '../../../src/components/ui';
+import { Banner, BottomSheet, Chip, EmptyState, OfflineBanner, SkeletonBlock, SkeletonGroup, Toast } from '../../../src/components/ui';
+import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { CourseCard } from '../../../src/components/adherent/CourseCard';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { Button } from '../../../src/components/Button';
@@ -32,6 +34,8 @@ export default function PlanningScreen() {
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const { data: sessions, isLoading, isError, refetch } = useSessions();
+  const { isOnline, lastSyncAt } = useNetworkStatusContext();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const createBooking = useCreateBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -78,6 +82,12 @@ export default function PlanningScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {!isOnline ? (
+        <View style={styles.bannerWrap}>
+          <OfflineBanner lastSyncAt={lastSyncAt} />
+        </View>
+      ) : null}
+
       <View style={styles.header}>
         <Text style={styles.title}>{t('planning.title')}</Text>
         <Pressable onPress={() => router.push('/(member)/reservations')}>
@@ -140,6 +150,7 @@ export default function PlanningScreen() {
           data={daySessions}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           renderItem={({ item }) => (
             <SessionCard
               session={item}
@@ -200,6 +211,10 @@ export default function PlanningScreen() {
         </View>
         <Button label={t('common.close')} variant="ghost" onPress={() => setOpenSheet(null)} />
       </BottomSheet>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }

@@ -65,6 +65,7 @@ export function useMyActiveChallenges() {
 export function useJoinChallenge() {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: ['joinChallenge'],
     mutationFn: (challengeId: string) =>
       apiRequest(`/v1/challenges/${challengeId}/join`, { method: 'POST' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['challenges'] }),

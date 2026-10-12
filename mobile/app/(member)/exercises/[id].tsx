@@ -1,23 +1,27 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useExercise, useMyWorkouts } from '../../../src/hooks/useCoaching';
-import { Banner, Pill } from '../../../src/components/ui';
+import { Banner, EmptyState, Pill, Toast } from '../../../src/components/ui';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRecordCard';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Fiche exercice — FitZone App Entraînement.dc.html, E3. */
 export default function ExerciseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: exercise, isLoading } = useExercise(id);
-  const { data: workouts } = useMyWorkouts();
+  const { data: exercise, isLoading, isError, refetch } = useExercise(id);
+  const { data: workouts, refetch: refetchWorkouts } = useMyWorkouts();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
+    Promise.all([refetch(), refetchWorkouts()]),
+  );
 
   const parsed = useMemo(() => parseExerciseInstructions(exercise?.instructions ?? null), [exercise]);
 
@@ -40,7 +44,7 @@ export default function ExerciseDetailScreen() {
     return { bestWeight: best.weight, bestReps: best.reps, deltaKg, weeksSpan: points.length >= 2 ? weeksSpan : null, series: points.map((p) => p.weight) };
   }, [workouts, id]);
 
-  if (isLoading || !exercise) {
+  if (isLoading && !exercise) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
@@ -48,10 +52,31 @@ export default function ExerciseDetailScreen() {
     );
   }
 
+  if (!exercise) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <ScreenHeader title="" fallbackHref="/(member)/(tabs)/training" />
+        <View style={{ padding: spacing.lg }}>
+          <EmptyState
+            icon="cloud-off"
+            title="Exercice indisponible"
+            text={isError ? 'Impossible de récupérer cet exercice pour le moment. Vérifiez votre connexion.' : 'Cet exercice est introuvable.'}
+            tone="danger"
+            actionLabel={isError ? 'Réessayer' : undefined}
+            onAction={isError ? () => refetch() : undefined}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref="/(member)/(tabs)/training" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View style={styles.mediaWrap}>
           <ExerciseGif uri={exercise.mediaKey} size={260} />
         </View>
@@ -97,6 +122,10 @@ export default function ExerciseDetailScreen() {
           text="Utilisez des pinces et un pareur au-delà de 80 % de votre maximum."
         />
       </ScrollView>
+
+      {offlineToastVisible ? (
+        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+      ) : null}
     </SafeAreaView>
   );
 }
