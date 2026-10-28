@@ -22,6 +22,7 @@ import { tokenStorage } from '../src/api/storage';
 import { meApi } from '../src/api/endpoints';
 import { ApiError } from '../src/api/client';
 import { queryPersister, QUERY_CACHE_VERSION } from '../src/api/queryStorage';
+import { usePreferencesStore } from '../src/store/preferences';
 import { useSessionStore } from '../src/store/session';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import { RemoteConfigProvider } from '../src/config/RemoteConfigContext';
@@ -91,6 +92,10 @@ export default function RootLayout() {
   const [bootstrapped, setBootstrapped] = useState(false);
   const [cacheRestored, setCacheRestored] = useState(false);
   const setSession = useSessionStore((s) => s.setSession);
+
+  useEffect(() => {
+    void usePreferencesStore.getState().hydrate();
+  }, []);
 
   useEffect(() => {
     if (!cacheRestored) return;

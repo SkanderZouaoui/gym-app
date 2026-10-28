@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fonts } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { useTabBarStore } from '../store/tabBar';
+import { usePreferencesStore } from '../store/preferences';
 
 /** Sous-ensemble des props `tabBar` de React Navigation dont on a besoin
  * (React Navigation est embarqué dans expo-router, pas résolvable directement). API SDK 58 : emitter + navigateToTab.. */
@@ -56,7 +57,9 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   const { colors, scheme } = useTheme();
   const insets = useSafeAreaInsets();
   const dark = scheme === 'dark';
-  const reduceMotion = useReducedMotion();
+  const systemReduceMotion = useReducedMotion();
+  const preferenceReduceMotion = usePreferencesStore((st) => st.reduceMotion);
+  const reduceMotion = systemReduceMotion || preferenceReduceMotion;
   const styles = useMemo(() => makeStyles(colors, dark), [colors, dark]);
   const hidden = useTabBarStore((s) => s.hidden);
   const setHidden = useTabBarStore((s) => s.setHidden);

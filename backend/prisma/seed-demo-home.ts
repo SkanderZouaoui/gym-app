@@ -44,6 +44,18 @@ async function main() {
       data: { name: 'Gym + cours', description: 'Accès salle et cours collectifs', durationDays: 180, price: 540, isPopular: true, includesLabel: 'Accès libre + cours collectifs' },
     });
   }
+  // Autres formules proposées dans l'écran Abonnement de l'app
+  const otherPlans = [
+    { name: 'Gym', description: 'Accès libre à la salle de musculation et de cardio.', durationDays: 30, price: 70, includesLabel: 'Accès libre à la salle', displayOrder: 1 },
+    { name: 'Gym + cours trimestre', description: 'Salle et tous les cours collectifs pendant 3 mois.', durationDays: 90, price: 270, includesLabel: 'Accès libre + cours collectifs', displayOrder: 2 },
+    { name: 'Premium annuel', description: 'Toute l’offre de la salle pendant un an, avec 2 invitations par mois.', durationDays: 365, price: 900, isPopular: true, includesLabel: 'Accès libre + cours + 2 invitations / mois', displayOrder: 3 },
+    { name: 'Étudiant', description: 'Tarif réduit sur présentation de la carte étudiante.', durationDays: 30, price: 50, includesLabel: 'Accès libre en journée', displayOrder: 4 },
+  ];
+  for (const p of otherPlans) {
+    const exists = await prisma.membershipPlan.findFirst({ where: { name: p.name } });
+    if (!exists) await prisma.membershipPlan.create({ data: p });
+  }
+
   const day = 86_400_000;
   const dates = { startDate: new Date(Date.now() - 152 * day), endDate: new Date(Date.now() + 28 * day) };
   const active = await prisma.membership.findFirst({ where: { userId: member.id, status: 'ACTIVE' } });

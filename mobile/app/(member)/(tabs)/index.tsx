@@ -195,7 +195,7 @@ export default function HomeScreen() {
             <Text style={styles.onboardListTitle}>{t('home.onboardTitle')}</Text>
             <OnboardRow icon="check-circle" label={t('home.onboardCompleteProfile')} done onPress={() => router.push('/(member)/profile-edit')} />
             <OnboardRow icon="event-available" label={t('home.onboardFirstBooking')} onPress={() => router.push('/(member)/(tabs)/planning')} />
-            <OnboardRow icon="notifications" label={t('home.onboardNotifications')} onPress={() => router.push('/(member)/settings')} />
+            <OnboardRow icon="notifications" label={t('home.onboardNotifications')} onPress={() => router.push('/(member)/(tabs)/profile')} />
           </View>
         ) : null}
 

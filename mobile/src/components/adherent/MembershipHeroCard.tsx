@@ -15,7 +15,8 @@ interface MembershipHeroCardProps {
   /** Part de la durée restante, entre 0 et 1 (anneau). */
   remainingRatio?: number;
   expired?: boolean;
-  onPressQr: () => void;
+  /** Absent : le bouton « Afficher mon QR » n'est pas affiché. */
+  onPressQr?: () => void;
 }
 
 const RING = 92;
@@ -68,13 +69,15 @@ export function MembershipHeroCard({ planName, periodLabel, daysLeft, remainingR
           </View>
         ) : null}
 
-        <Pressable
-          style={({ pressed }) => [styles.qrButton, expired && styles.qrButtonDisabled, pressed && { transform: [{ scale: 0.97 }] }]}
-          onPress={onPressQr}
-        >
-          <MaterialIcons name="qr-code-2" size={22} color={colors.primaryInk} />
-          <Text style={styles.qrButtonText}>{t('home.qrCardButton')}</Text>
-        </Pressable>
+        {onPressQr ? (
+          <Pressable
+            style={({ pressed }) => [styles.qrButton, expired && styles.qrButtonDisabled, pressed && { transform: [{ scale: 0.97 }] }]}
+            onPress={onPressQr}
+          >
+            <MaterialIcons name="qr-code-2" size={22} color={colors.primaryInk} />
+            <Text style={styles.qrButtonText}>{t('home.qrCardButton')}</Text>
+          </Pressable>
+        ) : null}
       </LinearGradient>
     </View>
   );

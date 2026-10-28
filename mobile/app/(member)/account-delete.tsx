@@ -38,14 +38,14 @@ export default function AccountDeleteScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title="Supprimer mon compte" fallbackHref="/(member)/settings" />
+      <ScreenHeader title="Supprimer mon compte" fallbackHref="/(member)/account-security" />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.warningBox}>
           <MaterialIcons name="warning" size={28} color={colors.dangerInk} />
           <Text style={styles.warningTitle}>Cette action est définitive</Text>
           <Text style={styles.warningText}>
-            La suppression de votre compte entraîne la perte de vos points de fidélité, votre historique de
-            présence, vos réservations et vos messages. Votre abonnement en cours n’est pas annulé automatiquement
+            La suppression de votre compte entraîne la perte de votre historique de présence, de vos
+            séances d’entraînement et de vos réservations. Votre abonnement en cours n’est pas annulé automatiquement
             — contactez l’accueil de votre salle si besoin.
           </Text>
         </View>
