@@ -22,10 +22,10 @@ export type Branding = z.infer<typeof brandingSchema>;
 
 export const DEFAULT_BRANDING: Branding = {
   brand: "MuscleUP",
-  primary: "#6D28D9",
+  primary: "#7C3AED",
   primaryContrast: "#FFFFFF",
   secondary: "#3B1764",
-  accent: "#6D28D9",
+  accent: "#7C3AED",
   theme: "Clair",
   radius: 16,
   font: "Géométrique",
@@ -45,7 +45,7 @@ export const BRAND_PRESETS: Record<string, Pick<Branding, "primary" | "primaryCo
   Énergie: { primary: "#FF5A1F", primaryContrast: "#FFFFFF", secondary: "#14213D", accent: "#FCA311" },
   Calme: { primary: "#0E7C66", primaryContrast: "#FFFFFF", secondary: "#1B3A5C", accent: "#4FB3BF" },
   Premium: { primary: "#C9A24B", primaryContrast: "#111111", secondary: "#111111", accent: "#E8C872" },
-  Violet: { primary: "#6D28D9", primaryContrast: "#FFFFFF", secondary: "#3B1764", accent: "#6D28D9" },
+  Violet: { primary: "#7C3AED", primaryContrast: "#FFFFFF", secondary: "#3B1764", accent: "#7C3AED" },
 };
 
 // ---------------------------------------------------------------------------
@@ -77,7 +77,7 @@ export const DEFAULT_HOME_MODULES: HomeModule[] = [
 // Branding.qrCenter côté navigation plutôt que via ce tableau.
 // ---------------------------------------------------------------------------
 
-export const TAB_IDS = ["home", "planning", "training", "profile"] as const;
+export const TAB_IDS = ["home", "planning", "training", "progress", "profile"] as const;
 export type TabId = (typeof TAB_IDS)[number];
 
 export const tabSchema = z.object({
@@ -93,6 +93,7 @@ export const DEFAULT_TABS: AppTab[] = [
   { id: "home", icon: "home", fr: "Accueil", ar: "الرئيسية", on: true },
   { id: "planning", icon: "calendar_month", fr: "Planning", ar: "الجدول", on: true },
   { id: "training", icon: "fitness_center", fr: "Entraînement", ar: "التمارين", on: true },
+  { id: "progress", icon: "monitoring", fr: "Progrès", ar: "التقدم", on: true },
   { id: "profile", icon: "person", fr: "Profil", ar: "حسابي", on: true },
 ];
 

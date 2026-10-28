@@ -1,44 +1,42 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { fonts, radii } from '../../theme/tokens';
+import { fonts, typography } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
-import { IconCircleButton } from '../ui';
+import { Avatar, IconCircleButton } from '../ui';
 
 interface AppHeaderProps {
+  /** Petite ligne au-dessus du prénom ("Bonjour,"). */
+  greeting: string;
+  firstName?: string;
+  lastName?: string;
   hasUnreadNotification?: boolean;
   onPressNotifications?: () => void;
 }
 
-/** En-tête commun aux écrans racine Adhérent : logo + marque, cloche notifications.
- * Cf. FitZone App Adherent.dc.html, section B1. */
-export function AppHeader({ hasUnreadNotification, onPressNotifications }: AppHeaderProps) {
+/** En-tête de l'Accueil adhérent v2 : avatar à initiales, salutation, cloche.
+ * Cf. Design System/FitZone Mobile Adherent.dc.html, écran Accueil. */
+export function AppHeader({ greeting, firstName, lastName, hasUnreadNotification, onPressNotifications }: AppHeaderProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const initials = `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || 'MU';
   return (
     <View style={styles.row}>
-      <View style={styles.logoRow}>
-        <View style={styles.logo}>
-          <Text style={styles.logoText}>MU</Text>
-        </View>
-        <Text style={styles.brand}>MuscleUP</Text>
+      <Avatar initials={initials} size={44} background={colors.primarySoft} color={colors.primaryInk} />
+      <View style={styles.text}>
+        <Text style={styles.greeting}>{greeting}</Text>
+        <Text style={styles.name} numberOfLines={1}>{firstName ?? ''}</Text>
       </View>
-      <View style={styles.actions}>
-        <IconCircleButton icon="notifications" onPress={onPressNotifications} badge={hasUnreadNotification} />
-      </View>
+      <IconCircleButton icon="notifications-none" radius={14} badgeColor={colors.primary} onPress={onPressNotifications} badge={hasUnreadNotification} />
     </View>
   );
 }
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    logo: {
-      width: 34, height: 34, borderRadius: radii.sm, backgroundColor: colors.primary,
-      alignItems: 'center', justifyContent: 'center',
-    },
-    logoText: { fontFamily: fonts.head, color: colors.primaryContrast, fontSize: 12 },
-    brand: { fontFamily: fonts.head, fontSize: 18, color: colors.text },
-    actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 6, paddingBottom: 6 },
+    text: { flex: 1 },
+    greeting: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
+    name: { ...typography.title, fontSize: 21, color: colors.text },
   });
 }
+

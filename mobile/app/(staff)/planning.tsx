@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useSessions } from '../../src/hooks/useClasses';
+import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
 
 export default function StaffPlanningScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: sessions } = useSessions();
@@ -15,7 +17,7 @@ export default function StaffPlanningScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Planning du site</Text>
       </View>
-      <FlatList
+      <FlatList {...tabBarScroll}
         data={sessions ?? []}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
@@ -43,11 +45,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     header: { padding: spacing.lg, paddingBottom: spacing.sm },
-    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    title: { ...typography.largeTitle, color: colors.text },
     list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
     empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
     },
     className: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },

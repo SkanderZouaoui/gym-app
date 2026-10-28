@@ -4,12 +4,14 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, T
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
-import { controlHeight, fonts, radii, spacing } from '../../../src/theme/tokens';
+import { LinearGradient } from 'expo-linear-gradient';
+import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../src/hooks/useCoachSessions';
 import { useDeleteOwnProgram } from '../../../src/hooks/useCoaching';
 import { Button } from '../../../src/components/Button';
 import { BottomSheet, EmptyState, OfflineBanner, Toast } from '../../../src/components/ui';
+import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
@@ -18,7 +20,7 @@ const DAY_LABELS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi
 /** Détail du programme — FitZone App Entraînement.dc.html, D2. */
 export default function ProgramDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: program, isLoading, isError, refetch } = useProgramDetail(id);
   const deleteProgram = useDeleteOwnProgram();
@@ -66,7 +68,12 @@ export default function ProgramDetailScreen() {
         day.exercises.reduce((total, ex) => total + ex.sets * (45 + (ex.restSeconds ?? 60)), 0) / 60,
       )
     : 0;
-  const mainMuscleGroup = day?.exercises.find((ex) => ex.exercise.muscleGroup)?.exercise.muscleGroup;
+  const totalSets = day?.exercises.reduce((sum, ex) => sum + ex.sets, 0) ?? 0;
+  const muscles = Array.from(
+    new Set((day?.exercises ?? []).map((ex) => ex.exercise.muscleGroup).filter((g): g is string => !!g)),
+  ).map(muscleGroupLabel);
+
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(member)/(tabs)/training'));
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -75,95 +82,125 @@ export default function ProgramDetailScreen() {
           <OfflineBanner lastSyncAt={lastSyncAt} />
         </View>
       ) : null}
-      <ScreenHeader title="" fallbackHref="/(member)/(tabs)/training" />
-      <View style={styles.header}>
-        <View style={styles.headerTopRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>{program.name}</Text>
-            <Text style={styles.subtitle}>{program.days.length} jour{program.days.length > 1 ? 's' : ''} / semaine</Text>
-          </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.topBar}>
+          <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
+            <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
+            <Text style={styles.backText}>Programmes</Text>
+          </Pressable>
           {isOwn ? (
             <Pressable style={styles.headerActionButton} onPress={() => setMenuOpen(true)} hitSlop={8}>
               <MaterialIcons name="more-vert" size={20} color={colors.text} />
             </Pressable>
           ) : null}
         </View>
-      </View>
 
-      <View style={styles.dayTabsWrap}>
-        {program.days.map((d, i) => (
-          <Pressable
-            key={d.id}
-            onPress={() => setActiveDayIndex(i)}
-            style={[styles.dayTab, i === activeDayIndex && styles.dayTabActive]}
-          >
-            <Text style={[styles.dayTabText, i === activeDayIndex && styles.dayTabTextActive]}>
-              {d.label ?? DAY_LABELS[d.dayOfWeek]}
+        <View style={styles.heroShadow}>
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <View style={styles.heroDecor} />
+            <View style={styles.heroTag}>
+              <Text style={styles.heroTagText}>{isOwn ? 'Perso' : 'Coach'}</Text>
+            </View>
+            <Text style={styles.heroTitle}>{program.name}</Text>
+            <Text style={styles.heroSub}>
+              {program.days.length} séance{program.days.length > 1 ? 's' : ''} par semaine
+              {day ? ` · ${day.label ?? DAY_LABELS[day.dayOfWeek]}` : ''}
             </Text>
-          </Pressable>
-        ))}
-      </View>
+          </LinearGradient>
+        </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryItem}>
-            <MaterialIcons name="schedule" size={18} color={colors.muted} />
-            <Text style={styles.summaryValue}>≈ {estimatedMinutes} min</Text>
+        {program.days.length > 1 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayTabs}>
+            {program.days.map((d, i) => (
+              <Pressable key={d.id} onPress={() => setActiveDayIndex(i)} style={styles.dayTab}>
+                {i === activeDayIndex ? (
+                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                ) : null}
+                <Text style={[styles.dayTabText, i === activeDayIndex && styles.dayTabTextActive]}>
+                  {d.label ?? DAY_LABELS[d.dayOfWeek]}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        ) : null}
+
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{day?.exercises.length ?? 0}</Text>
+            <Text style={styles.statLabel}>Exercices</Text>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryItem}>
-            <MaterialIcons name="format-list-bulleted" size={18} color={colors.muted} />
-            <Text style={styles.summaryValue}>{day?.exercises.length ?? 0} exercices</Text>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{totalSets}</Text>
+            <Text style={styles.statLabel}>Séries</Text>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryItem}>
-            <MaterialIcons name="track-changes" size={18} color={colors.muted} />
-            <Text style={styles.summaryValue} numberOfLines={1}>{mainMuscleGroup ?? '—'}</Text>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>~{estimatedMinutes} min</Text>
+            <Text style={styles.statLabel}>Durée</Text>
           </View>
         </View>
 
-        {day?.exercises.map((ex, i) => {
-          const firstSet = ex.setDetails[0];
-          return (
-            <Pressable
-              key={ex.id}
-              style={styles.exerciseCard}
-              onPress={() =>
-                router.push({
-                  pathname: '/(member)/exercises/view',
-                  params: { exerciseId: ex.exercise.id, sets: String(ex.sets), reps: ex.reps, setDetails: JSON.stringify(ex.setDetails), programId: program.id },
-                })
-              }
-            >
-              <Text style={styles.exerciseIndexText}>{String(i + 1).padStart(2, '0')}</Text>
-              <View style={styles.exerciseThumb}>
-                <MaterialIcons name="fitness-center" size={18} color={colors.muted} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.exerciseName}>{ex.exercise.name}</Text>
-                <Text style={styles.exerciseMeta}>
-                  {ex.sets} × {ex.reps}
-                  {ex.restSeconds ? `  repos ${ex.restSeconds} s` : ''}
-                  {firstSet?.weightKg ? `  ${firstSet.weightKg} kg` : ''}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        })}
+        {muscles.length > 0 ? (
+          <View>
+            <Text style={styles.sectionTitle}>Muscles ciblés</Text>
+            <View style={styles.chipsRow}>
+              {muscles.map((m) => (
+                <View key={m} style={styles.muscleChip}>
+                  <Text style={styles.muscleChipText}>{m}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+
+        <View>
+          <Text style={styles.sectionTitle}>Exercices</Text>
+          <View style={{ gap: 10 }}>
+            {day?.exercises.map((ex, i) => {
+              const firstSet = ex.setDetails[0];
+              return (
+                <Pressable
+                  key={ex.id}
+                  style={({ pressed }) => [styles.exerciseCard, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(member)/exercises/view',
+                      params: { exerciseId: ex.exercise.id, sets: String(ex.sets), reps: ex.reps, setDetails: JSON.stringify(ex.setDetails), programId: program.id },
+                    })
+                  }
+                >
+                  <View style={styles.indexBadge}>
+                    <Text style={styles.indexBadgeText}>{i + 1}</Text>
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.exerciseName} numberOfLines={2}>{ex.exercise.name}</Text>
+                    {ex.exercise.muscleGroup ? (
+                      <Text style={styles.exerciseMeta} numberOfLines={1}>{muscleGroupLabel(ex.exercise.muscleGroup)}</Text>
+                    ) : null}
+                  </View>
+                  <View style={styles.exerciseRight}>
+                    <Text style={styles.exerciseSets}>{ex.sets} × {ex.reps}</Text>
+                    <Text style={styles.exerciseMeta}>{firstSet?.weightKg ? `${Number(firstSet.weightKg)} kg` : 'Poids du corps'}</Text>
+                  </View>
+                  <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
-          style={styles.startButton}
           onPress={() => day && router.push(`/(member)/session/live/${program.id}/${day.id}`)}
+          style={({ pressed }) => [styles.startShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <MaterialIcons name="play-arrow" size={20} color={colors.primaryContrast} />
-          <Text style={styles.startButtonText}>
-            Démarrer {day?.label ?? DAY_LABELS[day?.dayOfWeek ?? 0]}
-          </Text>
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.startButton}>
+            <MaterialIcons name="play-arrow" size={24} color={colors.primaryContrast} />
+            <Text style={styles.startButtonText}>Démarrer la séance</Text>
+          </LinearGradient>
         </Pressable>
       </View>
 
@@ -208,59 +245,63 @@ export default function ProgramDetailScreen() {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  header: { paddingHorizontal: spacing.lg, gap: 2 },
-  headerTopRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-  headerActionButton: {
-    width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: colors.border,
-    backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
-  },
-  title: { fontFamily: fonts.head, fontSize: 24, color: colors.text },
-  subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-  dayTabsWrap: {
-    flexDirection: 'row', paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, gap: 6,
-  },
-  dayTab: {
-    flex: 1, height: 44, borderRadius: radii.sm, backgroundColor: colors.surface2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  dayTabActive: { backgroundColor: colors.primarySoft },
-  dayTabText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
-  dayTabTextActive: { color: colors.primaryInk },
-  content: { paddingHorizontal: spacing.lg, gap: spacing.sm, paddingBottom: 140 },
-  summaryCard: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface,
-    borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    paddingVertical: spacing.sm, marginBottom: spacing.xs,
-  },
-  summaryItem: { flex: 1, alignItems: 'center', gap: 4, paddingHorizontal: 4 },
-  summaryValue: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.text, textTransform: 'capitalize' },
-  summaryDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.border },
-  exerciseCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface,
-    borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, padding: spacing.sm,
-  },
-  exerciseThumb: {
-    width: 44, height: 44, borderRadius: radii.sm, backgroundColor: colors.surface2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  exerciseIndexText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.muted, width: 18 },
-  exerciseName: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text, textTransform: 'capitalize' },
-  exerciseMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, textTransform: 'capitalize' },
-  footer: {
-    position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface,
-    borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,
-  },
-  startButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    height: controlHeight, borderRadius: radii.sm, backgroundColor: colors.primary,
-  },
-  startButtonText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryContrast },
-  sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
-  sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
-  menuItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 12, height: 50, paddingHorizontal: spacing.xs,
-  },
-  menuItemText: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.text },
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
+    topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 },
+    backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    headerActionButton: {
+      width: 40, height: 40, borderRadius: 14, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
+    },
+    heroShadow: {
+      borderRadius: radii.xl, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8,
+    },
+    hero: { borderRadius: radii.xl, padding: 22, gap: 8, overflow: 'hidden' },
+    heroDecor: { position: 'absolute', right: -40, top: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.12)' },
+    heroTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 999 },
+    heroTagText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
+    heroTitle: { fontFamily: fonts.head, fontSize: 28, lineHeight: 32, letterSpacing: -1, color: '#FFFFFF' },
+    heroSub: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: 'rgba(255,255,255,0.92)' },
+    dayTabs: { gap: 8 },
+    dayTab: {
+      height: 36, paddingHorizontal: 16, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    },
+    dayTabText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    dayTabTextActive: { color: colors.primaryContrast },
+    statsRow: { flexDirection: 'row', gap: 10 },
+    statCard: {
+      flex: 1, padding: 14, gap: 2, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+    },
+    statValue: { fontFamily: fonts.head, fontSize: 24, lineHeight: 28, letterSpacing: -0.8, color: colors.text },
+    statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
+    chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    muscleChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primarySoft },
+    muscleChipText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
+    exerciseCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: colors.surface,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+    },
+    indexBadge: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    indexBadgeText: { fontFamily: fonts.head, fontSize: 14, color: colors.primaryInk },
+    exerciseName: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, textTransform: 'capitalize' },
+    exerciseMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    exerciseRight: { alignItems: 'flex-end' },
+    exerciseSets: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
+    footer: {
+      position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.bg,
+      borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,
+    },
+    startShadow: {
+      borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
+    },
+    startButton: { minHeight: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    startButtonText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
+    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
+    menuItem: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 50, paddingHorizontal: spacing.xs },
+    menuItemText: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.text },
   });
 }

@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMe } from '../../../src/hooks/useMe';
 import { useCoachSessions } from '../../../src/hooks/useCoachSessions';
@@ -11,9 +11,11 @@ import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
 import { EmptyState, OfflineBanner, SkeletonBlock } from '../../../src/components/ui';
 import { CoachStatCard } from '../../../src/components/coach/CoachStatCard';
 import { DayScheduleRow } from '../../../src/components/coach/DayScheduleRow';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 /** Accueil Coach — FitZone App Coach.dc.html, I1. */
 export default function CoachTodayScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user, isLoading: userLoading } = useMe();
@@ -73,7 +75,7 @@ export default function CoachTodayScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.title}>Bonjour, {user?.firstName}</Text>
@@ -146,7 +148,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontFamily: fonts.head, fontSize: 26, color: colors.text },
+    title: { ...typography.largeTitle, fontSize: 28, color: colors.text },
     subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
     statsRow: { flexDirection: 'row', gap: spacing.sm },
     nextCard: { backgroundColor: colors.secondary, borderRadius: radii.lg, padding: spacing.md, gap: 8 },
@@ -163,6 +165,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     rollCallText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryContrast },
     sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, color: colors.text },
-    dayList: { backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.md },
+    dayList: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.md },
   });
 }

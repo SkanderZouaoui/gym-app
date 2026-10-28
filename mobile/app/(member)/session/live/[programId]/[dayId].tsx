@@ -1,13 +1,14 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Swipeable } from 'react-native-gesture-handler';
 import { MaterialIcons } from '@expo/vector-icons';
-import { controlHeight, fonts, radii, spacing } from '../../../../../src/theme/tokens';
+import { LinearGradient } from 'expo-linear-gradient';
+import { fonts, radii, spacing } from '../../../../../src/theme/tokens';
 import { useTheme } from '../../../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../../../src/hooks/useCoachSessions';
-import { Banner, BottomSheet, CircularTimer, EmptyState } from '../../../../../src/components/ui';
+import { Banner, BottomSheet, EmptyState, ScreenTitle } from '../../../../../src/components/ui';
+import { WorkoutHeroCard } from '../../../../../src/components/training/WorkoutHeroCard';
 import { Button } from '../../../../../src/components/Button';
 import { SetTableRow, type SetRowState } from '../../../../../src/components/training/SetTableRow';
 import {
@@ -19,6 +20,7 @@ import {
 import type { SetDraft } from '../../../../../src/components/training/SetRow';
 import { clearSessionDraft, readSessionDraft, writeSessionDraft } from '../../../../../src/hooks/useSessionDraft';
 import { useNetworkStatusContext } from '../../../../../src/hooks/NetworkStatusContext';
+import { useExercisePickStore } from '../../../../../src/store/exercisePick';
 
 interface LiveSet {
   exerciseId: string;
@@ -56,7 +58,7 @@ export default function LiveSessionScreen() {
     pickedExerciseName?: string;
     pickedExerciseSets?: string;
   }>();
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: program, isLoading, isError, refetch } = useProgramDetail(programId);
   const { data: workouts, isLoading: isLoadingWorkouts } = useMyWorkouts();
@@ -85,7 +87,7 @@ export default function LiveSessionScreen() {
   const [error, setError] = useState<string | null>(null);
   const [errorGlobalIndex, setErrorGlobalIndex] = useState<number | null>(null);
   const [restSecondsLeft, setRestSecondsLeft] = useState<number | null>(null);
-  const [restTotal, setRestTotal] = useState(90);
+  const [, setRestTotal] = useState(90);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [saveChoiceOpen, setSaveChoiceOpen] = useState(false);
   const [removedExerciseIds, setRemovedExerciseIds] = useState<Set<string>>(new Set());
@@ -93,10 +95,9 @@ export default function LiveSessionScreen() {
   const [draftPromptVisible, setDraftPromptVisible] = useState(() => !!foundDraft);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
   const startedAt = useRef<number>(Date.now() - (foundDraft?.elapsedSeconds ?? 0) * 1000);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const exerciseOffsets = useRef<Record<string, number>>({});
   const lastScrolledExerciseId = useRef<string | null>(null);
-  const exerciseSwipeRefs = useRef<Map<string, Swipeable>>(new Map());
 
   useLayoutEffect(() => {
     const parent = navigation.getParent();
@@ -206,18 +207,32 @@ export default function LiveSessionScreen() {
     scrollRef.current?.scrollTo({ y: Math.max(0, y - spacing.sm), animated: true });
   }, [currentExerciseId]);
 
+  const pick = useExercisePickStore((st) => st.pick);
+  const clearPick = useExercisePickStore((st) => st.clear);
+
+  // Exercice ajouté depuis la bibliothèque : l'écran est resté monté, on lui passe le choix via le store.
   useEffect(() => {
-    if (!pickedExerciseId || !pickedExerciseName || !pickedExerciseSets) return;
-    const draftSets: SetDraft[] = JSON.parse(pickedExerciseSets);
-    setAddedExercises((prev) =>
-      prev.some((e) => e.exerciseId === pickedExerciseId) ? prev : [...prev, { exerciseId: pickedExerciseId, name: pickedExerciseName }],
-    );
+    let incoming: { exerciseId: string; name: string; sets: SetDraft[] } | null = null;
+    if (pick && pick.target === 'session') {
+      incoming = { exerciseId: pick.exerciseId, name: pick.name, sets: pick.sets };
+    } else if (pickedExerciseId && pickedExerciseName && pickedExerciseSets) {
+      incoming = { exerciseId: pickedExerciseId, name: pickedExerciseName, sets: JSON.parse(pickedExerciseSets) as SetDraft[] };
+    }
+    if (!incoming) return;
+    const { exerciseId, name, sets: draftSets } = incoming;
+    setAddedExercises((prev) => (prev.some((e) => e.exerciseId === exerciseId) ? prev : [...prev, { exerciseId, name }]));
+    setRemovedExerciseIds((prev) => {
+      if (!prev.has(exerciseId)) return prev;
+      const next = new Set(prev);
+      next.delete(exerciseId);
+      return next;
+    });
     setSets((prev) => [
-      ...prev,
-      ...draftSets.map((d) => ({
-        exerciseId: pickedExerciseId,
-        exerciseName: pickedExerciseName,
-        setNumber: d.setNumber,
+      ...prev.filter((s) => s.exerciseId !== exerciseId),
+      ...draftSets.map((d, i) => ({
+        exerciseId,
+        exerciseName: name,
+        setNumber: i + 1,
         previousLabel: '—',
         weightKg: d.weightKg ?? '',
         weightTouched: !!d.weightKg,
@@ -227,10 +242,13 @@ export default function LiveSessionScreen() {
         isExtraSet: false,
       })),
     ]);
-    setActiveExerciseId(pickedExerciseId);
-    router.setParams({ pickedExerciseId: undefined, pickedExerciseName: undefined, pickedExerciseSets: undefined });
+    setActiveExerciseId(exerciseId);
+    if (pick) clearPick();
+    if (pickedExerciseId) {
+      router.setParams({ pickedExerciseId: undefined, pickedExerciseName: undefined, pickedExerciseSets: undefined });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pickedExerciseId]);
+  }, [pick, pickedExerciseId]);
 
   const updateSet = (globalIndex: number, patch: Partial<LiveSet>) => {
     setSets((prev) => prev.map((s, i) => (i === globalIndex ? { ...s, ...patch } : s)));
@@ -330,7 +348,7 @@ export default function LiveSessionScreen() {
     return false;
   }, [day, addedExercises, sets, exerciseGroups]);
 
-  const goToSummary = () => {
+  const goToSummary = (summaryDayId: string | undefined = dayId) => {
     const doneSetsList = sets.filter((s) => s.done);
     const payload = doneSetsList.map((s) => ({
       exerciseId: s.exerciseId,
@@ -345,7 +363,7 @@ export default function LiveSessionScreen() {
       pathname: '/(member)/session/summary',
       params: {
         programId,
-        dayId,
+        dayId: summaryDayId,
         workoutSets: JSON.stringify(payload),
         elapsedSeconds: String(elapsedSeconds),
         avgRestSeconds: String(avgRestSeconds),
@@ -399,7 +417,14 @@ export default function LiveSessionScreen() {
     };
     updateProgram.mutate(
       { id: program.id, payload },
-      { onSuccess: () => { setSaveChoiceOpen(false); goToSummary(); } },
+      {
+        onSuccess: (updated) => {
+          setSaveChoiceOpen(false);
+          // La mise à jour du programme régénère ses jours : on récupère l'identifiant du jour équivalent.
+          const newDayId = updated?.days?.find((d) => d.dayOfWeek === day.dayOfWeek)?.id;
+          goToSummary(newDayId);
+        },
+      },
     );
   };
 
@@ -465,39 +490,51 @@ export default function LiveSessionScreen() {
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
   const totalSets = sets.length;
-  const doneSets = sets.filter((s) => s.done).length;
+  const doneSetsList = sets.filter((s) => s.done);
+  const doneSets = doneSetsList.length;
+  const volume = doneSetsList.reduce((sum, s) => sum + (Number(s.weightKg) || 0) * (Number(s.reps) || 0), 0);
+  const progressRatio = totalSets > 0 ? doneSets / totalSets : 0;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.topBar}>
-        <Pressable onPress={() => setExitConfirmVisible(true)} hitSlop={8}>
-          <MaterialIcons name="close" size={24} color={colors.text} />
-        </Pressable>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={styles.topBarTitle}>{day.label}</Text>
-          <Text style={styles.topBarSub}>{minutes}:{String(seconds).padStart(2, '0')} écoulées</Text>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.topBar}>
+          <Pressable style={styles.back} onPress={() => setExitConfirmVisible(true)} hitSlop={8}>
+            <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
+            <Text style={styles.backText}>Quitter</Text>
+          </Pressable>
+          <View style={styles.liveTag}>
+            <Text style={styles.liveTagText}>● En cours</Text>
+          </View>
         </View>
-        <Pressable style={styles.finishPill} onPress={handleFinish}>
-          <Text style={styles.finishPillText}>Terminer</Text>
-        </Pressable>
-      </View>
 
-      <View style={styles.progressRow}>
-        <View style={styles.progressSegments}>
-          {exerciseGroups.map(([exId], i) => (
-            <View key={exId} style={[styles.segment, i <= currentExerciseIndex && styles.segmentDone]} />
-          ))}
-        </View>
-        <Text style={styles.progressCount}>{doneSets} / {totalSets} séries</Text>
-      </View>
+        <ScreenTitle title={day.label ?? program?.name ?? 'Séance'} subtitle="Suivi des exercices et des séries" />
 
-      {error ? (
-        <View style={{ paddingHorizontal: spacing.lg, marginBottom: spacing.xs }}>
-          <Banner tone="danger" icon="error" text={error} />
-        </View>
-      ) : null}
+        <WorkoutHeroCard
+          duration={`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`}
+          progress={progressRatio}
+          ringLabel={`${Math.round(progressRatio * 100)}%`}
+          volume={`${Math.round(volume).toLocaleString('fr-FR')} kg`}
+          sets={`${doneSets}/${totalSets}`}
+        />
 
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
+        {restSecondsLeft !== null ? (
+          <View style={styles.restBanner}>
+            <MaterialIcons name="timer" size={24} color={colors.primaryInk} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.restLabel}>REPOS</Text>
+              <Text style={styles.restTime}>
+                {Math.floor(restSecondsLeft / 60)}:{String(restSecondsLeft % 60).padStart(2, '0')}
+              </Text>
+            </View>
+            <Pressable style={styles.restSkip} onPress={() => setRestSecondsLeft(0)}>
+              <Text style={styles.restSkipText}>Passer</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {error ? <Banner tone="danger" icon="error" text={error} /> : null}
+
         {exerciseGroups.map(([exId, exSets], exIndex) => {
           const exDoneCount = exSets.filter((s) => s.done).length;
           const isExerciseDone = exDoneCount === exSets.length;
@@ -505,62 +542,46 @@ export default function LiveSessionScreen() {
           const localCurrentSetIndex = exSets.findIndex((s) => !s.done);
 
           return (
-            <Swipeable
-              key={exId}
-              ref={(ref) => {
-                if (ref) exerciseSwipeRefs.current.set(exId, ref);
-                else exerciseSwipeRefs.current.delete(exId);
-              }}
-              enabled={exerciseGroups.length > 1}
-              renderRightActions={
-                exerciseGroups.length > 1
-                  ? () => (
-                      <Pressable
-                        style={styles.deleteExerciseAction}
-                        onPress={() => {
-                          exerciseSwipeRefs.current.get(exId)?.close();
-                          removeExercise(exId);
-                        }}
-                      >
-                        <MaterialIcons name="delete-outline" size={22} color={colors.primaryContrast} />
-                        <Text style={styles.deleteExerciseActionText}>Retirer</Text>
-                      </Pressable>
-                    )
-                  : undefined
-              }
-              overshootRight={false}
-            >
-            <View
-              style={[styles.exerciseBlock, isCurrentExercise && styles.exerciseBlockCurrent]}
-              onLayout={(e) => {
-                exerciseOffsets.current[exId] = e.nativeEvent.layout.y;
-              }}
-            >
-              <Pressable style={styles.exerciseHeaderRow} onPress={() => setActiveExerciseId(exId)}>
-                <View style={[styles.exerciseThumb, isExerciseDone && styles.exerciseThumbDone]}>
-                  {isExerciseDone ? (
-                    <MaterialIcons name="check" size={20} color={colors.primaryContrast} />
-                  ) : (
-                    <MaterialIcons name="fitness-center" size={20} color={colors.muted} />
-                  )}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.exerciseCounter}>
-                    EXERCICE {exIndex + 1} SUR {exerciseGroups.length}
-                    {isExerciseDone ? ' · TERMINÉ' : isCurrentExercise ? ' · EN COURS' : ''}
-                  </Text>
-                  <Text style={styles.exerciseName}>{exSets[0]?.exerciseName}</Text>
-                  <Text style={styles.exerciseMeta}>{exSets.length} séries</Text>
-                </View>
-              </Pressable>
+            <View key={exId}>
+              <View
+                style={[styles.exerciseBlock, cardShadow, !isCurrentExercise && !isExerciseDone && styles.exerciseBlockIdle]}
+                onLayout={(e) => {
+                  exerciseOffsets.current[exId] = e.nativeEvent.layout.y;
+                }}
+              >
+                <Pressable
+                  style={styles.exerciseHeaderRow}
+                  onPress={() => {
+                    setActiveExerciseId(exId);
+                    router.push(`/(member)/exercises/${exId}`);
+                  }}
+                >
+                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
+                    <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
+                  </LinearGradient>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.exerciseName} numberOfLines={1}>{exSets[0]?.exerciseName}</Text>
+                    <Text style={styles.exerciseMeta}>
+                      Exercice {exIndex + 1} sur {exerciseGroups.length}
+                    </Text>
+                  </View>
+                  <View style={[styles.progTag, isExerciseDone ? styles.progTagDone : isCurrentExercise ? styles.progTagCurrent : null]}>
+                    <Text style={[styles.progTagText, isExerciseDone ? styles.progTagTextDone : isCurrentExercise ? styles.progTagTextCurrent : null]}>
+                      {exDoneCount}/{exSets.length}
+                    </Text>
+                  </View>
+                  {exerciseGroups.length > 1 ? (
+                    <Pressable style={styles.trashButton} onPress={() => removeExercise(exId)} hitSlop={6} accessibilityLabel="Retirer l'exercice">
+                      <MaterialIcons name="delete-outline" size={22} color={colors.dangerInk} />
+                    </Pressable>
+                  ) : null}
+                </Pressable>
 
-              <View style={styles.table}>
                 <View style={styles.tableHeader}>
-                  <Text style={[styles.tableHeaderText, { width: 40, textAlign: 'center' }]}>SÉRIE</Text>
-                  <Text style={[styles.tableHeaderText, { flex: 1 }]}>PRÉCÉDENT</Text>
-                  <Text style={[styles.tableHeaderText, { width: 60, textAlign: 'center' }]}>KG</Text>
-                  <Text style={[styles.tableHeaderText, { width: 60, textAlign: 'center' }]}>REP</Text>
-                  <View style={{ width: 32 }} />
+                  <Text style={[styles.tableHeaderText, { width: 34, textAlign: 'center' }]}>SÉRIE</Text>
+                  <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>KG</Text>
+                  <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>REPS</Text>
+                  <View style={{ width: 44 }} />
                 </View>
                 {exSets.map((s, i) => {
                   const globalIdx = globalIndexOf(s.exerciseId, s.setNumber);
@@ -570,7 +591,6 @@ export default function LiveSessionScreen() {
                     <SetTableRow
                       key={s.setNumber}
                       setNumber={s.setNumber}
-                      previousLabel={s.previousLabel}
                       weightKg={s.weightKg}
                       reps={s.reps}
                       state={state}
@@ -587,12 +607,10 @@ export default function LiveSessionScreen() {
                 })}
 
                 <Pressable style={styles.addSetButton} onPress={() => addSet(exId)}>
-                  <MaterialIcons name="add" size={18} color={colors.primaryInk} />
-                  <Text style={styles.addSetText}>Ajouter une série</Text>
+                  <Text style={styles.addSetText}>+ Ajouter une série</Text>
                 </Pressable>
               </View>
             </View>
-            </Swipeable>
           );
         })}
 
@@ -605,48 +623,29 @@ export default function LiveSessionScreen() {
             })
           }
         >
-          <MaterialIcons name="library-add" size={18} color={colors.primaryInk} />
+          <MaterialIcons name="add" size={22} color={colors.primaryInk} />
           <Text style={styles.addExerciseText}>Ajouter un exercice</Text>
         </Pressable>
       </ScrollView>
 
       <View style={styles.footer}>
         <Pressable
-          style={styles.validateButton}
           onPress={currentSetIndex >= 0 ? handleValidate : handleFinish}
+          style={({ pressed }) => [styles.validateShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <MaterialIcons name="check" size={18} color={colors.primaryContrast} />
-          <Text style={styles.validateButtonText}>
-            {currentSetIndex >= 0 ? `Valider la série ${currentSets[currentSetIndex]?.setNumber}` : 'Terminer la séance'}
-          </Text>
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.validateButton}>
+            <MaterialIcons name={currentSetIndex >= 0 ? 'check' : 'flag'} size={24} color={colors.primaryContrast} />
+            <Text style={styles.validateButtonText}>
+              {currentSetIndex >= 0 ? `Valider la série ${currentSets[currentSetIndex]?.setNumber}` : 'Terminer la séance'}
+            </Text>
+          </LinearGradient>
         </Pressable>
+        {currentSetIndex >= 0 ? (
+          <Pressable style={styles.finishLink} onPress={handleFinish}>
+            <Text style={styles.finishLinkText}>Terminer la séance</Text>
+          </Pressable>
+        ) : null}
       </View>
-
-      <BottomSheet visible={restSecondsLeft !== null} onClose={() => setRestSecondsLeft(null)}>
-        <View style={styles.restContent}>
-          <Text style={styles.restLabel}>REPOS</Text>
-          <View style={styles.restRing}>
-            <CircularTimer progress={(restSecondsLeft ?? 0) / restTotal} size={160} strokeWidth={10} />
-            <View style={styles.restCenter}>
-              <Text style={styles.restTime}>
-                {Math.floor((restSecondsLeft ?? 0) / 60)}:{String((restSecondsLeft ?? 0) % 60).padStart(2, '0')}
-              </Text>
-              <Text style={styles.restTotalText}>sur {Math.floor(restTotal / 60)}:{String(restTotal % 60).padStart(2, '0')}</Text>
-            </View>
-          </View>
-          <View style={styles.restButtonsRow}>
-            <Pressable style={styles.restButton} onPress={() => setRestSecondsLeft((s) => Math.max(0, (s ?? 0) - 15))}>
-              <Text style={styles.restButtonText}>−15 s</Text>
-            </Pressable>
-            <Pressable style={styles.restButton} onPress={() => setRestSecondsLeft((s) => (s ?? 0) + 15)}>
-              <Text style={styles.restButtonText}>+15 s</Text>
-            </Pressable>
-            <Pressable style={[styles.restButton, styles.restButtonPrimary]} onPress={() => setRestSecondsLeft(0)}>
-              <Text style={styles.restButtonPrimaryText}>Passer</Text>
-            </Pressable>
-          </View>
-        </View>
-      </BottomSheet>
 
       <BottomSheet visible={saveChoiceOpen} onClose={() => setSaveChoiceOpen(false)}>
         <Text style={styles.sheetTitle}>Programme modifié</Text>
@@ -703,77 +702,60 @@ export default function LiveSessionScreen() {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  topBar: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.sm,
-  },
-  topBarTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
-  topBarSub: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
-  finishPill: { height: 32, paddingHorizontal: 14, borderRadius: radii.full, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center' },
-  finishPillText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.dangerInk },
-  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
-  progressSegments: { flex: 1, flexDirection: 'row', gap: 4 },
-  segment: { flex: 1, height: 4, borderRadius: 2, backgroundColor: colors.border },
-  segmentDone: { backgroundColor: colors.primary },
-  progressCount: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, color: colors.muted },
-  content: { paddingHorizontal: spacing.lg, gap: spacing.lg, paddingBottom: 140, paddingTop: spacing.xs },
-  exerciseBlock: { gap: spacing.sm, opacity: 0.6 },
-  exerciseBlockCurrent: { opacity: 1 },
-  exerciseHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  exerciseThumb: {
-    width: 52, height: 52, borderRadius: radii.sm, backgroundColor: colors.surface2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  exerciseThumbDone: { backgroundColor: colors.success },
-  exerciseCounter: { fontFamily: fonts.bodySemiBold, fontSize: 11, letterSpacing: 0.4, color: colors.primaryInk },
-  exerciseName: { fontFamily: fonts.head, fontSize: 20, color: colors.text, textTransform: 'capitalize' },
-  exerciseMeta: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-  table: {
-    backgroundColor: colors.surface, borderRadius: radii.md, padding: spacing.sm, gap: 2,
-    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 3,
-  },
-  tableHeader: { flexDirection: 'row', gap: 8, paddingHorizontal: 6, paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: colors.border },
-  tableHeaderText: { fontFamily: fonts.bodySemiBold, fontSize: 10.5, color: colors.muted, letterSpacing: 0.3 },
-  addSetButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    height: 44, marginTop: 4, borderRadius: radii.xs,
-  },
-  addSetText: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.primaryInk },
-  deleteExerciseAction: {
-    width: 84, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center',
-    gap: 2, borderRadius: radii.md, marginLeft: 8,
-  },
-  deleteExerciseActionText: { fontFamily: fonts.bodyBold, fontSize: 11.5, color: colors.primaryContrast },
-  addExerciseButton: {
-    height: 48, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.primaryBorder, borderStyle: 'dashed',
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primarySoft,
-  },
-  addExerciseText: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.primaryInk },
-  footer: {
-    position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface,
-    borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,
-  },
-  validateButton: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    height: controlHeight, borderRadius: radii.sm, backgroundColor: colors.primary,
-  },
-  validateButtonText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryContrast },
-  restContent: { alignItems: 'center', gap: spacing.md, paddingBottom: spacing.md },
-  restLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, letterSpacing: 0.5, color: colors.muted },
-  restRing: { alignItems: 'center', justifyContent: 'center' },
-  restCenter: { position: 'absolute', alignItems: 'center' },
-  restTime: { fontFamily: fonts.head, fontSize: 36, color: colors.text },
-  restTotalText: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-  restButtonsRow: { flexDirection: 'row', gap: 10, width: '100%' },
-  restButton: {
-    flex: 1, height: 44, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  restButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.text },
-  restButtonPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
-  restButtonPrimaryText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryContrast },
-  sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
-  sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingHorizontal: spacing.lg, gap: 12, paddingBottom: 190 },
+    topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 },
+    backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    liveTag: { backgroundColor: colors.successSoft, borderRadius: radii.full, paddingHorizontal: 11, paddingVertical: 5 },
+    liveTagText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.successInk },
+    restBanner: {
+      flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primarySoft, borderRadius: 20,
+      paddingVertical: 10, paddingLeft: 16, paddingRight: 10,
+    },
+    restLabel: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.8, color: colors.primaryInk },
+    restTime: { fontFamily: fonts.head, fontSize: 24, color: colors.primaryInk },
+    restSkip: { minHeight: 44, paddingHorizontal: 18, borderRadius: 14, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+    restSkipText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
+    exerciseBlock: {
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 8,
+    },
+    exerciseBlockIdle: { opacity: 0.75 },
+    exerciseHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 },
+    exerciseThumb: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+    exerciseName: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, textTransform: 'capitalize' },
+    exerciseMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    progTag: { backgroundColor: colors.surface2, borderRadius: radii.full, paddingHorizontal: 11, paddingVertical: 5 },
+    progTagCurrent: { backgroundColor: colors.primarySoft },
+    progTagDone: { backgroundColor: colors.successSoft },
+    progTagText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.muted },
+    progTagTextCurrent: { color: colors.primaryInk },
+    progTagTextDone: { color: colors.successInk },
+    tableHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    tableHeaderText: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.muted, letterSpacing: 0.6 },
+    addSetButton: {
+      minHeight: 44, marginTop: 4, borderRadius: 14, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.primary,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    addSetText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    trashButton: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.dangerSoft },
+    addExerciseButton: {
+      minHeight: 56, borderRadius: radii.lg, borderWidth: 1.5, borderColor: colors.primary, borderStyle: 'dashed',
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primarySoft,
+    },
+    addExerciseText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
+    footer: {
+      position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.bg,
+      borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl, gap: 4,
+    },
+    validateShadow: {
+      borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
+    },
+    validateButton: { minHeight: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    validateButtonText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
+    finishLink: { minHeight: 36, alignItems: 'center', justifyContent: 'center' },
+    finishLinkText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.muted },
+    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
   });
 }

@@ -46,7 +46,7 @@ export function ProgramExerciseSummary({ name, sets, onRemove, onEdit }: Program
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.sm, gap: 8,
     },
     headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

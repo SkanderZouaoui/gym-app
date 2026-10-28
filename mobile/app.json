@@ -50,7 +50,8 @@
           "cameraPermission": "MuscleUP a besoin de l'appareil photo pour prendre une photo de votre séance."
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-image"
     ],
     "extra": {
       "router": {},

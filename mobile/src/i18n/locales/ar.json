@@ -32,7 +32,14 @@
     "bookingConfirmed": "تم تأكيد الحجز{{detail}}",
     "inProgress": "جارية الآن",
     "inMinutes": "خلال {{minutes}} د",
-    "inHours": "خلال {{hours}}س{{minutes}}"
+    "inHours": "خلال {{hours}}س{{minutes}}",
+    "heroLabel": "الباقة الحالية",
+    "heroLabelInactive": "الاشتراك",
+    "daysLeft": "أيام متبقية",
+    "statusActive": "نشط",
+    "statusExpired": "منتهي",
+    "nextCourseTitle": "الحصة القادمة",
+    "greetingFallback": "مرحباً،"
   },
   "planning": {
     "title": "الجدول",
@@ -51,7 +58,9 @@
     "spotsLeft": "{{count}} مقاعد متاحة",
     "book": "احجز",
     "waitlist": "قائمة الانتظار",
-    "booking": "..."
+    "booking": "...",
+    "subtitle": "الحصص الجماعية · {{month}}",
+    "all": "الكل"
   },
   "training": {
     "title": "التمارين",
@@ -68,7 +77,10 @@
     "noOfflineCode": "لا يوجد رمز متاح دون اتصال",
     "membershipActive": "نشط",
     "membershipUntil": " · حتى {{date}}",
-    "nextCourse": "الحصة القادمة"
+    "nextCourse": "الحصة القادمة",
+    "subtitle": "اعرضه على المدرب أو الاستقبال عند مدخل الحصة.",
+    "dynamicCode": "رمز ديناميكي",
+    "dynamicHint": "يتم إنشاء رمز جديد تلقائياً."
   },
   "profile": {
     "title": "حسابي",
@@ -105,6 +117,13 @@
     "roleCoach": "مدرب",
     "logout": "تسجيل الخروج",
     "logoutConfirmTitle": "تسجيل الخروج؟",
-    "logoutConfirmText": "سيتم حذف رمز QR دون اتصال من هذا الهاتف. ستحتاج لإعادة تسجيل الدخول للحجز أو تسجيل الحضور."
+    "logoutConfirmText": "سيتم حذف رمز QR دون اتصال من هذا الهاتف. ستحتاج لإعادة تسجيل الدخول للحجز أو تسجيل الحضور.",
+    "memberSince": "عضو منذ {{date}}",
+    "daysLeftTag": "{{count}} أيام متبقية",
+    "statUpcoming": "الحجوزات القادمة",
+    "statDaysLeft": "الأيام المتبقية"
+  },
+  "progress": {
+    "title": "التقدم"
   }
 }

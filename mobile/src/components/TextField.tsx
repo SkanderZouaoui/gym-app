@@ -40,22 +40,22 @@ export function TextField({ label, error, style, isPassword, secureTextEntry, ..
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     container: { gap: 6 },
-    label: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    label: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.muted },
     inputWrap: { position: 'relative' },
     input: {
-      height: 48,
-      borderRadius: radii.sm,
-      borderWidth: 1.5,
-      borderColor: colors.borderStrong,
-      paddingHorizontal: 14,
+      height: 52,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 16,
       fontFamily: fonts.body,
-      fontSize: 15,
+      fontSize: 16,
       color: colors.text,
       backgroundColor: colors.surface,
     },
     inputWithIcon: { paddingRight: 44 },
     inputError: { borderColor: colors.danger },
-    eyeButton: { position: 'absolute', right: 12, top: 0, height: 48, justifyContent: 'center' },
+    eyeButton: { position: 'absolute', right: 14, top: 0, height: 52, justifyContent: 'center' },
     error: { fontFamily: fonts.body, fontSize: 12, color: colors.dangerInk },
   });
 }

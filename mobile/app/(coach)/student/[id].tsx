@@ -75,7 +75,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     name: { fontFamily: fonts.head, fontSize: 22, color: colors.text },
     sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, color: colors.text, marginTop: spacing.sm },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: 6,
     },
     workoutDate: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },

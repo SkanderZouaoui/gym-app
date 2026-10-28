@@ -1,49 +1,33 @@
-import { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { StyleSheet, View } from 'react-native';
-import { fonts } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
+import { FloatingTabBar, type FloatingTabBarProps } from '../../src/components/FloatingTabBar';
 
 export default function StaffTabsLayout() {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
-        tabBarLabelStyle: { fontFamily: fonts.bodyBold, fontSize: 11 },
-        tabBarStyle: {
-          height: 88, paddingTop: 8, paddingBottom: 22,
-          backgroundColor: colors.surface, borderTopColor: colors.border,
-        },
       }}
+      tabBar={(props) => <FloatingTabBar {...(props as unknown as FloatingTabBarProps)} actionRoute="scanner" actionIcon="qr-code-scanner" />}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Aujourd'hui",
-          tabBarIcon: ({ color }) => <MaterialIcons name="today" size={22} color={color} />,
+          tabBarIcon: ({ color }) => <MaterialIcons name="today" size={22} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="members"
         options={{
           title: 'Adhérents',
-          tabBarIcon: ({ color }) => <MaterialIcons name="people" size={22} color={color} />,
+          tabBarIcon: ({ color }) => <MaterialIcons name="people" size={22} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="scanner"
         options={{
           title: '',
-          tabBarIcon: () => (
-            <View style={styles.centerButton}>
-              <MaterialIcons name="qr-code-scanner" size={28} color={colors.primaryContrast} />
-            </View>
-          ),
           tabBarLabel: () => null,
         }}
       />
@@ -51,37 +35,17 @@ export default function StaffTabsLayout() {
         name="planning"
         options={{
           title: 'Planning',
-          tabBarIcon: ({ color }) => <MaterialIcons name="calendar-today" size={22} color={color} />,
+          tabBarIcon: ({ color }) => <MaterialIcons name="calendar-today" size={22} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profil',
-          tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color as string} />,
         }}
       />
     </Tabs>
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
-  return StyleSheet.create({
-    centerButton: {
-      width: 60,
-      height: 60,
-      borderRadius: 999,
-      backgroundColor: colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: -26,
-      borderWidth: 4,
-      borderColor: colors.surface,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.15,
-      shadowRadius: 10,
-      elevation: 6,
-    },
-  });
-}

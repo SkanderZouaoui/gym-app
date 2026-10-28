@@ -31,6 +31,6 @@ export function Pill({ label, tone = 'muted' }: { label: string; tone?: PillTone
 }
 
 const styles = StyleSheet.create({
-  pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, alignSelf: 'flex-start' },
-  text: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
+  pill: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999, alignSelf: 'flex-start' },
+  text: { fontFamily: fonts.bodyBold, fontSize: 12 },
 });

@@ -1,43 +1,46 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 
-export type TrainingTab = 'programs' | 'history' | 'progress';
+export type TrainingTab = 'programs' | 'history' | 'exercises';
 
 const TABS: { value: TrainingTab; label: string }[] = [
-  { value: 'programs', label: 'Programmes' },
+  { value: 'programs', label: 'Mes programmes' },
   { value: 'history', label: 'Historique' },
-  { value: 'progress', label: 'Progression' },
+  { value: 'exercises', label: 'Exercices' },
 ];
 
-/** Tabs internes partagés entre Mes programmes, Historique et Progression —
- * FitZone App Entraînement.dc.html (D1/E1/F1). Soulignement orange sur l'actif. */
+/** Segments de l'onglet Entraînement (v2) : pastilles défilantes, l'active en dégradé d'accent. */
 export function TrainingTabs({ value, onChange }: { value: TrainingTab; onChange: (tab: TrainingTab) => void }) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
-    <View style={styles.row}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       {TABS.map((tab) => {
         const active = tab.value === value;
         return (
           <Pressable key={tab.value} style={styles.tab} onPress={() => onChange(tab.value)}>
+            {active ? (
+              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+            ) : null}
             <Text style={[styles.label, active && styles.labelActive]}>{tab.label}</Text>
-            <View style={[styles.underline, active && styles.underlineActive]} />
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', gap: 20 },
-    tab: { gap: 8 },
-    label: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.muted },
-    labelActive: { color: colors.primaryInk, fontFamily: fonts.bodyBold },
-    underline: { height: 2.5, borderRadius: 2, backgroundColor: 'transparent' },
-    underlineActive: { backgroundColor: colors.primary },
+    row: { gap: 8 },
+    tab: {
+      height: 36, paddingHorizontal: 16, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    },
+    label: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    labelActive: { color: colors.primaryContrast },
   });
 }

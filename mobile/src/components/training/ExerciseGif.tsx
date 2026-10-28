@@ -9,6 +9,8 @@ import { useTheme } from '../../theme/ThemeContext';
 interface ExerciseGifProps {
   uri: string | null;
   size?: number;
+  /** Sans fond ni coins arrondis : l'image se pose directement sur l'écran. */
+  plain?: boolean;
 }
 
 const VIDEO_EXTENSIONS = ['.mov', '.mp4', '.m4v', '.webm'];
@@ -21,7 +23,7 @@ function isVideoUri(uri: string): boolean {
 /** Démonstration d'un exercice : vidéo HD (wger.de) si `mediaKey` pointe vers
  * un fichier vidéo, sinon image/GIF (voir backend/prisma/seed-data/README.md
  * pour la provenance des médias). */
-export function ExerciseGif({ uri, size = 72 }: ExerciseGifProps) {
+export function ExerciseGif({ uri, size = 72, plain }: ExerciseGifProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
@@ -33,7 +35,7 @@ export function ExerciseGif({ uri, size = 72 }: ExerciseGifProps) {
     );
   }
 
-  const mediaStyle = { width: size, height: size, borderRadius: radii.sm, backgroundColor: colors.surface2 };
+  const mediaStyle = { width: size, height: size, borderRadius: plain ? 0 : radii.sm, backgroundColor: plain ? 'transparent' : colors.surface2 };
 
   if (isVideoUri(uri)) {
     return <ExerciseVideo uri={uri} style={mediaStyle} />;

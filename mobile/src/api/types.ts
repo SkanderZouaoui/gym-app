@@ -23,14 +23,14 @@ export interface ClassSessionSummary {
   endsAt: string;
   capacity: number;
   status: string;
-  classType: { id: string; name: string; description: string | null };
+  classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[] };
   room: { id: string; name: string } | null;
   coach: { user: { firstName: string; lastName: string } } | null;
   _count: { bookings: number };
 }
 
 export interface ClassSessionDetail extends ClassSessionSummary {
-  classType: { id: string; name: string; description: string | null };
+  classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[] };
 }
 
 export interface Booking {

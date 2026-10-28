@@ -97,7 +97,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 60 },
     subtitle: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted },
     progressCard: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: 8,
     },
     progressRow: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -105,7 +105,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     progressValue: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.successInk },
     sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
     list: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       paddingHorizontal: spacing.md,
     },
   });

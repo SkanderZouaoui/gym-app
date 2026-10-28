@@ -92,7 +92,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
     markAllButton: { alignSelf: 'flex-end', paddingVertical: 6 },
     markAllText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.primaryInk },
-    list: { backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+    list: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
     row: {
       flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: spacing.md,
       borderBottomWidth: 1, borderBottomColor: colors.border,

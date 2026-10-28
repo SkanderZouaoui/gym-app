@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import type { BodyView } from '../../constants/muscleGroups';
 import { MUSCLE_GROUP_TO_SLUG, SLUG_TO_MUSCLE_GROUP } from './bodyHighlighterMapping';
 
-const SLIDE_DISTANCE = 24;
+const SLIDE_DISTANCE = 8;
 
 interface BodyMuscleMapProps {
   view: BodyView;
@@ -37,8 +37,8 @@ export function BodyMuscleMap({ view, selected, onToggle }: BodyMuscleMapProps) 
     slide.setValue(direction * SLIDE_DISTANCE);
     opacity.setValue(0);
     Animated.parallel([
-      Animated.spring(slide, { toValue: 0, useNativeDriver: true, speed: 16, bounciness: 4 }),
-      Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 0, duration: 150, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }),
     ]).start();
   }, [view, slide, opacity]);
 

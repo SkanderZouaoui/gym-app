@@ -3,22 +3,25 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useCreateBooking, useSession } from '../../../src/hooks/useClasses';
+import { useCancelBooking, useCreateBooking, useSession } from '../../../src/hooks/useClasses';
 import { useMyBookings } from '../../../src/hooks/useMe';
 import { Banner, ProgressBar, Toast } from '../../../src/components/ui';
 import { ApiError } from '../../../src/api/client';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { ImageGallery } from '../../../src/components/adherent/ImageGallery';
 
 /** Détail d'un cours — FitZone App Adherent.dc.html, C1. */
 export default function SessionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: session, isLoading, refetch } = useSession(id);
   const { data: bookings, refetch: refetchBookings } = useMyBookings();
   const createBooking = useCreateBooking();
+  const cancelBooking = useCancelBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
     Promise.all([refetch(), refetchBookings()]),
@@ -53,31 +56,40 @@ export default function SessionDetailScreen() {
     });
   };
 
+  const handleCancel = () => {
+    if (!existingBooking) return;
+    cancelBooking.mutate(existingBooking.id, { onSuccess: () => { void refetch(); void refetchBookings(); } });
+  };
+
+  const goBack = () => (router.canGoBack() ? router.back() : router.navigate('/(member)/(tabs)/planning'));
+  const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.heroImage}>
-        <Pressable
-          onPress={() => (router.canGoBack() ? router.back() : router.navigate('/(member)/(tabs)/planning'))}
-          style={styles.floatingBackButton}
-        >
-          <MaterialIcons name="arrow-back" size={20} color={colors.text} />
-        </Pressable>
-      </View>
-
       <ScrollView
-        style={styles.panel}
-        contentContainerStyle={styles.panelContent}
+        contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View style={styles.tagsRow}>
-          <Tag label="Cours collectif" tone="primary" />
+        <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
+          <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
+          <Text style={styles.backText}>Planning</Text>
+        </Pressable>
+
+        <View style={styles.heroShadow}>
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <View style={styles.heroDecor} />
+            <View style={styles.heroTag}>
+              <Text style={styles.heroTagText}>Cours collectif</Text>
+            </View>
+            <Text style={styles.heroTitle}>{session.classType.name}</Text>
+            <Text style={styles.heroSub}>
+              {new Date(session.startsAt).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </Text>
+            <Text style={styles.heroTime}>
+              {timeOf(session.startsAt)} – {timeOf(session.endsAt)}
+            </Text>
+          </LinearGradient>
         </View>
-        <Text style={styles.title}>{session.classType.name}</Text>
-        <Text style={styles.subtitle}>
-          {new Date(session.startsAt).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} ·{' '}
-          {new Date(session.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} –{' '}
-          {new Date(session.endsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-        </Text>
 
         {bookingError ? <Banner tone="danger" icon="error" text={bookingError} /> : null}
         {existingBooking?.status === 'CONFIRMED' ? (
@@ -91,47 +103,93 @@ export default function SessionDetailScreen() {
           />
         ) : null}
 
-        <View style={styles.infoGrid}>
-          <InfoTile icon="sports" label="Coach" value={session.coach?.user.firstName ?? '—'} />
-          <InfoTile icon="meeting-room" label="Salle" value={session.room?.name ?? '—'} />
-          <InfoTile icon="timer" label="Durée" value={`${durationMinutes} min`} />
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{session.coach?.user.firstName ?? '—'}</Text>
+            <Text style={styles.statLabel}>Coach</Text>
+          </View>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{session.room?.name ?? '—'}</Text>
+            <Text style={styles.statLabel}>Salle</Text>
+          </View>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{durationMinutes} min</Text>
+            <Text style={styles.statLabel}>Durée</Text>
+          </View>
         </View>
 
-        <View style={styles.spotsCard}>
+        <View style={[styles.spotsCard, cardShadow]}>
           <View style={styles.spotsRow}>
             <Text style={styles.spotsLabel}>Places</Text>
-            <Text style={[styles.spotsValue, { color: isFull ? colors.dangerInk : colors.successInk }]}>
-              {isFull ? 'Complet' : `${spotsLeft} dispo.`}
-            </Text>
+            <View style={[styles.spotsTag, { backgroundColor: isFull ? colors.dangerSoft : spotsLeft <= 3 ? colors.warningSoft : colors.surface2 }]}>
+              <Text style={[styles.spotsTagText, { color: isFull ? colors.dangerInk : spotsLeft <= 3 ? colors.warningInk : colors.muted }]}>
+                {isFull ? 'Complet' : `${spotsLeft} dispo.`}
+              </Text>
+            </View>
           </View>
-          <ProgressBar progress={progress} color={isFull ? colors.danger : colors.success} />
+          <ProgressBar progress={progress} color={isFull ? colors.danger : colors.primary} />
           <Text style={styles.spotsSub}>
             {session._count.bookings}/{session.capacity} inscrits
           </Text>
         </View>
 
-        {session.classType.description ? <Text style={styles.description}>{session.classType.description}</Text> : null}
+        <View>
+          <Text style={styles.sectionTitle}>Description du cours</Text>
+          <View style={[styles.descriptionCard, cardShadow]}>
+            {session.classType.description ? (
+              <Text style={styles.description}>{session.classType.description}</Text>
+            ) : (
+              <Text style={styles.descriptionEmpty}>Aucune description pour ce cours.</Text>
+            )}
+            {session.classType.level ? (
+              <View style={styles.levelRow}>
+                <MaterialIcons name="signal-cellular-alt" size={18} color={colors.primaryInk} />
+                <Text style={styles.levelText}>Niveau : {session.classType.level}</Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+
+        {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
+          <View>
+            <Text style={styles.sectionTitle}>Galerie</Text>
+            <ImageGallery urls={session.classType.galleryUrls} />
+          </View>
+        ) : null}
       </ScrollView>
 
       <View style={styles.footer}>
-        {existingBooking?.status === 'CONFIRMED' ? (
-          <Pressable style={styles.outlineDangerButton}>
-            <Text style={styles.outlineDangerText}>Annuler la réservation</Text>
-          </Pressable>
-        ) : existingBooking?.status === 'WAITLISTED' ? (
-          <Pressable style={styles.outlineDangerButton}>
-            <Text style={styles.outlineDangerText}>Quitter la liste d’attente</Text>
+        {existingBooking?.status === 'CONFIRMED' || existingBooking?.status === 'WAITLISTED' ? (
+          <Pressable
+            style={({ pressed }) => [styles.outlineDangerButton, pressed && { transform: [{ scale: 0.98 }] }]}
+            onPress={handleCancel}
+            disabled={cancelBooking.isPending}
+          >
+            <Text style={styles.outlineDangerText}>
+              {cancelBooking.isPending
+                ? '...'
+                : existingBooking.status === 'WAITLISTED'
+                  ? 'Quitter la liste d’attente'
+                  : 'Annuler la réservation'}
+            </Text>
           </Pressable>
         ) : (
           <Pressable
-            style={[styles.primaryButton, isFull && styles.secondaryButton]}
             onPress={handleReserve}
             disabled={createBooking.isPending}
+            style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
           >
-            {isFull ? <MaterialIcons name="hourglass-top" size={18} color={colors.onSecondary} /> : null}
-            <Text style={[styles.primaryButtonText, isFull && { color: colors.onSecondary }]}>
-              {createBooking.isPending ? '...' : isFull ? 'Rejoindre la liste d’attente' : 'Réserver ma place'}
-            </Text>
+            <LinearGradient
+              colors={isFull ? [colors.secondary, colors.secondary] : [colors.primary, colors.primaryPressed]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.cta}
+            >
+              <MaterialIcons name={isFull ? 'hourglass-top' : 'event-available'} size={22} color={colors.primaryContrast} />
+              <Text style={styles.ctaText}>
+                {createBooking.isPending ? '...' : isFull ? 'Rejoindre la liste d’attente' : 'Réserver ma place'}
+              </Text>
+            </LinearGradient>
           </Pressable>
         )}
       </View>
@@ -140,30 +198,6 @@ export default function SessionDetailScreen() {
         <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
-  );
-}
-
-function Tag({ label, tone }: { label: string; tone: 'primary' | 'secondary' }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  return (
-    <View style={[styles.tag, tone === 'primary' ? styles.tagPrimary : styles.tagSecondary]}>
-      <Text style={[styles.tagText, { color: tone === 'primary' ? colors.primaryInk : colors.secondaryInk }]}>{label}</Text>
-    </View>
-  );
-}
-
-function InfoTile({ icon, label, value }: { icon: keyof typeof MaterialIcons.glyphMap; label: string; value: string }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
-  return (
-    <View style={styles.infoTile}>
-      <MaterialIcons name={icon} size={18} color={colors.muted} />
-      <View>
-        <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoValue}>{value}</Text>
-      </View>
-    </View>
   );
 }
 
@@ -184,52 +218,53 @@ function traduireErreurReservation(e: ApiError): string {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  heroImage: { height: 220, backgroundColor: colors.surface2 },
-  floatingBackButton: {
-    position: 'absolute', top: 54, left: spacing.lg, width: 40, height: 40, borderRadius: 20,
-    backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 6, elevation: 3,
-  },
-  panel: { flex: 1, marginTop: -24, backgroundColor: colors.bg, borderTopLeftRadius: radii.lg, borderTopRightRadius: radii.lg },
-  panelContent: { padding: spacing.lg, gap: spacing.sm, paddingBottom: 140 },
-  tagsRow: { flexDirection: 'row', gap: 8 },
-  tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  tagPrimary: { backgroundColor: colors.primarySoft },
-  tagSecondary: { backgroundColor: colors.secondarySoft },
-  tagText: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
-  title: { fontFamily: fonts.head, fontSize: 26, color: colors.text },
-  subtitle: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted },
-  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  infoTile: {
-    width: '47%', flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.surface,
-    borderRadius: radii.sm, borderWidth: 1, borderColor: colors.border, padding: spacing.sm,
-  },
-  infoLabel: { fontFamily: fonts.body, fontSize: 11, color: colors.muted },
-  infoValue: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
-  spotsCard: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, gap: 8,
-  },
-  spotsRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  spotsLabel: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
-  spotsValue: { fontFamily: fonts.bodyBold, fontSize: 13 },
-  spotsSub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-  description: { fontFamily: fonts.body, fontSize: 13.5, color: colors.text, lineHeight: 20 },
-  footer: {
-    position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface,
-    borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,
-  },
-  primaryButton: {
-    height: 52, borderRadius: radii.sm, backgroundColor: colors.primary, flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'center', gap: 8,
-  },
-  secondaryButton: { backgroundColor: colors.secondary },
-  primaryButtonText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryContrast },
-  outlineDangerButton: {
-    height: 52, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.danger,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  outlineDangerText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.dangerInk },
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
+    back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
+    backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    heroShadow: {
+      borderRadius: radii.xl, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8,
+    },
+    hero: { borderRadius: radii.xl, padding: 22, gap: 6, overflow: 'hidden' },
+    heroDecor: { position: 'absolute', right: -40, top: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.12)' },
+    heroTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 999, marginBottom: 4 },
+    heroTagText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
+    heroTitle: { fontFamily: fonts.head, fontSize: 28, lineHeight: 32, letterSpacing: -1, color: '#FFFFFF' },
+    heroSub: { fontFamily: fonts.body, fontSize: 14, color: 'rgba(255,255,255,0.92)', textTransform: 'capitalize' },
+    heroTime: { fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.5, color: '#FFFFFF', marginTop: 4 },
+    statsRow: { flexDirection: 'row', gap: 10 },
+    statCard: {
+      flex: 1, minWidth: 0, padding: 14, gap: 4, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+    },
+    statValue: { fontFamily: fonts.head, fontSize: 16, lineHeight: 21, letterSpacing: -0.3, color: colors.text },
+    statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    spotsCard: {
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10,
+    },
+    spotsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    spotsLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text },
+    spotsTag: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
+    spotsTagText: { fontFamily: fonts.bodyBold, fontSize: 12 },
+    spotsSub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
+    descriptionCard: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 16 },
+    description: { fontFamily: fonts.body, fontSize: 15, color: colors.text, lineHeight: 22 },
+    descriptionEmpty: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },
+    levelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border },
+    levelText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.primaryInk },
+    footer: {
+      position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.bg,
+      borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,
+    },
+    ctaShadow: {
+      borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 6,
+    },
+    cta: { minHeight: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    ctaText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
+    outlineDangerButton: {
+      minHeight: 56, borderRadius: 18, borderWidth: 1.5, borderColor: colors.danger, backgroundColor: colors.surface,
+      alignItems: 'center', justifyContent: 'center',
+    },
+    outlineDangerText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.dangerInk },
   });
 }

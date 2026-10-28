@@ -272,7 +272,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     emailRow: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md,
     },
     emailValue: { fontFamily: fonts.bodyMedium, fontSize: 14.5, color: colors.text },

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomSheet } from '../ui';
 import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
@@ -26,11 +26,11 @@ export function MuscleGroupPickerSheet({ visible, value, onClose, onApply }: Mus
     // Fermer la feuille immédiatement après un tap qui vient de l'intérieur du
     // GestureDetector (silhouette) peut démonter le composant pendant que le
     // gestionnaire de gestes natif traite encore l'événement, ce qui fait
-    // planter l'app. Reporter après la fin des interactions en cours règle ça.
-    InteractionManager.runAfterInteractions(() => {
+    // planter l'app. Reporter après la fin du geste en cours règle ça.
+    setTimeout(() => {
       onApply(value === zoneValue ? null : zoneValue);
       onClose();
-    });
+    }, 100);
   };
 
   const setFront = () => setBodyView('front');

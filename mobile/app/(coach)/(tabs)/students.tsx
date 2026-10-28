@@ -2,13 +2,15 @@ import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachStudents } from '../../../src/hooks/useCoachSessions';
 import { Avatar, EmptyState } from '../../../src/components/ui';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 /** Élèves — FitZone App Coach.dc.html, L1. */
 export default function CoachStudentsScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: students } = useCoachStudents();
@@ -19,7 +21,7 @@ export default function CoachStudentsScreen() {
         <Text style={styles.title}>Élèves</Text>
         <Text style={styles.count}>{students?.length ?? 0}</Text>
       </View>
-      <FlatList
+      <FlatList {...tabBarScroll}
         data={students ?? []}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
@@ -46,12 +48,12 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     header: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: spacing.lg, paddingBottom: spacing.sm },
-    title: { fontFamily: fonts.head, fontSize: 24, color: colors.text },
+    title: { ...typography.largeTitle, color: colors.text },
     count: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.muted },
     list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
     row: {
       flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface,
-      borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md,
     },
     name: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
   });

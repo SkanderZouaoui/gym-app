@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMe } from '../../src/hooks/useMe';
 import { tokenStorage } from '../../src/api/storage';
@@ -68,11 +68,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     header: { padding: spacing.lg, paddingBottom: spacing.sm },
-    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    title: { ...typography.largeTitle, color: colors.text },
     subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 4 },
     list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
     },
     iconBox: {

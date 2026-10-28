@@ -11,6 +11,9 @@ interface IconCircleButtonProps {
   iconColor?: string;
   bordered?: boolean;
   badge?: boolean;
+  /** Rayon de coin (défaut : cercle). */
+  radius?: number;
+  badgeColor?: string;
 }
 
 export function IconCircleButton({
@@ -21,6 +24,8 @@ export function IconCircleButton({
   iconColor,
   bordered = true,
   badge,
+  radius,
+  badgeColor,
 }: IconCircleButtonProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -36,7 +41,7 @@ export function IconCircleButton({
         {
           width: size,
           height: size,
-          borderRadius: size / 2,
+          borderRadius: radius ?? size / 2,
           backgroundColor: bg,
           borderWidth: bordered ? 1 : 0,
           borderColor: colors.border,
@@ -44,7 +49,7 @@ export function IconCircleButton({
       ]}
     >
       <MaterialIcons name={icon} size={size * 0.5} color={fg} />
-      {badge ? <View style={styles.badge} /> : null}
+      {badge ? <View style={[styles.badge, badgeColor ? { backgroundColor: badgeColor } : null]} /> : null}
     </Pressable>
   );
 }

@@ -144,7 +144,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text, marginBottom: spacing.sm },
     summaryText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
     setsList: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       paddingHorizontal: spacing.md,
     },
     setRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },

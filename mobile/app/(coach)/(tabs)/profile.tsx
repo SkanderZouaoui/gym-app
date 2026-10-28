@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMe } from '../../../src/hooks/useMe';
 import { useSessionStore } from '../../../src/store/session';
@@ -11,9 +11,11 @@ import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { Avatar, Pill } from '../../../src/components/ui';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 /** Profil Coach — FitZone App Coach.dc.html, N4. */
 export default function CoachProfileScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
@@ -40,7 +42,7 @@ export default function CoachProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
         <Text style={styles.title}>Profil</Text>
 
         <View style={styles.identityCard}>
@@ -91,7 +93,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
-    title: { fontFamily: fonts.head, fontSize: 24, color: colors.text },
+    title: { ...typography.largeTitle, color: colors.text },
     identityCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
     name: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text, marginBottom: 4 },
     switchRow: {
@@ -100,7 +102,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     switchText: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.primaryInk },
     menu: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
     },
     menuRow: {
       flexDirection: 'row', alignItems: 'center', gap: 10, padding: spacing.md,

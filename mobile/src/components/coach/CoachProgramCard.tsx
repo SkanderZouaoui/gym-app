@@ -53,7 +53,7 @@ export function CoachProgramCard({ programId, studentId }: { programId: string; 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: 8,
     },
     programName: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },

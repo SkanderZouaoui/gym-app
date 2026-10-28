@@ -76,7 +76,7 @@ export function deriveColorFamily(c: string, surface: string, dark: boolean): De
   return {
     base: rgbToHex(hexToRgb(c)),
     hover: dark ? mixColors(c, "#FFFFFF", 0.12) : mixColors(c, "#000000", 0.1),
-    pressed: dark ? mixColors(c, "#FFFFFF", 0.22) : mixColors(c, "#000000", 0.2),
+    pressed: mixColors(c, "#000000", dark ? 0.25 : 0.2),
     soft,
     border: ensureContrast(mixColors(surface, c, dark ? 0.5 : 0.35), surface, 3),
     ink: ensureContrast(ensureContrast(c, soft, 4.5), surface, 4.5),

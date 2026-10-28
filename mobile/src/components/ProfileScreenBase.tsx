@@ -79,7 +79,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { padding: spacing.lg, gap: spacing.md },
     title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondary },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: 10,
     },
     avatar: {

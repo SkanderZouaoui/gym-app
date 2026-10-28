@@ -2,51 +2,59 @@ import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../src/components/ScreenHeader';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useCancelBooking } from '../../src/hooks/useClasses';
 import { useMyBookings } from '../../src/hooks/useMe';
 import type { Booking } from '../../src/api/types';
-import { BottomSheet, EmptyState, Pill, SegmentedControl, Toast } from '../../src/components/ui';
+import { BottomSheet, EmptyState, ScreenTitle, Toast } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
-import { ClassTypeIcon } from '../../src/components/adherent/ClassTypeIcon';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
-const STATUS_TONE: Record<Booking['status'], 'success' | 'warning' | 'muted' | 'danger'> = {
-  CONFIRMED: 'success',
-  WAITLISTED: 'warning',
-  ATTENDED: 'success',
-  NO_SHOW: 'danger',
-  CANCELLED: 'muted',
-};
-const STATUS_LABEL: Record<Booking['status'], string> = {
-  CONFIRMED: 'Confirmée',
-  WAITLISTED: 'Liste d’attente',
-  ATTENDED: 'Présente',
-  NO_SHOW: 'Absente',
-  CANCELLED: 'Annulée',
-};
+type Tab = 'upcoming' | 'waitlist' | 'past';
 
-/** Mes réservations — FitZone App Adherent.dc.html, C2. */
+/** Mes réservations — v2 : lien retour, grand titre, pastilles À venir / En attente / Passées,
+ * cartes à bloc date en dégradé et bouton d'annulation carré. */
 export default function ReservationsScreen() {
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: bookings, refetch } = useMyBookings();
   const cancelBooking = useCancelBooking();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
-  const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
+  const [tab, setTab] = useState<Tab>('upcoming');
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
 
-  const now = Date.now();
-  const list = useMemo(() => {
-    if (!bookings) return [];
-    return bookings.filter((b) => {
+  const { upcoming, waitlist, past } = useMemo(() => {
+    const now = Date.now();
+    const result: Record<Tab, Booking[]> = { upcoming: [], waitlist: [], past: [] };
+    for (const b of bookings ?? []) {
       const startsAt = b.session ? new Date(b.session.startsAt).getTime() : 0;
-      const isUpcoming = b.status !== 'CANCELLED' && b.status !== 'ATTENDED' && b.status !== 'NO_SHOW' && startsAt >= now;
-      return tab === 'upcoming' ? isUpcoming : !isUpcoming;
-    });
-  }, [bookings, tab, now]);
+      const future = startsAt >= now;
+      if (b.status === 'CONFIRMED' && future) result.upcoming.push(b);
+      else if (b.status === 'WAITLISTED' && future) result.waitlist.push(b);
+      else result.past.push(b);
+    }
+    const byDate = (a: Booking, b: Booking) =>
+      new Date(a.session?.startsAt ?? 0).getTime() - new Date(b.session?.startsAt ?? 0).getTime();
+    result.upcoming.sort(byDate);
+    result.waitlist.sort(byDate);
+    result.past.sort((a, b) => byDate(b, a));
+    return result;
+  }, [bookings]);
+
+  const list = tab === 'upcoming' ? upcoming : tab === 'waitlist' ? waitlist : past;
+  const tabs: { value: Tab; label: string }[] = [
+    { value: 'upcoming', label: `À venir (${upcoming.length})` },
+    { value: 'waitlist', label: `En attente (${waitlist.length})` },
+    { value: 'past', label: 'Passées' },
+  ];
+
+  const handleBack = () => {
+    if (router.canGoBack()) router.back();
+    else router.navigate('/(member)/(tabs)/planning');
+  };
 
   const confirmCancel = () => {
     if (!cancelTarget) return;
@@ -55,16 +63,22 @@ export default function ReservationsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title="Mes réservations" />
-      <View style={styles.tabWrap}>
-        <SegmentedControl
-          value={tab}
-          onChange={setTab}
-          options={[
-            { value: 'upcoming', label: 'À venir' },
-            { value: 'past', label: 'Passées' },
-          ]}
-        />
+      <View style={styles.header}>
+        <Pressable onPress={handleBack} style={styles.back} hitSlop={8}>
+          <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
+          <Text style={styles.backText}>Planning</Text>
+        </Pressable>
+        <ScreenTitle title="Mes réservations" subtitle={`${upcoming.length} à venir · ${waitlist.length} en attente`} />
+        <View style={styles.tabs}>
+          {tabs.map((t) => {
+            const active = t.value === tab;
+            return (
+              <Pressable key={t.value} style={[styles.tab, active && styles.tabActive]} onPress={() => setTab(t.value)}>
+                <Text style={[styles.tabText, active && styles.tabTextActive]}>{t.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       <FlatList
@@ -72,40 +86,59 @@ export default function ReservationsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <ClassTypeIcon name={item.session?.classType.name ?? ''} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.className}>{item.session?.classType.name}</Text>
-                <Text style={styles.meta}>
-                  {item.session ? new Date(item.session.startsAt).toLocaleString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : ''}
-                </Text>
+        renderItem={({ item, index }) => {
+          const session = item.session;
+          const date = session ? new Date(session.startsAt) : null;
+          const meta = [
+            date?.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            session?.coach?.user.firstName,
+            session?.room?.name,
+          ].filter(Boolean).join(' · ');
+          const note =
+            tab === 'upcoming' && index === 0
+              ? 'Prochain'
+              : item.status === 'WAITLISTED' && item.waitlistPosition
+                ? `${item.waitlistPosition}e en liste d’attente`
+                : tab === 'past'
+                  ? STATUS_LABEL[item.status]
+                  : null;
+          return (
+            <Pressable
+              style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
+              onPress={() => item.sessionId && router.push(`/(member)/session/${item.sessionId}`)}
+            >
+              {date ? (
+                <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.dateBlock}>
+                  <Text style={styles.dateDay}>
+                    {date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '').toUpperCase()}.
+                  </Text>
+                  <Text style={styles.dateNumber}>{date.getDate()}</Text>
+                </LinearGradient>
+              ) : null}
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.className} numberOfLines={1}>{session?.classType.name}</Text>
+                <Text style={styles.meta} numberOfLines={1}>{meta}</Text>
+                {note ? <Text style={styles.note}>{note}</Text> : null}
               </View>
-              <Pill label={STATUS_LABEL[item.status]} tone={STATUS_TONE[item.status]} />
-            </View>
-            {item.status === 'WAITLISTED' && item.waitlistPosition ? (
-              <Text style={styles.waitlistNote}>
-                {item.waitlistPosition}e en liste d’attente. Vous serez inscrite automatiquement si une place se libère.
-              </Text>
-            ) : null}
-            {tab === 'upcoming' ? (
-              <View style={styles.actionsRow}>
-                <Pressable style={styles.outlineButton} onPress={() => item.sessionId && router.push(`/(member)/session/${item.sessionId}`)}>
-                  <Text style={styles.outlineButtonText}>Détails</Text>
+              {tab !== 'past' ? (
+                <Pressable style={styles.cancelButton} onPress={() => setCancelTarget(item)} hitSlop={6}>
+                  <MaterialIcons name="close" size={20} color={colors.dangerInk} />
                 </Pressable>
-                <Pressable onPress={() => setCancelTarget(item)}>
-                  <Text style={styles.cancelText}>{item.status === 'WAITLISTED' ? 'Quitter la liste' : 'Annuler'}</Text>
-                </Pressable>
-              </View>
-            ) : null}
-          </View>
-        )}
+              ) : null}
+            </Pressable>
+          );
+        }}
         ListEmptyComponent={
           <EmptyState
             icon="event-available"
-            title={tab === 'upcoming' ? 'Aucune réservation à venir' : 'Aucune séance passée'}
-            text={tab === 'upcoming' ? 'Vos prochains cours apparaîtront ici.' : 'Votre historique apparaîtra après votre premier cours.'}
+            title={tab === 'upcoming' ? 'Aucune réservation à venir' : tab === 'waitlist' ? 'Aucune liste d’attente' : 'Aucune séance passée'}
+            text={
+              tab === 'upcoming'
+                ? 'Vos prochains cours apparaîtront ici.'
+                : tab === 'waitlist'
+                  ? 'Les cours complets que vous rejoignez en attente apparaîtront ici.'
+                  : 'Votre historique apparaîtra après votre premier cours.'
+            }
             tone="primary"
             actionLabel={tab === 'upcoming' ? 'Explorer le planning' : undefined}
             onAction={tab === 'upcoming' ? () => router.push('/(member)/(tabs)/planning') : undefined}
@@ -114,7 +147,9 @@ export default function ReservationsScreen() {
       />
 
       <BottomSheet visible={!!cancelTarget} onClose={() => setCancelTarget(null)}>
-        <Text style={styles.sheetTitle}>Annuler {cancelTarget?.session?.classType.name} ?</Text>
+        <Text style={styles.sheetTitle}>
+          {cancelTarget?.status === 'WAITLISTED' ? 'Quitter la liste d’attente' : `Annuler ${cancelTarget?.session?.classType.name} ?`}
+        </Text>
         <Text style={styles.sheetText}>
           L’annulation est gratuite. Votre place sera proposée à la liste d’attente.
         </Text>
@@ -131,24 +166,44 @@ export default function ReservationsScreen() {
   );
 }
 
+const STATUS_LABEL: Record<Booking['status'], string> = {
+  CONFIRMED: 'Confirmée',
+  WAITLISTED: 'Liste d’attente',
+  ATTENDED: 'Présente',
+  NO_SHOW: 'Absente',
+  CANCELLED: 'Annulée',
+};
+
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.bg },
-  tabWrap: { paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
-  list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
-  card: {
-    backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
-    padding: spacing.md, gap: 10,
-  },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  className: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
-  meta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
-  waitlistNote: { fontFamily: fonts.body, fontSize: 12, color: colors.warningInk },
-  actionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  outlineButton: { height: 36, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1.5, borderColor: colors.borderStrong, alignItems: 'center', justifyContent: 'center' },
-  outlineButtonText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.text },
-  cancelText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.dangerInk },
-  sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 19, color: colors.text },
-  sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    header: { paddingHorizontal: spacing.lg, gap: 4, paddingBottom: spacing.sm },
+    back: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingVertical: 6 },
+    backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    tabs: { flexDirection: 'row', gap: 8, marginTop: 10 },
+    tab: {
+      height: 36, paddingHorizontal: 14, borderRadius: 999, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    },
+    tabActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    tabText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    tabTextActive: { color: colors.primaryContrast },
+    list: { padding: spacing.lg, paddingTop: spacing.sm, gap: 10, paddingBottom: 120 },
+    card: {
+      flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+    },
+    dateBlock: { width: 64, height: 68, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+    dateDay: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, color: 'rgba(255,255,255,0.85)' },
+    dateNumber: { fontFamily: fonts.head, fontSize: 24, lineHeight: 28, letterSpacing: -0.6, color: '#FFFFFF' },
+    className: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
+    meta: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
+    note: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.text, marginTop: 2 },
+    cancelButton: {
+      width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    },
+    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 19, color: colors.text },
+    sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
   });
 }

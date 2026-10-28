@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
@@ -11,7 +10,7 @@ import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { meApi } from '../../../src/api/endpoints';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useOfflineQrToken } from '../../../src/hooks/useOfflineQrToken';
-import { Avatar, Banner, CircularTimer, Pill } from '../../../src/components/ui';
+import { Avatar, Banner, Pill, ProgressBar, ScreenTitle } from '../../../src/components/ui';
 
 // Repli uniquement : la vraie durée de vie vient de `expiresInSeconds`,
 // renvoyée par le serveur à chaque émission de token (45s — qr-token.service.ts).
@@ -19,7 +18,7 @@ const FALLBACK_REFRESH_SECONDS = 45;
 
 /** Écran "QR d'accès" — FitZone App Adherent.dc.html, C3. */
 export default function QrScreen() {
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const { t } = useTranslation();
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
@@ -70,14 +69,8 @@ export default function QrScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.container}>
-        <View style={styles.headerRow}>
-          <Text style={styles.title}>{t('qr.title')}</Text>
-          <View style={styles.brightnessRow}>
-            <MaterialIcons name="brightness-high" size={16} color={colors.muted} />
-            <Text style={styles.brightnessText}>{t('qr.brightness')}</Text>
-          </View>
-        </View>
+      <ScrollView contentContainerStyle={styles.container}>
+        <ScreenTitle title={t('qr.title')} subtitle={t('qr.subtitle')} />
 
         {offline || !token ? (
           <Banner
@@ -93,40 +86,42 @@ export default function QrScreen() {
           />
         ) : null}
 
-        <LinearGradient
-          colors={[colors.primary, colors.secondary]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.qrCard}
-        >
-          <View style={styles.qrGlow} />
+        <View style={[styles.qrCard, cardShadow]}>
           <View style={styles.qrBox}>
             {token ? (
-              <QRCode value={token} size={204} color={colors.secondary} backgroundColor="transparent" />
+              <QRCode value={token} size={210} color="#0E0D12" backgroundColor="#FFFFFF" />
             ) : offlineQr.token ? (
-              <QRCode value={offlineQr.token} size={204} color={colors.secondary} backgroundColor="transparent" />
+              <QRCode value={offlineQr.token} size={210} color="#0E0D12" backgroundColor="#FFFFFF" />
             ) : (
-              <MaterialIcons name="qr-code-2" size={204} color={colors.border} />
+              <MaterialIcons name="qr-code-2" size={210} color={colors.border} />
             )}
           </View>
-
-          {!offline ? (
-            <View style={styles.countdownRow}>
-              <CircularTimer progress={secondsLeft / totalSeconds} size={26} color="#FFFFFF" trackColor="rgba(255,255,255,0.25)" filled />
-              <Text style={styles.countdownText}>{t('qr.newCodeIn', { seconds: String(secondsLeft).padStart(2, '0') })}</Text>
-            </View>
-          ) : offlineQr.token ? (
+          {offline && offlineQr.token ? (
             <View style={styles.countdownPill}>
-              <MaterialIcons name="verified-user" size={16} color={colors.secondary} />
+              <MaterialIcons name="verified-user" size={16} color={colors.primaryInk} />
               <Text style={styles.countdownPillText}>{t('qr.fallbackCode')}</Text>
             </View>
-          ) : (
+          ) : offline ? (
             <View style={styles.countdownPill}>
               <MaterialIcons name="error-outline" size={16} color={colors.dangerInk} />
               <Text style={[styles.countdownPillText, { color: colors.dangerInk }]}>{t('qr.noOfflineCode')}</Text>
             </View>
-          )}
-        </LinearGradient>
+          ) : null}
+        </View>
+
+        {!offline ? (
+          <View style={[styles.dynamicCard, cardShadow]}>
+            <View style={styles.dynamicRow}>
+              <View style={styles.dynamicLabel}>
+                <MaterialIcons name="autorenew" size={20} color={colors.primaryInk} />
+                <Text style={styles.dynamicText}>{t('qr.dynamicCode')}</Text>
+              </View>
+              <Text style={styles.dynamicSeconds}>{secondsLeft} s</Text>
+            </View>
+            <ProgressBar progress={secondsLeft / totalSeconds} color={colors.primary} />
+            <Text style={styles.dynamicHint}>{t('qr.dynamicHint')}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.identityCard}>
           <Avatar initials={initials || 'AD'} background={colors.primarySoft} color={colors.primaryInk} />
@@ -158,7 +153,7 @@ export default function QrScreen() {
             </View>
           </View>
         ) : null}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -166,44 +161,38 @@ export default function QrScreen() {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
-    container: { flex: 1, padding: spacing.lg, gap: spacing.md },
-    headerRow: { flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center' },
-    title: { fontFamily: fonts.head, fontSize: 26, color: colors.text },
-    brightnessRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-    brightnessText: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
     qrCard: {
-      borderRadius: radii.lg, padding: spacing.lg, alignItems: 'center', gap: spacing.md,
-      overflow: 'hidden',
-      shadowColor: colors.secondary, shadowOpacity: 0.35, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 8,
+      backgroundColor: '#FFFFFF', borderRadius: 26, padding: 26, alignItems: 'center', gap: spacing.md,
+      borderWidth: 1, borderColor: colors.border,
     },
-    qrGlow: {
-      position: 'absolute', top: -80, right: -60, width: 220, height: 220, borderRadius: 110,
-      backgroundColor: 'rgba(255,255,255,0.12)',
-    },
-    qrBox: {
-      width: 236, height: 236, borderRadius: radii.md, backgroundColor: '#FFFFFF',
-      alignItems: 'center', justifyContent: 'center',
-      shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4,
-    },
-    countdownRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    countdownText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: '#FFFFFF' },
+    qrBox: { alignItems: 'center', justifyContent: 'center' },
     countdownPill: {
-      flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FFFFFF',
+      flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primarySoft,
       height: 32, paddingHorizontal: 12, borderRadius: 999,
     },
-    countdownPillText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.secondary },
+    countdownPillText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.primaryInk },
+    dynamicCard: {
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+      padding: 14, gap: 10,
+    },
+    dynamicRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    dynamicLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    dynamicText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
+    dynamicSeconds: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.primaryInk },
+    dynamicHint: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
     identityCard: {
       flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface,
-      borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 14,
     },
     identityName: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
     identityMeta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
     bookingCard: {
       flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.primarySoft,
-      borderRadius: radii.md, borderWidth: 1, borderColor: colors.primaryBorder, padding: spacing.md,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.primaryBorder, padding: 14,
     },
     bookingIcon: {
-      width: 44, height: 44, borderRadius: radii.sm, backgroundColor: colors.surface,
+      width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface,
       alignItems: 'center', justifyContent: 'center',
     },
     bookingLabel: { fontFamily: fonts.bodySemiBold, fontSize: 11, color: colors.primaryInk, letterSpacing: 0.5 },

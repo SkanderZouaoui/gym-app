@@ -12,11 +12,12 @@ interface CardProps {
 }
 
 export function Card({ children, onPress, style, tone = 'surface', selected }: CardProps) {
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const base = [
     styles.base,
     tone === 'secondary' ? styles.secondary : styles.surface,
+    tone === 'surface' && cardShadow,
     selected && styles.selected,
     style,
   ];
@@ -33,10 +34,10 @@ export function Card({ children, onPress, style, tone = 'surface', selected }: C
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    base: { borderRadius: radii.md, padding: spacing.md, gap: 10 },
+    base: { borderRadius: radii.lg, padding: spacing.lg, gap: 10 },
     surface: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     secondary: { backgroundColor: colors.secondary },
     selected: { borderColor: colors.primary, borderWidth: 2 },
-    pressed: { opacity: 0.9 },
+    pressed: { transform: [{ scale: 0.98 }] },
   });
 }

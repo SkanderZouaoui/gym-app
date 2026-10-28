@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -13,14 +13,17 @@ import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { useSessionStore } from '../../../src/store/session';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
-import { Banner, BottomSheet, IconCircleButton, OfflineBanner, Pill, ProgressBar, Toast } from '../../../src/components/ui';
+import { Banner, BottomSheet, IconCircleButton, OfflineBanner, Toast } from '../../../src/components/ui';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { Button } from '../../../src/components/Button';
+import { ProfileHeader } from '../../../src/components/adherent/ProfileHeader';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
-  const { colors } = useTheme();
+  const tabBarScroll = useHideTabBarOnScroll();
+  const { colors, cardShadow } = useTheme();
   const { t } = useTranslation();
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
@@ -64,6 +67,16 @@ export default function ProfileScreen() {
     return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
   }).length ?? 0;
 
+  const upcomingBookings = bookings?.filter(
+    (b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= now,
+  ).length ?? 0;
+  const completion =
+    [user?.firstName, user?.lastName, user?.email, user?.phone, user?.photoUrl].filter(Boolean).length / 5;
+  const memberSince = user && memberships?.length
+    ? new Date(Math.min(...memberships.map((m) => new Date(m.startDate).getTime())))
+        .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    : undefined;
+
   const handleSwitchToCoach = () => {
     setActiveRole('COACH');
     router.replace(rootRouteForRole('COACH') as never);
@@ -87,15 +100,15 @@ export default function ProfileScreen() {
           <OfflineBanner lastSyncAt={lastSyncAt} />
         </View>
       ) : null}
-      <ScrollView
+      <ScrollView {...tabBarScroll}
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>{t('profile.title')}</Text>
+          <View style={{ flex: 1 }} />
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <IconCircleButton icon="qr-code-2" onPress={() => router.push('/(member)/(tabs)/qr')} />
-            <IconCircleButton icon="settings" onPress={() => router.push('/(member)/settings')} />
+            <IconCircleButton icon="qr-code-2" radius={14} onPress={() => router.push('/(member)/(tabs)/qr')} />
+            <IconCircleButton icon="settings" radius={14} onPress={() => router.push('/(member)/settings')} />
           </View>
         </View>
 
@@ -108,70 +121,34 @@ export default function ProfileScreen() {
           />
         ) : null}
 
-        <View style={styles.identityRow}>
-          <View style={{ position: 'relative' }}>
-            {user?.photoUrl ? (
-              <Image source={{ uri: user.photoUrl }} style={styles.avatarImage} />
-            ) : (
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initials}</Text>
-              </View>
-            )}
-          </View>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={styles.name} numberOfLines={1}>
-              {user?.firstName} {user?.lastName}
-            </Text>
-            <View style={styles.identityMetaRow}>
-              <Pill label={t('profile.member')} tone="accent" />
-            </View>
-          </View>
-          <Pressable style={styles.editButton} onPress={() => router.push('/(member)/profile-edit')}>
-            <Text style={styles.editButtonText}>{t('profile.edit')}</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.heroCard}>
-          <View style={styles.heroTopRow}>
-            <Text style={styles.heroKicker}>{t('profile.myMembership')}</Text>
-            <Pill label={activeMembership ? t('profile.active') : t('profile.none')} tone={activeMembership ? 'success' : 'muted'} />
-          </View>
-          <View>
-            <Text style={styles.heroTitle}>{activeMembership?.plan.name ?? t('profile.membershipNone')}</Text>
-            {activeMembership ? (
-              <Text style={styles.heroSub}>
-                {t('profile.membershipPeriod', {
-                  start: new Date(activeMembership.startDate).toLocaleDateString('fr-FR'),
-                  end: new Date(activeMembership.endDate).toLocaleDateString('fr-FR'),
-                })}
-              </Text>
-            ) : (
-              <Text style={styles.heroSub}>{t('profile.membershipNoneText')}</Text>
-            )}
-          </View>
-          {activeMembership ? (
-            <>
-              <ProgressBar
-                progress={totalDays ? elapsedDays / totalDays : 0}
-                color={colors.primary}
-                trackColor="rgba(255,255,255,0.2)"
-              />
-              <View style={styles.heroBottomRow}>
-                <Text style={styles.heroBottomText}>{t('profile.dayOf', { elapsed: elapsedDays, total: totalDays })}</Text>
-                <Text style={styles.heroBottomText}>
-                  {daysLeft > 0
-                    ? t('profile.renewBefore', { date: new Date(activeMembership.endDate).toLocaleDateString('fr-FR') })
-                    : t('profile.expired')}
-                </Text>
-              </View>
-            </>
-          ) : null}
-        </View>
+        <ProfileHeader
+          initials={initials}
+          photoUrl={user?.photoUrl}
+          name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
+          subtitle={memberSince ? t('profile.memberSince', { date: memberSince }) : undefined}
+          completion={completion}
+          tags={
+            activeMembership
+              ? [
+                  { label: t('profile.active'), tone: 'success' },
+                  ...(daysLeft > 0 ? [{ label: t('profile.daysLeftTag', { count: daysLeft }), tone: 'primary' as const }] : []),
+                ]
+              : [{ label: t('profile.none'), tone: 'muted' }]
+          }
+        />
 
         <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, cardShadow]}>
             <Text style={styles.statValue}>{attendedThisMonth}</Text>
             <Text style={styles.statLabel}>{t('profile.statSessions')}</Text>
+          </View>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{upcomingBookings}</Text>
+            <Text style={styles.statLabel}>{t('profile.statUpcoming')}</Text>
+          </View>
+          <View style={[styles.statCard, cardShadow]}>
+            <Text style={styles.statValue}>{activeMembership ? daysLeft : 0}</Text>
+            <Text style={styles.statLabel}>{t('profile.statDaysLeft')}</Text>
           </View>
         </View>
 
@@ -302,43 +279,14 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
     offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
     header: { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between' },
-    title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },
-
-    identityRow: { flexDirection: isRtl ? 'row-reverse' : 'row', alignItems: 'center', gap: spacing.md },
-    avatar: {
-      width: 72, height: 72, borderRadius: 999, backgroundColor: colors.accent,
-      alignItems: 'center', justifyContent: 'center',
-    },
-    avatarImage: { width: 72, height: 72, borderRadius: 999, backgroundColor: colors.surface2 },
-    avatarText: { fontFamily: fonts.head, color: colors.onAccent, fontSize: 24 },
-    name: { fontFamily: fonts.headBold, fontSize: 22, color: colors.text, textAlign },
-    identityMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' },
-    editButton: {
-      height: 36, paddingHorizontal: 12, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
-      alignItems: 'center', justifyContent: 'center',
-    },
-    editButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.text },
-
-    heroCard: {
-      backgroundColor: colors.secondary, borderRadius: radii.lg, padding: spacing.md, gap: 10,
-    },
-    heroTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    heroKicker: {
-      fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.5, textTransform: 'uppercase',
-      color: colors.onSecondary, opacity: 0.85,
-    },
-    heroTitle: { fontFamily: fonts.headBold, fontSize: 22, color: colors.onSecondary },
-    heroSub: { fontFamily: fonts.body, fontSize: 13, color: colors.onSecondary, opacity: 0.85, marginTop: 2 },
-    heroBottomRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    heroBottomText: { fontFamily: fonts.body, fontSize: 12.5, color: colors.onSecondary, opacity: 0.9 },
-
+    
     statsGrid: { flexDirection: 'row', gap: spacing.sm },
     statCard: {
       flex: 1, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-      borderRadius: radii.md, padding: 12, gap: 2,
+      borderRadius: radii.lg, paddingVertical: 16, paddingHorizontal: 12, gap: 8,
     },
-    statValue: { fontFamily: fonts.headBold, fontSize: 22, color: colors.text },
-    statLabel: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted, lineHeight: 15 },
+    statValue: { fontFamily: fonts.head, fontSize: 34, lineHeight: 36, letterSpacing: -1.5, color: colors.text },
+    statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted, lineHeight: 15 },
 
     quickGrid: { flexDirection: 'row', gap: 6 },
     quickAction: {
@@ -354,7 +302,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
       textTransform: 'uppercase', marginTop: spacing.xs,
     },
     menuCard: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       overflow: 'hidden',
     },
     menuRow: {

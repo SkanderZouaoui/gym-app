@@ -59,6 +59,7 @@ export interface WorkoutLog {
   date: string;
   feeling: string | null;
   durationMinutes: number | null;
+  durationSeconds: number | null;
   programId: string | null;
   dayId: string | null;
   program: { id: string; name: string } | null;
@@ -93,6 +94,7 @@ export interface CreateWorkoutLogInput {
   dayId?: string;
   feeling?: string;
   durationMinutes?: number;
+  durationSeconds?: number;
   sets: CreateWorkoutSetInput[];
 }
 

@@ -66,7 +66,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { padding: spacing.lg, paddingTop: 0, gap: spacing.md, paddingBottom: 120 },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: 6,
     },
     appName: { fontFamily: fonts.headBold, fontSize: 20, color: colors.text, textAlign: 'center' },

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, type GestureResponderEvent } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -14,7 +15,9 @@ interface ButtonProps {
 export function Button({ label, onPress, variant = 'primary', loading, disabled }: ButtonProps) {
   const { colors } = useTheme();
   const isDisabled = disabled || loading;
+  const { scheme } = useTheme();
   const { styles, variantStyles, textVariantStyles } = useMemo(() => makeStyles(colors), [colors]);
+  const gradient = variant === 'primary';
 
   return (
     <Pressable
@@ -23,15 +26,25 @@ export function Button({ label, onPress, variant = 'primary', loading, disabled 
       style={({ pressed }) => [
         styles.base,
         variantStyles[variant],
-        isDisabled && styles.disabled,
+        gradient && !disabled && { shadowColor: colors.primary, shadowOpacity: scheme === 'dark' ? 0.45 : 0.3, ...styles.glow },
+        disabled && styles.disabled,
         pressed && !isDisabled && styles.pressed,
       ]}
     >
-      {loading ? (
-        <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#fff'} />
-      ) : (
-        <Text style={[styles.label, textVariantStyles[variant]]}>{label}</Text>
-      )}
+      {gradient && !disabled ? (
+        <LinearGradient
+          colors={[colors.primary, colors.primaryPressed]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      ) : null}
+      <View style={styles.content}>
+        {loading ? (
+          <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#fff'} />
+        ) : (
+          <Text style={[styles.label, textVariantStyles[variant], disabled && { color: colors.muted }]}>{label}</Text>
+        )}
+      </View>
     </Pressable>
   );
 }
@@ -39,28 +52,31 @@ export function Button({ label, onPress, variant = 'primary', loading, disabled 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   const styles = StyleSheet.create({
     base: {
-      height: 52,
-      borderRadius: radii.sm,
+      minHeight: 52,
+      borderRadius: radii.md,
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: 16,
+      paddingHorizontal: 24,
+      overflow: 'hidden',
     },
+    content: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+    glow: { shadowOffset: { width: 0, height: 8 }, shadowRadius: 20, elevation: 6 },
     label: {
       fontFamily: fonts.bodyBold,
-      fontSize: 15,
+      fontSize: 16,
     },
     disabled: {
-      opacity: 0.5,
+      backgroundColor: colors.surface2,
     },
     pressed: {
-      opacity: 0.85,
+      transform: [{ scale: 0.97 }],
     },
   });
 
   const variantStyles = StyleSheet.create({
     primary: { backgroundColor: colors.primary },
     secondary: { backgroundColor: colors.secondary },
-    outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.borderStrong },
+    outline: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     ghost: { backgroundColor: 'transparent' },
   });
 

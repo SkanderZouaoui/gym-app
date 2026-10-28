@@ -2,19 +2,22 @@ import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useCreateBooking, useSessions } from '../../../src/hooks/useClasses';
+import { useMyBookings } from '../../../src/hooks/useMe';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { ApiError } from '../../../src/api/client';
-import { Banner, BottomSheet, Chip, EmptyState, OfflineBanner, SkeletonBlock, SkeletonGroup, Toast } from '../../../src/components/ui';
+import { Banner, EmptyState, OfflineBanner, ScreenTitle, SkeletonBlock, SkeletonGroup, Toast } from '../../../src/components/ui';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { CourseCard } from '../../../src/components/adherent/CourseCard';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
-import { Button } from '../../../src/components/Button';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 const WEEKDAY_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
@@ -29,8 +32,10 @@ function buildWeek() {
 }
 
 export default function PlanningScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { data: myBookings } = useMyBookings();
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const { data: sessions, isLoading, isError, refetch } = useSessions();
@@ -42,22 +47,23 @@ export default function PlanningScreen() {
   const days = useMemo(buildWeek, []);
 
   const [classTypeFilter, setClassTypeFilter] = useState<string | null>(null);
-  const [coachFilter, setCoachFilter] = useState<string | null>(null);
-  const [openSheet, setOpenSheet] = useState<'classType' | 'coach' | null>(null);
 
+  // Types de cours proposés en filtre : uniquement ceux programmés le jour sélectionné.
   const classTypeOptions = useMemo(() => {
-    const names = new Set((sessions ?? []).map((s) => s.classType.name));
-    return Array.from(names).sort();
-  }, [sessions]);
-
-  const coachOptions = useMemo(() => {
+    const target = days[selectedDay]?.date;
     const names = new Set(
       (sessions ?? [])
-        .map((s) => s.coach?.user.firstName)
-        .filter((n): n is string => !!n),
+        .filter((s) => !target || new Date(s.startsAt).toDateString() === target.toDateString())
+        .map((s) => s.classType.name),
     );
     return Array.from(names).sort();
-  }, [sessions]);
+  }, [sessions, days, selectedDay]);
+  const activeType = classTypeFilter && classTypeOptions.includes(classTypeFilter) ? classTypeFilter : null;
+
+  const upcomingCount = useMemo(
+    () => (myBookings ?? []).filter((b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= Date.now()).length,
+    [myBookings],
+  );
 
   const handleBook = (sessionId: string) => {
     setBookingError(null);
@@ -72,13 +78,10 @@ export default function PlanningScreen() {
     return sessions.filter((s) => {
       const d = new Date(s.startsAt);
       const matchesDay = !target || d.toDateString() === target.toDateString();
-      const matchesType = !classTypeFilter || s.classType.name === classTypeFilter;
-      const matchesCoach = !coachFilter || s.coach?.user.firstName === coachFilter;
-      return matchesDay && matchesType && matchesCoach;
+      const matchesType = !activeType || s.classType.name === activeType;
+      return matchesDay && matchesType;
     });
-  }, [sessions, days, selectedDay, classTypeFilter, coachFilter]);
-
-  const activeFilterCount = (classTypeFilter ? 1 : 0) + (coachFilter ? 1 : 0);
+  }, [sessions, days, selectedDay, activeType]);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -89,36 +92,33 @@ export default function PlanningScreen() {
       ) : null}
 
       <View style={styles.header}>
-        <Text style={styles.title}>{t('planning.title')}</Text>
-        <Pressable onPress={() => router.push('/(member)/reservations')}>
-          <Text style={styles.myBookingsLink}>{t('planning.myBookings')}</Text>
+        <ScreenTitle
+          title={t('planning.title')}
+          subtitle={t('planning.subtitle', { month: (days[selectedDay]?.date ?? new Date()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) })}
+        />
+        <Pressable
+          style={({ pressed }) => [styles.bookingsButton, pressed && { transform: [{ scale: 0.98 }] }]}
+          onPress={() => router.push('/(member)/reservations')}
+        >
+          <MaterialIcons name="event-available" size={20} color={colors.primaryInk} />
+          <Text style={styles.bookingsButtonText}>{t('planning.myBookings')} · {upcomingCount}</Text>
         </Pressable>
       </View>
 
       <View style={styles.sticky}>
         <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-          <Chip
-            label={activeFilterCount > 0 ? t('planning.filtersCount', { count: activeFilterCount }) : t('planning.filters')}
-            icon="tune"
-            active={activeFilterCount > 0}
-            onPress={() => {
-              setClassTypeFilter(null);
-              setCoachFilter(null);
-            }}
-          />
-          <Chip
-            label={classTypeFilter ?? t('planning.classType')}
-            trailingIcon="expand-more"
-            active={!!classTypeFilter}
-            onPress={() => setOpenSheet('classType')}
-          />
-          <Chip
-            label={coachFilter ?? t('planning.coach')}
-            trailingIcon="expand-more"
-            active={!!coachFilter}
-            onPress={() => setOpenSheet('coach')}
-          />
+          {[null, ...classTypeOptions].map((name) => {
+            const active = activeType === name;
+            return (
+              <Pressable key={name ?? 'all'} onPress={() => setClassTypeFilter(name)} style={styles.filterPill}>
+                {active ? (
+                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                ) : null}
+                <Text style={[styles.filterText, active && styles.filterTextActive]}>{name ?? t('planning.all')}</Text>
+              </Pressable>
+            );
+          })}
         </ScrollView>
       </View>
 
@@ -146,7 +146,7 @@ export default function PlanningScreen() {
           onAction={() => refetch()}
         />
       ) : (
-        <FlatList
+        <FlatList {...tabBarScroll}
           data={daySessions}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
@@ -169,48 +169,6 @@ export default function PlanningScreen() {
           }
         />
       )}
-
-      <BottomSheet visible={openSheet === 'classType'} onClose={() => setOpenSheet(null)}>
-        <Text style={styles.sheetTitle}>{t('planning.classType')}</Text>
-        <View style={styles.optionsWrap}>
-          {classTypeOptions.map((name) => (
-            <Pressable
-              key={name}
-              style={[styles.optionRow, classTypeFilter === name && styles.optionRowActive]}
-              onPress={() => {
-                setClassTypeFilter(classTypeFilter === name ? null : name);
-                setOpenSheet(null);
-              }}
-            >
-              <Text style={[styles.optionText, classTypeFilter === name && styles.optionTextActive]}>{name}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Button label={t('common.close')} variant="ghost" onPress={() => setOpenSheet(null)} />
-      </BottomSheet>
-
-      <BottomSheet visible={openSheet === 'coach'} onClose={() => setOpenSheet(null)}>
-        <Text style={styles.sheetTitle}>{t('planning.coach')}</Text>
-        <View style={styles.optionsWrap}>
-          {coachOptions.length === 0 ? (
-            <Text style={styles.emptyOptionsText}>{t('planning.noCoachOptions')}</Text>
-          ) : (
-            coachOptions.map((name) => (
-              <Pressable
-                key={name}
-                style={[styles.optionRow, coachFilter === name && styles.optionRowActive]}
-                onPress={() => {
-                  setCoachFilter(coachFilter === name ? null : name);
-                  setOpenSheet(null);
-                }}
-              >
-                <Text style={[styles.optionText, coachFilter === name && styles.optionTextActive]}>{name}</Text>
-              </Pressable>
-            ))
-          )}
-        </View>
-        <Button label={t('common.close')} variant="ghost" onPress={() => setOpenSheet(null)} />
-      </BottomSheet>
 
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
@@ -243,7 +201,7 @@ function SessionCard({
       time={new Date(session.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
       duration={`${durationMinutes} min`}
       name={session.classType.name}
-      meta={[session.coach?.user.firstName, session.room?.name].filter(Boolean).join(' · ') || 'Salle'}
+      meta={[session.coach?.user.firstName, session.room?.name, `${session.capacity} places`].filter(Boolean).join(' · ')}
       spotsLabel={isFull ? t('planning.full') : t('planning.spotsLeft', { count: spotsLeft })}
       statusTone={isFull ? 'danger' : spotsLeft <= 3 ? 'warning' : 'success'}
       progress={progress}
@@ -257,12 +215,18 @@ function SessionCard({
 function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
-    header: {
-      flexDirection: isRtl ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center',
-      paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.sm,
+    header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
+    bookingsButton: {
+      height: 46, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+      backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder, marginTop: spacing.sm,
     },
-    title: { fontFamily: fonts.head, fontSize: 28, color: colors.text },
-    myBookingsLink: { fontFamily: fonts.bodyBold, color: colors.primaryInk, fontSize: 13 },
+    bookingsButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    filterPill: {
+      height: 36, paddingHorizontal: 16, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    },
+    filterText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    filterTextActive: { color: colors.primaryContrast },
     sticky: { paddingHorizontal: spacing.lg, gap: spacing.sm, marginBottom: spacing.sm },
     filterRow: { gap: 8 },
     bannerWrap: { paddingHorizontal: spacing.lg, marginBottom: spacing.sm },

@@ -3,9 +3,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useRemoteConfig } from '../../../src/config/RemoteConfigContext';
@@ -18,9 +19,12 @@ import { useCancelBooking } from '../../../src/hooks/useClasses';
 import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
-import { Banner, OfflineBanner, Pill, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
+import { Banner, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 export default function HomeScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { isRtl, language } = useLanguage();
@@ -65,7 +69,12 @@ export default function HomeScreen() {
     activeMembership?.endDate &&
     new Date(activeMembership.endDate).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
 
-  const dateLabel = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const daysLeft = activeMembership
+    ? Math.max(0, Math.ceil((new Date(activeMembership.endDate).getTime() - now) / 86_400_000))
+    : 0;
+  const remainingRatio = activeMembership
+    ? Math.min(1, daysLeft / Math.max(1, activeMembership.plan.durationDays))
+    : 0;
 
   const countdownLabel = (startsAt: string) => {
     const diffMs = new Date(startsAt).getTime() - now;
@@ -103,21 +112,17 @@ export default function HomeScreen() {
           <OfflineBanner lastSyncAt={lastSyncAt} />
         </View>
       ) : null}
-      <ScrollView
+      <ScrollView {...tabBarScroll}
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <AppHeader
+          greeting={greetingParts(config, language).label}
+          firstName={user?.firstName}
+          lastName={user?.lastName}
           hasUnreadNotification={unreadCount > 0}
           onPressNotifications={() => router.push('/(member)/notifications')}
         />
-
-        <View>
-          <Text style={styles.hello}>{greetingText(config, language, user?.firstName)}</Text>
-          <Text style={styles.sub}>
-            {dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} · {activeMembership?.plan.name ?? t('home.membershipNone')}
-          </Text>
-        </View>
 
         {isDegraded ? (
           <Banner
@@ -144,31 +149,27 @@ export default function HomeScreen() {
           />
         ) : null}
 
-        <Pressable
-          style={[styles.qrCard, expiredMembership && styles.qrButtonDisabled]}
-          onPress={() => router.push('/(member)/(tabs)/qr')}
-        >
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.qrCardTitle}>{t('home.qrCardTitle')}</Text>
-            <Text style={styles.qrCardSub}>{t('home.qrCardSub')}</Text>
-            <View style={styles.qrCardButton}>
-              <MaterialIcons name="qr-code-2" size={20} color={colors.primaryContrast} />
-              <Text style={styles.qrCardButtonText}>{t('home.qrCardButton')}</Text>
-            </View>
-          </View>
-          <View style={styles.qrCardIcon}>
-            <MaterialIcons name="qr-code-2" size={48} color={colors.primaryContrast} />
-          </View>
-        </Pressable>
+        <MembershipHeroCard
+          planName={activeMembership?.plan.name ?? t('home.membershipNone')}
+          periodLabel={activeMembership ? periodLabel(activeMembership.startDate, activeMembership.endDate) : undefined}
+          daysLeft={activeMembership ? daysLeft : undefined}
+          remainingRatio={remainingRatio}
+          expired={!!expiredMembership || !activeMembership}
+          onPressQr={() => router.push('/(member)/(tabs)/qr')}
+        />
 
         {expiredMembership ? null : nextBooking?.session ? (
+          <View style={{ gap: spacing.sm }}>
+          <Text style={styles.sectionTitle}>{t('home.nextCourseTitle')}</Text>
           <NextCourseCard
+            startsAt={nextBooking.session.startsAt}
             className={nextBooking.session.classType.name}
             meta={`${nextBooking.session.room?.name ?? ''}${nextBooking.session.coach ? ` · ${nextBooking.session.coach.user.firstName}` : ''}`}
             countdownText={countdownLabel(nextBooking.session.startsAt)}
             booked
             onPress={() => router.push(`/(member)/session/${nextBooking.session!.id}`)}
           />
+          </View>
         ) : isNewMember ? (
           <View style={styles.onboardCard}>
             <View style={styles.onboardIcon}>
@@ -214,12 +215,15 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>{t('home.announcementsTitle')}</Text>
             </View>
             {announcements.slice(0, 3).map((a, i) => (
-              <View key={a.id} style={styles.announcementRow}>
-                <View style={styles.announcementThumb} />
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Pill label={i === 0 ? t('home.announcementNew') : t('home.announcementInfo')} tone={i === 0 ? 'primary' : 'info'} />
-                  <Text style={styles.announcementTitle} numberOfLines={1}>{a.title}</Text>
-                  <Text style={styles.announcementMeta} numberOfLines={1}>{a.body}</Text>
+              <View key={a.id} style={styles.newsCard}>
+                <LinearGradient colors={[colors.secondary, '#0B0B0F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.8)']} style={StyleSheet.absoluteFill} />
+                <View style={styles.newsPill}>
+                  <Text style={styles.newsPillText}>{i === 0 ? t('home.announcementNew') : t('home.announcementInfo')}</Text>
+                </View>
+                <View style={styles.newsText}>
+                  <Text style={styles.newsTitle} numberOfLines={2}>{a.title}</Text>
+                  <Text style={styles.newsBody} numberOfLines={2}>{a.body}</Text>
                 </View>
               </View>
             ))}
@@ -243,11 +247,20 @@ export default function HomeScreen() {
 }
 
 /** Salutation pilotée par le back-office (clé "home.greeting", éditable
- * côté CMS) — distincte des textes fixes de l'app, traduits statiquement. */
-function greetingText(config: ReturnType<typeof useRemoteConfig>['config'], language: string, firstName?: string): string {
+ * côté CMS) — distincte des textes fixes de l'app, traduits statiquement.
+ * Le modèle "Bonjour, {prénom}" est scindé : la partie avant le prénom devient
+ * la petite ligne de l'en-tête, le prénom est affiché en grand à côté. */
+function greetingParts(config: ReturnType<typeof useRemoteConfig>['config'], language: string): { label: string } {
   const entry = config.strings.find((s) => s.k === 'home.greeting');
   const template = (language === 'ar' && entry?.ar.trim() ? entry.ar : entry?.fr) ?? 'Bonjour, {prénom}';
-  return template.replace('{prénom}', firstName ?? '');
+  const label = template.split('{prénom}')[0].trim();
+  return { label: label || 'Bonjour,' };
+}
+
+function periodLabel(start: string, end: string): string {
+  const fmt = (d: string, withYear: boolean) =>
+    new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) });
+  return `${fmt(start, false)} → ${fmt(end, true)}`;
 }
 
 function OnboardRow({
@@ -279,24 +292,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
   skeletonHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  hello: { fontFamily: fonts.head, fontSize: 28, color: colors.text, textAlign },
-  sub: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, marginTop: 2, textAlign },
-  qrCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 16, backgroundColor: colors.secondary,
-    borderRadius: radii.lg, padding: 18,
-  },
-  qrButtonDisabled: { opacity: 0.5 },
-  qrCardTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.onSecondary, letterSpacing: -0.2 },
-  qrCardSub: { fontFamily: fonts.body, fontSize: 13, color: colors.onSecondary, opacity: 0.85 },
-  qrCardButton: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', marginTop: 6,
-    height: 40, paddingHorizontal: 14, borderRadius: radii.sm, backgroundColor: colors.primary,
-  },
-  qrCardButtonText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryContrast },
-  qrCardIcon: {
-    width: 72, height: 72, borderRadius: radii.md, backgroundColor: colors.primary,
-    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  },
   emptyCourseCard: {
     backgroundColor: colors.surface, borderRadius: radii.lg,
     padding: spacing.md,
@@ -313,20 +308,24 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   onboardText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, textAlign: 'center' },
   onboardButton: { height: 44, paddingHorizontal: 18, borderRadius: radii.sm, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   onboardButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
-  onboardList: { backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, padding: spacing.md, gap: 8 },
+  onboardList: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md, gap: 8 },
   onboardListTitle: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text, marginBottom: 2 },
   onboardRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
   onboardRowLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text, flex: 1 },
   cancelLink: { alignSelf: 'center' },
   cancelLinkText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.dangerInk },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, color: colors.text },
-  announcementRow: {
-    flexDirection: 'row', gap: 12, alignItems: 'center', padding: 10,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md,
+  sectionTitle: { ...typography.title, fontSize: 17, color: colors.text, textAlign },
+  newsCard: {
+    height: 176, borderRadius: 26, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: '#0B0B0F',
   },
-  announcementThumb: { width: 56, height: 56, borderRadius: radii.sm, backgroundColor: colors.surface2 },
-  announcementTitle: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.text, marginTop: 3 },
-  announcementMeta: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
+  newsPill: {
+    position: 'absolute', top: 14, left: 14, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  newsPillText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
+  newsText: { padding: 18 },
+  newsTitle: { fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.4, color: '#FFFFFF' },
+  newsBody: { fontFamily: fonts.body, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 3 },
   });
 }

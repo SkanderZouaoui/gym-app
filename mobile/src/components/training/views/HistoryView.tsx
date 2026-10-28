@@ -7,6 +7,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { useMyWorkouts, type WorkoutLog } from '../../../hooks/useCoaching';
 import { useMyBookings } from '../../../hooks/useMe';
 import { EmptyState } from '../../ui';
+import { formatDurationLabel, workoutSeconds } from '../../../utils/duration';
 
 function startOfWeek(date: Date) {
   const d = new Date(date);
@@ -54,7 +55,7 @@ export function HistoryView() {
     threeMonthsAgo.setMonth(now.getMonth() - 3);
     const recent = entries.filter((e) => new Date(e.date) >= threeMonthsAgo);
     const weeks = new Set(recent.map((e) => startOfWeek(new Date(e.date)).toISOString()));
-    const totalMinutes = recent.reduce((sum, e) => sum + (e.kind === 'workout' ? e.log.durationMinutes ?? 0 : 0), 0);
+    const totalMinutes = recent.reduce((sum, e) => sum + (e.kind === 'workout' ? (workoutSeconds(e.log) ?? 0) / 60 : 0), 0);
     return {
       count: recent.length,
       perWeek: weeks.size > 0 ? (recent.length / weeks.size).toFixed(1) : '0',
@@ -83,20 +84,7 @@ export function HistoryView() {
     return result;
   }, [workouts]);
 
-  const groups = useMemo(() => {
-    const byWeek = new Map<string, HistoryEntry[]>();
-    for (const e of entries) {
-      const key = startOfWeek(new Date(e.date)).toISOString();
-      if (!byWeek.has(key)) byWeek.set(key, []);
-      byWeek.get(key)!.push(e);
-    }
-    return Array.from(byWeek.entries())
-      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
-      .map(([weekStart, items]) => ({
-        weekStart: new Date(weekStart),
-        items: items.sort((a, b) => (a.date < b.date ? 1 : -1)),
-      }));
-  }, [entries]);
+  const allEntries = useMemo(() => [...entries].sort((a, b) => (a.date < b.date ? 1 : -1)), [entries]);
 
   if (workoutsLoading || bookingsLoading) return null;
 
@@ -127,8 +115,6 @@ export function HistoryView() {
     );
   }
 
-  const thisWeekStart = startOfWeek(new Date()).getTime();
-
   return (
     <View style={{ gap: spacing.md }}>
       {stats ? (
@@ -139,62 +125,46 @@ export function HistoryView() {
         </View>
       ) : null}
 
-      {groups.map(({ weekStart, items }) => {
-        const isCurrentWeek = weekStart.getTime() === thisWeekStart;
-        const totalMinutes = items.reduce((sum, e) => sum + (e.kind === 'workout' ? e.log.durationMinutes ?? 0 : 0), 0);
-        const hours = Math.floor(totalMinutes / 60);
-        const mins = totalMinutes % 60;
-        return (
-          <View key={weekStart.toISOString()} style={{ gap: 8 }}>
-            <View style={styles.groupLabelRow}>
-              <Text style={styles.groupLabel}>
-                {isCurrentWeek ? 'CETTE SEMAINE' : `SEMAINE DU ${weekStart.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}`}
-              </Text>
-              <Text style={styles.groupLabel}>
-                {items.length} séance{items.length > 1 ? 's' : ''}
-                {totalMinutes > 0 ? ` · ${hours > 0 ? `${hours} h ${String(mins).padStart(2, '0')}` : `${mins} min`}` : ''}
-              </Text>
-            </View>
-            <View style={styles.groupCard}>
-              {items.map((entry) =>
-                entry.kind === 'workout' ? (
-                  <WorkoutRow key={entry.id} log={entry.log} isRecord={recordLogIds.has(entry.id)} styles={styles} />
-                ) : (
-                  <ClassRow key={entry.id} date={entry.date} name={entry.name} coachName={entry.coachName} styles={styles} />
-                ),
-              )}
-            </View>
-          </View>
-        );
-      })}
+      <View style={{ gap: 10 }}>
+        {allEntries.map((entry) =>
+          entry.kind === 'workout' ? (
+            <WorkoutRow key={entry.id} log={entry.log} isRecord={recordLogIds.has(entry.id)} styles={styles} />
+          ) : (
+            <ClassRow key={entry.id} date={entry.date} name={entry.name} coachName={entry.coachName} styles={styles} />
+          ),
+        )}
+      </View>
     </View>
   );
 }
 
 const DAY_LABELS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-const WEEKDAY_SHORT = ['DIM', 'LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM'];
 
 function DateBadge({ date, styles }: { date: string; styles: ReturnType<typeof makeStyles> }) {
   const d = new Date(date);
   return (
     <View style={styles.dateBadge}>
-      <Text style={styles.dateBadgeWeekday}>{WEEKDAY_SHORT[d.getDay()]}</Text>
+      <Text style={styles.dateBadgeMonth}>{d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '').toUpperCase()}.</Text>
       <Text style={styles.dateBadgeDay}>{d.getDate()}</Text>
     </View>
   );
 }
 
 function WorkoutRow({ log, isRecord, styles }: { log: WorkoutLog; isRecord: boolean; styles: ReturnType<typeof makeStyles> }) {
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const exerciseCount = new Set(log.sets.map((s) => s.exerciseId)).size;
   const dayLabel = log.day ? (log.day.label ?? DAY_LABELS[log.day.dayOfWeek]) : null;
   const workoutTitle = log.program
     ? `${log.program.name}${dayLabel ? ` · ${dayLabel}` : ''}`
     : `${log.sets[0]?.exercise.name ?? 'Séance'}${exerciseCount > 1 ? ` + ${exerciseCount - 1} autre${exerciseCount > 2 ? 's' : ''}` : ''}`;
+  const volume = workoutVolume(log);
   return (
-    <Pressable style={styles.logRow} onPress={() => router.push(`/(member)/workout/${log.id}`)}>
+    <Pressable
+      style={({ pressed }) => [styles.logRow, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
+      onPress={() => router.push(`/(member)/workout/${log.id}`)}
+    >
       <DateBadge date={log.date} styles={styles} />
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <View style={styles.logNameRow}>
           <Text style={styles.logName} numberOfLines={1}>
             {workoutTitle}
@@ -206,21 +176,22 @@ function WorkoutRow({ log, isRecord, styles }: { log: WorkoutLog; isRecord: bool
           ) : null}
         </View>
         <Text style={styles.logMeta}>
-          {log.durationMinutes ? `${log.durationMinutes} min · ` : ''}
+          {workoutSeconds(log) !== null ? `${formatDurationLabel(workoutSeconds(log)!)} · ` : ''}
           {log.sets.length} série{log.sets.length > 1 ? 's' : ''}
-          {workoutVolume(log) > 0 ? ` · ${Math.round(workoutVolume(log)).toLocaleString('fr-FR')} kg` : ''}
         </Text>
+        {volume > 0 ? <Text style={styles.logVolume}>{Math.round(volume).toLocaleString('fr-FR')} kg de volume</Text> : null}
       </View>
-      <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
+      <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
     </Pressable>
   );
 }
 
 function ClassRow({ date, name, coachName, styles }: { date: string; name: string; coachName: string | null; styles: ReturnType<typeof makeStyles> }) {
+  const { cardShadow } = useTheme();
   return (
-    <View style={styles.logRow}>
+    <View style={[styles.logRow, cardShadow]}>
       <DateBadge date={date} styles={styles} />
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={styles.logName} numberOfLines={1}>{name} (cours)</Text>
         <Text style={styles.logMeta}>
           {new Date(date).toLocaleDateString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -246,30 +217,26 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     statsRow: { flexDirection: 'row', gap: spacing.sm },
     statCard: {
-      flex: 1, backgroundColor: colors.surface, borderRadius: radii.md,
-      padding: spacing.md, gap: 2,
-      shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 3,
+      flex: 1, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+      paddingVertical: 14, paddingHorizontal: 12, gap: 2,
     },
-    statValue: { fontFamily: fonts.head, fontSize: 24, color: colors.secondary },
-    statLabel: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    groupLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    groupLabel: { fontFamily: fonts.bodySemiBold, fontSize: 11, letterSpacing: 0.5, color: colors.muted },
-    groupCard: {
-      backgroundColor: colors.surface, borderRadius: radii.md,
-      paddingHorizontal: spacing.md,
-      shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 3,
+    statValue: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -1, color: colors.text },
+    statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    logRow: {
+      flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, backgroundColor: colors.surface,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
     },
-    logRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 },
     dateBadge: {
-      width: 44, height: 44, borderRadius: radii.sm, backgroundColor: colors.surface2,
+      width: 58, height: 64, borderRadius: 16, backgroundColor: colors.primarySoft,
       alignItems: 'center', justifyContent: 'center',
     },
-    dateBadgeWeekday: { fontFamily: fonts.bodyBold, fontSize: 9, letterSpacing: 0.3, color: colors.muted },
-    dateBadgeDay: { fontFamily: fonts.headBold, fontSize: 16, color: colors.text },
+    dateBadgeMonth: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.6, color: colors.primaryInk },
+    dateBadgeDay: { fontFamily: fonts.head, fontSize: 22, lineHeight: 26, color: colors.primaryInk },
     logNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    logName: { flexShrink: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text, textTransform: 'capitalize' },
-    recordBadge: { backgroundColor: colors.accent, borderRadius: radii.xs, paddingHorizontal: 6, paddingVertical: 2 },
-    recordBadgeText: { fontFamily: fonts.bodySemiBold, fontSize: 9.5, letterSpacing: 0.3, color: colors.onAccent },
-    logMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    logName: { flexShrink: 1, fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, textTransform: 'capitalize' },
+    recordBadge: { backgroundColor: '#FBBF24', borderRadius: 999, paddingHorizontal: 6, paddingVertical: 2 },
+    recordBadgeText: { fontFamily: fonts.bodySemiBold, fontSize: 9.5, letterSpacing: 0.3, color: '#3A2500' },
+    logMeta: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
+    logVolume: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.primaryInk, marginTop: 6 },
   });
 }

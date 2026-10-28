@@ -3,8 +3,8 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { fonts, radii, spacing } from '../../../theme/tokens';
 import { useTheme } from '../../../theme/ThemeContext';
-import { useBodyMetrics, useAttendanceCalendar } from '../../../hooks/useProgress';
-import { useStreak } from '../../../hooks/useLoyalty';
+import { useBodyMetrics } from '../../../hooks/useProgress';
+import { useMyWorkouts } from '../../../hooks/useCoaching';
 import { BarHistogram, EmptyState, LineChart } from '../../ui';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -30,15 +30,10 @@ export function ProgressView() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: metrics, isLoading, isError, refetch } = useBodyMetrics();
-  const { data: streak } = useStreak();
 
-  const { from: attendanceFrom, to: attendanceTo } = useMemo(() => {
-    const to = new Date();
-    const from = new Date(to);
-    from.setDate(from.getDate() - 56);
-    return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
-  }, []);
-  const { data: attendanceDates } = useAttendanceCalendar(attendanceFrom, attendanceTo);
+  // Régularité : dates des séances d'entraînement enregistrées (le backend n'expose pas de calendrier de présence).
+  const { data: workouts } = useMyWorkouts();
+  const attendanceDates = useMemo(() => workouts?.map((w) => w.date), [workouts]);
 
   const weightSeries = useMemo(() => {
     if (!metrics) return [];
@@ -60,6 +55,19 @@ export function ProgressView() {
     }
     return weeks;
   }, [attendanceDates]);
+
+  // Série en cours : semaines consécutives avec au moins une séance, en remontant depuis la plus récente
+  // (la semaine courante vide n'interrompt pas la série tant qu'elle n'est pas terminée).
+  const streak = useMemo(() => {
+    let i = weeklyRegularity.length - 1;
+    if (i >= 0 && weeklyRegularity[i] === 0) i--;
+    let count = 0;
+    while (i >= 0 && weeklyRegularity[i] > 0) {
+      count++;
+      i--;
+    }
+    return { streak: count };
+  }, [weeklyRegularity]);
 
   if (isLoading) return null;
 
@@ -165,7 +173,7 @@ export function ProgressView() {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     weightCard: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: spacing.sm,
     },
     weightHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
@@ -184,7 +192,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     measurementLabel: { fontFamily: fonts.body, fontSize: 10.5, color: colors.muted },
     measurementValue: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },
     regularityCard: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: spacing.md,
     },
     regularityHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
@@ -198,7 +206,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     addButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
     photosLink: {
       flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface,
-      borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md,
     },
     photosLinkText: { flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
   });

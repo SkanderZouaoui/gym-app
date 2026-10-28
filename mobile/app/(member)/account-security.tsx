@@ -89,7 +89,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       letterSpacing: 0.4, marginTop: spacing.sm,
     },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, gap: spacing.sm,
     },
   });

@@ -4,7 +4,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { TextField } from '../../src/components/TextField';
-import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, spacing, typography } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { authApi, meApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
@@ -117,21 +117,21 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center', gap: spacing.xl },
-    header: { alignItems: 'center', gap: spacing.sm },
+    header: { alignItems: 'flex-start', gap: spacing.sm },
     logo: {
-      width: 56,
-      height: 56,
-      borderRadius: radii.md,
+      width: 64,
+      height: 64,
+      borderRadius: 20,
       backgroundColor: colors.primary,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: spacing.sm,
     },
-    logoText: { fontFamily: fonts.head, color: colors.primaryContrast, fontSize: 18 },
-    title: { fontFamily: fonts.head, fontSize: 30, color: colors.text },
-    subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, textAlign: 'center' },
+    logoText: { fontFamily: fonts.head, color: colors.primaryContrast, fontSize: 22, letterSpacing: -0.5 },
+    title: { ...typography.largeTitle, fontSize: 32, color: colors.text },
+    subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },
     form: { gap: spacing.md },
-    forgotLink: { fontFamily: fonts.bodyBold, color: colors.text, fontSize: 13.5, textAlign: 'right' },
+    forgotLink: { fontFamily: fonts.bodySemiBold, color: colors.primaryInk, fontSize: 14, alignSelf: 'flex-start' },
     footer: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
     footerText: { fontFamily: fonts.body, color: colors.muted },
     footerLink: { fontFamily: fonts.bodyBold, color: colors.primaryInk },

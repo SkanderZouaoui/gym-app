@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Platform, useColorScheme } from 'react-native';
+import { Platform, useColorScheme, type ViewStyle } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { deriveColorFamily, type Branding } from '@muscleup/shared';
-import { colors as lightColors } from './tokens';
+import { cardShadow, colors as lightColors } from './tokens';
 import { darkColors } from './darkColors';
 import { useRemoteConfig } from '../config/RemoteConfigContext';
 
@@ -37,8 +37,11 @@ function applyBranding(base: ColorPalette, branding: Branding, dark: boolean): C
   const secondary = deriveColorFamily(branding.secondary, surface, dark);
   const accent = deriveColorFamily(branding.accent, surface, dark);
 
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(primary.base.slice(i, i + 2), 16));
+
   return {
     ...base,
+    glow: `rgba(${r},${g},${b},${dark ? 0.38 : 0.28})`,
     primary: primary.base,
     primaryHover: primary.hover,
     primaryPressed: primary.pressed,
@@ -64,6 +67,8 @@ interface ThemeContextValue {
   preference: ThemePreference;
   setScheme: (preference: ThemePreference) => void;
   radius: number;
+  /** Ombre de carte v2 : douce en clair, aucune en sombre. */
+  cardShadow: ViewStyle;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -93,7 +98,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ colors, scheme: resolvedScheme, preference, setScheme, radius: config.branding.radius }),
+    () => ({
+      colors,
+      scheme: resolvedScheme,
+      preference,
+      setScheme,
+      radius: config.branding.radius,
+      cardShadow: resolvedScheme === 'dark' ? {} : cardShadow,
+    }),
     [colors, resolvedScheme, preference, config.branding.radius],
   );
 

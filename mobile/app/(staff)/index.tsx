@@ -2,11 +2,13 @@ import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useStaffToday, type StaffTodaySession } from '../../src/hooks/useStaff';
+import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
 
 export default function StaffTodayScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data } = useStaffToday();
@@ -27,7 +29,7 @@ export default function StaffTodayScreen() {
         </View>
       </View>
 
-      <FlatList
+      <FlatList {...tabBarScroll}
         data={data?.sessions ?? []}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
@@ -62,7 +64,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     header: { padding: spacing.lg, paddingBottom: spacing.sm, gap: spacing.sm },
-    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    title: { ...typography.largeTitle, color: colors.text },
     statRow: { flexDirection: 'row', gap: spacing.sm },
     statCard: {
       flex: 1, backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1,
@@ -73,7 +75,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     list: { padding: spacing.lg, paddingTop: 0, gap: spacing.sm, paddingBottom: 120 },
     empty: { fontFamily: fonts.body, color: colors.muted, textAlign: 'center', marginTop: 40 },
     card: {
-      backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
       padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12,
     },
     className: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },

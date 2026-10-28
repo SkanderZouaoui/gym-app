@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMe } from '../../src/hooks/useMe';
 import { useAdminDashboard, useDailyAttendance, useExpiringMemberships } from '../../src/hooks/useAdmin';
@@ -12,6 +12,7 @@ import { usePayments } from '../../src/hooks/usePayments';
 import { useStaffToday } from '../../src/hooks/useStaff';
 import { useNetworkStatus } from '../../src/hooks/useNetworkStatus';
 import { BarHistogram, OfflineBanner, ProgressBar, SkeletonBlock } from '../../src/components/ui';
+import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
 
 const nf = (n: number) => n.toLocaleString('fr-FR');
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
@@ -24,6 +25,7 @@ const PAYMENT_ICON: Record<string, keyof typeof MaterialIcons.glyphMap> = {
 };
 
 export default function AdminDashboardScreen() {
+  const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user, isLoading: userLoading } = useMe();
@@ -103,7 +105,7 @@ export default function AdminDashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
         <Text style={styles.title}>Bonjour {user?.firstName}</Text>
         <Text style={styles.subtitle}>Vue d’ensemble du site</Text>
 
@@ -229,7 +231,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
-    title: { fontFamily: fonts.head, fontSize: 24, color: colors.secondaryInk },
+    title: { ...typography.largeTitle, fontSize: 28, color: colors.text },
     subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
     kpiCard: {
