@@ -19,13 +19,4 @@ export class StorageController {
     const uploadUrl = await this.storageService.getUploadUrl(key, dto.contentType);
     return { key, uploadUrl };
   }
-
-  /** Même mécanisme que les photos de progression, pour les photos jointes
-   * à une publication du fil (ex. après une séance d'entraînement). */
-  @Post('post-upload-url')
-  async requestPostUploadUrl(@Body() dto: RequestUploadUrlDto, @CurrentUser() user: AuthenticatedUser) {
-    const key = this.storageService.buildKey(`posts/${user.userId}`, dto.contentType);
-    const uploadUrl = await this.storageService.getUploadUrl(key, dto.contentType);
-    return { key, uploadUrl };
-  }
 }

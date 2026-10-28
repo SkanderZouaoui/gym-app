@@ -10,7 +10,6 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useRemoteConfig } from '../../../src/config/RemoteConfigContext';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
-import { useMyActiveChallenges } from '../../../src/hooks/useLoyalty';
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
@@ -19,7 +18,7 @@ import { useCancelBooking } from '../../../src/hooks/useClasses';
 import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
-import { Banner, OfflineBanner, Pill, ProgressBar, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { Banner, OfflineBanner, Pill, SkeletonBlock, Toast } from '../../../src/components/ui';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
@@ -31,7 +30,6 @@ export default function HomeScreen() {
   const { data: user, isLoading: userLoading } = useMe();
   const { data: memberships, isLoading: membershipsLoading } = useMyMemberships();
   const { data: bookings } = useMyBookings();
-  const { data: challenges } = useMyActiveChallenges();
   const { data: announcements } = useMyAnnouncements();
   const { data: notifications } = useNotifications();
   const { isOnline, lastSyncAt } = useNetworkStatusContext();
@@ -41,7 +39,6 @@ export default function HomeScreen() {
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
   const [toastVisible, setToastVisible] = useState(false);
 
-  const activeChallenge = challenges?.find((c) => !c.completedAt);
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
 
   useEffect(() => {
@@ -211,34 +208,6 @@ export default function HomeScreen() {
           </Pressable>
         ) : null}
 
-        {activeChallenge ? (
-          <Pressable style={styles.challengeCard} onPress={() => router.push('/(member)/loyalty')}>
-            <View style={styles.challengeHeaderRow}>
-              <View style={styles.challengeIcon}>
-                <MaterialIcons name="emoji-events" size={22} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.challengeLabel}>{t('home.challengeInProgress')}</Text>
-                <Text style={styles.challengeTitle} numberOfLines={1}>{activeChallenge.name}</Text>
-              </View>
-              <Text style={styles.challengeCount}>
-                {activeChallenge.myProgress}/{activeChallenge.targetValue}
-              </Text>
-            </View>
-            <ProgressBar
-              progress={activeChallenge.targetValue > 0 ? activeChallenge.myProgress / activeChallenge.targetValue : 0}
-              color={colors.accent}
-              trackColor={colors.surface}
-            />
-            <Text style={styles.challengeMeta}>
-              {t('home.challengeMeta', {
-                points: activeChallenge.pointsReward,
-                days: Math.max(0, Math.ceil((new Date(activeChallenge.endDate).getTime() - now) / 86_400_000)),
-              })}
-            </Text>
-          </Pressable>
-        ) : null}
-
         {announcements && announcements.length > 0 ? (
           <View style={{ gap: spacing.sm }}>
             <View style={styles.sectionHeaderRow}>
@@ -350,20 +319,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   onboardRowLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text, flex: 1 },
   cancelLink: { alignSelf: 'center' },
   cancelLinkText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.dangerInk },
-  challengeCard: {
-    backgroundColor: colors.accentSoft, borderRadius: radii.lg, padding: spacing.md, gap: 10,
-    shadowColor: colors.accent, shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 3,
-  },
-  challengeHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  challengeIcon: {
-    width: 40, height: 40, borderRadius: 20, backgroundColor: colors.accent,
-    alignItems: 'center', justifyContent: 'center',
-    shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 2,
-  },
-  challengeLabel: { fontFamily: fonts.bodySemiBold, fontSize: 10.5, letterSpacing: 0.5, color: colors.accentInk },
-  challengeTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text, marginTop: 1 },
-  challengeCount: { fontFamily: fonts.headBold, fontSize: 17, color: colors.accentInk },
-  challengeMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.accentInk },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, color: colors.text },
   announcementRow: {

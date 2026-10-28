@@ -118,14 +118,14 @@ export class WorkoutsService {
     this.logger.debug(`${beaten.size} record(s) personnel(s) détecté(s) pour ${userId}`);
   }
 
-  /** Coachs ayant eu au moins une séance individuelle confirmée/terminée avec cet élève. */
+  /** Coachs ayant assigné au moins un programme à cet élève. */
   private async getActiveCoachIds(memberId: string): Promise<string[]> {
-    const sessions = await this.prisma.coachingSession.findMany({
-      where: { memberId, status: { in: ['CONFIRMED', 'COMPLETED'] } },
-      select: { coachId: true },
-      distinct: ['coachId'],
+    const programs = await this.prisma.program.findMany({
+      where: { assignedToId: memberId, createdById: { not: memberId } },
+      select: { createdById: true },
+      distinct: ['createdById'],
     });
-    return sessions.map((s) => s.coachId);
+    return programs.map((p) => p.createdById);
   }
 
   findForUser(userId: string) {

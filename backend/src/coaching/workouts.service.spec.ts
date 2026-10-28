@@ -10,7 +10,7 @@ describe('WorkoutsService — détection de record personnel', () => {
       workoutSet: { groupBy: vi.fn().mockResolvedValue([]) },
       workoutLog: { create: vi.fn() },
       user: { findUnique: vi.fn().mockResolvedValue({ firstName: 'Sarra', lastName: 'Ben Ali' }) },
-      coachingSession: { findMany: vi.fn().mockResolvedValue([]) },
+      program: { findMany: vi.fn().mockResolvedValue([]) },
       notification: { create: vi.fn().mockResolvedValue({}), createMany: vi.fn().mockResolvedValue({}) },
     };
     service = new WorkoutsService(prisma);
@@ -55,7 +55,7 @@ describe('WorkoutsService — détection de record personnel', () => {
   it('notifie aussi les coachs actifs de l’élève', async () => {
     prisma.workoutSet.groupBy.mockResolvedValue([{ exerciseId: 'ex-1', _max: { weightKg: 65 } }]);
     prisma.workoutLog.create.mockResolvedValue(makeLog(70));
-    prisma.coachingSession.findMany.mockResolvedValue([{ coachId: 'coach-1' }]);
+    prisma.program.findMany.mockResolvedValue([{ createdById: 'coach-1' }]);
 
     await service.create('user-1', { sets: [{ exerciseId: 'ex-1', setNumber: 1, weightKg: 70 }] } as any);
 

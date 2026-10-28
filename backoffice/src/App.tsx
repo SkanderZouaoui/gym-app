@@ -6,7 +6,6 @@ import { CoachesPage } from './pages/CoachesPage'
 import { TeamPage } from './pages/TeamPage'
 import { PlansPage } from './pages/PlansPage'
 import { PlanningPage } from './pages/PlanningPage'
-import { PrivatesPage } from './pages/PrivatesPage'
 import { ExercisesPage } from './pages/ExercisesPage'
 import { AttendancePage } from './pages/AttendancePage'
 import { StatsPage } from './pages/StatsPage'
@@ -42,7 +41,6 @@ function App() {
         <Route path="/coaches" element={<CoachesPage />} />
         <Route path="/team" element={<TeamPage />} />
         <Route path="/planning" element={<PlanningPage />} />
-        <Route path="/privates" element={<PrivatesPage />} />
         <Route path="/exercises" element={<ExercisesPage />} />
         <Route path="/attendance" element={<AttendancePage />} />
 

@@ -63,44 +63,29 @@ model User {
   photoKey     String?    @map("photo_key")
   status       UserStatus @default(ACTIVE)
   consents     Json       @default("{}")
-  referralCode String?    @unique @map("referral_code")
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")
 
-  roles                    UserRole[]
-  coachProfile             CoachProfile?
-  deviceTokens             DeviceToken[]
-  memberships              Membership[]
-  recordedPayments         Payment[]                 @relation("RecordedByUser")
-  bookings                 Booking[]
-  checkedInBookings        Booking[]                 @relation("CheckedInByUser")
-  coachingSessionsAsMember CoachingSession[]         @relation("CoachingMember")
-  refreshTokens            RefreshToken[]
-  otpCodes                 OtpCode[]
-  notifications            Notification[]
-  announcementsCreated     Announcement[]            @relation("AnnouncementCreatedBy")
-  reportsFiled             Report[]                  @relation("ReportReportedBy")
-  reportsResolved          Report[]                  @relation("ReportResolvedBy")
-  notesReceived            MemberNote[]              @relation("MemberNoteUser")
-  notesAuthored            MemberNote[]              @relation("MemberNoteAuthor")
-  exercisesCreated         Exercise[]                @relation("ExerciseCreatedBy")
-  programsCreated          Program[]                 @relation("ProgramCreatedBy")
-  programsAssigned         Program[]                 @relation("ProgramAssignedTo")
-  workoutLogs              WorkoutLog[]
-  bodyMetrics              BodyMetric[]
-  pointsTransactions       PointsTransaction[]
-  badges                   UserBadge[]
-  challengeParticipations  ChallengeParticipation[]
-  referralsAsReferrer      Referral[]                @relation("ReferralReferrer")
-  referralsAsReferee       Referral[]                @relation("ReferralReferee")
-  posts                    Post[]                    @relation("PostAuthor")
-  comments                 Comment[]                 @relation("CommentAuthor")
-  reactions                Reaction[]                @relation("ReactionUser")
-  conversations            ConversationParticipant[] @relation("ConversationParticipantUser")
-  messagesSent             Message[]                 @relation("MessageSender")
-  productReservations      ProductReservation[]      @relation("ProductReservationUser")
-  publishedConfigVersions  AppConfigVersion[]
+  roles                   UserRole[]
+  coachProfile            CoachProfile?
+  deviceTokens            DeviceToken[]
+  memberships             Membership[]
+  recordedPayments        Payment[]       @relation("RecordedByUser")
+  bookings                Booking[]
+  checkedInBookings       Booking[]       @relation("CheckedInByUser")
+  refreshTokens           RefreshToken[]
+  otpCodes                OtpCode[]
+  notifications           Notification[]
+  announcementsCreated    Announcement[]  @relation("AnnouncementCreatedBy")
+  notesReceived           MemberNote[]    @relation("MemberNoteUser")
+  notesAuthored           MemberNote[]    @relation("MemberNoteAuthor")
+  exercisesCreated        Exercise[]      @relation("ExerciseCreatedBy")
+  programsCreated         Program[]       @relation("ProgramCreatedBy")
+  programsAssigned        Program[]       @relation("ProgramAssignedTo")
+  workoutLogs             WorkoutLog[]
+  bodyMetrics             BodyMetric[]
+  publishedConfigVersions AppConfigVersion[]
 
   @@map("users")
 }
@@ -129,33 +114,13 @@ model CoachProfile {
   bio             String?
   specialties     String[]
   yearsExperience Int?        @map("years_experience")
-  sessionPrice    Decimal?    @map("session_price") @db.Decimal(10, 2)
-  rating          Decimal?    @db.Decimal(2, 1)
-  reviewCount     Int         @default(0) @map("review_count")
   status          CoachStatus @default(ACTIVE)
 
-  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  availabilities   CoachAvailability[]
-  classTemplates   ClassTemplate[]
-  classSessions    ClassSession[]
-  coachingSessions CoachingSession[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classTemplates ClassTemplate[]
+  classSessions  ClassSession[]
 
   @@map("coach_profiles")
-}
-
-model CoachAvailability {
-  id        String    @id @default(uuid())
-  coachId   String    @map("coach_id")
-  dayOfWeek Int?      @map("day_of_week") // récurrent: 0-6
-  startsAt  DateTime? @map("starts_at") // ponctuel
-  endsAt    DateTime? @map("ends_at")
-  startTime String?   @map("start_time") // récurrent "HH:mm"
-  endTime   String?   @map("end_time")
-
-  coach CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
-
-  @@index([coachId])
-  @@map("coach_availabilities")
 }
 
 model DeviceToken {
@@ -453,30 +418,6 @@ model UsedQrToken {
   @@map("used_qr_tokens")
 }
 
-enum CoachingSessionStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-}
-
-model CoachingSession {
-  id        String                @id @default(uuid())
-  coachId   String                @map("coach_id")
-  memberId  String                @map("member_id")
-  startsAt  DateTime              @map("starts_at")
-  endsAt    DateTime              @map("ends_at")
-  status    CoachingSessionStatus @default(PENDING)
-  objective String? // objectif facultatif saisi par l'adhérent à la réservation
-  createdAt DateTime              @default(now()) @map("created_at")
-
-  coach  CoachProfile @relation(fields: [coachId], references: [userId])
-  member User         @relation("CoachingMember", fields: [memberId], references: [id])
-
-  @@index([coachId, startsAt])
-  @@map("coaching_sessions")
-}
-
 // ---------------------------------------------------------------------------
 // Coaching et entraînement (section 8.5)
 // ---------------------------------------------------------------------------
@@ -638,8 +579,6 @@ enum NotificationType {
   MEMBERSHIP_EXPIRING
   ANNOUNCEMENT
   ATTENDANCE_CONFIRMED
-  MESSAGE
-  CHALLENGE
   PERSONAL_RECORD
 }
 
@@ -673,30 +612,6 @@ model Announcement {
   createdBy User            @relation("AnnouncementCreatedBy", fields: [createdById], references: [id])
 
   @@map("announcements")
-}
-
-enum ReportStatus {
-  OPEN
-  RESOLVED
-  DISMISSED
-}
-
-model Report {
-  id           String       @id @default(uuid())
-  reportedById String       @map("reported_by")
-  targetType   String       @map("target_type") // POST | COMMENT | USER
-  targetId     String       @map("target_id")
-  reason       String
-  status       ReportStatus @default(OPEN)
-  resolvedById String?      @map("resolved_by")
-  resolvedAt   DateTime?    @map("resolved_at")
-  createdAt    DateTime     @default(now()) @map("created_at")
-
-  reportedBy User  @relation("ReportReportedBy", fields: [reportedById], references: [id])
-  resolvedBy User? @relation("ReportResolvedBy", fields: [resolvedById], references: [id])
-
-  @@index([status])
-  @@map("reports")
 }
 
 /**
@@ -795,244 +710,3 @@ model RolePermission {
   @@map("role_permissions")
 }
 
-// ---------------------------------------------------------------------------
-// Fidélité (section 8.6) — pilotée par événements, idempotente
-// ---------------------------------------------------------------------------
-
-model PointsTransaction {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  points    Int // positif ou négatif
-  reason    String
-  sourceKey String   @unique @map("source_key") // clé d'idempotence (ex. "booking.attended:<bookingId>")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("points_transactions")
-}
-
-enum BadgeCriterionType {
-  STREAK_DAYS
-  TOTAL_ATTENDANCE
-  MANUAL
-}
-
-model Badge {
-  id             String             @id @default(uuid())
-  name           String
-  description    String?
-  iconKey        String?            @map("icon_key")
-  criterionType  BadgeCriterionType @map("criterion_type")
-  criterionValue Int?               @map("criterion_value")
-  isActive       Boolean            @default(true) @map("is_active")
-
-  userBadges UserBadge[]
-
-  @@map("badges")
-}
-
-model UserBadge {
-  id       String   @id @default(uuid())
-  userId   String   @map("user_id")
-  badgeId  String   @map("badge_id")
-  earnedAt DateTime @default(now()) @map("earned_at")
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  badge Badge @relation(fields: [badgeId], references: [id])
-
-  @@unique([userId, badgeId])
-  @@map("user_badges")
-}
-
-enum ChallengeMetric {
-  CLASSES_ATTENDED
-  STREAK_DAYS
-}
-
-model Challenge {
-  id           String          @id @default(uuid())
-  name         String
-  description  String?
-  metric       ChallengeMetric
-  targetValue  Int             @map("target_value")
-  startDate    DateTime        @map("start_date")
-  endDate      DateTime        @map("end_date")
-  pointsReward Int             @default(0) @map("points_reward")
-
-  participations ChallengeParticipation[]
-
-  @@map("challenges")
-}
-
-model ChallengeParticipation {
-  id          String    @id @default(uuid())
-  challengeId String    @map("challenge_id")
-  userId      String    @map("user_id")
-  progress    Int       @default(0)
-  completedAt DateTime? @map("completed_at")
-  joinedAt    DateTime  @default(now()) @map("joined_at")
-
-  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([challengeId, userId])
-  @@map("challenge_participations")
-}
-
-enum ReferralStatus {
-  COMPLETED
-  REWARDED
-}
-
-/**
- * Une ligne par filleul inscrit (section Compte/Profil — parrainage).
- * Le code partagé lui-même vit sur `User.referralCode` (stable, réutilisable
- * par plusieurs filleuls) ; chaque inscription réussie via ce code crée ici
- * une nouvelle ligne, donc un parrain peut apparaître plusieurs fois.
- */
-model Referral {
-  id           String         @id @default(uuid())
-  referrerId   String         @map("referrer_id")
-  refereeId    String         @unique @map("referee_id")
-  code         String
-  status       ReferralStatus @default(COMPLETED)
-  rewardPoints Int?           @map("reward_points")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  completedAt  DateTime?      @map("completed_at")
-
-  referrer User @relation("ReferralReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referee  User @relation("ReferralReferee", fields: [refereeId], references: [id])
-
-  @@index([referrerId])
-  @@map("referrals")
-}
-
-// ---------------------------------------------------------------------------
-// Social : fil d'actualité, messagerie (section 8.7)
-// ---------------------------------------------------------------------------
-
-model Post {
-  id        String    @id @default(uuid())
-  authorId  String    @map("author_id")
-  body      String
-  imageKey  String?   @map("image_key")
-  createdAt DateTime  @default(now()) @map("created_at")
-  deletedAt DateTime? @map("deleted_at") // masqué par modération
-
-  author    User       @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  comments  Comment[]
-  reactions Reaction[]
-
-  @@index([createdAt])
-  @@map("posts")
-}
-
-model Comment {
-  id        String    @id @default(uuid())
-  postId    String    @map("post_id")
-  authorId  String    @map("author_id")
-  body      String
-  createdAt DateTime  @default(now()) @map("created_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author User @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-
-  @@index([postId])
-  @@map("comments")
-}
-
-model Reaction {
-  id        String   @id @default(uuid())
-  postId    String   @map("post_id")
-  userId    String   @map("user_id")
-  type      String   @default("LIKE")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user User @relation("ReactionUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([postId, userId])
-  @@map("reactions")
-}
-
-model Conversation {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
-
-  participants ConversationParticipant[]
-  messages     Message[]
-
-  @@map("conversations")
-}
-
-model ConversationParticipant {
-  id             String   @id @default(uuid())
-  conversationId String   @map("conversation_id")
-  userId         String   @map("user_id")
-  joinedAt       DateTime @default(now()) @map("joined_at")
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  user         User         @relation("ConversationParticipantUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([conversationId, userId])
-  @@index([userId])
-  @@map("conversation_participants")
-}
-
-model Message {
-  id             String    @id @default(uuid())
-  conversationId String    @map("conversation_id")
-  senderId       String    @map("sender_id")
-  body           String
-  createdAt      DateTime  @default(now()) @map("created_at")
-  readAt         DateTime? @map("read_at")
-
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-
-  @@index([conversationId, createdAt])
-  @@map("messages")
-}
-
-// ---------------------------------------------------------------------------
-// Boutique (section 8.7)
-// ---------------------------------------------------------------------------
-
-model Product {
-  id          String  @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal @db.Decimal(10, 2)
-  stock       Int     @default(0)
-  imageKey    String? @map("image_key")
-  isActive    Boolean @default(true) @map("is_active")
-
-  reservations ProductReservation[]
-
-  @@map("products")
-}
-
-enum ProductReservationStatus {
-  PENDING
-  READY
-  COLLECTED
-  CANCELLED
-}
-
-model ProductReservation {
-  id        String                   @id @default(uuid())
-  productId String                   @map("product_id")
-  userId    String                   @map("user_id")
-  quantity  Int                      @default(1)
-  status    ProductReservationStatus @default(PENDING)
-  createdAt DateTime                 @default(now()) @map("created_at")
-
-  product Product @relation(fields: [productId], references: [id])
-  user    User    @relation("ProductReservationUser", fields: [userId], references: [id])
-
-  @@index([userId])
-  @@map("product_reservations")
-}

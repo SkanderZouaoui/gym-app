@@ -22,7 +22,6 @@ const NAV_GROUPS = [
       { to: '/coaches', label: 'Coachs', icon: 'badge' },
       { to: '/team', label: 'Équipe', icon: 'shield_person' },
       { to: '/planning', label: 'Planning', icon: 'calendar_month' },
-      { to: '/privates', label: 'Coaching privé', icon: 'sports' },
       { to: '/exercises', label: 'Exercices', icon: 'fitness_center' },
       { to: '/attendance', label: 'Présences', icon: 'qr_code_scanner' },
     ],

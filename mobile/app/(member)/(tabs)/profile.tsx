@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
-import { useMe, useMyBookings, useMyMemberships, useMyPoints, useMyStreak } from '../../../src/hooks/useMe';
+import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
@@ -27,8 +27,6 @@ export default function ProfileScreen() {
   const { data: user, refetch: refetchMe } = useMe();
   const { data: memberships, refetch: refetchMemberships } = useMyMemberships();
   const { data: bookings, refetch: refetchBookings } = useMyBookings();
-  const { data: points, refetch: refetchPoints } = useMyPoints();
-  const { data: streak, refetch: refetchStreak } = useMyStreak();
   const { data: notifications, refetch: refetchNotifications } = useNotifications();
   const roles = useSessionStore((s) => s.roles);
   const isDegraded = useSessionStore((s) => s.isDegraded);
@@ -40,8 +38,6 @@ export default function ProfileScreen() {
       refetchMe(),
       refetchMemberships(),
       refetchBookings(),
-      refetchPoints(),
-      refetchStreak(),
       refetchNotifications(),
     ]),
   );
@@ -177,32 +173,16 @@ export default function ProfileScreen() {
             <Text style={styles.statValue}>{attendedThisMonth}</Text>
             <Text style={styles.statLabel}>{t('profile.statSessions')}</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{streak?.streak ?? 0}</Text>
-            <Text style={styles.statLabel}>{t('profile.statStreak')}</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{points?.points ?? 0}</Text>
-            <Text style={styles.statLabel}>{t('profile.statPoints')}</Text>
-          </View>
         </View>
 
         <View style={styles.quickGrid}>
           <QuickAction icon="qr-code-2" label={t('profile.quickQr')} primary onPress={() => router.push('/(member)/(tabs)/qr')} />
           <QuickAction icon="event-note" label={t('profile.quickBookings')} onPress={() => router.push('/(member)/reservations')} />
-          <QuickAction icon="emoji-events" label={t('profile.quickLoyalty')} onPress={() => router.push('/(member)/loyalty')} />
-          <QuickAction icon="card-giftcard" label={t('profile.quickReferral')} onPress={() => router.push('/(member)/referral')} />
         </View>
 
         <Text style={styles.sectionTitle}>{t('profile.sectionAccount')}</Text>
         <View style={styles.menuCard}>
           <MenuRow icon="badge" label={t('profile.menuPersonalInfo')} onPress={() => router.push('/(member)/profile-edit')} />
-          <Divider />
-          <MenuRow icon="sports" label={t('profile.menuCoaching')} onPress={() => router.push('/(member)/coaching')} />
-          <Divider />
-          <MenuRow icon="forum" label={t('profile.menuCommunity')} onPress={() => router.push('/(member)/community')} />
-          <Divider />
-          <MenuRow icon="storefront" label={t('profile.menuShop')} onPress={() => router.push('/(member)/shop')} />
         </View>
 
         <Text style={styles.sectionTitle}>{t('profile.sectionPreferences')}</Text>

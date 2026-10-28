@@ -49,58 +49,6 @@ export function useManualCheckin() {
   });
 }
 
-// --- Séances individuelles confirmées/en attente du coach -----------------
-
-export interface CoachCoachingSession {
-  id: string;
-  startsAt: string;
-  endsAt: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
-  member: { firstName: string; lastName: string };
-}
-
-/** Séances individuelles du coach (confirmées + en attente) — à ne pas confondre
- * avec useMyCoachingSessions (vue élève sur /v1/me/coaching-sessions). */
-export function useCoachCoachingSessions() {
-  return useQuery({
-    queryKey: ['coach', 'coaching-sessions'],
-    queryFn: () => apiRequest<CoachCoachingSession[]>('/v1/coach/coaching-sessions'),
-  });
-}
-
-// --- Demandes de séance individuelle --------------------------------------
-
-export interface PendingCoachingSession {
-  id: string;
-  startsAt: string;
-  endsAt: string;
-  objective: string | null;
-  member: { id: string; firstName: string; lastName: string; photoKey: string | null };
-}
-
-export function useCoachPendingSessions() {
-  return useQuery({
-    queryKey: ['coach', 'coaching-sessions', 'pending'],
-    queryFn: () => apiRequest<PendingCoachingSession[]>('/v1/coach/coaching-sessions/pending'),
-  });
-}
-
-export function useConfirmCoachingSession() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => apiRequest(`/v1/coach/coaching-sessions/${id}/confirm`, { method: 'PATCH' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['coach', 'coaching-sessions', 'pending'] }),
-  });
-}
-
-export function useDeclineCoachingSession() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: string) => apiRequest(`/v1/coach/coaching-sessions/${id}/decline`, { method: 'PATCH' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['coach', 'coaching-sessions', 'pending'] }),
-  });
-}
-
 // --- Élèves suivis par le coach -------------------------------------------
 
 export interface CoachStudent {

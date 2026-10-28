@@ -8,7 +8,6 @@ export const AppEvent = {
 
 export interface UserRegisteredEvent {
   userId: string;
-  referralCode?: string;
 }
 
 export interface BookingAttendedEvent {

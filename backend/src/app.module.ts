@@ -15,12 +15,9 @@ import { AttendanceModule } from './attendance/attendance.module.js';
 import { StaffModule } from './staff/staff.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { AnnouncementsModule } from './announcements/announcements.module.js';
-import { SocialModule } from './social/social.module.js';
 import { CoachingModule } from './coaching/coaching.module.js';
 import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
-import { LoyaltyModule } from './loyalty/loyalty.module.js';
-import { MessagingModule } from './messaging/messaging.module.js';
-import { ShopModule } from './shop/shop.module.js';
+import { RealtimeModule } from './realtime/realtime.module.js';
 import { StatsModule } from './stats/stats.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { StorageModule } from './storage/storage.module.js';
@@ -45,12 +42,9 @@ import { CoachesModule } from './coaches/coaches.module.js';
     StaffModule,
     AdminModule,
     AnnouncementsModule,
-    SocialModule,
     CoachingModule,
     BodyMetricsModule,
-    LoyaltyModule,
-    MessagingModule,
-    ShopModule,
+    RealtimeModule,
     StatsModule,
     StorageModule,
     NotificationsModule,

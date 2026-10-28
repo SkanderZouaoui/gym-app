@@ -58,7 +58,3 @@ export interface QrTokenResponse {
   token: string;
   expiresInSeconds: number;
 }
-
-export interface PointsBalance {
-  points: number;
-}

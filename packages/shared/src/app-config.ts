@@ -52,7 +52,7 @@ export const BRAND_PRESETS: Record<string, Pick<Branding, "primary" | "primaryCo
 // Blocs de l'écran d'accueil
 // ---------------------------------------------------------------------------
 
-export const HOME_MODULE_IDS = ["announce", "qr", "next", "challenge", "week", "courses"] as const;
+export const HOME_MODULE_IDS = ["announce", "qr", "next", "week", "courses"] as const;
 export type HomeModuleId = (typeof HOME_MODULE_IDS)[number];
 
 export const homeModuleSchema = z.object({
@@ -65,7 +65,6 @@ export const DEFAULT_HOME_MODULES: HomeModule[] = [
   { id: "announce", on: true },
   { id: "qr", on: true },
   { id: "next", on: true },
-  { id: "challenge", on: true },
   { id: "week", on: false },
   { id: "courses", on: true },
 ];
@@ -115,7 +114,6 @@ export const DEFAULT_STRINGS: AppString[] = [
   { k: "home.qr.sub", label: "Carte QR · sous-titre", fr: "Présentez ce code à l'entrée", ar: "اعرض هذا الرمز عند المدخل" },
   { k: "home.qr.cta", label: "Carte QR · bouton", fr: "Afficher mon QR", ar: "عرض رمز QR" },
   { k: "home.next", label: "Prochaine séance", fr: "Prochaine séance", ar: "الحصة القادمة" },
-  { k: "home.challenge", label: "Défi", fr: "Défi du mois", ar: "تحدّي الشهر" },
   { k: "home.week", label: "Activité", fr: "Cette semaine", ar: "" },
   { k: "home.suggest", label: "Suggestions", fr: "Cours à venir", ar: "الحصص القادمة" },
   { k: "cta.book", label: "Bouton réserver", fr: "Réserver", ar: "احجز" },

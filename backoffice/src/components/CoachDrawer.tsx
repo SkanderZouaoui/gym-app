@@ -26,7 +26,6 @@ export function CoachDrawer({ item, onClose }: { item: CoachListItem | null; onC
     password: '',
     bio: item?.bio ?? '',
     specialties: item?.specialties.join(', ') ?? '',
-    sessionPrice: item?.sessionPrice ? Number(item.sessionPrice) : 50,
     status: item?.status ?? ('ACTIVE' as CoachListItem['status']),
   })
 
@@ -41,7 +40,6 @@ export function CoachDrawer({ item, onClose }: { item: CoachListItem | null; onC
           phone: form.phone || undefined,
           bio: form.bio,
           specialties,
-          sessionPrice: form.sessionPrice,
           status: form.status,
         })
       }
@@ -53,7 +51,6 @@ export function CoachDrawer({ item, onClose }: { item: CoachListItem | null; onC
         password: form.password,
         bio: form.bio,
         specialties,
-        sessionPrice: form.sessionPrice,
         status: form.status,
       })
     },
@@ -122,31 +119,20 @@ export function CoachDrawer({ item, onClose }: { item: CoachListItem | null; onC
           className="h-10 rounded-lg border border-(--color-border-strong) px-3 text-sm outline-none focus:border-(--color-primary)"
         />
       </label>
-      <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
-          Tarif coaching privé (DT/h)
-          <input
-            type="number"
-            value={form.sessionPrice}
-            onChange={(e) => setForm((f) => ({ ...f, sessionPrice: Number(e.target.value) }))}
-            className="h-10 rounded-lg border border-(--color-border-strong) px-3 text-sm outline-none focus:border-(--color-primary)"
-          />
-        </label>
-        <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
-          Statut
-          <select
-            value={form.status}
-            onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as CoachListItem['status'] }))}
-            className="h-10 rounded-lg border border-(--color-border-strong) px-2.5 text-sm"
-          >
-            {STATUS_OPTS.map((s) => (
-              <option key={s.v} value={s.v}>
-                {s.l}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
+        Statut
+        <select
+          value={form.status}
+          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as CoachListItem['status'] }))}
+          className="h-10 rounded-lg border border-(--color-border-strong) px-2.5 text-sm"
+        >
+          {STATUS_OPTS.map((s) => (
+            <option key={s.v} value={s.v}>
+              {s.l}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
         Présentation (visible dans l’app)
         <textarea

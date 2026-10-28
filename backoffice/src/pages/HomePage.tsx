@@ -6,7 +6,6 @@ const MODULE_LABELS: Record<HomeModule['id'], { name: string; desc: string; icon
   announce: { name: 'Bannière d’annonce', desc: 'Contenu géré dans Annonces', icon: 'campaign' },
   qr: { name: 'Carte d’accès QR', desc: "Code d'entrée en salle", icon: 'qr_code_2' },
   next: { name: 'Prochaine séance', desc: 'Réservation la plus proche', icon: 'event' },
-  challenge: { name: 'Défi du mois', desc: 'Objectif collectif et progression', icon: 'emoji_events' },
   week: { name: 'Activité de la semaine', desc: "Minutes d'entraînement par jour", icon: 'bar_chart' },
   courses: { name: 'Cours à venir', desc: 'Suggestions réservables', icon: 'calendar_month' },
 }

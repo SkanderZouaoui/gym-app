@@ -46,6 +46,12 @@ export class ProgramsController {
     return this.programsService.findCreatedByCoach(user.userId);
   }
 
+  @Roles(Role.COACH)
+  @Get('coach/students')
+  getStudents(@CurrentUser() user: AuthenticatedUser) {
+    return this.programsService.getStudents(user.userId);
+  }
+
   @Get('programs/:id')
   findOne(@Param('id') id: string) {
     return this.programsService.findOne(id);

@@ -1,8 +1,18 @@
-import { createMMKV } from 'react-native-mmkv';
+// OFFLINE MODE DÉSACTIVÉ TEMPORAIREMENT (test en dev via Expo Go — MMKV est incompatible Expo Go).
+// Pour réactiver : décommenter la ligne suivante et supprimer le stub Map ci-dessous.
+// import { createMMKV } from 'react-native-mmkv';
 
 /** Brouillon de séance en cours (sets/poids/reps saisis) — isolé du cache React Query pour ne jamais
  * être purgé par un changement de buster côté cache de requêtes. */
-const draftsStorage = createMMKV({ id: 'muscleup-drafts' });
+// const draftsStorage = createMMKV({ id: 'muscleup-drafts' });
+
+/** Stub en mémoire (non persistant) tant que MMKV est désactivé — perdu à chaque reload. */
+const draftsMemory = new Map<string, string>();
+const draftsStorage = {
+  getString: (key: string) => draftsMemory.get(key),
+  set: (key: string, value: string) => draftsMemory.set(key, value),
+  remove: (key: string) => draftsMemory.delete(key),
+};
 
 const DRAFT_VERSION = 1;
 /** Un brouillon plus vieux que ça est considéré obsolète et ignoré/supprimé silencieusement. */

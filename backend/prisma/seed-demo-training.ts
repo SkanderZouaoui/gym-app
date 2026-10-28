@@ -20,26 +20,6 @@ async function main() {
     },
   });
 
-  // Disponibilités récurrentes (lun/mer/ven, créneaux horaires)
-  const existingAvailability = await prisma.coachAvailability.findFirst({ where: { coachId: coach.userId } });
-  if (!existingAvailability) {
-    const slots = [
-      { dayOfWeek: 1, startTime: '08:00', endTime: '09:00' },
-      { dayOfWeek: 1, startTime: '10:00', endTime: '11:00' },
-      { dayOfWeek: 1, startTime: '14:00', endTime: '15:00' },
-      { dayOfWeek: 3, startTime: '08:00', endTime: '09:00' },
-      { dayOfWeek: 3, startTime: '16:00', endTime: '17:00' },
-      { dayOfWeek: 5, startTime: '09:00', endTime: '10:00' },
-      { dayOfWeek: 5, startTime: '19:00', endTime: '20:00' },
-    ];
-    for (const s of slots) {
-      await prisma.coachAvailability.create({ data: { coachId: coach.userId, ...s } });
-    }
-    console.log(`Disponibilités : ${slots.length} créneaux créés pour ${coach.userId}.`);
-  } else {
-    console.log('Disponibilités : déjà présentes, rien à faire.');
-  }
-
   // Mesures corporelles (historique de poids sur 2 mois)
   if (member) {
     const existingMetrics = await prisma.bodyMetric.count({ where: { userId: member.id } });

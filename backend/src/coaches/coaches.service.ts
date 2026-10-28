@@ -18,7 +18,7 @@ const COACH_SELECT = {
 } as const;
 
 /** Équipe de coachs (back-office "Coachs") — distinct de CoachingModule qui gère
- * les séances/programmes/exercices consommés par les coachs eux-mêmes. */
+ * les programmes/exercices consommés par les coachs eux-mêmes. */
 @Injectable()
 export class CoachesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -31,15 +31,10 @@ export class CoachesService {
 
     const withStats = await Promise.all(
       coaches.map(async (c) => {
-        const [weeklyClasses, privateClients] = await Promise.all([
-          this.prisma.classTemplate.count({ where: { coachId: c.userId, isActive: true } }),
-          this.prisma.coachingSession.findMany({
-            where: { coachId: c.userId },
-            select: { memberId: true },
-            distinct: ['memberId'],
-          }),
-        ]);
-        return { ...c, weeklyClasses, privateClientsCount: privateClients.length };
+        const weeklyClasses = await this.prisma.classTemplate.count({
+          where: { coachId: c.userId, isActive: true },
+        });
+        return { ...c, weeklyClasses };
       }),
     );
 

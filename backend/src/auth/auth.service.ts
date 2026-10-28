@@ -59,7 +59,6 @@ export class AuthService {
 
     this.events.emit(AppEvent.USER_REGISTERED, {
       userId: user.id,
-      referralCode: dto.referralCode,
     } satisfies UserRegisteredEvent);
 
     return this.issueTokensForRole(user.id, Role.MEMBER, [Role.MEMBER]);

@@ -59,20 +59,10 @@ export function CoachesPage() {
                 {STATUS_LABEL[c.status]}
               </span>
             </div>
-            <div className="grid w-full grid-cols-3 gap-2 border-t border-(--color-border) pt-3">
+            <div className="grid w-full grid-cols-1 gap-2 border-t border-(--color-border) pt-3">
               <div>
                 <div className="font-head text-lg font-extrabold">{c.weeklyClasses}</div>
                 <div className="text-[11.5px] text-(--color-muted)">cours / sem.</div>
-              </div>
-              <div>
-                <div className="font-head text-lg font-extrabold">{c.privateClientsCount}</div>
-                <div className="text-[11.5px] text-(--color-muted)">clients privés</div>
-              </div>
-              <div>
-                <div className="truncate font-head text-lg font-extrabold">
-                  {c.sessionPrice ? `${Number(c.sessionPrice)} DT` : '—'}
-                </div>
-                <div className="text-[11.5px] text-(--color-muted)">coaching privé</div>
               </div>
             </div>
           </button>

@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MessagingService } from './messaging.service.js';
-import { MessagingController } from './messaging.controller.js';
-import { MessagingGateway } from './messaging.gateway.js';
+import { RealtimeGateway } from './realtime.gateway.js';
 
 @Module({
   imports: [
@@ -15,8 +13,7 @@ import { MessagingGateway } from './messaging.gateway.js';
       }),
     }),
   ],
-  controllers: [MessagingController],
-  providers: [MessagingService, MessagingGateway],
-  exports: [MessagingService, MessagingGateway],
+  providers: [RealtimeGateway],
+  exports: [RealtimeGateway],
 })
-export class MessagingModule {}
+export class RealtimeModule {}

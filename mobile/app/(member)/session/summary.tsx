@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActionSheetIOS, Alert, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCreateWorkoutLog, useExercises, useMyWorkouts } from '../../../src/hooks/useCoaching';
-import { useCreatePost, useUploadPostPhoto } from '../../../src/hooks/useSocial';
 import { Button } from '../../../src/components/Button';
 import { Banner } from '../../../src/components/ui';
 import { clearSessionDraft } from '../../../src/hooks/useSessionDraft';
@@ -40,14 +38,9 @@ export default function SessionSummaryScreen() {
   const { data: history } = useMyWorkouts();
   const { data: exercises } = useExercises();
   const createWorkout = useCreateWorkoutLog();
-  const uploadPostPhoto = useUploadPostPhoto();
-  const createPost = useCreatePost();
   const [feeling, setFeeling] = useState<string>('OK');
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [sharing, setSharing] = useState(false);
-  const [shared, setShared] = useState(false);
 
   const minutes = Math.round(Number(elapsedSeconds ?? 0) / 60);
   const volume = sets.reduce((sum, s) => sum + (s.weightKg ?? 0) * (s.reps ?? 0), 0);
@@ -96,80 +89,6 @@ export default function SessionSummaryScreen() {
     );
   };
 
-  const applyPickedPhoto = (result: ImagePicker.ImagePickerResult) => {
-    if (result.canceled || !result.assets[0]) return;
-    setPhotoUri(result.assets[0].uri);
-    setShared(false);
-    setError(null);
-  };
-
-  const takeSessionPhoto = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      setError('Autorisez l’accès à l’appareil photo pour prendre une photo.');
-      return;
-    }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
-    applyPickedPhoto(result);
-  };
-
-  const pickSessionPhotoFromLibrary = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
-    applyPickedPhoto(result);
-  };
-
-  const pickSessionPhoto = () => {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: ['Annuler', 'Prendre une photo', 'Choisir dans la galerie'],
-          cancelButtonIndex: 0,
-        },
-        (index) => {
-          if (index === 1) takeSessionPhoto();
-          if (index === 2) pickSessionPhotoFromLibrary();
-        },
-      );
-      return;
-    }
-    Alert.alert('Ajouter une photo', undefined, [
-      { text: 'Prendre une photo', onPress: takeSessionPhoto },
-      { text: 'Choisir dans la galerie', onPress: pickSessionPhotoFromLibrary },
-      { text: 'Annuler', style: 'cancel' },
-    ]);
-  };
-
-  const handleShareToProfile = async () => {
-    if (!photoUri) return;
-    setSharing(true);
-    setError(null);
-    try {
-      const contentType = 'image/jpeg';
-      const { key } = await uploadPostPhoto.mutateAsync({ uri: photoUri, contentType });
-      await createPost.mutateAsync({
-        body: `Séance terminée 💪 ${minutes} min · ${Math.round(volume).toLocaleString('fr-FR')} kg au total`,
-        imageKey: key,
-      });
-      setShared(true);
-    } catch {
-      setError('L’envoi de la photo a échoué. Réessayez.');
-    } finally {
-      setSharing(false);
-    }
-  };
-
   if (saved) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -179,38 +98,7 @@ export default function SessionSummaryScreen() {
           </View>
           <Text style={styles.successTitle}>Séance enregistrée</Text>
 
-          {shared ? (
-            <Banner tone="success" icon="check-circle" text="Publié sur votre profil." />
-          ) : (
-            <View style={styles.shareCard}>
-              <Text style={styles.shareTitle}>Partager cette séance sur votre profil ?</Text>
-              <Pressable onPress={pickSessionPhoto} style={styles.photoPicker}>
-                {photoUri ? (
-                  <Image source={{ uri: photoUri }} style={styles.photoPreview} />
-                ) : (
-                  <View style={styles.photoPlaceholder}>
-                    <MaterialIcons name="add-a-photo" size={28} color={colors.muted} />
-                    <Text style={styles.photoPlaceholderText}>Ajouter une photo</Text>
-                  </View>
-                )}
-              </Pressable>
-              {error ? <Text style={styles.shareError}>{error}</Text> : null}
-              {photoUri ? (
-                <Button
-                  label="Publier sur mon profil"
-                  onPress={handleShareToProfile}
-                  loading={sharing}
-                  variant="secondary"
-                />
-              ) : null}
-            </View>
-          )}
-
-          <Button
-            label={!shared && photoUri ? 'Ignorer et quitter' : 'Quitter'}
-            onPress={() => router.replace('/(member)/(tabs)/training')}
-            variant={shared || !photoUri ? 'primary' : 'outline'}
-          />
+          <Button label="Quitter" onPress={() => router.replace('/(member)/(tabs)/training')} variant="primary" />
         </ScrollView>
       </SafeAreaView>
     );
@@ -321,15 +209,5 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   feelingChipTextActive: { color: colors.onSecondary },
   successContainer: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.xl },
   successTitle: { fontFamily: fonts.head, fontSize: 22, color: colors.text },
-  shareCard: { width: '100%', gap: spacing.sm, alignItems: 'center' },
-  shareTitle: { fontFamily: fonts.bodySemiBold, fontSize: 14.5, color: colors.text, textAlign: 'center' },
-  photoPicker: { width: '100%' },
-  photoPreview: { width: '100%', aspectRatio: 4 / 3, borderRadius: radii.md, backgroundColor: colors.surface2 },
-  photoPlaceholder: {
-    width: '100%', aspectRatio: 4 / 3, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.borderStrong,
-    borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.surface,
-  },
-  photoPlaceholderText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.muted },
-  shareError: { fontFamily: fonts.body, fontSize: 12.5, color: colors.dangerInk, textAlign: 'center' },
   });
 }

@@ -129,4 +129,17 @@ export class ProgramsService {
     }
     await this.prisma.program.delete({ where: { id } });
   }
+
+  /** Liste des élèves suivis par le coach — adhérents ayant un programme assigné. */
+  async getStudents(coachId: string) {
+    const programs = await this.prisma.program.findMany({
+      where: { createdById: coachId },
+      select: { assignedTo: { select: { id: true, firstName: true, lastName: true, photoKey: true } } },
+      distinct: ['assignedToId'],
+    });
+
+    return programs
+      .map((p) => p.assignedTo)
+      .sort((a, b) => a.firstName.localeCompare(b.firstName));
+  }
 }

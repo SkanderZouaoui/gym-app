@@ -335,12 +335,8 @@ export interface CoachListItem {
   bio: string | null;
   specialties: string[];
   yearsExperience: number | null;
-  sessionPrice: string | null;
-  rating: string | null;
-  reviewCount: number;
   status: 'ACTIVE' | 'ON_LEAVE' | 'INACTIVE';
   weeklyClasses: number;
-  privateClientsCount: number;
   user: { id: string; firstName: string; lastName: string; email: string | null; phone: string | null };
 }
 
@@ -352,7 +348,6 @@ export interface CreateCoachInput {
   phone?: string;
   bio?: string;
   specialties?: string[];
-  sessionPrice?: number;
   status?: CoachListItem['status'];
 }
 
@@ -485,37 +480,6 @@ export const announcementsApi = {
     api.post<{ recipientCount: number }>('/v1/admin/announcements/preview', data).then((r) => r.data),
   send: (data: CreateAnnouncementInput) =>
     api.post<{ announcement: AnnouncementItem; recipientCount: number }>('/v1/admin/announcements', data).then((r) => r.data),
-};
-
-// ---------------------------------------------------------------------------
-// Coaching privé (séances individuelles)
-// ---------------------------------------------------------------------------
-
-export interface CoachingSessionItem {
-  id: string;
-  coachId: string;
-  memberId: string;
-  startsAt: string;
-  endsAt: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
-  objective: string | null;
-  member: { firstName: string; lastName: string };
-  coach: { user: { firstName: string; lastName: string } };
-}
-
-export interface CreateCoachingSessionInput {
-  coachId: string;
-  memberId: string;
-  startsAt: string;
-  endsAt: string;
-  objective?: string;
-}
-
-export const coachingSessionsApi = {
-  findAllForAdmin: () => api.get<CoachingSessionItem[]>('/v1/admin/coaching-sessions').then((r) => r.data),
-  create: (data: CreateCoachingSessionInput) =>
-    api.post<CoachingSessionItem>('/v1/admin/coaching-sessions', data).then((r) => r.data),
-  markCompleted: (id: string) => api.patch(`/v1/admin/coaching-sessions/${id}/complete`),
 };
 
 export const classTemplatesApi = {

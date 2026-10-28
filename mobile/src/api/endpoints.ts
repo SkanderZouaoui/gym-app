@@ -5,7 +5,6 @@ import type {
   ClassSessionSummary,
   MeResponse,
   MembershipSummary,
-  PointsBalance,
   QrTokenResponse,
   TokenPair,
 } from './types';
@@ -33,7 +32,6 @@ export const authApi = {
     firstName: string;
     lastName: string;
     phone?: string;
-    referralCode?: string;
   }) => apiRequest<TokenPair>('/v1/auth/register', { method: 'POST', body: data, auth: false }),
   logout: (refreshToken: string) =>
     apiRequest<void>('/v1/auth/logout', { method: 'POST', body: { refreshToken } }),
@@ -53,8 +51,6 @@ export const meApi = {
   getBookings: () => apiRequest<Booking[]>('/v1/me/bookings'),
   getQrToken: () => apiRequest<QrTokenResponse>('/v1/me/qr-token'),
   getOfflineQrToken: () => apiRequest<QrTokenResponse>('/v1/me/qr-token/offline'),
-  getPoints: () => apiRequest<PointsBalance>('/v1/me/points'),
-  getStreak: () => apiRequest<{ streak: number }>('/v1/me/streak'),
 };
 
 export const classesApi = {
