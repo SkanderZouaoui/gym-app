@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600;700&amp;family=Bricolage+Grotesque:wght@500;700;800&amp;family=Figtree:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;-webkit-font-smoothing:antialiased}
+a{color:var(--primary-ink);text-decoration:none}
+a:hover{color:var(--primary-pressed);text-decoration:underline}
+input,button{font:inherit;color:inherit}
+@keyframes fzFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+</style>
+</helmet>
+<div style="{{ rootStyle }}">
+<div style="padding:56px 64px 120px;display:flex;flex-direction:column;gap:40px">
+  <div style="max-width:760px">
+    <div style="font-family:var(--f-mono);font-size:13px;color:var(--primary-ink);letter-spacing:.08em;text-transform:uppercase">{{ brand }} · App mobile · Adhérent</div>
+    <h1 style="margin:10px 0 0;font-family:var(--f-head);font-size:56px;line-height:1;letter-spacing:-.035em;font-weight:800">Onboarding</h1>
+    <p style="margin:14px 0 0;font-size:18px;color:var(--muted);text-wrap:pretty">Quatre écrans, moins de 30 secondes. Réserver, entrer, objectif, profil physique. « Passer » reste disponible à chaque étape. Couleurs, polices et angles suivent les Tweaks.</p>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+
+    <div data-screen-label="Onboarding 1" style="display:flex;flex-direction:column;gap:12px;align-items:center">
+      <div style="{{ frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body);display:flex;flex-direction:column">
+        <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+        <div style="display:flex;justify-content:flex-end;padding:4px 20px"><button style="height:44px;padding:0 12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer" style-hover="color:var(--text)">Passer</button></div>
+        <div style="margin:4px 20px 0;height:400px;border-radius:var(--r-lg);background:var(--primary-soft);position:relative;overflow:hidden">
+          <div style="position:absolute;top:-60px;inset-inline-end:-50px;width:220px;height:220px;border-radius:99px;background:var(--primary);opacity:.14"></div>
+          <div style="position:absolute;left:44px;right:44px;top:44px;height:120px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);opacity:.55"></div>
+          <div style="position:absolute;left:32px;right:32px;top:72px;height:120px;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);opacity:.8"></div>
+          <div style="position:absolute;left:20px;right:20px;top:112px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh2);padding:16px;display:flex;flex-direction:column;gap:14px;animation:fzFloat 4s ease-in-out infinite">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:48px;height:48px;flex:none;border-radius:var(--r-sm);background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:28px;font-variation-settings:'FILL' 1">local_fire_department</span></div>
+              <div style="flex:1;min-width:0"><div style="font-family:var(--f-head);font-weight:700;font-size:17px">HIIT Express</div><div style="font-size:13px;color:var(--muted)">Ce soir · 18:30 · Yassine</div></div>
+              <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--success-soft);color:var(--success-ink)">4 places</span>
+            </div>
+            <div style="height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden"><div style="width:80%;height:100%;background:var(--primary);border-radius:99px"></div></div>
+            <div style="height:44px;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:6px"><span style="font-family:'Material Symbols Rounded';font-size:20px">event_available</span>Réserver</div>
+          </div>
+          <div style="position:absolute;left:50%;transform:translateX(-50%);bottom:28px;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:99px;background:var(--secondary);color:var(--on-secondary);font-size:13px;font-weight:600"><span style="font-family:'Material Symbols Rounded';font-size:18px">touch_app</span>Deux touches, c’est réservé</div>
+        </div>
+        <div style="padding:28px 24px 0;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;gap:6px"><span style="height:6px;width:24px;border-radius:99px;background:var(--primary)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span></div>
+          <h2 style="margin:6px 0 0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800;text-wrap:balance">Réservez en deux gestes</h2>
+          <p style="margin:0;color:var(--muted);font-size:15.5px;text-wrap:pretty">Le planning de la salle, avec les places restantes en temps réel.</p>
+        </div>
+        <div style="padding:0 24px 40px"><button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Suivant<span style="font-family:'Material Symbols Rounded';font-size:20px">arrow_forward</span></button></div>
+      </div></div>
+      <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">1 · Réserver</span>
+    </div>
+
+    <div data-screen-label="Onboarding 2" style="display:flex;flex-direction:column;gap:12px;align-items:center">
+      <div style="{{ frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body);display:flex;flex-direction:column">
+        <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+        <div style="display:flex;justify-content:flex-end;padding:4px 20px"><button style="height:44px;padding:0 12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer" style-hover="color:var(--text)">Passer</button></div>
+        <div style="margin:4px 20px 0;height:400px;border-radius:var(--r-lg);background:var(--secondary);color:var(--on-secondary);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+          <div style="position:absolute;bottom:-70px;inset-inline-start:-50px;width:240px;height:240px;border-radius:99px;background:var(--primary);opacity:.18"></div>
+          <div style="position:relative;width:200px;height:200px;border-radius:var(--r-lg);background:var(--primary);color:var(--primary-contrast);display:grid;place-items:center;box-shadow:var(--sh3);animation:fzFloat 4s ease-in-out infinite"><span style="font-family:'Material Symbols Rounded';font-size:150px;line-height:1;font-variation-settings:'FILL' 0">qr_code_2</span></div>
+          <div style="position:relative;display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <span style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--surface);color:var(--text);font-size:13px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:var(--success)">autorenew</span>Renouvelé toutes les 30 s</span>
+            <span style="display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:var(--surface);color:var(--text);font-size:13px;font-weight:700"><span style="font-family:'Material Symbols Rounded';font-size:17px;color:var(--primary-ink)">wifi_off</span>Même sans réseau</span>
+          </div>
+        </div>
+        <div style="padding:28px 24px 0;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;gap:6px"><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:24px;border-radius:99px;background:var(--primary)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span></div>
+          <h2 style="margin:6px 0 0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800;text-wrap:balance">Entrez avec votre QR</h2>
+          <p style="margin:0;color:var(--muted);font-size:15.5px;text-wrap:pretty">Votre code d’accès est toujours à portée : un geste à l’entrée, rien d’autre à sortir.</p>
+        </div>
+        <div style="padding:0 24px 40px"><button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Suivant<span style="font-family:'Material Symbols Rounded';font-size:20px">arrow_forward</span></button></div>
+      </div></div>
+      <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">2 · Entrer</span>
+    </div>
+
+    <div data-screen-label="Onboarding 3" style="display:flex;flex-direction:column;gap:12px;align-items:center">
+      <div style="{{ frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body);display:flex;flex-direction:column">
+        <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+        <div style="display:flex;justify-content:flex-end;padding:4px 20px"><button style="height:44px;padding:0 12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer" style-hover="color:var(--text)">Passer</button></div>
+        <div style="margin:4px 20px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <sc-for list="{{ goals }}" as="g" hint-placeholder-count="4">
+            <button onClick="{{ g.on }}" role="radio" aria-checked="{{ g.sel }}" style="height:188px;border-radius:var(--r-lg);border:{{ g.bd }};background:{{ g.bg }};padding:16px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;cursor:pointer;text-align:start;position:relative" style-focus="outline:2px solid var(--focus);outline-offset:2px">
+              <span style="width:48px;height:48px;border-radius:var(--r-sm);background:{{ g.iconBg }};color:{{ g.iconFg }};display:grid;place-items:center;font-family:'Material Symbols Rounded';font-size:26px;font-variation-settings:'FILL' 1">{{ g.icon }}</span>
+              <span style="font-family:var(--f-head);font-weight:700;font-size:16px;line-height:1.2">{{ g.label }}</span>
+              <span style="position:absolute;top:14px;inset-inline-end:14px;width:24px;height:24px;border-radius:99px;display:grid;place-items:center;background:{{ g.ckBg }};color:var(--primary-contrast);font-family:'Material Symbols Rounded';font-size:18px;border:1.5px solid {{ g.ckBd }}">{{ g.ck }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="padding:28px 24px 0;display:flex;flex-direction:column;gap:10px;flex:1">
+          <div style="display:flex;gap:6px"><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:24px;border-radius:99px;background:var(--primary)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span></div>
+          <h2 style="margin:6px 0 0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800;text-wrap:balance">Quel est votre objectif ?</h2>
+          <p style="margin:0;color:var(--muted);font-size:15.5px;text-wrap:pretty">Nous adaptons vos suggestions de cours. Modifiable à tout moment dans votre profil.</p>
+        </div>
+        <div style="padding:0 24px 40px;display:flex;flex-direction:column;gap:8px"><button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Suivant<span style="font-family:'Material Symbols Rounded';font-size:20px">arrow_forward</span></button></div>
+      </div></div>
+      <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">3 · Objectif</span>
+    </div>
+
+    <div data-screen-label="Onboarding 4" style="display:flex;flex-direction:column;gap:12px;align-items:center">
+      <div style="{{ frame }}"><div style="position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--f-body);display:flex;flex-direction:column">
+        <dc-import name="FZ StatusBar" net="ok" hint-size="100%,46px"></dc-import>
+        <div style="display:flex;justify-content:flex-end;padding:4px 20px"><button style="height:44px;padding:0 12px;border:0;background:transparent;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer" style-hover="color:var(--text)">Passer</button></div>
+        <div style="padding:4px 24px 0;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:6px"><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:6px;border-radius:99px;background:var(--border-strong)"></span><span style="height:6px;width:24px;border-radius:99px;background:var(--primary)"></span></div>
+          <h2 style="margin:6px 0 0;font-family:var(--f-head);font-size:28px;line-height:1.1;letter-spacing:-.03em;font-weight:800;text-wrap:balance">Parlez-nous de vous</h2>
+          <p style="margin:0;color:var(--muted);font-size:15.5px;text-wrap:pretty">Pour calibrer vos programmes. Ces données restent privées et modifiables.</p>
+        </div>
+        <div style="flex:1;padding:18px 24px 0;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+          <div><div style="font-size:13px;font-weight:700;margin-bottom:8px">Genre</div><div role="radiogroup" style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ genders }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" role="radio" aria-checked="{{ o.sel }}" style="height:44px;flex:1 1 auto;padding:0 14px;border-radius:var(--r-sm);border:{{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;display:{{ o.ckD }}">check</span>{{ o.label }}</button></sc-for></div></div>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Taille</span>
+              <div style="display:flex;align-items:baseline;gap:4px;direction:ltr"><span style="font-family:var(--f-head);font-weight:800;font-size:30px;letter-spacing:-.03em;line-height:1">{{ height }}</span><span style="font-size:13px;font-weight:600;color:var(--muted)">cm</span></div>
+              <div style="display:flex;gap:8px"><button onClick="{{ heightDec }}" aria-label="Diminuer Taille" style="width:44px;height:44px;border-radius:99px;border:1px solid var(--border-input);background:var(--surface);cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px" style-hover="background:var(--surface-2)" style-focus="outline:2px solid var(--focus);outline-offset:2px">remove</button><button onClick="{{ heightInc }}" aria-label="Augmenter Taille" style="width:44px;height:44px;border-radius:99px;border:0;background:var(--primary-soft);color:var(--primary-ink);cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px" style-hover="background:var(--primary-border)" style-focus="outline:2px solid var(--focus);outline-offset:2px">add</button></div>
+            </div>
+            <div style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Poids</span>
+              <div style="display:flex;align-items:baseline;gap:4px;direction:ltr"><span style="font-family:var(--f-head);font-weight:800;font-size:30px;letter-spacing:-.03em;line-height:1">{{ weight }}</span><span style="font-size:13px;font-weight:600;color:var(--muted)">kg</span></div>
+              <div style="display:flex;gap:8px"><button onClick="{{ weightDec }}" aria-label="Diminuer Poids" style="width:44px;height:44px;border-radius:99px;border:1px solid var(--border-input);background:var(--surface);cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px" style-hover="background:var(--surface-2)" style-focus="outline:2px solid var(--focus);outline-offset:2px">remove</button><button onClick="{{ weightInc }}" aria-label="Augmenter Poids" style="width:44px;height:44px;border-radius:99px;border:0;background:var(--primary-soft);color:var(--primary-ink);cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px" style-hover="background:var(--primary-border)" style-focus="outline:2px solid var(--focus);outline-offset:2px">add</button></div>
+            </div>
+            <div style="flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+              <span style="font-size:12.5px;font-weight:700;color:var(--muted)">Âge</span>
+              <div style="display:flex;align-items:baseline;gap:4px;direction:ltr"><span style="font-family:var(--f-head);font-weight:800;font-size:30px;letter-spacing:-.03em;line-height:1">{{ age }}</span><span style="font-size:13px;font-weight:600;color:var(--muted)">ans</span></div>
+              <div style="display:flex;gap:8px"><button onClick="{{ ageDec }}" aria-label="Diminuer Âge" style="width:44px;height:44px;border-radius:99px;border:1px solid var(--border-input);background:var(--surface);cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px" style-hover="background:var(--surface-2)" style-focus="outline:2px solid var(--focus);outline-offset:2px">remove</button><button onClick="{{ ageInc }}" aria-label="Augmenter Âge" style="width:44px;height:44px;border-radius:99px;border:0;background:var(--primary-soft);color:var(--primary-ink);cursor:pointer;font-family:'Material Symbols Rounded';font-size:22px" style-hover="background:var(--primary-border)" style-focus="outline:2px solid var(--focus);outline-offset:2px">add</button></div>
+            </div>
+          </div>
+          <div><div style="font-size:13px;font-weight:700;margin-bottom:8px">Votre niveau</div><div role="radiogroup" style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ levels }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" role="radio" aria-checked="{{ o.sel }}" style="height:44px;flex:1 1 auto;padding:0 14px;border-radius:var(--r-sm);border:{{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;display:{{ o.ckD }}">check</span>{{ o.label }}</button></sc-for></div></div>
+          <div><div style="font-size:13px;font-weight:700;margin-bottom:8px">Séances par semaine</div><div role="radiogroup" style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ freqs }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" role="radio" aria-checked="{{ o.sel }}" style="height:44px;flex:1 1 auto;padding:0 14px;border-radius:var(--r-sm);border:{{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap" style-focus="outline:2px solid var(--focus);outline-offset:2px"><span style="font-family:'Material Symbols Rounded';font-size:18px;display:{{ o.ckD }}">check</span>{{ o.label }}</button></sc-for></div></div>
+        </div>
+        <div style="padding:16px 24px 40px"><button style="width:100%;height:var(--ctl);border:0;border-radius:var(--r-sm);background:var(--primary);color:var(--primary-contrast);font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--primary-hover)" style-active="background:var(--primary-pressed)" style-focus="outline:2px solid var(--focus);outline-offset:2px">Commencer<span style="font-family:'Material Symbols Rounded';font-size:20px">arrow_forward</span></button></div>
+      </div></div>
+      <span style="font-family:var(--f-mono);font-size:12px;color:var(--muted)">4 · Profil</span>
+    </div>
+
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clair&quot;,&quot;Sombre&quot;],&quot;default&quot;:&quot;Clair&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Thème&quot;},&quot;preset&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Énergie&quot;,&quot;Calme&quot;,&quot;Premium&quot;,&quot;Féminin&quot;],&quot;default&quot;:&quot;Énergie&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;brandName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;FitZone&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marque&quot;},&quot;fontPair&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Géométrique&quot;,&quot;Sportive&quot;,&quot;Expressive&quot;],&quot;default&quot;:&quot;Géométrique&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Style&quot;},&quot;radius&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:4,&quot;max&quot;:24,&quot;step&quot;:1,&quot;default&quot;:16,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Style&quot;}}">
+const DEF={primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311',success:'#16A34A',warning:'#F59E0B',danger:'#DC2626',info:'#2563EB',bgLight:'#F7F7F9',surfaceLight:'#FFFFFF',bgDark:'#0E1117',surfaceDark:'#1A1F2B',textLight:'#111827',textDark:'#F3F4F6'};
+const PRESETS={'Énergie':{primary:'#FF5A1F',primaryContrast:'#FFFFFF',secondary:'#14213D',accent:'#FCA311'},'Calme':{primary:'#0E7C66',primaryContrast:'#FFFFFF',secondary:'#1B3A5C',accent:'#4FB3BF'},'Premium':{primary:'#C9A24B',primaryContrast:'#111111',secondary:'#111111',accent:'#E8C872'},'Féminin':{primary:'#9B3FD6',primaryContrast:'#FFFFFF',secondary:'#3A1450',accent:'#F0569A'}};
+const FONTS={'Géométrique':['Sora','DM Sans'],'Sportive':['Barlow Condensed','Barlow'],'Expressive':['Bricolage Grotesque','Figtree']};
+const hx=h=>{h=String(h||'#000').replace('#','').trim();if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h.slice(0,6),16)||0;return[n>>16&255,n>>8&255,n&255];};
+const toHex=a=>'#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('').toUpperCase();
+const mix=(a,b,t)=>{const A=hx(a),B=hx(b);return toHex(A.map((v,i)=>v+(B[i]-v)*t));};
+const lum=c=>{const[r,g,b]=hx(c).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
+const ensure=(c,bg,target)=>{const to=lum(bg)>.18?'#000000':'#FFFFFF';let t=0,o=toHex(hx(c));while(cr(o,bg)<target&&t<1){t+=.03;o=mix(c,to,t);}return o;};
+const onColor=c=>cr(c,'#FFFFFF')>=4.5?'#FFFFFF':(cr(c,'#FFFFFF')>cr(c,'#111111')?'#FFFFFF':'#111111');
+const fam=(c,S,d)=>{const soft=mix(S,c,d?.2:.12);return{base:toHex(hx(c)),hover:d?mix(c,'#FFFFFF',.12):mix(c,'#000000',.1),pressed:d?mix(c,'#FFFFFF',.22):mix(c,'#000000',.2),soft,border:ensure(mix(S,c,d?.5:.35),S,3),ink:ensure(ensure(c,soft,4.5),S,4.5),on:onColor(c)};};
+const GOALS=[['Perdre du poids','monitor_weight'],['Prendre du muscle','fitness_center'],['Rester en forme','favorite'],['Me détendre','self_improvement']];
+class Component extends DCLogic {
+  state={goal:0,gender:0,height:170,weight:70,age:30,level:0,freq:1};
+  vars(dark,C,P){
+    const bg=dark?C.bgDark:C.bgLight,surface=dark?C.surfaceDark:C.surfaceLight,text=dark?C.textDark:C.textLight;
+    const F={};['primary','secondary','accent','success','warning','danger','info'].forEach(k=>F[k]=fam(C[k],surface,dark));
+    const r=Math.max(4,Math.min(24,+(P.radius??16)));const compact=P.density==='Compacte';
+    const fp=FONTS[P.fontPair]||FONTS['Géométrique'];const fb=",system-ui,sans-serif";
+    const v={'--bg':bg,'--surface':surface,'--surface-2':mix(surface,text,dark?.06:.045),'--text':text,'--muted':ensure(mix(text,surface,.42),surface,4.5),'--border':mix(surface,text,dark?.14:.11),'--border-strong':mix(surface,text,dark?.3:.24),'--border-input':ensure(mix(surface,text,.35),surface,3),'--primary-contrast':C.primaryContrast,'--focus':ensure(C.primary,bg,3),
+      '--r':r+'px','--r-xs':Math.max(3,Math.round(r*.3))+'px','--r-sm':Math.max(4,Math.round(r*.55))+'px','--r-lg':Math.round(r*1.4)+'px','--pad':compact?'12px':'16px','--gap':compact?'12px':'16px','--ctl':compact?'44px':'48px',
+      '--f-head':"'"+fp[0]+"'"+fb,'--f-body':"'"+fp[1]+"'"+fb,'--f-mono':"'JetBrains Mono',ui-monospace,monospace",
+      '--sh1':dark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(17,24,39,.05),0 1px 3px rgba(17,24,39,.07)','--sh2':dark?'0 8px 20px rgba(0,0,0,.45)':'0 6px 16px rgba(17,24,39,.08)','--sh3':dark?'0 24px 56px rgba(0,0,0,.6)':'0 20px 48px rgba(17,24,39,.18)'};
+    for(const k in F){const f=F[k];v['--'+k]=f.base;v['--'+k+'-hover']=f.hover;v['--'+k+'-pressed']=f.pressed;v['--'+k+'-soft']=f.soft;v['--'+k+'-border']=f.border;v['--'+k+'-ink']=f.ink;v['--on-'+k]=f.on;}
+    return v;
+  }
+  renderVals(){
+    const P=this.props,S=this.state;
+    const preset=PRESETS[P.preset];const C={};for(const k in DEF)C[k]=(preset&&preset[k])||P[k]||DEF[k];
+    const dark=P.theme==='Sombre';const v=this.vars(dark,C,P);
+    const rootStyle={...v,background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',minHeight:'100vh',fontSize:'15px',lineHeight:1.5,width:'max-content',minWidth:'100%'};
+    const frame={width:'390px',height:'844px',flex:'none',borderRadius:'54px',padding:'10px',background:'#0B0D12',boxShadow:'var(--sh3)'};
+    const brand=(P.brandName||'FitZone').trim()||'FitZone';
+    const goals=GOALS.map(([label,icon],i)=>{const sel=S.goal===i;return{label,icon,sel,on:()=>this.setState({goal:i}),bg:sel?'var(--primary-soft)':'var(--surface)',bd:sel?'2px solid var(--primary)':'1px solid var(--border)',iconBg:sel?'var(--primary)':'var(--surface-2)',iconFg:sel?'var(--primary-contrast)':'var(--text)',ckBg:sel?'var(--primary)':'transparent',ckBd:sel?'var(--primary)':'var(--border-input)',ck:sel?'check':''};});
+    const opt=(labels,cur,key)=>labels.map((label,i)=>{const sel=cur===i;return{label,sel,ckD:sel?'block':'none',on:()=>this.setState({[key]:i}),bg:sel?'var(--primary-soft)':'var(--surface)',fg:sel?'var(--primary-ink)':'var(--text)',bd:sel?'2px solid var(--primary)':'1px solid var(--border-input)'};});
+    const st=(k,d,mn,mx)=>()=>this.setState(s=>({[k]:Math.max(mn,Math.min(mx,s[k]+d))}));
+    return {rootStyle,frame,brand,goals,genders:opt(['Femme','Homme','Autre'],S.gender,'gender'),levels:opt(['Débutant','Intermédiaire','Avancé'],S.level,'level'),freqs:opt(['1–2','3–4','5+'],S.freq,'freq'),
+      height:S.height,weight:S.weight,age:S.age,heightDec:st('height',-1,120,220),heightInc:st('height',1,120,220),weightDec:st('weight',-1,30,250),weightInc:st('weight',1,30,250),ageDec:st('age',-1,12,99),ageInc:st('age',1,12,99)};
+  }
+}
+</script>
+</body>
+</html>
