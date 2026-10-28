@@ -20,7 +20,7 @@ docker exec "$CONTAINER" /garage layout apply --version 1
 
 docker exec "$CONTAINER" /garage bucket create "$BUCKET" || true
 docker exec "$CONTAINER" /garage key create "$KEY_NAME" || true
-docker exec "$CONTAINER" /garage bucket allow --read --write "$BUCKET" --key "$KEY_NAME"
+docker exec "$CONTAINER" /garage bucket allow --read --write --owner "$BUCKET" --key "$KEY_NAME"
 
 echo
 echo "Récupère les credentials ci-dessous et renseigne-les dans backend/.env :"

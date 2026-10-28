@@ -40,6 +40,24 @@ export class ClassesController {
   }
 
   @Roles(Role.ADMIN)
+  @Post('admin/class-types/:id/gallery/upload-url')
+  galleryUploadUrl(@Param('id') id: string, @Body() body: { contentType: string }) {
+    return this.classesService.galleryUploadUrl(id, body.contentType);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/class-types/:id/gallery')
+  addGalleryImage(@Param('id') id: string, @Body() body: { key: string }) {
+    return this.classesService.addGalleryImage(id, body.key);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/class-types/:id/gallery')
+  removeGalleryImage(@Param('id') id: string, @Body() body: { key: string }) {
+    return this.classesService.removeGalleryImage(id, body.key);
+  }
+
+  @Roles(Role.ADMIN)
   @Get('admin/class-templates')
   findTemplates() {
     return this.classesService.findAllTemplates();
@@ -82,7 +100,7 @@ export class ClassesController {
 
   @Get('classes/sessions/:id')
   findSession(@Param('id') id: string) {
-    return this.classesService.findSession(id);
+    return this.classesService.findSessionDetail(id);
   }
 
   @Roles(Role.COACH)

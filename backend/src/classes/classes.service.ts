@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { StorageService } from '../storage/storage.service.js';
 import type { CreateClassTypeDto } from './dto/create-class-type.dto.js';
 import type { UpdateClassTypeDto } from './dto/update-class-type.dto.js';
 import type { CreateTemplateDto } from './dto/create-template.dto.js';
@@ -7,15 +8,53 @@ import type { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 
 @Injectable()
 export class ClassesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   // --- Types de cours -----------------------------------------------------
 
-  findAllTypes(includeInactive = false) {
-    return this.prisma.classType.findMany({
+  async findAllTypes(includeInactive = false) {
+    const types = await this.prisma.classType.findMany({
       where: includeInactive ? {} : { isActive: true },
       orderBy: { name: 'asc' },
     });
+    return Promise.all(types.map((t) => this.withGalleryUrls(t)));
+  }
+
+  /** Ajoute `galleryUrls` (URLs présignées de lecture, durée limitée) à un type de cours. */
+  async withGalleryUrls<T extends { galleryKeys: string[] }>(type: T) {
+    const galleryUrls = await Promise.all(type.galleryKeys.map((key) => this.storage.getReadUrl(key)));
+    return { ...type, galleryUrls };
+  }
+
+  /** URL présignée d'envoi d'une photo de galerie (le client envoie directement vers le stockage). */
+  async galleryUploadUrl(id: string, contentType: string) {
+    await this.findType(id);
+    if (!/^image\/(jpeg|png|webp)$/.test(contentType)) throw new BadRequestException('INVALID_IMAGE_TYPE');
+    const key = this.storage.buildKey(`class-types/${id}`, contentType);
+    const uploadUrl = await this.storage.getUploadUrl(key, contentType);
+    return { key, uploadUrl };
+  }
+
+  async addGalleryImage(id: string, key: string) {
+    const type = await this.findType(id);
+    if (!key.startsWith(`class-types/${id}/`)) throw new BadRequestException('INVALID_GALLERY_KEY');
+    if (type.galleryKeys.includes(key)) return this.withGalleryUrls(type);
+    const updated = await this.prisma.classType.update({ where: { id }, data: { galleryKeys: { push: key } } });
+    return this.withGalleryUrls(updated);
+  }
+
+  async removeGalleryImage(id: string, key: string) {
+    const type = await this.findType(id);
+    if (!type.galleryKeys.includes(key)) return this.withGalleryUrls(type);
+    const updated = await this.prisma.classType.update({
+      where: { id },
+      data: { galleryKeys: type.galleryKeys.filter((k) => k !== key) },
+    });
+    await this.storage.deleteObject(key).catch(() => undefined);
+    return this.withGalleryUrls(updated);
   }
 
   createType(dto: CreateClassTypeDto) {
@@ -131,6 +170,12 @@ export class ClassesService {
       },
       orderBy: { startsAt: 'asc' },
     });
+  }
+
+  /** Fiche cours pour l'app : la session + les URLs de la galerie du type de cours. */
+  async findSessionDetail(id: string) {
+    const session = await this.findSession(id);
+    return { ...session, classType: await this.withGalleryUrls(session.classType) };
   }
 
   async findSession(id: string) {

@@ -15,13 +15,18 @@ export class WorkoutsService {
     const exerciseIds = [...new Set(dto.sets.map((s) => s.exerciseId))];
     const previousBests = await this.getPreviousBests(userId, exerciseIds);
 
+    // Un programme modifié pendant la séance régénère ses jours : l'identifiant de jour connu du client
+    // peut ne plus exister. On enregistre alors la séance sans lien de jour plutôt que d'échouer.
+    const dayId = dto.dayId ? await this.existingDayId(dto.dayId) : undefined;
+
     const log = await this.prisma.workoutLog.create({
       data: {
         userId,
         programId: dto.programId,
-        dayId: dto.dayId,
+        dayId,
         feeling: dto.feeling,
-        durationMinutes: dto.durationMinutes,
+        durationMinutes: dto.durationMinutes ?? (dto.durationSeconds !== undefined ? Math.round(dto.durationSeconds / 60) : undefined),
+        durationSeconds: dto.durationSeconds ?? (dto.durationMinutes !== undefined ? dto.durationMinutes * 60 : undefined),
         sets: {
           create: dto.sets.map((s) => ({
             exerciseId: s.exerciseId,
@@ -38,6 +43,11 @@ export class WorkoutsService {
     await this.detectAndNotifyPersonalRecords(userId, log.sets, previousBests);
 
     return log;
+  }
+
+  private async existingDayId(dayId: string): Promise<string | undefined> {
+    const day = await this.prisma.programDay.findUnique({ where: { id: dayId }, select: { id: true } });
+    return day?.id;
   }
 
   /** Meilleur poids déjà loggé par exercice, avant le nouveau passage (undefined = jamais loggé). */

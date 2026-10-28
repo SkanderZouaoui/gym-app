@@ -38,6 +38,10 @@ export class CreateWorkoutLogDto {
   @IsInt()
   durationMinutes?: number;
 
+  @IsOptional()
+  @IsInt()
+  durationSeconds?: number;
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

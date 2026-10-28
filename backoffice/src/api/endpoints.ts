@@ -408,6 +408,9 @@ export interface ClassTypeItem {
   isBookable: boolean;
   defaultCapacity: number;
   defaultDurationMin: number;
+  /** Clés S3 des photos de la galerie et leurs URLs de lecture (mêmes indices). */
+  galleryKeys: string[];
+  galleryUrls: string[];
 }
 
 export interface CreateClassTypeInput {
@@ -426,6 +429,14 @@ export const classTypesApi = {
   create: (data: CreateClassTypeInput) => api.post<ClassTypeItem>('/v1/admin/class-types', data).then((r) => r.data),
   update: (id: string, data: Partial<CreateClassTypeInput>) =>
     api.patch<ClassTypeItem>(`/v1/admin/class-types/${id}`, data).then((r) => r.data),
+  galleryUploadUrl: (id: string, contentType: string) =>
+    api
+      .post<{ key: string; uploadUrl: string }>(`/v1/admin/class-types/${id}/gallery/upload-url`, { contentType })
+      .then((r) => r.data),
+  addGalleryImage: (id: string, key: string) =>
+    api.post<ClassTypeItem>(`/v1/admin/class-types/${id}/gallery`, { key }).then((r) => r.data),
+  removeGalleryImage: (id: string, key: string) =>
+    api.delete<ClassTypeItem>(`/v1/admin/class-types/${id}/gallery`, { data: { key } }).then((r) => r.data),
 };
 
 export interface ClassTemplateItem {

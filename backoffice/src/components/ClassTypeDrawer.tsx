@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { classTypesApi, type ClassTypeItem, type CreateClassTypeInput } from '../api/endpoints'
 import { Drawer } from './ui/Drawer'
@@ -51,6 +51,43 @@ export function ClassTypeDrawer({ item, onClose }: { item: ClassTypeItem | null;
         },
   )
 
+  const [gallery, setGallery] = useState<{ keys: string[]; urls: string[] }>({
+    keys: item?.galleryKeys ?? [],
+    urls: item?.galleryUrls ?? [],
+  })
+  const [uploading, setUploading] = useState(false)
+  const [galleryError, setGalleryError] = useState<string | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
+
+  /** Envoie chaque photo directement vers le stockage (URL présignée), puis l'ajoute à la galerie. */
+  const uploadFiles = async (files: FileList | null) => {
+    if (!item || !files || files.length === 0) return
+    setGalleryError(null)
+    setUploading(true)
+    try {
+      for (const file of Array.from(files)) {
+        const { key, uploadUrl } = await classTypesApi.galleryUploadUrl(item.id, file.type)
+        const res = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
+        if (!res.ok) throw new Error('UPLOAD_FAILED')
+        const updated = await classTypesApi.addGalleryImage(item.id, key)
+        setGallery({ keys: updated.galleryKeys, urls: updated.galleryUrls })
+      }
+      queryClient.invalidateQueries({ queryKey: ['class-types'] })
+    } catch {
+      setGalleryError('Envoi impossible : formats acceptés JPEG, PNG ou WebP.')
+    } finally {
+      setUploading(false)
+      if (fileInput.current) fileInput.current.value = ''
+    }
+  }
+
+  const removeImage = async (key: string) => {
+    if (!item) return
+    const updated = await classTypesApi.removeGalleryImage(item.id, key)
+    setGallery({ keys: updated.galleryKeys, urls: updated.galleryUrls })
+    queryClient.invalidateQueries({ queryKey: ['class-types'] })
+  }
+
   const save = useMutation({
     mutationFn: () => (item ? classTypesApi.update(item.id, form) : classTypesApi.create(form)),
     onSuccess: () => {
@@ -82,6 +119,16 @@ export function ClassTypeDrawer({ item, onClose }: { item: ClassTypeItem | null;
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           className="h-10 rounded-lg border border-(--color-border-strong) px-3 text-sm outline-none focus:border-(--color-primary)"
+        />
+      </label>
+      <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
+        Description
+        <textarea
+          value={form.description}
+          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          rows={4}
+          placeholder="Présentez le cours : déroulé, matériel, public visé…"
+          className="rounded-lg border border-(--color-border-strong) px-3 py-2 text-sm font-normal outline-none focus:border-(--color-primary)"
         />
       </label>
       <label className="flex flex-col gap-1.5 text-[13px] font-semibold">
@@ -144,6 +191,51 @@ export function ClassTypeDrawer({ item, onClose }: { item: ClassTypeItem | null;
             </button>
           ))}
         </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-[13px] font-semibold">Galerie photos</span>
+        {item ? (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              {gallery.urls.map((url, i) => (
+                <div key={gallery.keys[i]} className="group relative aspect-[4/3] overflow-hidden rounded-lg border border-(--color-border)">
+                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <button
+                    onClick={() => removeImage(gallery.keys[i])}
+                    aria-label="Supprimer la photo"
+                    className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <span className="material-symbols-rounded text-[16px]">delete</span>
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => fileInput.current?.click()}
+                disabled={uploading}
+                className="grid aspect-[4/3] place-items-center rounded-lg border-2 border-dashed border-(--color-primary) bg-(--color-primary-soft) text-(--color-primary-ink) disabled:opacity-50"
+              >
+                <span className="flex flex-col items-center gap-0.5 text-xs font-bold">
+                  <span className="material-symbols-rounded text-[22px]">{uploading ? 'hourglass_top' : 'add_photo_alternate'}</span>
+                  {uploading ? 'Envoi…' : 'Ajouter'}
+                </span>
+              </button>
+            </div>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={(e) => uploadFiles(e.target.files)}
+            />
+            {galleryError ? <p className="text-xs font-semibold text-(--color-danger-ink)">{galleryError}</p> : null}
+            <p className="text-xs text-(--color-muted)">Les photos s’affichent dans la fiche du cours de l’application.</p>
+          </>
+        ) : (
+          <p className="rounded-lg bg-(--color-surface-2) p-3 text-xs text-(--color-muted)">
+            Enregistrez d’abord le cours pour pouvoir ajouter des photos.
+          </p>
+        )}
       </div>
     </Drawer>
   )
