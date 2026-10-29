@@ -188,6 +188,8 @@ export class UsersService {
     return this.prisma.user.findMany({
       where: {
         deletedAt: null,
+        // Liste des adhérents : ni l'équipe d'accueil ni les admins (comptes gérés dans « Équipe »).
+        roles: { some: { role: Role.MEMBER }, none: { role: { in: [Role.STAFF, Role.ADMIN] } } },
         OR: [
           { firstName: { contains: query, mode: 'insensitive' } },
           { lastName: { contains: query, mode: 'insensitive' } },

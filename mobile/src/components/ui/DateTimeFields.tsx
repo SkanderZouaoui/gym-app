@@ -195,3 +195,77 @@ export function TimeButton({ value, onChange, disabled }: { value: string; onCha
     </>
   );
 }
+
+const toIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const fromIso = (s: string) => {
+  const [y, m, d] = s.split('-').map(Number);
+  return y ? new Date(y, (m || 1) - 1, d || 1) : new Date();
+};
+
+/** Champ date (AAAA-MM-JJ) avec sélecteur natif ; `value` vide = non défini (si `clearable`). */
+export function DateField({
+  label, value, onChange, clearable, minimumDate, icon = 'event',
+}: { label: string; value: string; onChange: (iso: string) => void; clearable?: boolean; minimumDate?: Date; icon?: keyof typeof MaterialIcons.glyphMap }) {
+  const { colors } = useTheme();
+  const [iosOpen, setIosOpen] = useState(false);
+  const [draft, setDraft] = useState(new Date());
+
+  const open = () => {
+    const picker = loadPicker();
+    if (!picker) return;
+    const current = value ? fromIso(value) : new Date();
+    if (Platform.OS === 'android') {
+      picker.DateTimePickerAndroid.open({
+        value: current,
+        mode: 'date',
+        minimumDate,
+        onChange: (e: DateTimePickerEvent, d?: Date) => {
+          if (e.type === 'set' && d) onChange(toIso(d));
+        },
+      });
+    } else {
+      setDraft(current);
+      setIosOpen(true);
+    }
+  };
+
+  return (
+    <>
+      <Pressable
+        onPress={open}
+        style={{
+          flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 60, paddingHorizontal: 12, borderRadius: radii.lg,
+          backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+        }}
+      >
+        <View style={{ width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft }}>
+          <MaterialIcons name={icon} size={20} color={colors.primaryInk} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted }}>{label}</Text>
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: value ? colors.text : colors.muted }} numberOfLines={1}>
+            {value ? fromIso(value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Aucune limite'}
+          </Text>
+        </View>
+        {clearable && value ? (
+          <Pressable onPress={() => onChange('')} hitSlop={10}>
+            <MaterialIcons name="close" size={20} color={colors.muted} />
+          </Pressable>
+        ) : null}
+      </Pressable>
+      {Platform.OS === 'ios' ? (
+        <BottomSheet visible={iosOpen} onClose={() => setIosOpen(false)} scrollEnabled={false}>
+          <Text style={{ fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text }}>{label}</Text>
+          <IosPicker value={draft} mode="date" display="spinner" locale="fr-FR" minimumDate={minimumDate} onChange={(_e: unknown, d?: Date) => d && setDraft(d)} />
+          <Button
+            label="Valider"
+            onPress={() => {
+              onChange(toIso(draft));
+              setIosOpen(false);
+            }}
+          />
+        </BottomSheet>
+      ) : null}
+    </>
+  );
+}

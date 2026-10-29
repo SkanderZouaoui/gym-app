@@ -681,3 +681,68 @@ export function useSetupAlerts() {
 export function resetTeamPassword(id: string) {
   return apiRequest<{ password: string }>(`/v1/admin/team/${id}/reset-password`, { method: 'POST' });
 }
+
+// --- Bibliothèque d'exercices (admin) ------------------------------------------------
+
+export interface AdminExercise {
+  id: string;
+  name: string;
+  muscleGroup: string | null;
+  equipment: string | null;
+  instructions: string | null;
+  level: string | null;
+  type: 'STRENGTH' | 'CARDIO' | 'MOBILITY';
+  isActive: boolean;
+  usedInPrograms?: number;
+}
+
+export function useAdminExercises(params: { search?: string; muscleGroup?: string } = {}) {
+  const qs = new URLSearchParams();
+  if (params.search) qs.set('search', params.search);
+  if (params.muscleGroup) qs.append('muscleGroup', params.muscleGroup);
+  const q = qs.toString();
+  return useQuery({
+    queryKey: ['admin', 'exercises', params.search ?? '', params.muscleGroup ?? ''],
+    queryFn: () => apiRequest<AdminExercise[]>(`/v1/exercises/admin/all${q ? `?${q}` : ''}`),
+  });
+}
+export function useAdminExercise(id: string | undefined) {
+  return useQuery({
+    queryKey: ['admin', 'exercise', id],
+    enabled: !!id,
+    queryFn: () => apiRequest<AdminExercise>(`/v1/exercises/${id}`),
+  });
+}
+export function useSaveExercise() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id?: string; name: string; muscleGroup?: string; equipment?: string; level?: string; instructions?: string; type?: string }) =>
+      apiRequest<AdminExercise>(id ? `/v1/exercises/${id}` : '/v1/exercises', { method: id ? 'PATCH' : 'POST', body }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'exercises'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'exercise'] });
+      void queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    },
+  });
+}
+export function useDeactivateExercise() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/exercises/${id}/deactivate`, { method: 'PATCH' }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'exercises'] });
+      void queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    },
+  });
+}
+
+/** Icône Material par groupe musculaire (libellés de la bibliothèque). */
+export function muscleIcon(group: string): 'fitness-center' | 'directions-run' | 'self-improvement' | 'accessibility-new' | 'sports-gymnastics' | 'whatshot' {
+  const g = group.toLowerCase();
+  if (/jambe|cuisse|quad|ischio|hamstring|glute|fessier|mollet|calves|adductor|abductor/.test(g)) return 'directions-run';
+  if (/cardio/.test(g)) return 'whatshot';
+  if (/abs|abdo|gainage|core|serratus/.test(g)) return 'accessibility-new';
+  if (/mobilit|souplesse|étirement|levator/.test(g)) return 'self-improvement';
+  if (/dos|lats|traps|spine|upper back/.test(g)) return 'sports-gymnastics';
+  return 'fitness-center';
+}

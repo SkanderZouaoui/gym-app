@@ -178,11 +178,13 @@ export interface AssignProgramInput {
   days: AssignProgramDayInput[];
 }
 
-export function useAssignProgram() {
+/** `asAdmin` : l'admin publie directement (sans validation) via /v1/admin/programs. */
+export function useAssignProgram(asAdmin = false) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: AssignProgramInput) => apiRequest('/v1/coach/programs', { method: 'POST', body: payload }),
+    mutationFn: (payload: AssignProgramInput) => apiRequest(asAdmin ? '/v1/admin/programs' : '/v1/coach/programs', { method: 'POST', body: payload }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'programs'] });
       queryClient.invalidateQueries({ queryKey: ['coach', 'programs'] });
       queryClient.invalidateQueries({ queryKey: ['coach', 'students'] });
     },

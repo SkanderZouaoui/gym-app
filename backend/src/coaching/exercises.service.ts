@@ -24,9 +24,9 @@ export class ExercisesService {
   }
 
   async findOne(id: string) {
-    const exercise = await this.prisma.exercise.findUnique({ where: { id } });
+    const exercise = await this.prisma.exercise.findUnique({ where: { id }, include: { _count: { select: { programExercises: true } } } });
     if (!exercise) throw new NotFoundException('EXERCISE_NOT_FOUND');
-    return exercise;
+    return { ...exercise, usedInPrograms: exercise._count.programExercises };
   }
 
   async findMuscleGroups(): Promise<string[]> {

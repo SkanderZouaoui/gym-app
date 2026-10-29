@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { DateField } from '../../src/components/ui/DateTimeFields';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminHomeAlerts, useDeleteHomeAlert, useSaveHomeAlert, type AdminHomeAlert } from '../../src/hooks/useAdmin';
 import { Banner, ScreenTitle } from '../../src/components/ui';
@@ -135,12 +136,10 @@ export default function AdminAlertFormScreen() {
 
         <View style={styles.dates}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Du (AAAA-MM-JJ)</Text>
-            <TextInput value={startsOn} onChangeText={setStartsOn} placeholder="2026-10-29" placeholderTextColor={colors.muted} style={styles.input} autoCapitalize="none" />
+            <DateField label="Début" value={startsOn} onChange={setStartsOn} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Au (AAAA-MM-JJ)</Text>
-            <TextInput value={endsOn} onChangeText={setEndsOn} placeholder="2026-11-05" placeholderTextColor={colors.muted} style={styles.input} autoCapitalize="none" />
+            <DateField label="Fin" value={endsOn} onChange={setEndsOn} minimumDate={startsOn ? new Date(startsOn) : undefined} icon="event-available" />
           </View>
         </View>
 

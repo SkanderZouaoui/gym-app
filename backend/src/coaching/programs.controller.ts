@@ -47,6 +47,13 @@ export class ProgramsController {
     return this.programsService.create(dto, user.userId);
   }
 
+  /** Programme créé par l'admin : publié sans validation. */
+  @Roles(Role.ADMIN)
+  @Post('admin/programs')
+  createAsAdmin(@Body() dto: CreateProgramDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.programsService.create(dto, user.userId, true);
+  }
+
   @Roles(Role.COACH)
   @Get('coach/programs')
   findMyCreated(@CurrentUser() user: AuthenticatedUser) {

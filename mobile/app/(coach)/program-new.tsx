@@ -18,6 +18,7 @@ import {
 import { useExercisePickStore } from '../../src/store/exercisePick';
 import { estimateMinutes } from '../../src/components/coach/programStatus';
 import { ApiError } from '../../src/api/client';
+import { useSessionStore } from '../../src/store/session';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'] as const;
 const GOALS: { value: string; icon: keyof typeof MaterialIcons.glyphMap; sub: string }[] = [
@@ -49,7 +50,8 @@ export default function CoachProgramNewScreen() {
   const [exercises, setExercises] = useState<DraftExercise[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const assignProgram = useAssignProgram();
+  const isAdmin = useSessionStore((st) => st.activeRole === 'ADMIN');
+  const assignProgram = useAssignProgram(isAdmin);
   const { data: students } = useCoachStudents();
   const { data: source } = useProgramDetail(duplicateFrom);
   const pick = useExercisePickStore((s) => s.pick);
@@ -88,7 +90,8 @@ export default function CoachProgramNewScreen() {
     setExercises((prev) => prev.map((e, i) => (i === index ? { ...e, sets: update(e.sets) } : e)));
   const renumber = (sets: SetDraft[]) => sets.map((s, i) => ({ ...s, setNumber: i + 1 }));
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(coach)/(tabs)/programs'));
+  const programsRoute = isAdmin ? '/(admin)/programs' : '/(coach)/(tabs)/programs';
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(programsRoute as never));
 
   const handleSubmit = () => {
     setError(null);
@@ -120,8 +123,8 @@ export default function CoachProgramNewScreen() {
         ],
       },
       {
-        onSuccess: () => router.replace('/(coach)/(tabs)/programs'),
-        onError: (e) => setError(e instanceof ApiError ? e.message : 'Impossible de soumettre le programme.'),
+        onSuccess: () => router.replace(programsRoute as never),
+        onError: (e) => setError(e instanceof ApiError ? e.message : isAdmin ? 'Impossible de publier le programme.' : 'Impossible de soumettre le programme.'),
       },
     );
   };
@@ -143,7 +146,7 @@ export default function CoachProgramNewScreen() {
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>Programmes</Text>
         </Pressable>
-        <ScreenTitle title="Nouveau programme" subtitle="Sera soumis à validation de l’admin." />
+        <ScreenTitle title="Nouveau programme" subtitle={isAdmin ? 'Créé par l’admin · publié sans validation.' : 'Sera soumis à validation de l’admin.'} />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
@@ -190,6 +193,7 @@ export default function CoachProgramNewScreen() {
           </View>
         </View>
 
+        {!isAdmin ? (
         <View>
           <Text style={styles.label}>Destinataires</Text>
           <View style={[styles.audienceCard, cardShadow]}>
@@ -216,11 +220,16 @@ export default function CoachProgramNewScreen() {
             })}
           </View>
         </View>
+        ) : null}
 
         <View style={styles.notice}>
           <MaterialIcons name="verified-user" size={22} color={colors.primaryInk} />
           <Text style={styles.noticeText}>
-            Le programme est envoyé à l’admin. Une fois accepté, il devient <Text style={{ fontFamily: fonts.bodyBold }}>visible par {audience === 'ALL' ? 'tous les adhérents' : 'l’adhérent choisi'}</Text>.
+            {isAdmin ? (
+              <>Le programme est <Text style={{ fontFamily: fonts.bodyBold }}>publié immédiatement</Text> et visible par tous les adhérents, sans validation.</>
+            ) : (
+              <>Le programme est envoyé à l’admin. Une fois accepté, il devient <Text style={{ fontFamily: fonts.bodyBold }}>visible par {audience === 'ALL' ? 'tous les adhérents' : 'l’adhérent choisi'}</Text>.</>
+            )}
           </Text>
         </View>
 
@@ -268,8 +277,8 @@ export default function CoachProgramNewScreen() {
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, assignProgram.isPending && { opacity: 0.7 }]}
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
-            <MaterialIcons name="send" size={22} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{assignProgram.isPending ? 'Envoi…' : 'Soumettre à validation'}</Text>
+            <MaterialIcons name={isAdmin ? 'check' : 'send'} size={22} color={colors.primaryContrast} />
+            <Text style={styles.ctaText}>{assignProgram.isPending ? (isAdmin ? 'Publication…' : 'Envoi…') : isAdmin ? 'Publier le programme' : 'Soumettre à validation'}</Text>
           </LinearGradient>
         </Pressable>
       </View>

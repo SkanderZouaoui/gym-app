@@ -41,7 +41,7 @@ export class ProgramsService {
 
   /** Programme créé par un coach : soumis à la validation de l'admin avant d'être visible des adhérents.
    * Sans destinataire, il est destiné à tous les adhérents (rubrique « Proposés »). */
-  create(dto: CreateProgramDto, createdById: string) {
+  create(dto: CreateProgramDto, createdById: string, publish = false) {
     return this.prisma.program.create({
       data: {
         name: dto.name,
@@ -50,7 +50,8 @@ export class ProgramsService {
         isPublic: !dto.assignedToId,
         level: dto.level,
         goal: dto.goal,
-        status: 'PENDING',
+        status: publish ? 'APPROVED' : 'PENDING',
+        reviewedAt: publish ? new Date() : undefined,
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         days: { create: mapDays(dto.days) },

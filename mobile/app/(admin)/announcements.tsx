@@ -9,6 +9,7 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
 import { Banner, BottomSheet, ScreenTitle } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
+import { DateField } from '../../src/components/ui/DateTimeFields';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../src/components/ui/StickyActionBar';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useAnnouncements, useDeleteAnnouncement, useSendAnnouncement, useUpdateAnnouncement, type Announcement } from '../../src/hooks/useAdmin';
@@ -126,12 +127,8 @@ export default function AdminAnnouncementsScreen() {
             <TextField label="Titre" value={title} onChangeText={setTitle} placeholder="Ex. Fermeture exceptionnelle" />
             <TextField label="Message" value={body} onChangeText={setBody} placeholder="Votre message aux adhérents" multiline style={{ minHeight: 80, textAlignVertical: 'top' }} />
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                <TextField label="Début" value={startsOn} onChangeText={setStartsOn} placeholder="AAAA-MM-JJ" keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <TextField label="Fin (facultatif)" value={endsOn} onChangeText={setEndsOn} placeholder="AAAA-MM-JJ" keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'default'} />
-              </View>
+              <View style={{ flex: 1 }}><DateField label="Début" value={startsOn} onChange={setStartsOn} /></View>
+              <View style={{ flex: 1 }}><DateField label="Fin (facultatif)" value={endsOn} onChange={setEndsOn} clearable icon="event-available" minimumDate={startsOn ? new Date(startsOn) : undefined} /></View>
             </View>
             {!editingId ? (
             <View style={styles.switchRow}>
