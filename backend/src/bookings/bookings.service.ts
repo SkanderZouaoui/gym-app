@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { readOrganizationConfig } from '../organization/organization-config.js';
 import type { ClassSession, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AccessPolicyService } from '../access-policy/access-policy.service.js';
@@ -95,6 +96,9 @@ export class BookingsService {
         });
       }
 
+      const config = await readOrganizationConfig(this.prisma);
+      if (!config.booking.waitlist) throw new BadRequestException('SESSION_FULL');
+
       const waitlistCount = await tx.booking.count({
         where: { sessionId, status: 'WAITLISTED' },
       });
@@ -118,8 +122,14 @@ export class BookingsService {
     if (!booking || booking.userId !== userId) throw new NotFoundException('BOOKING_NOT_FOUND');
     if (booking.status === 'CANCELLED') return booking;
 
-    const session = await this.prisma.classSession.findUnique({ where: { id: booking.sessionId }, select: { endsAt: true } });
+    const session = await this.prisma.classSession.findUnique({ where: { id: booking.sessionId }, select: { startsAt: true, endsAt: true } });
     if (session && session.endsAt.getTime() < Date.now()) throw new BadRequestException('SESSION_ENDED');
+    if (session && booking.status === 'CONFIRMED') {
+      const { booking: rules } = await readOrganizationConfig(this.prisma);
+      if (session.startsAt.getTime() - Date.now() < rules.cancelHoursBefore * 3_600_000) {
+        throw new BadRequestException('CANCELLATION_TOO_LATE');
+      }
+    }
 
     return this.prisma.$transaction(async (tx) => {
       const cancelled = await tx.booking.update({

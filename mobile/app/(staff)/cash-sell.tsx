@@ -9,6 +9,7 @@ import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMemberDetail, useSellMembership, type PaymentMethod } from '../../src/hooks/useStaff';
 import { usePlans } from '../../src/hooks/usePlans';
+import { useOrganizationConfig } from '../../src/hooks/useAdmin';
 import { Banner, ScreenTitle } from '../../src/components/ui';
 import { InitialsAvatar, METHOD_ICON, METHOD_LABEL, formatMoney } from '../../src/components/staff/staffUi';
 import { ApiError } from '../../src/api/client';
@@ -30,6 +31,8 @@ export default function StaffCashSellScreen() {
   const { data: member } = useMemberDetail(memberId);
   const { data: plans } = usePlans({ all: true });
   const sell = useSellMembership();
+  const { data: orgConfig } = useOrganizationConfig();
+  const methods = METHODS.filter((m) => orgConfig?.paymentMethods[m] !== false);
   const [planId, setPlanId] = useState<string | null>(null);
   const [method, setMethod] = useState<PaymentMethod>('CASH');
   const [error, setError] = useState<string | null>(null);
@@ -105,7 +108,7 @@ export default function StaffCashSellScreen() {
         <View>
           <Text style={styles.label}>Moyen de paiement</Text>
           <View style={styles.methodGrid}>
-            {METHODS.map((m) => {
+            {methods.map((m) => {
               const active = method === m;
               return (
                 <Pressable key={m} onPress={() => setMethod(m)} style={[styles.methodCard, active && styles.methodCardActive]}>

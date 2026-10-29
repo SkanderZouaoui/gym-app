@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto.js';
+import { CreateSessionDto, UpdateSessionDto } from './dto/session-input.dto.js';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { ClassesService } from './classes.service.js';
@@ -111,6 +113,54 @@ export class ClassesController {
     @Query('to') to?: string,
   ) {
     return this.classesService.findSessionsForCoach(user.userId, from, to);
+  }
+
+  @Roles(Role.ADMIN)
+  @Get('admin/rooms')
+  listRooms() {
+    return this.classesService.listRooms();
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/rooms')
+  createRoom(@Body() dto: CreateRoomDto) {
+    return this.classesService.createRoom(dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/rooms/:id')
+  updateRoom(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
+    return this.classesService.updateRoom(id, dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/rooms/:id')
+  deleteRoom(@Param('id') id: string) {
+    return this.classesService.deleteRoom(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/class-types/:id')
+  deleteType(@Param('id') id: string) {
+    return this.classesService.deleteType(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/sessions')
+  createSession(@Body() dto: CreateSessionDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.classesService.createSession(dto, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('admin/sessions/:id')
+  updateSession(@Param('id') id: string, @Body() dto: UpdateSessionDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.classesService.updateSession(id, dto, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/sessions/:id')
+  deleteSession(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.classesService.deleteSession(id, user.userId);
   }
 
   @Roles(Role.ADMIN)

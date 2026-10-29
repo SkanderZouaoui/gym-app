@@ -115,9 +115,19 @@ export function usePayments() {
 export function useCreateMember() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { email: string; password: string; firstName: string; lastName: string; phone?: string }) =>
-      apiRequest<MemberDetail>('/v1/members', { method: 'POST', body: payload }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members'] }),
+    mutationFn: (payload: {
+      email: string; password: string; firstName: string; lastName: string; phone?: string;
+      /** Forfait et moyen de paiement : le compte, l'abonnement et l'encaissement sont créés ensemble. */
+      planId: string; paymentMethod: PaymentMethod;
+    }) =>
+      apiRequest<MemberDetail & { membership: { id: string } | null; payment: { id: string; amount: number } | null }>('/v1/members', {
+        method: 'POST',
+        body: payload,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['members'] });
+      void queryClient.invalidateQueries({ queryKey: ['payments'] });
+    },
   });
 }
 
@@ -167,4 +177,9 @@ export function useMemberPayments(memberships: StaffMembership[] | undefined) {
       return lists.flat().sort((a, b) => (a.recordedAt < b.recordedAt ? 1 : -1));
     },
   });
+}
+
+/** Réinitialisation du mot de passe d'un adhérent (accueil ou admin) : renvoie le mot de passe provisoire. */
+export function resetMemberPassword(id: string) {
+  return apiRequest<{ password: string }>(`/v1/members/${id}/reset-password`, { method: 'POST' });
 }

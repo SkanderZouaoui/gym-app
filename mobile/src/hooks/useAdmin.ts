@@ -225,3 +225,459 @@ export function useUpdateAttendancePolicy() {
     },
   });
 }
+
+// --- Planning (cours) --------------------------------------------------------
+
+export interface AdminCoach {
+  userId: string;
+  user: { firstName: string; lastName: string };
+}
+export interface AdminRoom {
+  id: string;
+  name: string;
+  capacity: number;
+}
+export interface AdminClassType {
+  id: string;
+  name: string;
+  defaultCapacity: number;
+  defaultDurationMin: number;
+}
+
+export function useAdminCoaches() {
+  return useQuery({ queryKey: ['admin', 'coaches'], queryFn: () => apiRequest<AdminCoach[]>('/v1/admin/coaches') });
+}
+export function useAdminRooms() {
+  return useQuery({ queryKey: ['admin', 'rooms'], queryFn: () => apiRequest<AdminRoom[]>('/v1/admin/rooms') });
+}
+export function useAdminClassTypes() {
+  return useQuery({ queryKey: ['admin', 'class-types'], queryFn: () => apiRequest<AdminClassType[]>('/v1/admin/class-types') });
+}
+
+function useInvalidateSessions() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['classes'] });
+    void queryClient.invalidateQueries({ queryKey: ['admin'] });
+  };
+}
+
+export function useSetSessionCapacity() {
+  const done = useInvalidateSessions();
+  return useMutation({
+    mutationFn: ({ id, capacity }: { id: string; capacity: number }) =>
+      apiRequest(`/v1/admin/sessions/${id}/capacity`, { method: 'PATCH', body: { capacity } }),
+    onSuccess: done,
+  });
+}
+export function useReplaceSessionCoach() {
+  const done = useInvalidateSessions();
+  return useMutation({
+    mutationFn: ({ id, coachId }: { id: string; coachId: string | null }) =>
+      apiRequest(`/v1/admin/sessions/${id}/coach`, { method: 'PATCH', body: { coachId } }),
+    onSuccess: done,
+  });
+}
+export function useCancelSession() {
+  const done = useInvalidateSessions();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/sessions/${id}/cancel`, { method: 'POST', body: {} }),
+    onSuccess: done,
+  });
+}
+export interface SessionInput {
+  classTypeId: string;
+  startsAt: string;
+  durationMin?: number;
+  coachId: string | null;
+  roomId: string | null;
+  capacity: number;
+}
+export function useSaveSession() {
+  const done = useInvalidateSessions();
+  return useMutation({
+    mutationFn: ({ id, ...body }: SessionInput & { id?: string }) =>
+      apiRequest(id ? `/v1/admin/sessions/${id}` : '/v1/admin/sessions', { method: id ? 'PATCH' : 'POST', body }),
+    onSuccess: done,
+  });
+}
+export function useDeleteSession() {
+  const done = useInvalidateSessions();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/sessions/${id}`, { method: 'DELETE' }),
+    onSuccess: done,
+  });
+}
+
+// --- Annonces ------------------------------------------------------------------
+
+export interface Announcement {
+  id: string;
+  title: string;
+  body: string;
+  planId: string | null;
+  tone: 'info' | 'accent' | 'danger';
+  sentAt: string | null;
+  startsOn: string | null;
+  endsOn: string | null;
+  push: boolean;
+  createdAt: string;
+}
+export interface AnnouncementInput {
+  title: string;
+  body: string;
+  planId?: string;
+  tone?: 'info' | 'accent' | 'danger';
+  startsOn?: string;
+  endsOn?: string;
+  push?: boolean;
+}
+
+export function useAnnouncements() {
+  return useQuery({ queryKey: ['admin', 'announcements'], queryFn: () => apiRequest<Announcement[]>('/v1/admin/announcements') });
+}
+export function useSendAnnouncement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: AnnouncementInput) =>
+      apiRequest<{ announcement: Announcement; recipientCount: number }>('/v1/admin/announcements', { method: 'POST', body: input }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] }),
+  });
+}
+
+export function useUpdateAnnouncement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string; title?: string; body?: string; startsOn?: string | null; endsOn?: string | null }) =>
+      apiRequest<Announcement>(`/v1/admin/announcements/${id}`, { method: 'PATCH', body }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] }),
+  });
+}
+export function useDeleteAnnouncement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/announcements/${id}`, { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] }),
+  });
+}
+
+// --- Équipe d'accueil -----------------------------------------------------------
+
+export interface TeamMember {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  status: 'ACTIVE' | 'SUSPENDED' | string;
+  createdAt: string;
+  roles: { role: string }[];
+}
+export function useTeam() {
+  return useQuery({ queryKey: ['admin', 'team'], queryFn: () => apiRequest<TeamMember[]>('/v1/admin/team') });
+}
+export function useCreateTeamMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { email: string; password: string; firstName: string; lastName: string; phone?: string; role: 'STAFF' | 'COACH' }) =>
+      apiRequest<TeamMember>('/v1/admin/users', { method: 'POST', body: payload }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'team'] }),
+  });
+}
+export function useUpdateTeamMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string; status?: 'ACTIVE' | 'SUSPENDED'; firstName?: string; lastName?: string; phone?: string }) =>
+      apiRequest<TeamMember>(`/v1/admin/team/${id}`, { method: 'PATCH', body }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'team'] }),
+  });
+}
+
+// --- Types de cours et salles (configuration) ------------------------------------
+
+export interface AdminClassTypeFull extends AdminClassType {
+  isActive: boolean;
+  level?: string | null;
+}
+
+export function useAllClassTypes() {
+  return useQuery({ queryKey: ['admin', 'class-types'], queryFn: () => apiRequest<AdminClassTypeFull[]>('/v1/admin/class-types') });
+}
+
+function useInvalidateCatalog() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['admin', 'class-types'] });
+    void queryClient.invalidateQueries({ queryKey: ['admin', 'rooms'] });
+    void queryClient.invalidateQueries({ queryKey: ['classes'] });
+  };
+}
+
+export function useSaveClassType() {
+  const done = useInvalidateCatalog();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id?: string; name: string; defaultCapacity?: number; defaultDurationMin?: number; isActive?: boolean }) =>
+      apiRequest<AdminClassTypeFull>(id ? `/v1/admin/class-types/${id}` : '/v1/admin/class-types', { method: id ? 'PATCH' : 'POST', body }),
+    onSuccess: done,
+  });
+}
+export function useDeleteClassType() {
+  const done = useInvalidateCatalog();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<{ deleted: boolean; deactivated: boolean }>(`/v1/admin/class-types/${id}`, { method: 'DELETE' }),
+    onSuccess: done,
+  });
+}
+export function useSaveRoom() {
+  const done = useInvalidateCatalog();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id?: string; name: string; capacity: number }) =>
+      apiRequest<AdminRoom>(id ? `/v1/admin/rooms/${id}` : '/v1/admin/rooms', { method: id ? 'PATCH' : 'POST', body }),
+    onSuccess: done,
+  });
+}
+export function useDeleteRoom() {
+  const done = useInvalidateCatalog();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/rooms/${id}`, { method: 'DELETE' }),
+    onSuccess: done,
+  });
+}
+
+
+// --- Notifications push : envoi, programmation, règles récurrentes -------------------
+
+export interface AudienceOption {
+  key: string;
+  label: string;
+  count: number;
+}
+export function useAudiences() {
+  return useQuery({
+    queryKey: ['admin', 'notifications', 'audiences'],
+    queryFn: () => apiRequest<{ audiences: AudienceOption[]; conditions: Record<string, number> }>('/v1/admin/notifications/audiences'),
+  });
+}
+
+export interface ScheduledNotification {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  audience: string;
+  sendAt: string;
+  status: string;
+  sentCount: number;
+  sentAt: string | null;
+}
+export interface SentNotification extends ScheduledNotification {
+  openedCount: number;
+  openRate: number;
+}
+export type RuleCondition = 'NONE' | 'EXPIRES_7D' | 'ABSENT_14D' | 'CLASS_TOMORROW';
+export interface NotificationRule {
+  id: string;
+  title: string;
+  body: string;
+  audience: string;
+  condition: RuleCondition;
+  days: number[];
+  time: string;
+  isActive: boolean;
+}
+
+export function useScheduledNotifications() {
+  return useQuery({ queryKey: ['admin', 'notifications', 'scheduled'], queryFn: () => apiRequest<ScheduledNotification[]>('/v1/admin/notifications/scheduled') });
+}
+export function useNotificationHistory() {
+  return useQuery({ queryKey: ['admin', 'notifications', 'history'], queryFn: () => apiRequest<SentNotification[]>('/v1/admin/notifications/history') });
+}
+export function useNotificationRules() {
+  return useQuery({ queryKey: ['admin', 'notifications', 'rules'], queryFn: () => apiRequest<NotificationRule[]>('/v1/admin/notifications/rules') });
+}
+
+function useInvalidateNotifications() {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: ['admin', 'notifications'] });
+}
+export function useSendNotification() {
+  const done = useInvalidateNotifications();
+  return useMutation({
+    mutationFn: (input: { kind: string; title: string; body: string; audience: string; sendAt?: string }) =>
+      apiRequest<ScheduledNotification>('/v1/admin/notifications', { method: 'POST', body: input }),
+    onSuccess: done,
+  });
+}
+export function useCancelScheduledNotification() {
+  const done = useInvalidateNotifications();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/notifications/scheduled/${id}`, { method: 'DELETE' }),
+    onSuccess: done,
+  });
+}
+export function useCreateNotificationRule() {
+  const done = useInvalidateNotifications();
+  return useMutation({
+    mutationFn: (input: Omit<NotificationRule, 'id' | 'isActive'>) =>
+      apiRequest<NotificationRule>('/v1/admin/notifications/rules', { method: 'POST', body: input }),
+    onSuccess: done,
+  });
+}
+export function useToggleNotificationRule() {
+  const done = useInvalidateNotifications();
+  return useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      apiRequest(`/v1/admin/notifications/rules/${id}`, { method: 'PATCH', body: { isActive } }),
+    onSuccess: done,
+  });
+}
+export function useDeleteNotificationRule() {
+  const done = useInvalidateNotifications();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/notifications/rules/${id}`, { method: 'DELETE' }),
+    onSuccess: done,
+  });
+}
+
+// --- Configuration de la salle ------------------------------------------------------
+
+export interface OrganizationConfig {
+  contact: { address: string; phone: string; email: string; visibleToMembers: boolean };
+  hours: { open: boolean; from: string; to: string }[];
+  paymentMethods: { CASH: boolean; OTHER: boolean; TRANSFER: boolean; CHECK: boolean };
+  announcements: { format: 'Bandeau' | 'Pop-up' | 'Encart'; push: boolean; expiryReminderDays: number };
+  booking: { cancelHoursBefore: number; defaultCapacity: number; waitlist: boolean };
+  discounts: Record<string, number>;
+}
+
+export function useOrganizationConfig() {
+  return useQuery({
+    queryKey: ['settings', 'config'],
+    queryFn: () => apiRequest<OrganizationConfig>('/v1/admin/settings/config'),
+    staleTime: 60_000,
+  });
+}
+export function useUpdateOrganizationConfig() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (config: OrganizationConfig) => apiRequest<OrganizationConfig>('/v1/admin/settings/config', { method: 'PUT', body: config }),
+    onSuccess: (data) => queryClient.setQueryData(['settings', 'config'], data),
+  });
+}
+
+export interface CoachDetails {
+  userId: string;
+  bio: string | null;
+  specialties: string[];
+  yearsExperience: number | null;
+  status: string;
+}
+export function useCoachDetails(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['admin', 'coaches', userId],
+    enabled: !!userId,
+    queryFn: () => apiRequest<CoachDetails>(`/v1/admin/coaches/${userId}`),
+  });
+}
+export function useDeleteTeamMember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest(`/v1/admin/team/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'team'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'coaches'] });
+    },
+  });
+}
+
+export interface TeamStats {
+  days: number;
+  staff: {
+    scans: number;
+    scansGranted: number;
+    payments: number;
+    paymentsTotal: number;
+    accountsCreated: number;
+    daysWorked: number;
+    hours: number;
+    avgHoursPerDay: number;
+    estimated: boolean;
+    source?: 'planning' | 'activity';
+  } | null;
+  coach: {
+    plannedDays?: number | null;
+    plannedHours?: number | null;
+    sessions: number;
+    attendees: number;
+    upcoming: number;
+    daysWorked: number;
+    hours: number;
+    avgHoursPerDay: number;
+    estimated: boolean;
+  } | null;
+}
+export function useTeamStats(id: string | undefined, days: number) {
+  return useQuery({
+    queryKey: ['admin', 'team', id, 'stats', days],
+    enabled: !!id,
+    queryFn: () => apiRequest<TeamStats>(`/v1/admin/team/${id}/stats?days=${days}`),
+  });
+}
+
+// --- Planning de travail --------------------------------------------------------------
+
+export interface WorkDay {
+  dayOfWeek: number; // 0 = lundi
+  working: boolean;
+  startTime: string;
+  endTime: string;
+}
+export function useWorkSchedule(id: string | undefined) {
+  return useQuery({
+    queryKey: ['admin', 'team', id, 'schedule'],
+    enabled: !!id,
+    queryFn: () => apiRequest<WorkDay[]>(`/v1/admin/team/${id}/schedule`),
+  });
+}
+export function useSaveWorkSchedule() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, days }: { id: string; days: WorkDay[] }) =>
+      apiRequest<WorkDay[]>(`/v1/admin/team/${id}/schedule`, { method: 'PUT', body: { days } }),
+    onSuccess: (_d, v) => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'team', v.id] });
+      void queryClient.invalidateQueries({ queryKey: ['me', 'schedule'] });
+    },
+  });
+}
+export function useMySchedule() {
+  return useQuery({ queryKey: ['me', 'schedule'], queryFn: () => apiRequest<WorkDay[]>('/v1/me/schedule') });
+}
+
+export const WEEK_DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+export function shiftHours(d: WorkDay): number {
+  if (!d.working) return 0;
+  const m = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+  return Math.max(0, (m(d.endTime) - m(d.startTime)) / 60);
+}
+
+export interface SetupAlert {
+  key: string;
+  severity: 'warning' | 'danger' | 'info';
+  title: string;
+  detail: string;
+  route: string;
+}
+/** Éléments de configuration manquants (planning d'équipe, forfaits, salles, coordonnées…). */
+export function useSetupAlerts() {
+  return useQuery({
+    queryKey: ['admin', 'setup-alerts'],
+    queryFn: () => apiRequest<SetupAlert[]>('/v1/admin/alerts/setup'),
+    staleTime: 0,
+  });
+}
+
+/** Réinitialisation du mot de passe d'un membre de l'équipe (admin) : renvoie le mot de passe provisoire. */
+export function resetTeamPassword(id: string) {
+  return apiRequest<{ password: string }>(`/v1/admin/team/${id}/reset-password`, { method: 'POST' });
+}

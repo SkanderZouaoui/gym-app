@@ -1,103 +1,121 @@
 import { useMemo } from 'react';
-import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle, Polyline } from 'react-native-svg';
+import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMe } from '../../../src/hooks/useMe';
-import { useAdminDashboard, useDailyAttendance, useExpiringMemberships } from '../../../src/hooks/useAdmin';
+import { useAdminDashboard, useDailyAttendance, useExpiringMemberships, useSetupAlerts } from '../../../src/hooks/useAdmin';
 import { useOpenReports } from '../../../src/hooks/useModeration';
 import { usePayments } from '../../../src/hooks/usePayments';
 import { useStaffToday } from '../../../src/hooks/useStaff';
 import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
-import { BarHistogram, OfflineBanner, ProgressBar, SkeletonBlock } from '../../../src/components/ui';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { OfflineBanner, SkeletonBlock } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 const nf = (n: number) => n.toLocaleString('fr-FR');
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
+const DAY_LETTERS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
-const PAYMENT_ICON: Record<string, keyof typeof MaterialIcons.glyphMap> = {
-  CASH: 'payments',
-  TRANSFER: 'account-balance',
-  CHECK: 'receipt-long',
-  OTHER: 'more-horiz',
-};
-
+/** Pilotage (admin) : encaissé du mois, indicateurs clés, remplissage et alertes — FitZone Mobile Admin v2. */
 export default function AdminDashboardScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user, isLoading: userLoading } = useMe();
-  const { data, isLoading: dashboardLoading } = useAdminDashboard();
-  const { data: dailyAttendance } = useDailyAttendance();
+  const { data: user } = useMe();
+  const { data, isLoading, refetch } = useAdminDashboard();
+  const { data: daily, refetch: refetchDaily } = useDailyAttendance();
   const { data: expiring } = useExpiringMemberships();
   const { data: reports } = useOpenReports();
+  const { data: setupAlerts, refetch: refetchSetup } = useSetupAlerts();
+  // Revenir sur l'accueil après avoir corrigé une configuration met la liste à jour.
+  useFocusEffect(useCallback(() => { void refetchSetup(); }, [refetchSetup]));
   const { data: payments } = usePayments();
   const { data: staffToday } = useStaffToday();
   const { isOnline, lastSyncAt } = useNetworkStatus();
+  const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetch(), refetchDaily()]));
 
-  const now = Date.now();
-  const liveSessions = (staffToday?.sessions ?? []).filter((s) => {
-    const start = new Date(s.startsAt).getTime();
-    const end = new Date(s.endsAt).getTime();
-    return now >= start && now <= end;
-  });
+  const now = new Date();
+  const monthName = now.toLocaleDateString('fr-FR', { month: 'long' });
+  const dateLabel = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'AD';
 
-  const kpis = [
-    { label: 'Adhérents actifs', value: nf(data?.activeMembers ?? 0), icon: 'people' as const, tone: 'success' as const },
-    { label: 'Présences du jour', value: nf(data?.attendanceToday ?? 0), icon: 'event-available' as const, tone: 'secondary' as const },
-    { label: 'Remplissage moyen', value: `${data?.avgFillRate ?? 0}%`, icon: 'donut-large' as const, tone: 'success' as const },
-    { label: 'Encaissé aujourd’hui', value: money(data?.revenueToday ?? 0), icon: 'payments' as const, tone: 'secondary' as const, sub: data ? `${money(data.revenueMonth)} / mois` : undefined },
-  ];
+  // Courbe : encaissements cumulés par semaine du mois en cours ; variation vs mois précédent.
+  const { points, variation, prevMonthName } = useMemo(() => {
+    const list = payments ?? [];
+    const thisMonth = list.filter((p) => {
+      const d = new Date(p.recordedAt);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const prevTotal = list
+      .filter((p) => {
+        const d = new Date(p.recordedAt);
+        return d.getMonth() === prev.getMonth() && d.getFullYear() === prev.getFullYear();
+      })
+      .reduce((s, p) => s + Number(p.amount), 0);
+    const total = thisMonth.reduce((s, p) => s + Number(p.amount), 0);
+    const buckets = [0, 0, 0, 0, 0];
+    for (const p of thisMonth) buckets[Math.min(4, Math.floor((new Date(p.recordedAt).getDate() - 1) / 7))] += Number(p.amount);
+    let acc = 0;
+    const cumulative = buckets.map((b) => (acc += b));
+    const max = Math.max(...cumulative, 1);
+    const pts = cumulative.map((v, i) => `${(i / 4) * 300},${52 - (v / max) * 44}`).join(' ');
+    return {
+      points: total > 0 ? pts : '0,48 75,40 150,34 225,24 300,12',
+      variation: prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 100) : null,
+      prevMonthName: prev.toLocaleDateString('fr-FR', { month: 'long' }),
+    };
+  }, [payments]);
 
   const alerts = [
     staffToday && staffToday.sessions.some((s) => s.fillRate < 30)
-      ? { icon: 'trending-down' as const, tone: 'danger' as const, title: 'Cours sous-rempli', sub: 'Remplissage < 30 %', cta: 'Promouvoir', onPress: () => router.push('/(admin)/(tabs)/planning') }
+      ? { icon: 'trending-down' as const, tone: 'danger' as const, title: 'Cours sous-rempli', sub: 'Remplissage inférieur à 30 %', onPress: () => router.push('/(admin)/(tabs)/planning') }
       : null,
     expiring && expiring.length > 0
       ? {
           icon: 'schedule' as const,
           tone: 'warning' as const,
-          title: `${expiring.length} abonnement${expiring.length > 1 ? 's' : ''} expirent sous 7 j`,
-          sub: expiring.slice(0, 1).map((m) => `${m.user.firstName} ${m.user.lastName}`).join(', '),
-          cta: 'Relancer',
+          title: `${expiring.length} abonnement${expiring.length > 1 ? 's' : ''} expirent sous 7 jours`,
+          sub: expiring.slice(0, 2).map((m) => `${m.user.firstName} ${m.user.lastName}`).join(', '),
           onPress: () => router.push('/(admin)/(tabs)/members'),
         }
       : null,
     reports && reports.length > 0
-      ? {
-          icon: 'shield' as const,
-          tone: 'info' as const,
-          title: `${reports.length} signalement${reports.length > 1 ? 's' : ''} à modérer`,
-          sub: 'Communauté',
-          cta: 'Voir',
-          onPress: () => router.push('/(admin)/(tabs)/more'),
-        }
+      ? { icon: 'shield' as const, tone: 'info' as const, title: `${reports.length} signalement${reports.length > 1 ? 's' : ''} à modérer`, sub: 'Communauté', onPress: () => router.push('/(admin)/(tabs)/more') }
       : null,
   ].filter((a): a is NonNullable<typeof a> => a !== null);
 
-  const quickActions: { icon: keyof typeof MaterialIcons.glyphMap; label: string; primary?: boolean; onPress: () => void }[] = [
-    { icon: 'space-dashboard', label: 'Tableau de bord', primary: true, onPress: () => {} },
-    { icon: 'campaign', label: 'Annonce', onPress: () => router.push('/(admin)/(tabs)/more') },
-    { icon: 'payments', label: 'Encaisser', onPress: () => router.push('/(admin)/(tabs)/more') },
-    { icon: 'person-search', label: 'Adhérent', onPress: () => router.push('/(admin)/(tabs)/members') },
-  ];
+  const tone = {
+    danger: { bg: colors.dangerSoft, fg: colors.dangerInk },
+    warning: { bg: colors.warningSoft, fg: colors.warningInk },
+    info: { bg: colors.infoSoft, fg: colors.infoInk },
+  } as const;
 
-  const isLoading = userLoading || dashboardLoading;
+  const setupTone = {
+    danger: { bg: colors.dangerSoft, fg: colors.dangerInk, icon: 'error-outline' as const },
+    warning: { bg: colors.warningSoft, fg: colors.warningInk, icon: 'warning-amber' as const },
+    info: { bg: colors.infoSoft, fg: colors.infoInk, icon: 'info-outline' as const },
+  } as const;
+
+  const days = daily?.days ?? [];
+  const maxCount = Math.max(...days.map((d) => d.count), 1);
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.container}>
-          <SkeletonBlock height={28} width="50%" radius={radii.xs} />
-          <View style={styles.grid}>
-            <SkeletonBlock height={90} width="47%" radius={radii.md} />
-            <SkeletonBlock height={90} width="47%" radius={radii.md} />
-            <SkeletonBlock height={90} width="47%" radius={radii.md} />
-            <SkeletonBlock height={90} width="47%" radius={radii.md} />
+          <SkeletonBlock height={44} width="60%" radius={radii.sm} />
+          <SkeletonBlock height={190} radius={radii.xl} />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <SkeletonBlock height={110} width="48%" radius={radii.lg} />
+            <SkeletonBlock height={110} width="48%" radius={radii.lg} />
           </View>
-          <SkeletonBlock height={140} radius={radii.lg} />
         </View>
       </SafeAreaView>
     );
@@ -105,183 +123,168 @@ export default function AdminDashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Bonjour {user?.firstName}</Text>
-        <Text style={styles.subtitle}>Vue d’ensemble du site</Text>
+      <ScrollView
+        {...tabBarScroll}
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.header}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.date}>{dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}</Text>
+            <Text style={styles.title}>Pilotage</Text>
+          </View>
+          <Pressable onPress={() => router.push('/(admin)/profile')} style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials}</Text>
+          </Pressable>
+        </View>
 
         {!isOnline ? <OfflineBanner lastSyncAt={lastSyncAt} /> : null}
 
-        <View style={styles.grid}>
-          {kpis.map((k) => (
-            <View key={k.label} style={styles.kpiCard}>
-              <MaterialIcons name={k.icon} size={20} color={colors.primaryInk} />
-              <Text style={styles.kpiValue}>{k.value}</Text>
-              <Text style={styles.kpiLabel}>{k.label}</Text>
-              {k.sub ? <Text style={styles.kpiSub}>{k.sub}</Text> : null}
-            </View>
-          ))}
+        <View style={styles.heroShadow}>
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <View style={styles.heroDecor} />
+            <Text style={styles.heroKicker}>ENCAISSÉ EN {monthName.toUpperCase()}</Text>
+            <Text style={styles.heroValue} numberOfLines={1} adjustsFontSizeToFit>{money(data?.revenueMonth ?? 0)}</Text>
+            {variation !== null ? (
+              <View style={styles.heroPill}>
+                <Text style={styles.heroPillText}>{variation >= 0 ? '+' : ''}{variation} % vs {prevMonthName}</Text>
+              </View>
+            ) : null}
+            <Svg viewBox="0 0 300 60" style={{ width: '100%', height: 60, marginTop: 14 }}>
+              <Polyline points={points} fill="none" stroke="#FFFFFF" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+              <Circle cx={300} cy={Number(points.split(' ').pop()?.split(',')[1] ?? 8)} r={5} fill="#FFFFFF" />
+            </Svg>
+          </LinearGradient>
         </View>
 
-        {liveSessions.length > 0 ? (
-          <View style={styles.liveCard}>
-            <View style={styles.liveHeaderRow}>
-              <View style={styles.liveHeaderLeft}>
-                <View style={styles.liveDot} />
-                <Text style={styles.liveHeaderText}>En ce moment · {liveSessions.length} cours</Text>
-              </View>
-              <Text style={styles.liveTime}>{new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
+        {setupAlerts && setupAlerts.length > 0 ? (
+          <View style={{ gap: 8 }}>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>Configuration à compléter</Text>
+              <Text style={styles.sectionCount}>{setupAlerts.length}</Text>
             </View>
-            {liveSessions.map((s) => (
-              <View key={s.id} style={{ gap: 4 }}>
-                <View style={styles.liveRow}>
-                  <Text style={styles.liveName}>{s.classTypeName}</Text>
-                  <Text style={styles.liveFill}>{s.booked} / {s.capacity}</Text>
-                </View>
-                <ProgressBar progress={s.capacity > 0 ? s.booked / s.capacity : 0} color={colors.primary} trackColor="rgba(255,255,255,.2)" height={6} />
-                <Text style={styles.liveMeta}>{s.coachName ?? ''}{s.room ? ` · ${s.room}` : ''}</Text>
-              </View>
-            ))}
-          </View>
-        ) : null}
-
-        <View style={styles.quickGrid}>
-          {quickActions.map((q) => (
-            <Pressable
-              key={q.label}
-              style={[styles.quickAction, q.primary ? styles.quickActionPrimary : styles.quickActionDefault]}
-              onPress={q.onPress}
-            >
-              <MaterialIcons name={q.icon} size={24} color={q.primary ? colors.primaryContrast : colors.text} />
-              <Text style={[styles.quickActionLabel, { color: q.primary ? colors.primaryContrast : colors.text }]}>{q.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {alerts.length > 0 ? (
-          <>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>À traiter · {alerts.length}</Text>
-            </View>
-            {alerts.map((a, i) => (
-              <Pressable key={i} style={styles.alertRow} onPress={a.onPress}>
-                <View style={[styles.alertIcon, { backgroundColor: toneBg(colors, a.tone) }]}>
-                  <MaterialIcons name={a.icon} size={20} color={toneInk(colors, a.tone)} />
-                </View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={styles.alertTitle} numberOfLines={1}>{a.title}</Text>
-                  <Text style={styles.alertSub} numberOfLines={1}>{a.sub}</Text>
-                </View>
-                <View style={styles.alertCta}>
-                  <Text style={styles.alertCtaText}>{a.cta}</Text>
-                </View>
-              </Pressable>
-            ))}
-          </>
-        ) : null}
-
-        {dailyAttendance ? (
-          <View style={styles.attendanceCard}>
-            <View style={styles.attendanceHeaderRow}>
-              <Text style={styles.attendanceTitle}>Présences · 7 jours</Text>
-              <Text style={[styles.attendanceChange, { color: dailyAttendance.changePercent >= 0 ? colors.successInk : colors.dangerInk }]}>
-                {dailyAttendance.changePercent >= 0 ? '+' : ''}{dailyAttendance.changePercent}% vs sem. dern.
-              </Text>
-            </View>
-            <BarHistogram values={dailyAttendance.days.map((d) => d.count)} highlightIndex={6} height={64} />
-            <View style={styles.attendanceLabels}>
-              {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
-                <Text key={i} style={styles.attendanceLabel}>{d}</Text>
-              ))}
-            </View>
-          </View>
-        ) : null}
-
-        {payments && payments.length > 0 ? (
-          <View style={{ gap: spacing.sm }}>
-            <Text style={styles.sectionTitle}>Derniers encaissements</Text>
-            <View style={styles.paymentList}>
-              {payments.slice(0, 3).map((p) => (
-                <View key={p.id} style={styles.paymentRow}>
-                  <MaterialIcons name={PAYMENT_ICON[p.method] ?? 'payments'} size={22} color={colors.secondaryInk} />
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={styles.paymentName} numberOfLines={1}>
-                      {p.membership.user.firstName} {p.membership.user.lastName}
-                    </Text>
-                    <Text style={styles.paymentMeta} numberOfLines={1}>{p.membership.plan.name}</Text>
+            {setupAlerts.map((a) => {
+              const t = setupTone[a.severity];
+              return (
+                <Pressable
+                  key={a.key}
+                  onPress={() => router.push(a.route as never)}
+                  style={({ pressed }) => [styles.alert, cardShadow, { borderColor: t.fg + '40' }, pressed && { transform: [{ scale: 0.98 }] }]}
+                >
+                  <View style={[styles.alertIcon, { backgroundColor: t.bg }]}>
+                    <MaterialIcons name={t.icon} size={22} color={t.fg} />
                   </View>
-                  <Text style={styles.paymentAmount}>{money(p.amount)}</Text>
-                </View>
-              ))}
-            </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.alertTitle} numberOfLines={2}>{a.title}</Text>
+                    <Text style={styles.alertSub} numberOfLines={2}>{a.detail}</Text>
+                  </View>
+                  <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+                </Pressable>
+              );
+            })}
           </View>
         ) : null}
+
+        <View style={styles.kpiRow}>
+          <View style={[styles.kpi, cardShadow]}>
+            <MaterialIcons name="group" size={22} color={colors.primary} />
+            <Text style={styles.kpiValue}>{nf(data?.activeMembers ?? 0)}</Text>
+            <Text style={styles.kpiLabel}>Adhérents actifs</Text>
+          </View>
+          <View style={[styles.kpi, cardShadow]}>
+            <MaterialIcons name="event" size={22} color={colors.primary} />
+            <Text style={styles.kpiValue}>{nf(data?.classesToday ?? 0)}</Text>
+            <Text style={styles.kpiLabel}>Cours aujourd’hui</Text>
+          </View>
+        </View>
+
+        <View style={[styles.fillCard, cardShadow]}>
+          <Text style={styles.kpiLabel}>Taux de remplissage</Text>
+          <Text style={styles.fillValue}>{data?.avgFillRate ?? 0}%</Text>
+          <View style={styles.bars}>
+            {days.map((d, i) => {
+              const last = i === days.length - 1;
+              return (
+                <View key={d.date} style={styles.barCol}>
+                  <View style={[styles.bar, { height: Math.max(6, (d.count / maxCount) * 52), backgroundColor: last ? colors.primary : colors.primarySoft }]} />
+                  <Text style={styles.barLabel}>{DAY_LETTERS[new Date(d.date).getDay()]}</Text>
+                </View>
+              );
+            })}
+          </View>
+          {daily ? (
+            <Text style={styles.fillNote}>
+              Présences sur 7 jours : {daily.currentWeekTotal} ({daily.changePercent >= 0 ? '+' : ''}{daily.changePercent} % vs semaine précédente)
+            </Text>
+          ) : null}
+        </View>
+
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle}>Alertes</Text>
+          <Text style={styles.sectionCount}>{alerts.length}</Text>
+        </View>
+        {alerts.length === 0 ? (
+          <View style={[styles.alert, cardShadow]}>
+            <View style={[styles.alertIcon, { backgroundColor: colors.successSoft }]}>
+              <MaterialIcons name="check-circle" size={22} color={colors.successInk} />
+            </View>
+            <Text style={styles.alertTitle}>Rien à signaler</Text>
+          </View>
+        ) : (
+          alerts.map((a, i) => (
+            <Pressable key={i} style={({ pressed }) => [styles.alert, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]} onPress={a.onPress}>
+              <View style={[styles.alertIcon, { backgroundColor: tone[a.tone].bg }]}>
+                <MaterialIcons name={a.icon} size={22} color={tone[a.tone].fg} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.alertTitle} numberOfLines={1}>{a.title}</Text>
+                <Text style={styles.alertSub} numberOfLines={1}>{a.sub}</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+            </Pressable>
+          ))
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function toneBg(colors: ReturnType<typeof useTheme>['colors'], tone: 'danger' | 'warning' | 'info') {
-  return { danger: colors.dangerSoft, warning: colors.warningSoft, info: colors.infoSoft }[tone];
-}
-function toneInk(colors: ReturnType<typeof useTheme>['colors'], tone: 'danger' | 'warning' | 'info') {
-  return { danger: colors.dangerInk, warning: colors.warningInk, info: colors.infoInk }[tone];
-}
-
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
-    container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
-    title: { ...typography.largeTitle, fontSize: 28, color: colors.text },
-    subtitle: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-    kpiCard: {
-      width: '47%', backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1,
-      borderColor: colors.border, padding: spacing.md, gap: 4,
+    container: { paddingHorizontal: spacing.lg, gap: 10, paddingBottom: 140 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 6, paddingBottom: 4 },
+    date: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
+    title: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -0.7, color: colors.text },
+    avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+    avatarText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
+    heroShadow: { borderRadius: 28, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8, marginTop: 4 },
+    hero: { borderRadius: 28, padding: 22, overflow: 'hidden' },
+    heroDecor: { position: 'absolute', right: -50, top: -50, width: 190, height: 190, borderRadius: 95, backgroundColor: 'rgba(255,255,255,0.1)' },
+    heroKicker: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1, color: 'rgba(255,255,255,0.92)' },
+    heroValue: { fontFamily: fonts.head, fontSize: 46, letterSpacing: -2, color: '#FFFFFF', marginTop: 6 },
+    heroPill: { alignSelf: 'flex-start', marginTop: 8, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.22)' },
+    heroPillText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
+    kpiRow: { flexDirection: 'row', gap: 10 },
+    kpi: { flex: 1, padding: 14, backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border },
+    kpiValue: { fontFamily: fonts.head, fontSize: 38, letterSpacing: -1.5, color: colors.text, marginTop: 8 },
+    kpiLabel: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
+    fillCard: { padding: 16, backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border },
+    fillValue: { fontFamily: fonts.head, fontSize: 52, letterSpacing: -2, color: colors.primary },
+    bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 74, marginTop: 8 },
+    barCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 4, height: '100%' },
+    bar: { width: '100%', borderRadius: 6 },
+    barLabel: { fontFamily: fonts.body, fontSize: 10, color: colors.muted },
+    fillNote: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted, marginTop: 10 },
+    sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 },
+    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text },
+    sectionCount: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.dangerInk },
+    alert: {
+      flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14,
+      backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border,
     },
-    kpiValue: { fontFamily: fonts.head, fontSize: 22, color: colors.text },
-    kpiLabel: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
-    kpiSub: { fontFamily: fonts.body, fontSize: 10.5, color: colors.muted },
-    liveCard: { backgroundColor: colors.secondary, borderRadius: radii.lg, padding: spacing.md, gap: 10 },
-    liveHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    liveHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
-    liveHeaderText: {
-      fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.5, textTransform: 'uppercase', color: colors.onSecondary,
-    },
-    liveTime: { fontFamily: fonts.body, fontSize: 12.5, color: colors.onSecondary, opacity: 0.85 },
-    liveRow: { flexDirection: 'row', justifyContent: 'space-between' },
-    liveName: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.onSecondary },
-    liveFill: { fontFamily: fonts.body, fontSize: 13, color: colors.onSecondary, opacity: 0.9 },
-    liveMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.onSecondary, opacity: 0.8 },
-    quickGrid: { flexDirection: 'row', gap: 6 },
-    quickAction: {
-      flex: 1, minHeight: 72, borderRadius: radii.sm, alignItems: 'center', justifyContent: 'center', gap: 4,
-      paddingHorizontal: 4, borderWidth: 1,
-    },
-    quickActionPrimary: { backgroundColor: colors.primary, borderColor: colors.primary },
-    quickActionDefault: { backgroundColor: colors.surface, borderColor: colors.border },
-    quickActionLabel: { fontFamily: fonts.bodyBold, fontSize: 11.5, textAlign: 'center' },
-    sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-    sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, color: colors.text },
-    alertRow: {
-      flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10,
-      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radii.sm,
-    },
-    alertIcon: { width: 36, height: 36, borderRadius: radii.sm, alignItems: 'center', justifyContent: 'center' },
-    alertTitle: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.text },
+    alertIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+    alertTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
     alertSub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    alertCta: { height: 34, paddingHorizontal: 10, borderRadius: radii.sm, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-    alertCtaText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.primaryInk },
-    attendanceCard: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, padding: spacing.md, gap: 8 },
-    attendanceHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-    attendanceTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
-    attendanceChange: { fontFamily: fonts.bodyBold, fontSize: 12 },
-    attendanceLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-    attendanceLabel: { fontFamily: fonts.bodySemiBold, fontSize: 10.5, color: colors.muted, textAlign: 'center', flex: 1 },
-    paymentList: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, overflow: 'hidden' },
-    paymentRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, paddingHorizontal: spacing.md, borderBottomWidth: 1, borderBottomColor: colors.border },
-    paymentName: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
-    paymentMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    paymentAmount: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },
   });
 }

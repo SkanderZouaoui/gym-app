@@ -11,9 +11,6 @@ const COACH_SELECT = {
   bio: true,
   specialties: true,
   yearsExperience: true,
-  sessionPrice: true,
-  rating: true,
-  reviewCount: true,
   status: true,
   user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, status: true } },
 } as const;
@@ -70,7 +67,6 @@ export class CoachesService {
           create: {
             bio: dto.bio,
             specialties: dto.specialties ?? [],
-            sessionPrice: dto.sessionPrice,
             status: dto.status ?? 'ACTIVE',
           },
         },

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { useAdminPlans, useTogglePlanActive } from '../../src/hooks/useAdmin';
+import { useAdminPlans, useOrganizationConfig, useTogglePlanActive, useUpdateOrganizationConfig } from '../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle } from '../../src/components/ui';
 import { formatMoney } from '../../src/components/staff/staffUi';
@@ -23,6 +23,17 @@ export default function AdminPlansScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: plans, refetch } = useAdminPlans();
   const toggle = useTogglePlanActive();
+  const { data: config } = useOrganizationConfig();
+  const saveConfig = useUpdateOrganizationConfig();
+  const [discounts, setDiscounts] = useState<Record<string, number>>({});
+  const [discountsDirty, setDiscountsDirty] = useState(false);
+  useEffect(() => {
+    if (config && !discountsDirty) setDiscounts(config.discounts);
+  }, [config, discountsDirty]);
+  const setDiscount = (months: string, v: number) => {
+    setDiscounts((d) => ({ ...d, [months]: Math.max(0, Math.min(50, v)) }));
+    setDiscountsDirty(true);
+  };
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'));
 
@@ -87,6 +98,37 @@ export default function AdminPlansScreen() {
             </Pressable>
           ))}
         </View>
+
+        <Text style={styles.sectionTitle}>Remises par durée d’engagement</Text>
+        <View style={[styles.card, cardShadow]}>
+          {['3', '6', '12'].map((m, i) => (
+            <View key={m}>
+              {i > 0 ? <View style={styles.sep} /> : null}
+              <View style={styles.discRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.name}>{m} mois</Text>
+                  <Text style={styles.meta}>Remise sur le tarif mensuel</Text>
+                </View>
+                <View style={styles.stepper}>
+                  <Pressable style={styles.stepBtn} onPress={() => setDiscount(m, (discounts[m] ?? 0) - 1)}>
+                    <MaterialIcons name="remove" size={18} color={colors.text} />
+                  </Pressable>
+                  <Text style={styles.stepText}>{discounts[m] ?? 0} %</Text>
+                  <Pressable style={styles.stepBtn} onPress={() => setDiscount(m, (discounts[m] ?? 0) + 1)}>
+                    <MaterialIcons name="add" size={18} color={colors.text} />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          ))}
+          <Pressable
+            disabled={!discountsDirty || saveConfig.isPending || !config}
+            onPress={() => config && saveConfig.mutate({ ...config, discounts }, { onSuccess: () => setDiscountsDirty(false) })}
+            style={[styles.saveBtn, (!discountsDirty || saveConfig.isPending) && { opacity: 0.5 }]}
+          >
+            <Text style={styles.saveText}>{saveConfig.isPending ? 'Enregistrement…' : discountsDirty ? 'Enregistrer les remises' : 'Remises enregistrées'}</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -107,6 +149,14 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
     price: { fontFamily: fonts.head, fontSize: 24, letterSpacing: -0.8, color: colors.text },
     tags: { flexDirection: 'row', gap: 6, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' },
+    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
+    sep: { height: 1, backgroundColor: colors.border },
+    discRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
+    stepper: { flexDirection: 'row', alignItems: 'center', height: 44, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+    stepBtn: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center' },
+    stepText: { minWidth: 52, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
+    saveBtn: { height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, marginTop: 4 },
+    saveText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
     tag: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
     tagText: { fontFamily: fonts.bodyBold, fontSize: 12 },
   });

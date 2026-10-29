@@ -25,6 +25,10 @@ export class CreateClassTypeDto {
   isBookable?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(99)

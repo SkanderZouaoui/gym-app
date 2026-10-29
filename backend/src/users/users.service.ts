@@ -1,4 +1,6 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
+import { readOrganizationConfig } from '../organization/organization-config.js';
 import { generateMemberCode } from './member-code.js';
 import * as argon2 from 'argon2';
 import type { Prisma } from '@prisma/client';
@@ -67,6 +69,10 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
+    if (dto.phone) {
+      const taken = await this.prisma.user.findFirst({ where: { phone: dto.phone, id: { not: userId } }, select: { id: true } });
+      if (taken) throw new ConflictException('PHONE_ALREADY_USED');
+    }
     const previous =
       dto.photoKey !== undefined
         ? await this.prisma.user.findUnique({ where: { id: userId }, select: { photoKey: true } })
@@ -210,8 +216,9 @@ export class UsersService {
     return user;
   }
 
-  /** Création d'un adhérent par un admin/staff (back-office → Adhérents → Nouvel adhérent). */
-  async createMember(dto: CreateMemberDto, actorId: string) {
+  /** Création d'un adhérent par un admin/staff. Avec `planId`, le compte, l'abonnement et
+   * l'encaissement sont créés dans une seule transaction : tout ou rien. */
+  async createMember(dto: CreateMemberDto, actorId: string, actorRole?: Role) {
     const existing = await this.prisma.user.findFirst({
       where: { OR: [{ email: dto.email }, dto.phone ? { phone: dto.phone } : undefined].filter(Boolean) as any },
       select: { email: true },
@@ -222,26 +229,62 @@ export class UsersService {
       );
     }
 
+    if (dto.planId && dto.paymentMethod) {
+      const config = await readOrganizationConfig(this.prisma);
+      if (!config.paymentMethods[dto.paymentMethod]) throw new BadRequestException('PAYMENT_METHOD_DISABLED');
+    }
+
+    const plan = dto.planId ? await this.prisma.membershipPlan.findUnique({ where: { id: dto.planId } }) : null;
+    if (dto.planId && !plan) throw new NotFoundException('PLAN_NOT_FOUND');
+    if (plan && actorRole === Role.STAFF) {
+      const settings = await this.prisma.organizationSettings.findFirst();
+      const policy = (settings?.attendancePolicy ?? {}) as { staffCanRecordPayments?: boolean };
+      if (policy.staffCanRecordPayments === false) throw new ForbiddenException('STAFF_PAYMENTS_DISABLED');
+    }
+
     const passwordHash = await argon2.hash(dto.password);
-    const user = await this.prisma.user.create({
-      data: {
-        memberCode: await generateMemberCode(this.prisma),
-        mustChangePassword: true,
-        email: dto.email,
-        phone: dto.phone,
-        passwordHash,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        roles: { create: { role: Role.MEMBER } },
-      },
-      select: PUBLIC_USER_SELECT,
-    });
+    const memberCode = await generateMemberCode(this.prisma);
 
-    await this.prisma.auditLog.create({
-      data: { actorId, action: 'CREATE_MEMBER', entity: 'User', entityId: user.id },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          memberCode,
+          mustChangePassword: true,
+          email: dto.email,
+          phone: dto.phone,
+          passwordHash,
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          roles: { create: { role: Role.MEMBER } },
+        },
+        select: PUBLIC_USER_SELECT,
+      });
+      await tx.auditLog.create({ data: { actorId, action: 'CREATE_MEMBER', entity: 'User', entityId: user.id } });
 
-    return user;
+      if (!plan || !dto.paymentMethod) return { ...user, membership: null, payment: null };
+
+      const startDate = new Date();
+      const membership = await tx.membership.create({
+        data: {
+          userId: user.id,
+          planId: plan.id,
+          startDate,
+          endDate: new Date(startDate.getTime() + plan.durationDays * 86_400_000),
+          status: 'ACTIVE',
+        },
+      });
+      await tx.auditLog.create({
+        data: { actorId, action: 'CREATE_MEMBERSHIP', entity: 'Membership', entityId: membership.id, newValue: { userId: user.id, planId: plan.id } },
+      });
+      const amount = Math.round(Number(plan.price));
+      const payment = await tx.payment.create({
+        data: { membershipId: membership.id, amount, method: dto.paymentMethod, recordedById: actorId },
+      });
+      await tx.auditLog.create({
+        data: { actorId, action: 'RECORD_PAYMENT', entity: 'Payment', entityId: payment.id, newValue: { amount, method: dto.paymentMethod, membershipId: membership.id } },
+      });
+      return { ...user, membership, payment };
+    });
   }
 
   /** Édition d'un adhérent par un admin/staff — contrairement à updateProfile
@@ -271,6 +314,7 @@ export class UsersService {
    * mécanisme que la suppression en libre-service mais sans mot de passe
    * de confirmation (l'admin a déjà l'autorité nécessaire). */
   async deleteMember(id: string, actorId: string) {
+    if (id === actorId) throw new BadRequestException('CANNOT_DELETE_SELF');
     await this.findOne(id);
 
     await this.prisma.$transaction([
@@ -317,10 +361,160 @@ export class UsersService {
   /** Comptes internes (Staff + Admin) — back-office → Équipe. */
   findAllTeam() {
     return this.prisma.user.findMany({
-      where: { deletedAt: null, roles: { some: { role: { in: [Role.STAFF, Role.ADMIN] } } } },
+      where: { deletedAt: null, roles: { some: { role: { in: [Role.STAFF, Role.COACH, Role.ADMIN] } } } },
       select: PUBLIC_USER_SELECT,
       orderBy: { firstName: 'asc' },
     });
+  }
+
+  /**
+   * Réinitialisation du mot de passe par un admin (équipe ou adhérent) ou par l'accueil (adhérents uniquement) :
+   * un mot de passe provisoire aléatoire est généré, affiché une seule fois, et le changement est exigé à la prochaine connexion.
+   */
+  async resetPassword(targetId: string, actorId: string, actorRoles: Role[]) {
+    if (targetId === actorId) throw new BadRequestException('CANNOT_RESET_SELF');
+    const target = await this.prisma.user.findFirst({ where: { id: targetId, deletedAt: null }, select: { id: true, roles: { select: { role: true } } } });
+    if (!target) throw new NotFoundException('USER_NOT_FOUND');
+
+    const isAdmin = actorRoles.includes(Role.ADMIN);
+    const targetIsPrivileged = target.roles.some((r) => r.role !== Role.MEMBER);
+    // L'accueil ne peut réinitialiser que des adhérents, pas le personnel ni les admins.
+    if (!isAdmin && targetIsPrivileged) throw new ForbiddenException('RESET_NOT_ALLOWED');
+
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    const bytes = randomBytes(10);
+    const password = Array.from(bytes, (b) => chars[b % chars.length]).join('');
+    const passwordHash = await argon2.hash(password);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: targetId }, data: { passwordHash, mustChangePassword: true } }),
+      this.prisma.refreshToken.updateMany({ where: { userId: targetId, revokedAt: null }, data: { revokedAt: new Date() } }),
+      this.prisma.auditLog.create({ data: { actorId, action: 'ADMIN_RESET_PASSWORD', entity: 'User', entityId: targetId } }),
+    ]);
+    return { password };
+  }
+
+  // --- Planning de travail ---------------------------------------------------
+
+  async getSchedule(userId: string) {
+    const rows = await this.prisma.workShift.findMany({ where: { userId }, orderBy: { dayOfWeek: 'asc' } });
+    return Array.from({ length: 7 }, (_, d) => {
+      const r = rows.find((x) => x.dayOfWeek === d);
+      return { dayOfWeek: d, working: !!r, startTime: r?.startTime ?? '09:00', endTime: r?.endTime ?? '17:00' };
+    });
+  }
+
+  /** Remplace le planning hebdomadaire : seuls les jours travaillés sont conservés. */
+  async setSchedule(userId: string, days: { dayOfWeek: number; working: boolean; startTime: string; endTime: string }[], actorId: string) {
+    await this.findOne(userId);
+    const hhmm = /^([01]\d|2[0-3]):[0-5]\d$/;
+    for (const d of days) {
+      if (d.dayOfWeek < 0 || d.dayOfWeek > 6 || !hhmm.test(d.startTime) || !hhmm.test(d.endTime)) throw new BadRequestException('INVALID_SCHEDULE');
+      if (d.working && d.endTime <= d.startTime) throw new BadRequestException('SHIFT_END_BEFORE_START');
+    }
+    await this.prisma.$transaction([
+      this.prisma.workShift.deleteMany({ where: { userId } }),
+      this.prisma.workShift.createMany({
+        data: days.filter((d) => d.working).map((d) => ({ userId, dayOfWeek: d.dayOfWeek, startTime: d.startTime, endTime: d.endTime })),
+      }),
+      this.prisma.auditLog.create({ data: { actorId, action: 'SET_WORK_SCHEDULE', entity: 'User', entityId: userId, newValue: days as object } }),
+    ]);
+    return this.getSchedule(userId);
+  }
+
+  /** Jours et heures prévus par le planning entre `from` et maintenant (la semaine type est répétée). */
+  private plannedWorkload(shifts: { dayOfWeek: number; startTime: string; endTime: string }[], from: Date, to: Date) {
+    const toMin = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+    let days = 0;
+    let minutes = 0;
+    for (let d = new Date(from.getFullYear(), from.getMonth(), from.getDate()); d <= to; d.setDate(d.getDate() + 1)) {
+      const dow = (d.getDay() + 6) % 7;
+      const shift = shifts.find((x) => x.dayOfWeek === dow);
+      if (!shift) continue;
+      days += 1;
+      minutes += toMin(shift.endTime) - toMin(shift.startTime);
+    }
+    return { days, hours: Math.round((minutes / 60) * 10) / 10 };
+  }
+
+  /** Activité d'un membre de l'équipe sur une période : accueil (scans, encaissements, comptes créés) et coach (cours assurés). */
+  async getTeamStats(id: string, days: number) {
+    const user = await this.findOne(id);
+    const roles = user.roles.map((r) => r.role as string);
+    const now = new Date();
+    const from = new Date(now.getTime() - days * 86_400_000);
+    const dayKey = (d: Date) => d.toLocaleDateString('sv-SE');
+
+    /** Jours travaillés + heures : durée entre la première et la dernière activité de chaque jour. */
+    const workload = (stamps: Date[]) => {
+      const byDay = new Map<string, { first: number; last: number }>();
+      for (const t of stamps) {
+        const k = dayKey(t);
+        const cur = byDay.get(k);
+        const ms = t.getTime();
+        byDay.set(k, cur ? { first: Math.min(cur.first, ms), last: Math.max(cur.last, ms) } : { first: ms, last: ms });
+      }
+      const daysWorked = byDay.size;
+      const hours = [...byDay.values()].reduce((sum, d) => sum + (d.last - d.first) / 3_600_000, 0);
+      return { daysWorked, hours: Math.round(hours * 10) / 10, avgHoursPerDay: daysWorked ? Math.round((hours / daysWorked) * 10) / 10 : 0 };
+    };
+
+    let staff: Record<string, unknown> | null = null;
+    if (roles.includes('STAFF') || roles.includes('ADMIN')) {
+      const [scans, payments, created, audits, logins] = await Promise.all([
+        this.prisma.attendanceScanLog.findMany({ where: { scannedBy: id, scannedAt: { gte: from } }, select: { scannedAt: true, result: true } }),
+        this.prisma.payment.findMany({ where: { recordedById: id, deletedAt: null, recordedAt: { gte: from } }, select: { recordedAt: true, amount: true } }),
+        this.prisma.auditLog.count({ where: { actorId: id, action: 'CREATE_MEMBER', createdAt: { gte: from } } }),
+        this.prisma.auditLog.findMany({ where: { actorId: id, createdAt: { gte: from } }, select: { createdAt: true } }),
+        this.prisma.refreshToken.findMany({ where: { userId: id, createdAt: { gte: from } }, select: { createdAt: true } }),
+      ]);
+      const shifts = await this.prisma.workShift.findMany({ where: { userId: id } });
+      const planned = shifts.length ? this.plannedWorkload(shifts, from, now) : null;
+      const activity = workload([...scans.map((s) => s.scannedAt), ...payments.map((p) => p.recordedAt), ...audits.map((a) => a.createdAt), ...logins.map((l) => l.createdAt)]);
+      staff = {
+        scans: scans.length,
+        scansGranted: scans.filter((s) => s.result === 'GRANTED').length,
+        payments: payments.length,
+        paymentsTotal: payments.reduce((sum, p) => sum + Number(p.amount), 0),
+        accountsCreated: created,
+        // Planning défini : jours et heures prévus ; sinon estimation d'après l'activité.
+        daysWorked: planned ? planned.days : activity.daysWorked,
+        hours: planned ? planned.hours : activity.hours,
+        avgHoursPerDay: planned ? (planned.days ? Math.round((planned.hours / planned.days) * 10) / 10 : 0) : activity.avgHoursPerDay,
+        activeDays: activity.daysWorked,
+        source: planned ? 'planning' : 'activity',
+        estimated: !planned,
+      };
+    }
+
+    let coach: Record<string, unknown> | null = null;
+    if (roles.includes('COACH')) {
+      const [done, upcoming] = await Promise.all([
+        this.prisma.classSession.findMany({
+          where: { coachId: id, status: { not: 'CANCELLED' }, endsAt: { gte: from, lte: now } },
+          select: { id: true, startsAt: true, endsAt: true },
+        }),
+        this.prisma.classSession.count({ where: { coachId: id, status: { not: 'CANCELLED' }, startsAt: { gt: now } } }),
+      ]);
+      const attended = await this.prisma.booking.count({ where: { sessionId: { in: done.map((d) => d.id) }, status: 'ATTENDED' } });
+      const hours = done.reduce((sum, d) => sum + (d.endsAt.getTime() - d.startsAt.getTime()) / 3_600_000, 0);
+      const daysWorked = new Set(done.map((d) => dayKey(d.startsAt))).size;
+      const coachShifts = await this.prisma.workShift.findMany({ where: { userId: id } });
+      const coachPlanned = coachShifts.length ? this.plannedWorkload(coachShifts, from, now) : null;
+      coach = {
+        plannedDays: coachPlanned?.days ?? null,
+        plannedHours: coachPlanned?.hours ?? null,
+        sessions: done.length,
+        attendees: attended,
+        upcoming,
+        daysWorked,
+        hours: Math.round(hours * 10) / 10,
+        avgHoursPerDay: daysWorked ? Math.round((hours / daysWorked) * 10) / 10 : 0,
+        estimated: false,
+      };
+    }
+
+    return { days, staff: roles.includes('COACH') && !roles.includes('STAFF') ? null : staff, coach };
   }
 
   async updateTeamMember(id: string, dto: UpdateMemberDto, actorId: string) {
@@ -344,8 +538,13 @@ export class UsersService {
   async createPrivilegedUser(dto: CreatePrivilegedUserDto, actorId: string) {
     const existing = await this.prisma.user.findFirst({
       where: { OR: [{ email: dto.email }, dto.phone ? { phone: dto.phone } : undefined].filter(Boolean) as any },
+      select: { email: true },
     });
-    if (existing) throw new ConflictException('EMAIL_OR_PHONE_ALREADY_USED');
+    if (existing) {
+      throw new ConflictException(
+        existing.email?.toLowerCase() === dto.email.toLowerCase() ? 'EMAIL_ALREADY_USED' : 'PHONE_ALREADY_USED',
+      );
+    }
 
     const passwordHash = await argon2.hash(dto.password);
 

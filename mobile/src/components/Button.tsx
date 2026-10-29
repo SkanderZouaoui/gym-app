@@ -7,7 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 interface ButtonProps {
   label: string;
   onPress: (e: GestureResponderEvent) => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   loading?: boolean;
   disabled?: boolean;
 }
@@ -78,6 +78,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     secondary: { backgroundColor: colors.secondary },
     outline: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     ghost: { backgroundColor: 'transparent' },
+    danger: { backgroundColor: colors.danger },
   });
 
   const textVariantStyles = StyleSheet.create({
@@ -85,6 +86,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     secondary: { color: colors.onSecondary },
     outline: { color: colors.text },
     ghost: { color: colors.primaryInk },
+    danger: { color: '#FFFFFF' },
   });
 
   return { styles, variantStyles, textVariantStyles };

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { UsersService } from './users.service.js';
@@ -74,7 +74,7 @@ export class UsersController {
   @Roles(Role.STAFF, Role.ADMIN)
   @Post('members')
   createMember(@Body() dto: CreateMemberDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.usersService.createMember(dto, user.userId);
+    return this.usersService.createMember(dto, user.userId, user.activeRole);
   }
 
   @Roles(Role.STAFF, Role.ADMIN)
@@ -110,6 +110,45 @@ export class UsersController {
   @Get('admin/team')
   findAllTeam() {
     return this.usersService.findAllTeam();
+  }
+
+  /** Nouveau mot de passe aléatoire pour un membre de l'équipe (admin). */
+  @Roles(Role.ADMIN)
+  @Post('admin/team/:id/reset-password')
+  resetTeamPassword(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.resetPassword(id, user.userId, user.roles);
+  }
+
+  /** Nouveau mot de passe aléatoire pour un adhérent (accueil ou admin). */
+  @Roles(Role.STAFF, Role.ADMIN)
+  @Post('members/:id/reset-password')
+  resetMemberPassword(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.resetPassword(id, user.userId, user.roles);
+  }
+
+  @Roles(Role.ADMIN)
+  @Get('admin/team/:id/schedule')
+  teamSchedule(@Param('id') id: string) {
+    return this.usersService.getSchedule(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('admin/team/:id/schedule')
+  setTeamSchedule(@Param('id') id: string, @Body() body: { days: { dayOfWeek: number; working: boolean; startTime: string; endTime: string }[] }, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.setSchedule(id, Array.isArray(body?.days) ? body.days : [], user.userId);
+  }
+
+  /** Mon planning de travail (accueil, coach). */
+  @Get('me/schedule')
+  mySchedule(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.getSchedule(user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Get('admin/team/:id/stats')
+  teamStats(@Param('id') id: string, @Query('days') days?: string) {
+    const n = Math.min(365, Math.max(1, Number(days) || 30));
+    return this.usersService.getTeamStats(id, n);
   }
 
   @Roles(Role.ADMIN)

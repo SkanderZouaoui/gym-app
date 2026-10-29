@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextField } from '../../src/components/TextField';
 import { Button } from '../../src/components/Button';
+import { StickyActionBar, STICKY_BAR_SPACE } from '../../src/components/ui/StickyActionBar';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useChangePassword } from '../../src/hooks/useProfile';
@@ -22,6 +23,8 @@ export default function AccountSecurityScreen() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const canSubmit = !!currentPassword && newPassword.length >= 8 && newPassword === confirmPassword;
+  const touched = !!(currentPassword || newPassword || confirmPassword);
   const mismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
 
   const handleSubmit = () => {
@@ -44,7 +47,7 @@ export default function AccountSecurityScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={[styles.container, touched && { paddingBottom: STICKY_BAR_SPACE + 20 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>Profil</Text>
@@ -73,12 +76,6 @@ export default function AccountSecurityScreen() {
               isPassword
               error={mismatch ? 'Les mots de passe ne correspondent pas.' : undefined}
             />
-            <Button
-              label="Mettre à jour le mot de passe"
-              onPress={handleSubmit}
-              loading={changePassword.isPending}
-              disabled={!currentPassword || newPassword.length < 8 || mismatch || newPassword !== confirmPassword}
-            />
           </View>
         </View>
 
@@ -98,6 +95,7 @@ export default function AccountSecurityScreen() {
           </View>
         </View>
       </ScrollView>
+      <StickyActionBar visible={touched} label="Mettre à jour le mot de passe" loading={changePassword.isPending} disabled={!canSubmit} onPress={handleSubmit} />
     </SafeAreaView>
   );
 }

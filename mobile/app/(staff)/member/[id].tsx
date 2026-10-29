@@ -8,7 +8,8 @@ import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useMemberDetail, useMemberMemberships, useMemberPayments } from '../../../src/hooks/useStaff';
+import { ResetPasswordButton } from '../../../src/components/ResetPasswordButton';
+import { resetMemberPassword, useMemberDetail, useMemberMemberships, useMemberPayments } from '../../../src/hooks/useStaff';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { EmptyState } from '../../../src/components/ui';
 import { StatusTag, formatMoney, membershipBadge, METHOD_LABEL } from '../../../src/components/staff/staffUi';
@@ -214,6 +215,8 @@ export default function StaffMemberScreen() {
             )}
           </View>
         </View>
+
+        <ResetPasswordButton name={`${member.firstName} ${member.lastName}`} email={member.email} reset={() => resetMemberPassword(member.id)} />
 
         {current ? (
         <Pressable

@@ -9,6 +9,7 @@ import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { authApi, meApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSessionStore } from '../../src/store/session';
 import { ApiError } from '../../src/api/client';
 import { Banner } from '../../src/components/ui';
@@ -27,6 +28,7 @@ export default function RegisterScreen() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const setSession = useSessionStore((s) => s.setSession);
+  const queryClient = useQueryClient();
 
   const handleRegister = async () => {
     if (!agreed) {
@@ -45,6 +47,7 @@ export default function RegisterScreen() {
       });
       await tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
       const user = await meApi.getMe();
+      queryClient.clear();
       setSession(user, user.roles.map((r) => r.role), 'MEMBER');
       setSuccess(true);
     } catch (e) {

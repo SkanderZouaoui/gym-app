@@ -17,6 +17,8 @@ model OrganizationSettings {
   branding         Json     @default("{}")
   features         Json     @default("{}")
   attendancePolicy Json     @map("attendance_policy")
+  /// Contact, horaires, moyens de paiement, annonces, réservation (voir OrganizationConfig côté API).
+  config           Json     @default("{}")
   version          Int      @default(1)
   updatedBy        String?  @map("updated_by")
   updatedAt        DateTime @updatedAt @map("updated_at")
@@ -90,6 +92,8 @@ model User {
   workoutLogs             WorkoutLog[]
   bodyMetrics             BodyMetric[]
   publishedConfigVersions AppConfigVersion[]
+
+  workShifts WorkShift[]
 
   @@map("users")
 }
@@ -645,6 +649,10 @@ model Announcement {
   tone        String    @default("info") // style de bannière dans l'app : info|accent|danger
   createdById String    @map("created_by")
   sentAt      DateTime? @map("sent_at")
+  /// Période d'affichage sur l'accueil adhérent (null = sans limite).
+  startsOn    DateTime? @map("starts_on") @db.Date
+  endsOn      DateTime? @map("ends_on") @db.Date
+  push        Boolean   @default(true)
   createdAt   DateTime  @default(now()) @map("created_at")
 
   plan      MembershipPlan? @relation(fields: [planId], references: [id])
@@ -749,3 +757,52 @@ model RolePermission {
   @@map("role_permissions")
 }
 
+
+/// Notification push composée par l'admin : envoyée tout de suite (SENT) ou programmée (PENDING).
+model ScheduledNotification {
+  id          String    @id @default(uuid())
+  kind        String    @default("Annonce") // Annonce | Rappel | Offre
+  title       String
+  body        String
+  audience    String    @default("ALL") // ALL | ACTIVE | EXPIRING | EXPIRED | PLAN:<id>
+  sendAt      DateTime  @map("send_at")
+  status      String    @default("PENDING") // PENDING | SENT | CANCELLED
+  sentCount   Int       @default(0) @map("sent_count")
+  sentAt      DateTime? @map("sent_at")
+  createdById String    @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([status, sendAt])
+  @@map("scheduled_notifications")
+}
+
+/// Règle d'envoi récurrente : certains jours, à une heure donnée, selon une condition.
+model NotificationRule {
+  id          String    @id @default(uuid())
+  title       String
+  body        String
+  audience    String    @default("ALL")
+  condition   String    @default("NONE") // NONE | EXPIRES_7D | ABSENT_14D | CLASS_TOMORROW
+  days        Int[] // 0 = lundi … 6 = dimanche
+  time        String // HH:mm
+  isActive    Boolean   @default(true) @map("is_active")
+  lastRunOn   DateTime? @map("last_run_on") @db.Date
+  createdById String    @map("created_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("notification_rules")
+}
+
+/// Planning de travail hebdomadaire d'un membre de l'équipe (accueil, coach) : un créneau par jour, répété chaque semaine.
+model WorkShift {
+  id        String @id @default(uuid())
+  userId    String @map("user_id")
+  dayOfWeek Int    @map("day_of_week") // 0 = lundi … 6 = dimanche
+  startTime String @map("start_time") // HH:mm
+  endTime   String @map("end_time") // HH:mm
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek])
+  @@map("work_shifts")
+}

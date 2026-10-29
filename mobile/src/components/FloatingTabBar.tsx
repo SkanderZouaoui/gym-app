@@ -65,7 +65,7 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   const preferenceReduceMotion = usePreferencesStore((st) => st.reduceMotion);
   const reduceMotion = systemReduceMotion || preferenceReduceMotion;
   const styles = useMemo(() => makeStyles(colors, dark), [colors, dark]);
-  const hidden = useTabBarStore((s) => s.hidden);
+  const hidden = useTabBarStore((s) => s.hidden || s.suppressed > 0);
   const setHidden = useTabBarStore((s) => s.setHidden);
 
   const press = (route: TabBarRoute, focused: boolean) => {

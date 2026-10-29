@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsIn, IsISO8601, IsOptional, IsString } from 'class-validator';
 
 export class CreateAnnouncementDto {
   @IsString()
@@ -14,4 +14,18 @@ export class CreateAnnouncementDto {
   @IsOptional()
   @IsIn(['info', 'accent', 'danger'])
   tone?: 'info' | 'accent' | 'danger';
+
+  /** Période d'affichage sur l'accueil adhérent (AAAA-MM-JJ). Sans début : dès maintenant. */
+  @IsOptional()
+  @IsISO8601()
+  startsOn?: string;
+
+  @IsOptional()
+  @IsISO8601()
+  endsOn?: string;
+
+  /** Envoie aussi une notification push aux destinataires. */
+  @IsOptional()
+  @IsBoolean()
+  push?: boolean;
 }

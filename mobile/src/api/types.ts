@@ -32,6 +32,8 @@ export interface ClassSessionSummary {
   classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[] };
   room: { id: string; name: string } | null;
   coach: { user: { firstName: string; lastName: string } } | null;
+  coachId?: string | null;
+  roomId?: string | null;
   _count: { bookings: number };
 }
 

@@ -14,13 +14,35 @@ import { Button } from '../../../src/components/Button';
 
 type Row = { icon: keyof typeof MaterialIcons.glyphMap; title: string; sub: string; href: string };
 
-const ROWS: Row[] = [
-  { icon: 'payments', title: 'Encaissements', sub: 'Historique et nouvel encaissement', href: '/(admin)/cash' },
-  { icon: 'fitness-center', title: 'Programmes', sub: 'Validation et exercices', href: '/(admin)/programs' },
-  { icon: 'notification-important', title: 'Alertes adhérents', sub: 'Bandeaux sur l’accueil de l’app', href: '/(admin)/alerts' },
-  { icon: 'card-membership', title: 'Abonnements', sub: 'Forfaits, tarifs et visibilité', href: '/(admin)/plans' },
-  { icon: 'tune', title: 'Configuration', sub: 'Période de scan et règles de présence', href: '/(admin)/settings' },
-  { icon: 'person', title: 'Profil et confidentialité', sub: 'Compte, sécurité, données', href: '/(admin)/profile' },
+const SECTIONS: { title: string; rows: Row[] }[] = [
+  {
+    title: 'Activité',
+    rows: [{ icon: 'payments', title: 'Encaissements', sub: 'Historique et nouvel encaissement', href: '/(admin)/cash' }],
+  },
+  {
+    title: 'Contenu',
+    rows: [{ icon: 'fitness-center', title: 'Programmes', sub: 'Validation et exercices', href: '/(admin)/programs' }],
+  },
+  {
+    title: 'Communication',
+    rows: [
+      { icon: 'campaign', title: 'Annonces', sub: 'Push et écran d’accueil adhérent', href: '/(admin)/announcements' },
+      { icon: 'notifications', title: 'Notifications', sub: 'Envoyer et programmer', href: '/(admin)/notifications' },
+      { icon: 'notification-important', title: 'Alertes adhérents', sub: 'Bandeaux sur l’accueil de l’app', href: '/(admin)/alerts' },
+    ],
+  },
+  {
+    title: 'Gestion de la salle',
+    rows: [
+      { icon: 'badge', title: 'Équipe', sub: 'Comptes accueil et coachs', href: '/(admin)/team' },
+      { icon: 'card-membership', title: 'Abonnements', sub: 'Forfaits, tarifs et remises', href: '/(admin)/plans' },
+      { icon: 'tune', title: 'Configuration', sub: 'Horaires, cours, salles et règles', href: '/(admin)/settings' },
+    ],
+  },
+  {
+    title: 'Mon compte',
+    rows: [{ icon: 'person', title: 'Profil et confidentialité', sub: 'Compte, sécurité, données', href: '/(admin)/profile' }],
+  },
 ];
 
 /** Plus (admin) : accès aux fonctions d'accueil et d'administration. */
@@ -44,9 +66,12 @@ export default function AdminMoreScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
         <ScreenTitle title="Plus" subtitle="Fonctions d’accueil et d’administration" />
-        <View style={{ gap: 10 }}>
-          {ROWS.map((r) => (
-            <Pressable
+        {SECTIONS.map((section) => (
+          <View key={section.title} style={{ gap: 8 }}>
+            <Text style={styles.sectionLabel}>{section.title}</Text>
+            <View style={{ gap: 10 }}>
+              {section.rows.map((r) => (
+                <Pressable
               key={r.title}
               style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
               onPress={() => router.push(r.href as never)}
@@ -60,10 +85,11 @@ export default function AdminMoreScreen() {
               </View>
               <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
             </Pressable>
-          ))}
-        </View>
-        <Text style={styles.note}>L’identité visuelle et les horaires se gèrent depuis le back-office web.</Text>
-        <Pressable style={styles.logout} onPress={() => setLogoutVisible(true)}>
+              ))}
+            </View>
+          </View>
+        ))}
+                <Pressable style={styles.logout} onPress={() => setLogoutVisible(true)}>
           <MaterialIcons name="logout" size={22} color={colors.dangerInk} />
           <Text style={styles.logoutText}>Se déconnecter</Text>
         </Pressable>
@@ -73,7 +99,7 @@ export default function AdminMoreScreen() {
         <Text style={styles.sheetTitle}>Se déconnecter ?</Text>
         <Text style={styles.sheetText}>Vous devrez vous reconnecter pour accéder à l’application.</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Se déconnecter" onPress={handleLogout} variant="secondary" />
+          <Button label="Se déconnecter" onPress={handleLogout} variant="danger" />
           <Button label="Annuler" onPress={() => setLogoutVisible(false)} variant="outline" />
         </View>
       </BottomSheet>
@@ -85,6 +111,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
+    sectionLabel: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1, textTransform: 'uppercase', color: colors.muted, marginLeft: 4, marginTop: 6 },
     card: {
       flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, backgroundColor: colors.surface,
       borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,

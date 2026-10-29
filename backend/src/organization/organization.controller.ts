@@ -17,6 +17,18 @@ export class OrganizationController {
     return this.organizationService.getSettings();
   }
 
+  /** Réglages de la salle avec valeurs par défaut — lisible par tous les rôles (accueil : moyens de paiement). */
+  @Get('config')
+  getConfig() {
+    return this.organizationService.getConfig();
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('config')
+  updateConfig(@Body() body: unknown, @CurrentUser() user: AuthenticatedUser) {
+    return this.organizationService.updateConfig(body, user.userId);
+  }
+
   @Roles(Role.ADMIN)
   @Put('attendance')
   updateAttendancePolicy(

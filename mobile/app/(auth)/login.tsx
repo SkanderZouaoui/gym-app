@@ -8,6 +8,7 @@ import { fonts, spacing, typography } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { authApi, meApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSessionStore } from '../../src/store/session';
 import { ApiError } from '../../src/api/client';
 import { pendingPassword } from '../../src/auth/pendingPassword';
@@ -24,6 +25,7 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
   const setSession = useSessionStore((s) => s.setSession);
+  const queryClient = useQueryClient();
 
   const handleLogin = async () => {
     setError(null);
@@ -31,6 +33,8 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const tokens = await authApi.login(email.trim(), password);
+      // Données en cache d'un autre compte (profil, réservations…) : on repart de zéro.
+      queryClient.clear();
       await tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
       const user = await meApi.getMe();
       const roles = user.roles.map((r) => r.role);

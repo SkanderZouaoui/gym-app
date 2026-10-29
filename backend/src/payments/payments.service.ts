@@ -1,4 +1,5 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { readOrganizationConfig } from '../organization/organization-config.js';
 import { Role, type AttendancePolicy } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OrganizationService } from '../organization/organization.service.js';
@@ -18,6 +19,11 @@ export class PaymentsService {
       if (!policy.staffCanRecordPayments) {
         throw new ForbiddenException('STAFF_PAYMENTS_DISABLED');
       }
+    }
+
+    const config = await readOrganizationConfig(this.prisma);
+    if (!config.paymentMethods[dto.method as keyof typeof config.paymentMethods]) {
+      throw new BadRequestException('PAYMENT_METHOD_DISABLED');
     }
 
     const payment = await this.prisma.payment.create({

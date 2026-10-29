@@ -92,7 +92,7 @@ export default function ProfileEditScreen() {
       { firstName, lastName, phone: phone || undefined },
       {
         onSuccess: () => router.navigate('/(member)/(tabs)/profile'),
-        onError: () => setError('Impossible d’enregistrer vos informations. Réessayez.'),
+        onError: (e) => setError(e instanceof ApiError && e.code === 'PHONE_ALREADY_USED' ? 'Ce numéro de téléphone est déjà utilisé par un autre compte.' : 'Impossible d’enregistrer vos informations. Réessayez.'),
       },
     );
   };

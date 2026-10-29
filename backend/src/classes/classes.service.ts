@@ -4,6 +4,8 @@ import { StorageService } from '../storage/storage.service.js';
 import type { CreateClassTypeDto } from './dto/create-class-type.dto.js';
 import type { UpdateClassTypeDto } from './dto/update-class-type.dto.js';
 import type { CreateTemplateDto } from './dto/create-template.dto.js';
+import type { CreateSessionDto, UpdateSessionDto } from './dto/session-input.dto.js';
+import type { CreateRoomDto, UpdateRoomDto } from './dto/room.dto.js';
 import type { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 
 @Injectable()
@@ -276,6 +278,106 @@ export class ClassesService {
     });
 
     return updated;
+  }
+
+  createRoom(dto: CreateRoomDto) {
+    return this.prisma.room.create({ data: dto });
+  }
+
+  async updateRoom(id: string, dto: UpdateRoomDto) {
+    await this.findRoom(id);
+    return this.prisma.room.update({ where: { id }, data: dto });
+  }
+
+  async deleteRoom(id: string) {
+    await this.findRoom(id);
+    const used =
+      (await this.prisma.classSession.count({ where: { roomId: id } })) + (await this.prisma.classTemplate.count({ where: { roomId: id } }));
+    if (used > 0) throw new BadRequestException('ROOM_IN_USE');
+    await this.prisma.room.delete({ where: { id } });
+    return { deleted: true };
+  }
+
+  private async findRoom(id: string) {
+    const room = await this.prisma.room.findUnique({ where: { id } });
+    if (!room) throw new NotFoundException('ROOM_NOT_FOUND');
+    return room;
+  }
+
+  /** Suppression d'un type de cours : définitive s'il n'est jamais utilisé, sinon désactivation. */
+  async deleteType(id: string) {
+    await this.findType(id);
+    const used =
+      (await this.prisma.classSession.count({ where: { classTypeId: id } })) + (await this.prisma.classTemplate.count({ where: { classTypeId: id } }));
+    if (used > 0) {
+      await this.prisma.classType.update({ where: { id }, data: { isActive: false } });
+      return { deleted: false, deactivated: true };
+    }
+    await this.prisma.classType.delete({ where: { id } });
+    return { deleted: true, deactivated: false };
+  }
+
+  listRooms() {
+    return this.prisma.room.findMany({ orderBy: { name: 'asc' } });
+  }
+
+  /** Création d'un cours ponctuel. */
+  async createSession(dto: CreateSessionDto, actorId: string) {
+    const type = await this.findType(dto.classTypeId);
+    const startsAt = new Date(dto.startsAt);
+    const durationMin = dto.durationMin ?? type.defaultDurationMin;
+    const session = await this.prisma.classSession.create({
+      data: {
+        classTypeId: type.id,
+        startsAt,
+        endsAt: new Date(startsAt.getTime() + durationMin * 60_000),
+        coachId: dto.coachId ?? null,
+        roomId: dto.roomId ?? null,
+        capacity: dto.capacity ?? type.defaultCapacity,
+      },
+    });
+    await this.prisma.auditLog.create({
+      data: { actorId, action: 'CREATE_SESSION', entity: 'ClassSession', entityId: session.id, newValue: { classTypeId: type.id, startsAt: dto.startsAt } },
+    });
+    return session;
+  }
+
+  /** Modification d'un cours (horaire, type, coach, salle, capacité). */
+  async updateSession(id: string, dto: UpdateSessionDto, actorId: string) {
+    const session = await this.findSession(id);
+    const startsAt = dto.startsAt ? new Date(dto.startsAt) : session.startsAt;
+    const durationMs = dto.durationMin ? dto.durationMin * 60_000 : session.endsAt.getTime() - session.startsAt.getTime();
+    if (dto.classTypeId) await this.findType(dto.classTypeId);
+    if (dto.capacity !== undefined && dto.capacity < session._count.bookings) {
+      throw new BadRequestException('CAPACITY_BELOW_BOOKINGS');
+    }
+    const updated = await this.prisma.classSession.update({
+      where: { id },
+      data: {
+        ...(dto.classTypeId ? { classTypeId: dto.classTypeId } : {}),
+        startsAt,
+        endsAt: new Date(startsAt.getTime() + durationMs),
+        ...(dto.coachId !== undefined ? { coachId: dto.coachId } : {}),
+        ...(dto.roomId !== undefined ? { roomId: dto.roomId } : {}),
+        ...(dto.capacity !== undefined ? { capacity: dto.capacity } : {}),
+      },
+    });
+    await this.prisma.auditLog.create({
+      data: { actorId, action: 'UPDATE_SESSION', entity: 'ClassSession', entityId: id, newValue: dto as object },
+    });
+    return updated;
+  }
+
+  /** Suppression : définitive sans réservation, sinon annulation (les inscrits sont libérés). */
+  async deleteSession(id: string, actorId: string) {
+    const session = await this.findSession(id);
+    const bookings = await this.prisma.booking.count({ where: { sessionId: id } });
+    if (bookings > 0) return this.cancelSession(id, 'Cours supprimé', actorId);
+    await this.prisma.classSession.delete({ where: { id } });
+    await this.prisma.auditLog.create({
+      data: { actorId, action: 'DELETE_SESSION', entity: 'ClassSession', entityId: id, oldValue: { startsAt: session.startsAt } },
+    });
+    return { deleted: true };
   }
 
   /** Nombre de places restantes, utilisé par bookings/attendance. */

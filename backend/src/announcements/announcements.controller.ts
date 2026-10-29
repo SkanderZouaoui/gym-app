@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { AnnouncementsService } from './announcements.service.js';
+import { UpdateAnnouncementDto } from './dto/update-announcement.dto.js';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
@@ -26,5 +27,15 @@ export class AnnouncementsController {
   @Post()
   send(@Body() dto: CreateAnnouncementDto, @CurrentUser() user: AuthenticatedUser) {
     return this.announcementsService.send(dto, user.userId);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: UpdateAnnouncementDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.announcementsService.update(id, dto, user.userId);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.announcementsService.remove(id, user.userId);
   }
 }

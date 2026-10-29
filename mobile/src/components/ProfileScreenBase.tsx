@@ -50,7 +50,7 @@ export function ProfileScreenBase({ roleLabel }: { roleLabel: string }) {
           <InfoRow label="Rôle" value={roleLabel} styles={styles} />
         </View>
 
-        <Button label="Se déconnecter" onPress={handleLogout} variant="outline" />
+        <Button label="Se déconnecter" onPress={handleLogout} variant="danger" />
       </View>
     </SafeAreaView>
   );

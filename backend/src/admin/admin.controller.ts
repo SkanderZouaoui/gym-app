@@ -16,6 +16,12 @@ export class AdminController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('alerts/setup')
+  setupAlerts() {
+    return this.adminService.setupAlerts();
+  }
+
+  @Roles(Role.ADMIN)
   @Get('alerts/expiring-memberships')
   expiringMemberships() {
     return this.adminService.expiringMemberships();
