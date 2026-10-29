@@ -17,10 +17,13 @@ export class MembershipsService {
     });
   }
 
-  findAllPlansForAdmin() {
-    return this.prisma.membershipPlan.findMany({
+  /** Forfaits avec leur nombre d'abonnés actifs (base du revenu mensuel récurrent affiché côté admin). */
+  async findAllPlansForAdmin() {
+    const plans = await this.prisma.membershipPlan.findMany({
       orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+      include: { _count: { select: { memberships: { where: { status: 'ACTIVE', endDate: { gte: new Date() } } } } } },
     });
+    return plans.map(({ _count, ...plan }) => ({ ...plan, activeSubscribers: _count.memberships }));
   }
 
   async reactivatePlan(id: string) {

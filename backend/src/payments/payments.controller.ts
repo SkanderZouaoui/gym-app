@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { PaymentsService } from './payments.service.js';
@@ -20,8 +20,9 @@ export class PaymentsController {
 
   @Roles(Role.STAFF, Role.ADMIN)
   @Get('payments')
-  findAll(@CurrentUser() user: AuthenticatedUser) {
-    return this.paymentsService.findAll(user.userId, user.activeRole);
+  findAll(@CurrentUser() user: AuthenticatedUser, @Query('from') from?: string, @Query('to') to?: string) {
+    const valid = (v?: string) => (v && !Number.isNaN(Date.parse(v)) ? new Date(v) : undefined);
+    return this.paymentsService.findAll(user.userId, user.activeRole, { from: valid(from), to: valid(to) });
   }
 
   @Roles(Role.STAFF, Role.ADMIN)

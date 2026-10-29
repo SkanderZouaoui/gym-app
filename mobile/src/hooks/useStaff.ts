@@ -104,11 +104,15 @@ export interface StaffPayment {
   };
 }
 
-/** 50 derniers encaissements de la caisse. */
-export function usePayments() {
+/** Encaissements de la caisse : les 100 derniers, ou ceux d'une période (`from`/`to` en ISO). */
+export function usePayments(range?: { from?: string; to?: string }) {
+  const qs = new URLSearchParams();
+  if (range?.from) qs.set('from', range.from);
+  if (range?.to) qs.set('to', range.to);
+  const q = qs.toString();
   return useQuery({
-    queryKey: ['staff', 'payments'],
-    queryFn: () => apiRequest<StaffPayment[]>('/v1/payments'),
+    queryKey: ['staff', 'payments', range?.from ?? '', range?.to ?? ''],
+    queryFn: () => apiRequest<StaffPayment[]>(`/v1/payments${q ? `?${q}` : ''}`),
   });
 }
 

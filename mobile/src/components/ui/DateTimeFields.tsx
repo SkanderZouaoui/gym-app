@@ -1,21 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-
-// Chargement différé : si le module natif est absent (Expo Go sans la bonne version), seul cet écran est touché.
-function loadPicker(): typeof import('@react-native-community/datetimepicker') | null {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require('@react-native-community/datetimepicker');
-  } catch {
-    return null;
-  }
-}
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
-import { BottomSheet } from './BottomSheet';
-import { Button } from '../Button';
+import { CalendarSheet, TimeSheet } from './pickers';
 
 interface Props {
   value: Date;
@@ -26,57 +14,33 @@ interface Props {
   timeOnly?: boolean;
 }
 
-/** Sélecteurs natifs de date et d'heure (deux champs côte à côte). */
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** Champs date et heure (côte à côte) ; sélecteurs JavaScript, sans module natif. */
 export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const [iosMode, setIosMode] = useState<'date' | 'time' | null>(null);
-  const [draft, setDraft] = useState(value);
-
-  const merge = (mode: 'date' | 'time', picked: Date) => {
-    const next = new Date(value);
-    if (mode === 'date') next.setFullYear(picked.getFullYear(), picked.getMonth(), picked.getDate());
-    else next.setHours(picked.getHours(), picked.getMinutes(), 0, 0);
-    return next;
-  };
-
-  const open = (mode: 'date' | 'time') => {
-    const picker = loadPicker();
-    if (!picker) return;
-    if (Platform.OS === 'android') {
-      picker.DateTimePickerAndroid.open({
-        value,
-        mode,
-        is24Hour: true,
-        minimumDate: mode === 'date' ? minimumDate : undefined,
-        onChange: (e: DateTimePickerEvent, d?: Date) => {
-          if (e.type === 'set' && d) onChange(merge(mode, d));
-        },
-      });
-    } else {
-      setDraft(value);
-      setIosMode(mode);
-    }
-  };
+  const [dateOpen, setDateOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
 
   const dateLabel = value.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' });
-  const timeLabel = value.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const timeLabel = `${pad(value.getHours())}:${pad(value.getMinutes())}`;
 
   return (
     <>
       <View style={styles.row}>
         {!timeOnly ? (
-        <Pressable style={[styles.field, { flex: 1.5 }]} onPress={() => open('date')}>
-          <View style={styles.iconBox}>
-            <MaterialIcons name="event" size={20} color={colors.primaryInk} />
-          </View>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={styles.label}>Date</Text>
-            <Text style={styles.value} numberOfLines={1}>{dateLabel}</Text>
-          </View>
-        </Pressable>
+          <Pressable style={[styles.field, { flex: 1.5 }]} onPress={() => setDateOpen(true)}>
+            <View style={styles.iconBox}>
+              <MaterialIcons name="event" size={20} color={colors.primaryInk} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.label}>Date</Text>
+              <Text style={styles.value} numberOfLines={1}>{dateLabel}</Text>
+            </View>
+          </Pressable>
         ) : null}
-        <Pressable style={[styles.field, { flex: 1 }]} onPress={() => open('time')}>
+        <Pressable style={[styles.field, { flex: 1 }]} onPress={() => setTimeOpen(true)}>
           <View style={styles.iconBox}>
             <MaterialIcons name="schedule" size={20} color={colors.primaryInk} />
           </View>
@@ -87,90 +51,42 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
         </Pressable>
       </View>
 
-      {Platform.OS === 'ios' ? (
-        <BottomSheet visible={iosMode !== null} onClose={() => setIosMode(null)} scrollEnabled={false}>
-          <Text style={styles.sheetTitle}>{iosMode === 'date' ? 'Choisir la date' : 'Choisir l’heure'}</Text>
-          {iosMode ? (
-            <IosPicker
-              value={draft}
-              mode={iosMode}
-              display="spinner"
-              locale="fr-FR"
-              is24Hour
-              minimumDate={iosMode === 'date' ? minimumDate : undefined}
-              minuteInterval={5}
-              onChange={(_e: unknown, d?: Date) => d && setDraft(d)}
-            />
-          ) : null}
-          <Button
-            label="Valider"
-            onPress={() => {
-              if (iosMode) onChange(merge(iosMode, draft));
-              setIosMode(null);
-            }}
-          />
-        </BottomSheet>
-      ) : null}
+      <CalendarSheet
+        visible={dateOpen}
+        value={value}
+        minimumDate={minimumDate}
+        title="Choisir la date"
+        onClose={() => setDateOpen(false)}
+        onSelect={(d) => {
+          const next = new Date(value);
+          next.setFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+          onChange(next);
+        }}
+      />
+      <TimeSheet
+        visible={timeOpen}
+        value={{ h: value.getHours(), m: value.getMinutes() }}
+        title="Choisir l’heure"
+        onClose={() => setTimeOpen(false)}
+        onSelect={({ h, m }) => {
+          const next = new Date(value);
+          next.setHours(h, m, 0, 0);
+          onChange(next);
+        }}
+      />
     </>
   );
 }
 
-function IosPicker(props: Record<string, unknown>) {
-  const picker = loadPicker();
-  if (!picker) return null;
-  const Picker = picker.default as unknown as React.ComponentType<Record<string, unknown>>;
-  return <Picker {...props} />;
-}
-
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
-  return StyleSheet.create({
-    row: { flexDirection: 'row', gap: 10 },
-    field: {
-      flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 64, paddingHorizontal: 12, borderRadius: radii.lg,
-      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
-    },
-    iconBox: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
-    label: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
-    value: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text, marginTop: 1 },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
-  });
-}
-
-/** Bouton compact « HH:mm » qui ouvre le sélecteur d'heure natif (horaires d'ouverture). */
+/** Bouton compact « HH:mm » qui ouvre le sélecteur d'heure (horaires d'ouverture, planning). */
 export function TimeButton({ value, onChange, disabled }: { value: string; onChange: (hhmm: string) => void; disabled?: boolean }) {
   const { colors } = useTheme();
-  const [iosOpen, setIosOpen] = useState(false);
-  const [draft, setDraft] = useState(new Date());
-  const toDate = () => {
-    const [h, m] = value.split(':').map(Number);
-    const d = new Date();
-    d.setHours(h || 0, m || 0, 0, 0);
-    return d;
-  };
-  const fmt = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-
-  const open = () => {
-    const picker = loadPicker();
-    if (!picker || disabled) return;
-    if (Platform.OS === 'android') {
-      picker.DateTimePickerAndroid.open({
-        value: toDate(),
-        mode: 'time',
-        is24Hour: true,
-        onChange: (e: DateTimePickerEvent, d?: Date) => {
-          if (e.type === 'set' && d) onChange(fmt(d));
-        },
-      });
-    } else {
-      setDraft(toDate());
-      setIosOpen(true);
-    }
-  };
-
+  const [open, setOpen] = useState(false);
+  const [h, m] = value.split(':').map(Number);
   return (
     <>
       <Pressable
-        onPress={open}
+        onPress={() => setOpen(true)}
         disabled={disabled}
         style={{
           height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2,
@@ -179,60 +95,33 @@ export function TimeButton({ value, onChange, disabled }: { value: string; onCha
       >
         <Text style={{ fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text }}>{value}</Text>
       </Pressable>
-      {Platform.OS === 'ios' ? (
-        <BottomSheet visible={iosOpen} onClose={() => setIosOpen(false)} scrollEnabled={false}>
-          <Text style={{ fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text }}>Choisir l’heure</Text>
-          <IosPicker value={draft} mode="time" display="spinner" locale="fr-FR" is24Hour minuteInterval={5} onChange={(_e: unknown, d?: Date) => d && setDraft(d)} />
-          <Button
-            label="Valider"
-            onPress={() => {
-              onChange(fmt(draft));
-              setIosOpen(false);
-            }}
-          />
-        </BottomSheet>
-      ) : null}
+      <TimeSheet
+        visible={open}
+        value={{ h: h || 0, m: m || 0 }}
+        title="Choisir l’heure"
+        onClose={() => setOpen(false)}
+        onSelect={(v) => onChange(`${pad(v.h)}:${pad(v.m)}`)}
+      />
     </>
   );
 }
 
-const toIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const toIso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fromIso = (s: string) => {
-  const [y, m, d] = s.split('-').map(Number);
-  return y ? new Date(y, (m || 1) - 1, d || 1) : new Date();
+  const [y, mo, d] = s.split('-').map(Number);
+  return y ? new Date(y, (mo || 1) - 1, d || 1) : new Date();
 };
 
-/** Champ date (AAAA-MM-JJ) avec sélecteur natif ; `value` vide = non défini (si `clearable`). */
+/** Champ date (AAAA-MM-JJ) avec calendrier ; `value` vide = non défini (si `clearable`). */
 export function DateField({
   label, value, onChange, clearable, minimumDate, icon = 'event',
 }: { label: string; value: string; onChange: (iso: string) => void; clearable?: boolean; minimumDate?: Date; icon?: keyof typeof MaterialIcons.glyphMap }) {
   const { colors } = useTheme();
-  const [iosOpen, setIosOpen] = useState(false);
-  const [draft, setDraft] = useState(new Date());
-
-  const open = () => {
-    const picker = loadPicker();
-    if (!picker) return;
-    const current = value ? fromIso(value) : new Date();
-    if (Platform.OS === 'android') {
-      picker.DateTimePickerAndroid.open({
-        value: current,
-        mode: 'date',
-        minimumDate,
-        onChange: (e: DateTimePickerEvent, d?: Date) => {
-          if (e.type === 'set' && d) onChange(toIso(d));
-        },
-      });
-    } else {
-      setDraft(current);
-      setIosOpen(true);
-    }
-  };
-
+  const [open, setOpen] = useState(false);
   return (
     <>
       <Pressable
-        onPress={open}
+        onPress={() => setOpen(true)}
         style={{
           flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 60, paddingHorizontal: 12, borderRadius: radii.lg,
           backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
@@ -253,19 +142,20 @@ export function DateField({
           </Pressable>
         ) : null}
       </Pressable>
-      {Platform.OS === 'ios' ? (
-        <BottomSheet visible={iosOpen} onClose={() => setIosOpen(false)} scrollEnabled={false}>
-          <Text style={{ fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text }}>{label}</Text>
-          <IosPicker value={draft} mode="date" display="spinner" locale="fr-FR" minimumDate={minimumDate} onChange={(_e: unknown, d?: Date) => d && setDraft(d)} />
-          <Button
-            label="Valider"
-            onPress={() => {
-              onChange(toIso(draft));
-              setIosOpen(false);
-            }}
-          />
-        </BottomSheet>
-      ) : null}
+      <CalendarSheet visible={open} value={value ? fromIso(value) : new Date()} minimumDate={minimumDate} title={label} onClose={() => setOpen(false)} onSelect={(d) => onChange(toIso(d))} />
     </>
   );
+}
+
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    row: { flexDirection: 'row', gap: 10 },
+    field: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 64, paddingHorizontal: 12, borderRadius: radii.lg,
+      backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    },
+    iconBox: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+    label: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    value: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text, marginTop: 1 },
+  });
 }

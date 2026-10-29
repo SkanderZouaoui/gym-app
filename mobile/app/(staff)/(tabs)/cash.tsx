@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +12,8 @@ import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll'
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle } from '../../../src/components/ui';
 import { useSessionStore } from '../../../src/store/session';
+import { Pagination } from '../../../src/components/ui/Pagination';
+import { DateField } from '../../../src/components/ui/DateTimeFields';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 
 type Filter = 'all' | PaymentMethod;
@@ -29,19 +31,51 @@ export default function StaffCashScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: payments, refetch } = usePayments();
-  const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
-  const [filter, setFilter] = useState<Filter>('all');
   const isAdmin = useSessionStore((st) => st.activeRole) === 'ADMIN';
+  const [filter, setFilter] = useState<Filter>('all');
+  const [period, setPeriod] = useState<'month' | 'last' | 'custom'>('month');
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const [customFrom, setCustomFrom] = useState(() => iso(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
+  const [customTo, setCustomTo] = useState(() => iso(new Date()));
+
+  // Plage demandée au serveur (admin uniquement) : début de journée → fin de journée, heure locale.
+  const range = useMemo(() => {
+    if (!isAdmin) return undefined;
+    const n = new Date();
+    if (period === 'month') return { from: new Date(n.getFullYear(), n.getMonth(), 1).toISOString(), to: new Date(n.getFullYear(), n.getMonth() + 1, 0, 23, 59, 59, 999).toISOString() };
+    if (period === 'last') return { from: new Date(n.getFullYear(), n.getMonth() - 1, 1).toISOString(), to: new Date(n.getFullYear(), n.getMonth(), 0, 23, 59, 59, 999).toISOString() };
+    const [fy, fm, fd] = customFrom.split('-').map(Number);
+    const [ty, tm, td] = customTo.split('-').map(Number);
+    return { from: new Date(fy, fm - 1, fd, 0, 0, 0, 0).toISOString(), to: new Date(ty, tm - 1, td, 23, 59, 59, 999).toISOString() };
+  }, [isAdmin, period, customFrom, customTo]);
+
+  const { data: payments, refetch } = usePayments(range);
+  const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const list = payments ?? [];
   const now = new Date();
-  const monthPayments = list.filter((p) => {
-    const d = new Date(p.recordedAt);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
+  // Accueil : total du mois en cours. Admin : total de la période choisie.
+  const monthPayments = isAdmin
+    ? list
+    : list.filter((p) => {
+        const d = new Date(p.recordedAt);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
   const monthTotal = monthPayments.reduce((s, p) => s + Number(p.amount), 0);
-  const shown = list.filter((p) => filter === 'all' || p.method === filter);
+  const filtered = list.filter((p) => filter === 'all' || p.method === filter);
+  const PAGE_SIZE = 10;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const shown = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  // Retour à la première page dès que la période ou le moyen de paiement change.
+  useEffect(() => setPage(0), [filter, period, customFrom, customTo]);
+  const byMethod = (['CASH', 'OTHER', 'TRANSFER', 'CHECK'] as PaymentMethod[])
+    .map((m) => ({ m, total: monthPayments.filter((p) => p.method === m).reduce((s, p) => s + Number(p.amount), 0), count: monthPayments.filter((p) => p.method === m).length }))
+    .filter((x) => x.count > 0);
+  const fmtShort = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  const periodKicker =
+    period === 'month' ? 'ENCAISSÉ CE MOIS' : period === 'last' ? 'ENCAISSÉ LE MOIS DERNIER' : `ENCAISSÉ DU ${fmtShort(customFrom).toUpperCase()} AU ${fmtShort(customTo).toUpperCase()}`;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -55,11 +89,40 @@ export default function StaffCashScreen() {
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
-            <Text style={styles.heroKicker}>{isAdmin ? 'ENCAISSÉ CE MOIS' : 'VOUS AVEZ ENCAISSÉ CE MOIS'}</Text>
+            <Text style={styles.heroKicker}>{isAdmin ? periodKicker : 'VOUS AVEZ ENCAISSÉ CE MOIS'}</Text>
             <Text style={styles.heroValue}>{formatMoney(monthTotal)}</Text>
             <Text style={styles.heroSub}>{monthPayments.length} encaissement{monthPayments.length > 1 ? 's' : ''}</Text>
           </LinearGradient>
         </View>
+
+        {isAdmin ? (
+          <View style={{ gap: 10 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+              {([['month', 'Ce mois'], ['last', 'Mois dernier'], ['custom', 'Période…']] as const).map(([k, l]) => (
+                <Pressable key={k} onPress={() => setPeriod(k)} style={[styles.filterPill, period === k && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
+                  <Text style={[styles.filterText, period === k && styles.filterTextActive]}>{l}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            {period === 'custom' ? (
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flex: 1 }}><DateField label="Du" value={customFrom} onChange={(v) => { setCustomFrom(v); if (v > customTo) setCustomTo(v); }} /></View>
+                <View style={{ flex: 1 }}><DateField label="Au" value={customTo} onChange={(v) => { setCustomTo(v); if (v < customFrom) setCustomFrom(v); }} icon="event-available" /></View>
+              </View>
+            ) : null}
+            {byMethod.length > 0 ? (
+              <View style={styles.methodRow}>
+                {byMethod.map((x) => (
+                  <View key={x.m} style={[styles.methodCell, cardShadow]}>
+                    <Text style={styles.methodLabel}>{METHOD_LABEL[x.m]}</Text>
+                    <Text style={styles.methodValue} numberOfLines={1} adjustsFontSizeToFit>{formatMoney(x.total)}</Text>
+                    <Text style={styles.methodCount}>{x.count} paiement{x.count > 1 ? 's' : ''}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        ) : null}
 
         <Pressable
           onPress={() => router.push(routes.cashSelect)}
@@ -105,9 +168,10 @@ export default function StaffCashScreen() {
               </View>
             </Pressable>
           ))}
+          <Pagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onChange={setPage} />
           {shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
-              <Text style={styles.emptyText}>Aucun encaissement avec ce moyen de paiement.</Text>
+              <Text style={styles.emptyText}>{isAdmin ? 'Aucun encaissement sur cette période avec ce moyen de paiement.' : 'Aucun encaissement avec ce moyen de paiement.'}</Text>
             </View>
           ) : null}
         </View>
@@ -132,6 +196,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     cta: { minHeight: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     ctaText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
     filters: { gap: 8 },
+    methodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    methodCell: { flexGrow: 1, minWidth: '47%', padding: 12, gap: 2, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
+    methodLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    methodValue: { fontFamily: fonts.head, fontSize: 18, letterSpacing: -0.4, color: colors.text },
+    methodCount: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
     filterPill: {
       height: 36, paddingHorizontal: 16, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center',
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,

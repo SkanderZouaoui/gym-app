@@ -35,6 +35,11 @@ export default function AdminPlansScreen() {
     setDiscountsDirty(true);
   };
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
+  // Revenu mensuel récurrent : prix ramené au mois × abonnés actifs, sur les forfaits actifs.
+  const monthly = (p: { price: string; durationDays: number }) => (Number(p.price) / Math.max(1, p.durationDays)) * 30;
+  const activePlans = (plans ?? []).filter((p) => p.isActive);
+  const subscribers = activePlans.reduce((n, p) => n + (p.activeSubscribers ?? 0), 0);
+  const mrr = activePlans.reduce((sum, p) => sum + monthly(p) * (p.activeSubscribers ?? 0), 0);
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'));
 
   return (
@@ -60,6 +65,20 @@ export default function AdminPlansScreen() {
           }
         />
 
+        <View style={styles.heroShadow}>
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <View style={styles.heroDecor} />
+            <View style={styles.heroTop}>
+              <Text style={styles.heroKicker}>REVENU MENSUEL RÉCURRENT</Text>
+              <MaterialIcons name="trending-up" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={styles.heroValue} numberOfLines={1} adjustsFontSizeToFit>{formatMoney(Math.round(mrr))}</Text>
+            <Text style={styles.heroSub}>
+              {activePlans.length} forfait{activePlans.length > 1 ? 's' : ''} actif{activePlans.length > 1 ? 's' : ''} · {subscribers} abonné{subscribers > 1 ? 's' : ''}
+            </Text>
+          </LinearGradient>
+        </View>
+
         <View style={{ gap: 10 }}>
           {(plans ?? []).map((p) => (
             <Pressable
@@ -70,7 +89,7 @@ export default function AdminPlansScreen() {
               <View style={styles.top}>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.name}>{p.name}</Text>
-                  <Text style={styles.meta}>{durationLabel(p.durationDays)}{p.includesLabel ? ` · ${p.includesLabel}` : ''}</Text>
+                  <Text style={styles.meta}>{durationLabel(p.durationDays)}{p.includesLabel ? ` · ${p.includesLabel}` : ''} · {p.activeSubscribers ?? 0} abonné{(p.activeSubscribers ?? 0) > 1 ? 's' : ''}</Text>
                 </View>
                 <Switch
                   value={p.isActive}
@@ -149,6 +168,13 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
     price: { fontFamily: fonts.head, fontSize: 24, letterSpacing: -0.8, color: colors.text },
     tags: { flexDirection: 'row', gap: 6, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' },
+    heroShadow: { borderRadius: 28, shadowColor: colors.primary, shadowOffset: { width: 0, height: 14 }, shadowOpacity: 0.3, shadowRadius: 16, elevation: 7 },
+    hero: { borderRadius: 28, padding: 22, overflow: 'hidden', gap: 4 },
+    heroDecor: { position: 'absolute', right: -40, top: -40, width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(255,255,255,0.12)' },
+    heroTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    heroKicker: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1, color: 'rgba(255,255,255,0.92)' },
+    heroValue: { fontFamily: fonts.head, fontSize: 44, letterSpacing: -1.8, color: '#FFFFFF' },
+    heroSub: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: 'rgba(255,255,255,0.92)' },
     sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
     sep: { height: 1, backgroundColor: colors.border },
     discRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },

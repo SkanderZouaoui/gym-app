@@ -140,6 +140,7 @@ export interface AdminPlan {
   isVisibleInApp: boolean;
   isPopular: boolean;
   includesLabel: string | null;
+  activeSubscribers?: number;
 }
 
 export interface PlanInput {

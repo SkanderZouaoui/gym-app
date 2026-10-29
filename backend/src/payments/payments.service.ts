@@ -51,14 +51,19 @@ export class PaymentsService {
 
   /** Liste de la caisse : l'admin voit tous les encaissements de la salle, un agent d'accueil
    * uniquement ceux qu'il a lui-même enregistrés. */
-  findAll(actorId: string, actorRole: Role) {
+  findAll(actorId: string, actorRole: Role, range?: { from?: Date; to?: Date }) {
+    const ranged = !!(range?.from || range?.to);
     return this.prisma.payment.findMany({
-      where: { deletedAt: null, ...(actorRole === Role.ADMIN ? {} : { recordedById: actorId }) },
+      where: {
+        deletedAt: null,
+        ...(actorRole === Role.ADMIN ? {} : { recordedById: actorId }),
+        ...(ranged ? { recordedAt: { ...(range?.from ? { gte: range.from } : {}), ...(range?.to ? { lte: range.to } : {}) } } : {}),
+      },
       include: {
         membership: { include: { user: { select: { firstName: true, lastName: true } }, plan: { select: { name: true } } } },
       },
       orderBy: { recordedAt: 'desc' },
-      take: 100,
+      take: ranged ? 2000 : 100,
     });
   }
 
