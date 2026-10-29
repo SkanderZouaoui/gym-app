@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import { radii, spacing } from '../../theme/tokens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { useTheme } from '../../theme/ThemeContext';
 
 const MAX_SHEET_HEIGHT = Dimensions.get('window').height * 0.85;
@@ -26,13 +28,18 @@ interface BottomSheetProps {
 export function BottomSheet({ visible, onClose, children, scrollEnabled = true }: BottomSheetProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const insets = useSafeAreaInsets();
+  const keyboard = useKeyboardHeight();
+  // Android : le Modal s'arrête déjà au-dessus de la barre système (feuille collée en bas) ;
+  // seul le clavier, qui ne redimensionne pas la fenêtre, demande un décalage manuel.
+  const androidBottom = Platform.OS === 'android' ? Math.max(0, keyboard - insets.bottom) : 0;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.keyboardAvoider}
+        style={[styles.keyboardAvoider, { paddingBottom: androidBottom }]}
         pointerEvents="box-none"
       >
         <View style={styles.sheet}>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { Platform, Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,6 +15,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fonts } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
+import { useKeyboardHeight } from '../hooks/useKeyboardHeight';
 import { useTabBarStore } from '../store/tabBar';
 import { usePreferencesStore } from '../store/preferences';
 
@@ -56,6 +57,9 @@ const EASE_OUT = Easing.bezier(0.32, 0.72, 0, 1);
 export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, actionRoute, actionIcon = 'qr-code-2' }: FloatingTabBarProps) {
   const { colors, scheme } = useTheme();
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  // Android : le cadre racine gère déjà la barre système.
+  const bottomInset = Platform.OS === 'android' ? 0 : insets.bottom;
   const dark = scheme === 'dark';
   const systemReduceMotion = useReducedMotion();
   const preferenceReduceMotion = usePreferencesStore((st) => st.reduceMotion);
@@ -88,7 +92,7 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   const slot = tabs.length > 0 ? (rowWidth - 12) / tabs.length : 0;
   const indicatorX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const offset = BAR_HEIGHT + Math.max(insets.bottom - 6, 10) + 24;
+  const offset = BAR_HEIGHT + Math.max(bottomInset - 6, 10) + 24;
 
   useEffect(() => {
     if (activeIndex < 0 || slot === 0) return;
@@ -97,8 +101,8 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   }, [activeIndex, slot, reduceMotion, indicatorX]);
 
   useEffect(() => {
-    translateY.value = withTiming(hidden ? offset : 0, { duration: reduceMotion ? 120 : 450, easing: EASE_OUT });
-  }, [hidden, offset, reduceMotion, translateY]);
+    translateY.value = withTiming(hidden || keyboardHeight > 0 ? offset : 0, { duration: reduceMotion ? 120 : 450, easing: EASE_OUT });
+  }, [hidden, keyboardHeight, offset, reduceMotion, translateY]);
 
   const wrapStyle = useAnimatedStyle(() => ({ transform: [{ translateY: translateY.value }] }));
   const indicatorStyle = useAnimatedStyle(() => ({ transform: [{ translateX: indicatorX.value }] }));
@@ -106,7 +110,7 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   return (
     <Animated.View
       pointerEvents="box-none"
-      style={[styles.wrap, { paddingBottom: Math.max(insets.bottom - 6, 10) }, wrapStyle]}
+      style={[styles.wrap, { paddingBottom: Math.max(bottomInset - 6, 10) }, wrapStyle]}
     >
       <View style={styles.barShadow}>
         <View style={styles.barClip}>

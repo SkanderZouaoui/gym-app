@@ -25,6 +25,9 @@ import { queryPersister, QUERY_CACHE_VERSION } from '../src/api/queryStorage';
 import { usePreferencesStore } from '../src/store/preferences';
 import { NetworkStatusProvider } from '../src/hooks/NetworkStatusContext';
 import { useSessionStore } from '../src/store/session';
+import { Platform, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeyboardHeight } from '../src/hooks/useKeyboardHeight';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import { RemoteConfigProvider } from '../src/config/RemoteConfigContext';
 import { LanguageProvider } from '../src/i18n/LanguageContext';
@@ -159,6 +162,15 @@ export default function RootLayout() {
   );
 }
 
+/** Android (edge-to-edge) : garde l'app au-dessus de la barre système, et au-dessus du clavier quand il est ouvert. */
+function AndroidInsetsFrame({ children }: { children: React.ReactNode }) {
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const keyboard = useKeyboardHeight();
+  if (Platform.OS !== 'android') return <>{children}</>;
+  return <View style={{ flex: 1, backgroundColor: colors.bg, paddingBottom: keyboard > 0 ? keyboard : insets.bottom }}>{children}</View>;
+}
+
 function RootLayoutInner() {
   const { scheme } = useTheme();
   const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
@@ -179,7 +191,9 @@ function RootLayoutInner() {
   return (
     <NetworkStatusProvider>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }} />
+      <AndroidInsetsFrame>
+        <Stack screenOptions={{ headerShown: false }} />
+      </AndroidInsetsFrame>
     </NetworkStatusProvider>
   );
 }
