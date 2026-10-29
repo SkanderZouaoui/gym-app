@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { usePayments, type PaymentMethod } from '../../../src/hooks/useStaff';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
@@ -23,6 +24,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 
 /** Caisse (accueil) : total encaissé, nouvel encaissement, historique filtrable par moyen de paiement. */
 export default function StaffCashScreen() {
+  const routes = useStaffRoutes();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -58,7 +60,7 @@ export default function StaffCashScreen() {
         </View>
 
         <Pressable
-          onPress={() => router.push('/(staff)/cash-select')}
+          onPress={() => router.push(routes.cashSelect)}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
@@ -86,7 +88,7 @@ export default function StaffCashScreen() {
             <Pressable
               key={p.id}
               style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
-              onPress={() => router.push({ pathname: '/(staff)/cash-receipt', params: { paymentId: p.id } })}
+              onPress={() => router.push({ pathname: routes.cashReceipt, params: { paymentId: p.id } })}
             >
               <InitialsAvatar first={p.membership.user.firstName} last={p.membership.user.lastName} />
               <View style={{ flex: 1, minWidth: 0 }}>

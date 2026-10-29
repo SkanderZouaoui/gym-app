@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
 import { Banner, ScreenTitle } from '../../src/components/ui';
@@ -13,6 +14,7 @@ import { ApiError } from '../../src/api/client';
 
 /** Nouveau compte adhérent créé à l'accueil (mot de passe provisoire communiqué sur place). */
 export default function StaffMemberCreateScreen() {
+  const routes = useStaffRoutes();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const createMember = useCreateMember();
@@ -24,14 +26,14 @@ export default function StaffMemberCreateScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const valid = firstName.trim() && lastName.trim() && /\S+@\S+\.\S+/.test(email) && password.length >= 8;
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(staff)/(tabs)/members'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.members));
 
   const submit = () => {
     setError(null);
     createMember.mutate(
       { firstName: firstName.trim(), lastName: lastName.trim(), email: email.trim(), phone: phone.trim() || undefined, password },
       {
-        onSuccess: (created) => router.replace(`/(staff)/member/${created.id}`),
+        onSuccess: (created) => router.replace(routes.member(created.id)),
         onError: (e) =>
           setError(e instanceof ApiError && e.code === 'EMAIL_OR_PHONE_ALREADY_USED' ? 'Cet e-mail ou ce téléphone est déjà utilisé.' : 'Impossible de créer le compte.'),
       },

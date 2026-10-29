@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMembers } from '../../../src/hooks/useStaff';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
@@ -14,6 +15,7 @@ import { InitialsAvatar, StatusTag } from '../../../src/components/staff/staffUi
 
 /** Adhérents (accueil) : recherche, liste, ouverture de la fiche, création de compte. */
 export default function StaffMembersScreen() {
+  const routes = useStaffRoutes();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -30,7 +32,7 @@ export default function StaffMembersScreen() {
           right={
             <Pressable
               accessibilityLabel="Créer un compte"
-              onPress={() => router.push('/(staff)/member-create')}
+              onPress={() => router.push(routes.memberCreate)}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
@@ -61,7 +63,7 @@ export default function StaffMembersScreen() {
         renderItem={({ item }) => (
           <Pressable
             style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
-            onPress={() => router.push(`/(staff)/member/${item.id}`)}
+            onPress={() => router.push(routes.member(item.id))}
           >
             <InitialsAvatar first={item.firstName} last={item.lastName} />
             <View style={{ flex: 1, minWidth: 0 }}>

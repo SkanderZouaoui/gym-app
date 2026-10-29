@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { usePayments } from '../../src/hooks/useStaff';
 import { useRemoteConfig } from '../../src/config/RemoteConfigContext';
@@ -15,6 +16,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numer
 
 /** Reçu d'un encaissement : après un encaissement (« Paiement reçu ») ou depuis l'historique de la caisse. */
 export default function StaffCashReceiptScreen() {
+  const routes = useStaffRoutes();
   const { paymentId, fresh } = useLocalSearchParams<{ paymentId: string; fresh?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -25,7 +27,7 @@ export default function StaffCashReceiptScreen() {
 
   const close = () => {
     if (router.canDismiss()) router.dismissAll();
-    router.replace('/(staff)/(tabs)/cash');
+    router.replace(routes.cash);
   };
 
   if (isLoading && !payment) {

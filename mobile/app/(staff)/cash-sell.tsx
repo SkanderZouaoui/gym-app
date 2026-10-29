@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMemberDetail, useSellMembership, type PaymentMethod } from '../../src/hooks/useStaff';
 import { usePlans } from '../../src/hooks/usePlans';
@@ -22,6 +23,7 @@ function durationLabel(days: number): string {
 
 /** Encaissement : formule, moyen de paiement, puis création de l'abonnement et enregistrement du paiement. */
 export default function StaffCashSellScreen() {
+  const routes = useStaffRoutes();
   const { memberId } = useLocalSearchParams<{ memberId: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -33,7 +35,7 @@ export default function StaffCashSellScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const plan = (plans ?? []).find((p) => p.id === planId);
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(staff)/(tabs)/cash'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.cash));
 
   const submit = () => {
     if (!member || !plan) return;
@@ -41,7 +43,7 @@ export default function StaffCashSellScreen() {
     sell.mutate(
       { userId: member.id, planId: plan.id, amount: Math.round(Number(plan.price)), method },
       {
-        onSuccess: ({ payment }) => router.replace({ pathname: '/(staff)/cash-receipt', params: { paymentId: payment.id, fresh: '1' } }),
+        onSuccess: ({ payment }) => router.replace({ pathname: routes.cashReceipt, params: { paymentId: payment.id, fresh: '1' } }),
         onError: (e) =>
           setError(e instanceof ApiError && e.code === 'STAFF_PAYMENTS_DISABLED' ? 'L’enregistrement des paiements est désactivé pour l’accueil.' : 'Impossible d’enregistrer l’encaissement.'),
       },
@@ -66,7 +68,7 @@ export default function StaffCashSellScreen() {
               <Text style={styles.memberLabel}>Adhérent</Text>
               <Text style={styles.memberName}>{member.firstName} {member.lastName}</Text>
             </View>
-            <Pressable onPress={() => router.replace('/(staff)/cash-select')} hitSlop={8}>
+            <Pressable onPress={() => router.replace(routes.cashSelect)} hitSlop={8}>
               <Text style={styles.change}>Changer</Text>
             </Pressable>
           </View>

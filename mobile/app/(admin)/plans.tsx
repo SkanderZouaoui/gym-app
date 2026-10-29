@@ -1,0 +1,113 @@
+import { useMemo } from 'react';
+import { router } from 'expo-router';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/ThemeContext';
+import { useAdminPlans, useTogglePlanActive } from '../../src/hooks/useAdmin';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { ScreenTitle } from '../../src/components/ui';
+import { formatMoney } from '../../src/components/staff/staffUi';
+
+function durationLabel(days: number): string {
+  if (days >= 360) return `${Math.round(days / 365)} an${days >= 730 ? 's' : ''}`;
+  if (days >= 28) return `${Math.round(days / 30)} mois`;
+  return `${days} jours`;
+}
+
+/** Abonnements (admin) : forfaits, tarifs, visibilité dans l'app, activation. */
+export default function AdminPlansScreen() {
+  const { colors, cardShadow } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { data: plans, refetch } = useAdminPlans();
+  const toggle = useTogglePlanActive();
+  const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'));
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+        <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
+          <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
+          <Text style={styles.backText}>Plus</Text>
+        </Pressable>
+        <ScreenTitle
+          title="Abonnements"
+          subtitle="Forfaits, tarifs et visibilité"
+          right={
+            <Pressable
+              accessibilityLabel="Créer un forfait"
+              onPress={() => router.push('/(admin)/plan-form')}
+              style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
+            >
+              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
+                <MaterialIcons name="add" size={28} color={colors.primaryContrast} />
+              </LinearGradient>
+            </Pressable>
+          }
+        />
+
+        <View style={{ gap: 10 }}>
+          {(plans ?? []).map((p) => (
+            <Pressable
+              key={p.id}
+              style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }, !p.isActive && { opacity: 0.6 }]}
+              onPress={() => router.push({ pathname: '/(admin)/plan-form', params: { id: p.id } })}
+            >
+              <View style={styles.top}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={styles.name}>{p.name}</Text>
+                  <Text style={styles.meta}>{durationLabel(p.durationDays)}{p.includesLabel ? ` · ${p.includesLabel}` : ''}</Text>
+                </View>
+                <Switch
+                  value={p.isActive}
+                  onValueChange={(v) => toggle.mutate({ id: p.id, active: v })}
+                  trackColor={{ true: colors.primary, false: colors.surface2 }}
+                  thumbColor="#FFFFFF"
+                  ios_backgroundColor={colors.surface2}
+                />
+              </View>
+              <View style={styles.bottom}>
+                <Text style={styles.price}>{formatMoney(p.price)}</Text>
+                <View style={styles.tags}>
+                  {p.isPopular ? (
+                    <View style={[styles.tag, { backgroundColor: colors.primary }]}>
+                      <Text style={[styles.tagText, { color: colors.primaryContrast }]}>Populaire</Text>
+                    </View>
+                  ) : null}
+                  <View style={[styles.tag, { backgroundColor: p.isVisibleInApp ? colors.successSoft : colors.surface2 }]}>
+                    <Text style={[styles.tagText, { color: p.isVisibleInApp ? colors.successInk : colors.muted }]}>
+                      {p.isVisibleInApp ? 'Visible dans l’app' : 'Masqué'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: colors.bg },
+    container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 60 },
+    back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
+    backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    addShadow: { borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5, marginBottom: 6 },
+    addButton: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+    card: { padding: 16, gap: 12, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
+    top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    name: { fontFamily: fonts.head, fontSize: 18, letterSpacing: -0.4, color: colors.text },
+    meta: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
+    bottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+    price: { fontFamily: fonts.head, fontSize: 24, letterSpacing: -0.8, color: colors.text },
+    tags: { flexDirection: 'row', gap: 6, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' },
+    tag: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
+    tagText: { fontFamily: fonts.bodyBold, fontSize: 12 },
+  });
+}

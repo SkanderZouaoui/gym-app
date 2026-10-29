@@ -6,6 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMemberDetail, useMemberMemberships, usePayments } from '../../../src/hooks/useStaff';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
@@ -22,6 +23,7 @@ const fmtDate = (d: string, year = true) =>
 
 /** Fiche adhérent (accueil) : identité, abonnement en cours, coordonnées, paiements, renouvellement. */
 export default function StaffMemberScreen() {
+  const routes = useStaffRoutes();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -30,7 +32,7 @@ export default function StaffMemberScreen() {
   const { data: payments, refetch: refetchPayments } = usePayments();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetch(), refetchMemberships(), refetchPayments()]));
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(staff)/(tabs)/members'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.members));
 
   if (isLoading && !member) {
     return (
@@ -174,7 +176,7 @@ export default function StaffMemberScreen() {
         </View>
 
         <Pressable
-          onPress={() => router.push({ pathname: '/(staff)/cash-sell', params: { memberId: member.id } })}
+          onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>

@@ -3,16 +3,16 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
-import { useMe } from '../../src/hooks/useMe';
-import { useAdminDashboard, useDailyAttendance, useExpiringMemberships } from '../../src/hooks/useAdmin';
-import { useOpenReports } from '../../src/hooks/useModeration';
-import { usePayments } from '../../src/hooks/usePayments';
-import { useStaffToday } from '../../src/hooks/useStaff';
-import { useNetworkStatus } from '../../src/hooks/useNetworkStatus';
-import { BarHistogram, OfflineBanner, ProgressBar, SkeletonBlock } from '../../src/components/ui';
-import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { useTheme } from '../../../src/theme/ThemeContext';
+import { useMe } from '../../../src/hooks/useMe';
+import { useAdminDashboard, useDailyAttendance, useExpiringMemberships } from '../../../src/hooks/useAdmin';
+import { useOpenReports } from '../../../src/hooks/useModeration';
+import { usePayments } from '../../../src/hooks/usePayments';
+import { useStaffToday } from '../../../src/hooks/useStaff';
+import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
+import { BarHistogram, OfflineBanner, ProgressBar, SkeletonBlock } from '../../../src/components/ui';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 const nf = (n: number) => n.toLocaleString('fr-FR');
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
@@ -53,7 +53,7 @@ export default function AdminDashboardScreen() {
 
   const alerts = [
     staffToday && staffToday.sessions.some((s) => s.fillRate < 30)
-      ? { icon: 'trending-down' as const, tone: 'danger' as const, title: 'Cours sous-rempli', sub: 'Remplissage < 30 %', cta: 'Promouvoir', onPress: () => router.push('/(admin)/planning') }
+      ? { icon: 'trending-down' as const, tone: 'danger' as const, title: 'Cours sous-rempli', sub: 'Remplissage < 30 %', cta: 'Promouvoir', onPress: () => router.push('/(admin)/(tabs)/planning') }
       : null,
     expiring && expiring.length > 0
       ? {
@@ -62,7 +62,7 @@ export default function AdminDashboardScreen() {
           title: `${expiring.length} abonnement${expiring.length > 1 ? 's' : ''} expirent sous 7 j`,
           sub: expiring.slice(0, 1).map((m) => `${m.user.firstName} ${m.user.lastName}`).join(', '),
           cta: 'Relancer',
-          onPress: () => router.push('/(admin)/members'),
+          onPress: () => router.push('/(admin)/(tabs)/members'),
         }
       : null,
     reports && reports.length > 0
@@ -72,16 +72,16 @@ export default function AdminDashboardScreen() {
           title: `${reports.length} signalement${reports.length > 1 ? 's' : ''} à modérer`,
           sub: 'Communauté',
           cta: 'Voir',
-          onPress: () => router.push('/(admin)/more'),
+          onPress: () => router.push('/(admin)/(tabs)/more'),
         }
       : null,
   ].filter((a): a is NonNullable<typeof a> => a !== null);
 
   const quickActions: { icon: keyof typeof MaterialIcons.glyphMap; label: string; primary?: boolean; onPress: () => void }[] = [
     { icon: 'space-dashboard', label: 'Tableau de bord', primary: true, onPress: () => {} },
-    { icon: 'campaign', label: 'Annonce', onPress: () => router.push('/(admin)/more') },
-    { icon: 'payments', label: 'Encaisser', onPress: () => router.push('/(admin)/more') },
-    { icon: 'person-search', label: 'Adhérent', onPress: () => router.push('/(admin)/members') },
+    { icon: 'campaign', label: 'Annonce', onPress: () => router.push('/(admin)/(tabs)/more') },
+    { icon: 'payments', label: 'Encaisser', onPress: () => router.push('/(admin)/(tabs)/more') },
+    { icon: 'person-search', label: 'Adhérent', onPress: () => router.push('/(admin)/(tabs)/members') },
   ];
 
   const isLoading = userLoading || dashboardLoading;

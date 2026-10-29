@@ -2,11 +2,11 @@ import { useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
-import { useSessions } from '../../src/hooks/useClasses';
-import { apiRequest } from '../../src/api/client';
-import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { useTheme } from '../../../src/theme/ThemeContext';
+import { useSessions } from '../../../src/hooks/useClasses';
+import { apiRequest } from '../../../src/api/client';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 export default function AdminPlanningScreen() {
   const tabBarScroll = useHideTabBarOnScroll();

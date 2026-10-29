@@ -4,6 +4,7 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMembers } from '../../src/hooks/useStaff';
 import { ScreenTitle } from '../../src/components/ui';
@@ -11,11 +12,12 @@ import { InitialsAvatar, StatusTag } from '../../src/components/staff/staffUi';
 
 /** Nouvel encaissement, étape 1 : choisir l'adhérent à encaisser (ou créer un compte). */
 export default function StaffCashSelectScreen() {
+  const routes = useStaffRoutes();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [query, setQuery] = useState('');
   const { data: members } = useMembers(query.trim());
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(staff)/(tabs)/cash'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.cash));
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -46,7 +48,7 @@ export default function StaffCashSelectScreen() {
         renderItem={({ item }) => (
           <Pressable
             style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
-            onPress={() => router.replace({ pathname: '/(staff)/cash-sell', params: { memberId: item.id } })}
+            onPress={() => router.replace({ pathname: routes.cashSell, params: { memberId: item.id } })}
           >
             <InitialsAvatar first={item.firstName} last={item.lastName} />
             <View style={{ flex: 1, minWidth: 0 }}>
@@ -62,7 +64,7 @@ export default function StaffCashSelectScreen() {
           </View>
         }
         ListFooterComponent={
-          <Pressable style={styles.create} onPress={() => router.push('/(staff)/member-create')}>
+          <Pressable style={styles.create} onPress={() => router.push(routes.memberCreate)}>
             <MaterialIcons name="person-add" size={22} color={colors.primaryInk} />
             <Text style={styles.createText}>Créer un nouveau compte</Text>
           </Pressable>
