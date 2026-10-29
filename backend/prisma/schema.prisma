@@ -600,6 +600,25 @@ model Notification {
   @@map("notifications")
 }
 
+/**
+ * Alerte affichée en haut de l'accueil adhérent (fermeture exceptionnelle, travaux, panne…).
+ * Distincte des annonces : pas de notification, mais une période d'affichage et une audience.
+ */
+model HomeAlert {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  level     String   @default("info") // info | warn | urgent
+  audience  String   @default("Tous") // Tous | Actifs | Expirés
+  startsOn  DateTime @map("starts_on") @db.Date
+  endsOn    DateTime @map("ends_on") @db.Date
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([isActive, startsOn, endsOn])
+  @@map("home_alerts")
+}
+
 model Announcement {
   id          String    @id @default(uuid())
   title       String

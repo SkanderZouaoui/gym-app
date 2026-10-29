@@ -130,6 +130,24 @@ async function main() {
     if (!exists) await prisma.announcement.create({ data: { ...n, createdById: admin.id, sentAt: new Date() } });
   }
 
+  // Alertes affichées en haut de l'accueil adhérent (info / avertissement / urgent)
+  const dayOnly = (offset: number) => {
+    const d = new Date();
+    d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() + offset);
+    return d;
+  };
+  const alerts = [
+    { title: 'Fermeture le 1er novembre', message: 'La salle sera fermée toute la journée. Les cours reprennent le 2 novembre.', level: 'info', audience: 'Tous' },
+    { title: 'Travaux au Studio B', message: 'Le Studio B est fermé jusqu’à vendredi, les cours y sont déplacés au Studio A.', level: 'warn', audience: 'Actifs' },
+    { title: 'Panne du système d’accès', message: 'Présentez-vous à l’accueil avec votre QR pour entrer, le temps du rétablissement.', level: 'urgent', audience: 'Tous' },
+  ];
+  for (const a of alerts) {
+    const exists = await prisma.homeAlert.findFirst({ where: { title: a.title } });
+    if (exists) await prisma.homeAlert.update({ where: { id: exists.id }, data: { startsOn: dayOnly(-1), endsOn: dayOnly(10), isActive: true } });
+    else await prisma.homeAlert.create({ data: { ...a, startsOn: dayOnly(-1), endsOn: dayOnly(10) } });
+  }
+
   console.log(`Accueil démo : abonnement « ${plan.name} », ${created.length} cours, réservation sur le prochain, ${news.length} actualités.`);
 }
 

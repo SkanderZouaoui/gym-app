@@ -60,7 +60,7 @@ export function ProgramsView() {
           todayLabel={todayDay ? todayDay.label ?? DAY_LABELS_FR[todayDay.dayOfWeek] : undefined}
           todayExerciseCount={todayDay?.exercises.length}
           onPress={() => router.push(`/(member)/program/${main.id}`)}
-          onStart={todayDay ? () => router.push(`/(member)/session/live/${main.id}/${todayDay.id}`) : undefined}
+          onStart={() => router.push(`/(member)/program/${main.id}`)}
         />
       ) : null}
 

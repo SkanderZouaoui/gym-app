@@ -12,6 +12,7 @@ import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useRemoteConfig } from '../../../src/config/RemoteConfigContext';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
+import { useHomeAlerts } from '../../../src/hooks/useHomeAlerts';
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
@@ -35,6 +36,8 @@ export default function HomeScreen() {
   const { data: memberships, isLoading: membershipsLoading } = useMyMemberships();
   const { data: bookings } = useMyBookings();
   const { data: announcements } = useMyAnnouncements();
+  const { data: homeAlerts } = useHomeAlerts();
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
   const { data: notifications } = useNotifications();
   const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const isDegraded = useSessionStore((s) => s.isDegraded);
@@ -123,6 +126,34 @@ export default function HomeScreen() {
           hasUnreadNotification={unreadCount > 0}
           onPressNotifications={() => router.push('/(member)/notifications')}
         />
+
+        {(homeAlerts ?? [])
+          .filter((a) => !dismissedAlerts.has(a.id))
+          .map((a) => {
+            const tone =
+              a.level === 'urgent'
+                ? { icon: 'error' as const, bg: colors.dangerSoft, ink: colors.dangerInk }
+                : a.level === 'warn'
+                  ? { icon: 'warning' as const, bg: colors.warningSoft, ink: colors.warningInk }
+                  : { icon: 'info' as const, bg: colors.primarySoft, ink: colors.primaryInk };
+            return (
+              <View key={a.id} style={[styles.alertCard, { backgroundColor: tone.bg }]}>
+                <MaterialIcons name={tone.icon} size={24} color={tone.ink} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.alertTitle, { color: tone.ink }]}>{a.title}</Text>
+                  <Text style={[styles.alertMessage, { color: tone.ink }]}>{a.message}</Text>
+                </View>
+                <Pressable
+                  style={styles.alertClose}
+                  hitSlop={6}
+                  accessibilityLabel="Fermer l'alerte"
+                  onPress={() => setDismissedAlerts((prev) => new Set(prev).add(a.id))}
+                >
+                  <MaterialIcons name="close" size={20} color={tone.ink} />
+                </Pressable>
+              </View>
+            );
+          })}
 
         {isDegraded ? (
           <Banner
@@ -289,6 +320,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   const textAlign = isRtl ? 'right' as const : 'left' as const;
   return StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.bg },
+  alertCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, borderRadius: 16, padding: 14 },
+  alertTitle: { fontFamily: fonts.bodyBold, fontSize: 14 },
+  alertMessage: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, marginTop: 2 },
+  alertClose: { width: 44, height: 44, marginTop: -10, marginRight: -10, alignItems: 'center', justifyContent: 'center' },
   offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
   skeletonHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
