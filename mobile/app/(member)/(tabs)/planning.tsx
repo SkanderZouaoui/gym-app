@@ -16,6 +16,7 @@ import { Banner, EmptyState, OfflineBanner, ScreenTitle, SkeletonBlock, Skeleton
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { CourseCard } from '../../../src/components/adherent/CourseCard';
+import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
@@ -44,6 +45,7 @@ export default function PlanningScreen() {
   const createBooking = useCreateBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
+  const [toBook, setToBook] = useState<ClassSessionSummary | null>(null);
   const days = useMemo(buildWeek, []);
 
   const [classTypeFilter, setClassTypeFilter] = useState<string | null>(null);
@@ -65,10 +67,20 @@ export default function PlanningScreen() {
     [myBookings],
   );
 
+  const bookedStatus = useMemo(() => {
+    const m = new Map<string, 'CONFIRMED' | 'WAITLISTED'>();
+    for (const b of myBookings ?? []) if (b.status === 'CONFIRMED' || b.status === 'WAITLISTED') m.set(b.sessionId, b.status);
+    return m;
+  }, [myBookings]);
+
   const handleBook = (sessionId: string) => {
     setBookingError(null);
     createBooking.mutate(sessionId, {
-      onError: (e) => setBookingError(e instanceof ApiError ? e.message : t('planning.bookingError')),
+      onSuccess: () => setToBook(null),
+      onError: (e) => {
+        setToBook(null);
+        setBookingError(e instanceof ApiError ? e.message : t('planning.bookingError'));
+      },
     });
   };
 
@@ -154,9 +166,9 @@ export default function PlanningScreen() {
           renderItem={({ item }) => (
             <SessionCard
               session={item}
-              onBook={() => handleBook(item.id)}
+              bookedAs={bookedStatus.get(item.id)}
+              onBook={() => setToBook(item)}
               onPress={() => router.push(`/(member)/session/${item.id}`)}
-              booking={createBooking.isPending}
             />
           )}
           ListEmptyComponent={
@@ -170,6 +182,13 @@ export default function PlanningScreen() {
         />
       )}
 
+      <BookingConfirmSheet
+        session={toBook}
+        pending={createBooking.isPending}
+        onConfirm={() => toBook && handleBook(toBook.id)}
+        onClose={() => setToBook(null)}
+      />
+
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
       ) : null}
@@ -179,18 +198,19 @@ export default function PlanningScreen() {
 
 function SessionCard({
   session,
+  bookedAs,
   onBook,
   onPress,
-  booking,
 }: {
   session: ClassSessionSummary;
+  bookedAs?: 'CONFIRMED' | 'WAITLISTED';
   onBook: () => void;
   onPress: () => void;
-  booking: boolean;
 }) {
   const { t } = useTranslation();
   const spotsLeft = session.capacity - session._count.bookings;
   const isFull = spotsLeft <= 0;
+  const started = new Date(session.startsAt).getTime() <= Date.now();
   const progress = session._count.bookings / Math.max(session.capacity, 1);
   const durationMinutes = Math.round(
     (new Date(session.endsAt).getTime() - new Date(session.startsAt).getTime()) / 60000,
@@ -201,13 +221,18 @@ function SessionCard({
       time={new Date(session.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
       duration={`${durationMinutes} min`}
       name={session.classType.name}
-      meta={[session.coach?.user.firstName, session.room?.name, `${session.capacity} places`].filter(Boolean).join(' · ')}
+      coach={session.coach ? `${session.coach.user.firstName} ${session.coach.user.lastName.charAt(0)}.` : undefined}
+      room={session.room?.name}
+      capacity={session.capacity}
+      booked_count={session._count.bookings}
       spotsLabel={isFull ? t('planning.full') : t('planning.spotsLeft', { count: spotsLeft })}
       statusTone={isFull ? 'danger' : spotsLeft <= 3 ? 'warning' : 'success'}
       progress={progress}
-      ctaLabel={booking ? t('planning.booking') : isFull ? t('planning.waitlist') : t('planning.book')}
+      booked={!!bookedAs}
+      closed={started && !bookedAs}
+      ctaLabel={started && !bookedAs ? 'Réservation fermée' : bookedAs === 'WAITLISTED' ? 'En liste d’attente' : bookedAs ? 'Réservé' : isFull ? t('planning.waitlist') : t('planning.book')}
       onPress={onPress}
-      onPressCta={onBook}
+      onPressCta={bookedAs || started ? onPress : onBook}
     />
   );
 }

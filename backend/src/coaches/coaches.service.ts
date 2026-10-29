@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { generateMemberCode } from '../users/member-code.js';
 import * as argon2 from 'argon2';
 import { Role } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -57,6 +58,8 @@ export class CoachesService {
 
     const user = await this.prisma.user.create({
       data: {
+        memberCode: await generateMemberCode(this.prisma),
+        mustChangePassword: true,
         email: dto.email,
         phone: dto.phone,
         passwordHash,

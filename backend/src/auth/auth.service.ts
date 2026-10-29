@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { generateMemberCode } from '../users/member-code.js';
 import {
   ConflictException,
   ForbiddenException,
@@ -45,6 +46,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
+        memberCode: await generateMemberCode(this.prisma),
         email: dto.email,
         phone: dto.phone,
         passwordHash,

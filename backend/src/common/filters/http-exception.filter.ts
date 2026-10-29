@@ -24,7 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       typeof payload === 'string'
         ? { code: this.codeFromStatus(status), message: payload }
         : {
-            code: (payload as any).code ?? this.codeFromStatus(status),
+            code: (payload as any).code ?? this.codeFromMessage((payload as any).message) ?? this.codeFromStatus(status),
             message: Array.isArray((payload as any).message)
               ? (payload as any).message.join(', ')
               : (payload as any).message ?? exception.message,
@@ -32,6 +32,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
           };
 
     response.status(status).json(body);
+  }
+
+  /** Les `new XxxException('SOME_CODE')` n'ont pas de champ code : le message en UPPER_SNAKE_CASE en tient lieu. */
+  private codeFromMessage(message: unknown): string | undefined {
+    return typeof message === 'string' && /^[A-Z][A-Z0-9_]+$/.test(message) ? message : undefined;
   }
 
   private codeFromStatus(status: number): string {

@@ -33,6 +33,9 @@ export interface MemberSearchResult {
   phone: string | null;
   email: string | null;
   status: string;
+  memberCode?: string | null;
+  /** Dernier abonnement (le plus récent), absent si l'adhérent n'en a jamais eu. */
+  memberships?: { status: 'ACTIVE' | 'EXPIRED' | 'SUSPENDED' | 'CANCELLED'; endDate: string; plan: { name: string } }[];
 }
 
 export function useMemberSearch(query: string) {
@@ -136,6 +139,32 @@ export function useSellMembership() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['staff', 'payments'] });
       void queryClient.invalidateQueries({ queryKey: ['members'] });
+    },
+  });
+}
+
+export interface MemberPayment {
+  id: string;
+  amount: string;
+  method: PaymentMethod;
+  recordedAt: string;
+  planName: string;
+}
+
+/** Paiements d'un adhérent (tous ses abonnements), indépendamment de qui les a encaissés. */
+export function useMemberPayments(memberships: StaffMembership[] | undefined) {
+  const ids = (memberships ?? []).map((m) => m.id).join(',');
+  return useQuery({
+    queryKey: ['members', 'payments', ids],
+    enabled: !!memberships,
+    queryFn: async () => {
+      const lists = await Promise.all(
+        (memberships ?? []).map(async (m) => {
+          const payments = await apiRequest<Omit<MemberPayment, 'planName'>[]>(`/v1/memberships/${m.id}/payments`);
+          return payments.map((p) => ({ ...p, planName: m.plan.name }));
+        }),
+      );
+      return lists.flat().sort((a, b) => (a.recordedAt < b.recordedAt ? 1 : -1));
     },
   });
 }

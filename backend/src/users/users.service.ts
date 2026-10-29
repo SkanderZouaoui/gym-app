@@ -1,4 +1,5 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { generateMemberCode } from './member-code.js';
 import * as argon2 from 'argon2';
 import type { Prisma } from '@prisma/client';
 import { Role } from '@muscleup/shared';
@@ -14,6 +15,8 @@ import type { RequestEmailChangeDto } from './dto/request-email-change.dto.js';
 
 const PUBLIC_USER_SELECT = {
   id: true,
+  memberCode: true,
+  mustChangePassword: true,
   email: true,
   phone: true,
   firstName: true,
@@ -43,8 +46,24 @@ export class UsersService {
       select: PUBLIC_USER_SELECT,
     });
     if (!user) throw new NotFoundException('USER_NOT_FOUND');
+    // Comptes créés sans code (autres chemins de création) : le code est attribué au premier accès.
+    if (!user.memberCode) user.memberCode = await this.assignMemberCode(userId);
     const coach = await this.prisma.coachProfile.findUnique({ where: { userId }, select: { specialties: true } });
     return { ...(await this.withPhotoUrl(user)), specialties: coach?.specialties ?? [] };
+  }
+
+  /** Attribue un code à 6 chiffres unique à un compte qui n'en a pas encore. */
+  private async assignMemberCode(userId: string): Promise<string> {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const code = String(100000 + Math.floor(Math.random() * 900000));
+      try {
+        await this.prisma.user.update({ where: { id: userId }, data: { memberCode: code } });
+        return code;
+      } catch {
+        // collision (très improbable) : on retente avec un autre code
+      }
+    }
+    throw new Error('MEMBER_CODE_GENERATION_FAILED');
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
@@ -146,10 +165,12 @@ export class UsersService {
     const passwordValid = await argon2.verify(user.passwordHash, currentPassword);
     if (!passwordValid) throw new UnauthorizedException('INVALID_PASSWORD');
 
+    if (currentPassword === newPassword) throw new BadRequestException('PASSWORD_UNCHANGED');
+
     const passwordHash = await argon2.hash(newPassword);
 
     await this.prisma.$transaction([
-      this.prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      this.prisma.user.update({ where: { id: userId }, data: { passwordHash, mustChangePassword: false } }),
       this.prisma.auditLog.create({
         data: { actorId: userId, action: 'SELF_CHANGE_PASSWORD', entity: 'User', entityId: userId },
       }),
@@ -166,10 +187,20 @@ export class UsersService {
           { lastName: { contains: query, mode: 'insensitive' } },
           { phone: { contains: query } },
           { email: { contains: query, mode: 'insensitive' } },
+          { memberCode: query },
         ],
       },
-      select: PUBLIC_USER_SELECT,
-      take: 25,
+      select: {
+        ...PUBLIC_USER_SELECT,
+        // Dernier abonnement : permet à l'accueil de filtrer et d'afficher la formule dans la liste.
+        memberships: {
+          orderBy: { endDate: 'desc' },
+          take: 1,
+          select: { status: true, endDate: true, plan: { select: { name: true } } },
+        },
+      },
+      orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
+      take: 100,
     });
   }
 
@@ -183,12 +214,19 @@ export class UsersService {
   async createMember(dto: CreateMemberDto, actorId: string) {
     const existing = await this.prisma.user.findFirst({
       where: { OR: [{ email: dto.email }, dto.phone ? { phone: dto.phone } : undefined].filter(Boolean) as any },
+      select: { email: true },
     });
-    if (existing) throw new ConflictException('EMAIL_OR_PHONE_ALREADY_USED');
+    if (existing) {
+      throw new ConflictException(
+        existing.email?.toLowerCase() === dto.email.toLowerCase() ? 'EMAIL_ALREADY_USED' : 'PHONE_ALREADY_USED',
+      );
+    }
 
     const passwordHash = await argon2.hash(dto.password);
     const user = await this.prisma.user.create({
       data: {
+        memberCode: await generateMemberCode(this.prisma),
+        mustChangePassword: true,
         email: dto.email,
         phone: dto.phone,
         passwordHash,
@@ -313,6 +351,8 @@ export class UsersService {
 
     const user = await this.prisma.user.create({
       data: {
+        memberCode: await generateMemberCode(this.prisma),
+        mustChangePassword: true,
         email: dto.email,
         phone: dto.phone,
         passwordHash,

@@ -62,6 +62,15 @@ export class AttendanceService {
   async manualCheckin(dto: ManualCheckinDto, scannedBy: string): Promise<ScanOutcome> {
     let userId = dto.userId;
 
+    if (!userId && dto.memberCode) {
+      const member = await this.prisma.user.findUnique({ where: { memberCode: dto.memberCode }, select: { id: true } });
+      if (!member) {
+        await this.logScan(dto.sessionId, null, scannedBy, 'DENIED', 'MEMBER_NOT_FOUND', false);
+        return { result: 'DENIED', reasonCode: 'MEMBER_NOT_FOUND' };
+      }
+      userId = member.id;
+    }
+
     if (!userId && dto.bookingCode) {
       const booking = await this.prisma.booking.findUnique({ where: { bookingCode: dto.bookingCode } });
       if (!booking || booking.sessionId !== dto.sessionId) {
@@ -252,7 +261,11 @@ export class AttendanceService {
 
     if (!policyResult.allowed) {
       await this.logScan(sessionId, userId, scannedBy, 'DENIED', policyResult.reasonCode, offline);
-      return { result: 'DENIED', reasonCode: policyResult.reasonCode };
+      const deniedMember = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, firstName: true, lastName: true, photoKey: true },
+      });
+      return { result: 'DENIED', reasonCode: policyResult.reasonCode, member: deniedMember ?? undefined };
     }
 
     const updatedBooking = await this.prisma.booking.update({

@@ -120,7 +120,7 @@ export default function ReservationsScreen() {
                 <Text style={styles.meta} numberOfLines={1}>{meta}</Text>
                 {note ? <Text style={styles.note}>{note}</Text> : null}
               </View>
-              {tab !== 'past' ? (
+              {tab !== 'past' && !(session && new Date(session.endsAt).getTime() < Date.now()) ? (
                 <Pressable style={styles.cancelButton} onPress={() => setCancelTarget(item)} hitSlop={6}>
                   <MaterialIcons name="close" size={20} color={colors.dangerInk} />
                 </Pressable>

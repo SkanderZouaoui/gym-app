@@ -15,6 +15,10 @@ export interface MeResponse {
   photoUrl: string | null;
   status: string;
   roles: { role: Role }[];
+  /** Code personnel à 6 chiffres : pointage manuel à l'accueil. */
+  memberCode?: string | null;
+  /** Mot de passe provisoire : le changement est obligatoire avant d'utiliser l'app. */
+  mustChangePassword?: boolean;
   /** Spécialités du coach (vide pour un adhérent). */
   specialties?: string[];
 }

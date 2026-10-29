@@ -58,6 +58,10 @@ model User {
   email        String?    @unique
   phone        String?    @unique
   passwordHash String     @map("password_hash")
+  /** Code personnel à 6 chiffres : pointage manuel à l'accueil (affiché dans le profil de l'adhérent). */
+  memberCode   String?    @unique @map("member_code")
+  /** Mot de passe provisoire communiqué par l'accueil/admin : à remplacer à la première connexion. */
+  mustChangePassword Boolean @default(false) @map("must_change_password")
   firstName    String     @map("first_name")
   lastName     String     @map("last_name")
   photoKey     String?    @map("photo_key")

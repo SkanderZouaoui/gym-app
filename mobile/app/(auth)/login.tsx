@@ -10,6 +10,7 @@ import { authApi, meApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
 import { useSessionStore } from '../../src/store/session';
 import { ApiError } from '../../src/api/client';
+import { pendingPassword } from '../../src/auth/pendingPassword';
 import { rootRouteForRole } from '../../src/navigation/roleRoutes';
 import { Banner } from '../../src/components/ui';
 
@@ -35,6 +36,11 @@ export default function LoginScreen() {
       const roles = user.roles.map((r) => r.role);
       const activeRole = roles[0] ?? 'MEMBER';
       setSession(user, roles, activeRole);
+      if (user.mustChangePassword) {
+        pendingPassword.set(password);
+        router.replace('/force-password');
+        return;
+      }
       router.replace(rootRouteForRole(activeRole) as any);
     } catch (e) {
       if (e instanceof ApiError) {

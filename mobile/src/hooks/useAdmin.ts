@@ -184,3 +184,44 @@ export function useTogglePlanActive() {
     },
   });
 }
+
+// --- Configuration de présence ----------------------------------------------
+
+export interface AttendancePolicy {
+  scanOpensMinutesBefore: number;
+  scanClosesMinutesAfterStart: number;
+  allowWalkIn: boolean;
+  noShowGraceMinutes: number;
+  noShowPenalty: { enabled: boolean; threshold: number; windowDays: number; blockBookingDays: number };
+  staffCanRecordPayments: boolean;
+}
+
+export const DEFAULT_ATTENDANCE_POLICY: AttendancePolicy = {
+  scanOpensMinutesBefore: 15,
+  scanClosesMinutesAfterStart: 10,
+  allowWalkIn: false,
+  noShowGraceMinutes: 15,
+  noShowPenalty: { enabled: false, threshold: 3, windowDays: 30, blockBookingDays: 7 },
+  staffCanRecordPayments: true,
+};
+
+export function useAttendancePolicy() {
+  return useQuery({
+    queryKey: ['settings', 'attendance'],
+    queryFn: async () => {
+      const s = await apiRequest<{ attendancePolicy: AttendancePolicy }>('/v1/admin/settings');
+      return { ...DEFAULT_ATTENDANCE_POLICY, ...s.attendancePolicy };
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useUpdateAttendancePolicy() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (policy: AttendancePolicy) => apiRequest('/v1/admin/settings/attendance', { method: 'PUT', body: policy }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+  });
+}

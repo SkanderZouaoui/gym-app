@@ -24,7 +24,7 @@ export function useScan() {
 export function useManualCheckin() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { sessionId: string; userId?: string; bookingCode?: string }) =>
+    mutationFn: (payload: { sessionId: string; userId?: string; memberCode?: string; bookingCode?: string }) =>
       apiRequest<ScanOutcome>('/v1/attendance/manual', { method: 'POST', body: payload }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['roster'] }),
   });

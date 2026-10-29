@@ -11,6 +11,7 @@ import { usePayments, type PaymentMethod } from '../../../src/hooks/useStaff';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle } from '../../../src/components/ui';
+import { useSessionStore } from '../../../src/store/session';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 
 type Filter = 'all' | PaymentMethod;
@@ -31,6 +32,7 @@ export default function StaffCashScreen() {
   const { data: payments, refetch } = usePayments();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const [filter, setFilter] = useState<Filter>('all');
+  const isAdmin = useSessionStore((st) => st.activeRole) === 'ADMIN';
 
   const list = payments ?? [];
   const now = new Date();
@@ -48,12 +50,12 @@ export default function StaffCashScreen() {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <ScreenTitle title="Encaissements" subtitle="Historique de la caisse" />
+        <ScreenTitle title={isAdmin ? 'Encaissements' : 'Ma caisse'} subtitle={isAdmin ? 'Historique de la caisse de la salle' : 'Les encaissements que vous avez enregistrés'} />
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
-            <Text style={styles.heroKicker}>ENCAISSÉ CE MOIS</Text>
+            <Text style={styles.heroKicker}>{isAdmin ? 'ENCAISSÉ CE MOIS' : 'VOUS AVEZ ENCAISSÉ CE MOIS'}</Text>
             <Text style={styles.heroValue}>{formatMoney(monthTotal)}</Text>
             <Text style={styles.heroSub}>{monthPayments.length} encaissement{monthPayments.length > 1 ? 's' : ''}</Text>
           </LinearGradient>

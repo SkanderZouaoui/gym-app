@@ -23,6 +23,7 @@ import { meApi } from '../src/api/endpoints';
 import { ApiError } from '../src/api/client';
 import { queryPersister, QUERY_CACHE_VERSION } from '../src/api/queryStorage';
 import { usePreferencesStore } from '../src/store/preferences';
+import { NetworkStatusProvider } from '../src/hooks/NetworkStatusContext';
 import { useSessionStore } from '../src/store/session';
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import { RemoteConfigProvider } from '../src/config/RemoteConfigContext';
@@ -176,9 +177,9 @@ function RootLayoutInner() {
   }, [freshUser, setSession]);
 
   return (
-    <>
+    <NetworkStatusProvider>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }} />
-    </>
+    </NetworkStatusProvider>
   );
 }

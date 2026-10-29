@@ -8,9 +8,11 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCancelBooking, useCreateBooking, useSession } from '../../../src/hooks/useClasses';
 import { useMyBookings } from '../../../src/hooks/useMe';
-import { Banner, ProgressBar, Toast } from '../../../src/components/ui';
+import { Button } from '../../../src/components/Button';
+import { Banner, BottomSheet, ProgressBar, Toast } from '../../../src/components/ui';
 import { ApiError } from '../../../src/api/client';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
 import { ImageGallery } from '../../../src/components/adherent/ImageGallery';
 
 /** Détail d'un cours — FitZone App Adherent.dc.html, C1. */
@@ -23,6 +25,8 @@ export default function SessionDetailScreen() {
   const createBooking = useCreateBooking();
   const cancelBooking = useCancelBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
     Promise.all([refetch(), refetchBookings()]),
   );
@@ -39,12 +43,15 @@ export default function SessionDetailScreen() {
 
   const spotsLeft = session.capacity - session._count.bookings;
   const isFull = spotsLeft <= 0;
+  const hasEnded = new Date(session.endsAt).getTime() < Date.now();
+  const hasStarted = new Date(session.startsAt).getTime() <= Date.now();
   const progress = session._count.bookings / Math.max(session.capacity, 1);
   const durationMinutes = Math.round((new Date(session.endsAt).getTime() - new Date(session.startsAt).getTime()) / 60000);
 
   const handleReserve = () => {
     setBookingError(null);
     createBooking.mutate(session.id, {
+      onSettled: () => setConfirming(false),
       onSuccess: () => {
         if (!isFull) {
           router.replace({ pathname: '/(member)/(tabs)', params: { booked: session.classType.name } });
@@ -58,7 +65,10 @@ export default function SessionDetailScreen() {
 
   const handleCancel = () => {
     if (!existingBooking) return;
-    cancelBooking.mutate(existingBooking.id, { onSuccess: () => { void refetch(); void refetchBookings(); } });
+    cancelBooking.mutate(existingBooking.id, {
+      onSettled: () => setCancelling(false),
+      onSuccess: () => { void refetch(); void refetchBookings(); },
+    });
   };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.navigate('/(member)/(tabs)/planning'));
@@ -159,12 +169,18 @@ export default function SessionDetailScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        {existingBooking?.status === 'CONFIRMED' || existingBooking?.status === 'WAITLISTED' ? (
+        {hasEnded ? (
+          <View style={styles.closed}>
+            <MaterialIcons name="event-busy" size={20} color={colors.muted} />
+            <Text style={styles.closedText}>Ce cours est terminé</Text>
+          </View>
+        ) : existingBooking?.status === 'CONFIRMED' || existingBooking?.status === 'WAITLISTED' ? (
           <Pressable
             style={({ pressed }) => [styles.outlineDangerButton, pressed && { transform: [{ scale: 0.98 }] }]}
-            onPress={handleCancel}
+            onPress={() => setCancelling(true)}
             disabled={cancelBooking.isPending}
           >
+            <MaterialIcons name="close" size={18} color={colors.dangerInk} />
             <Text style={styles.outlineDangerText}>
               {cancelBooking.isPending
                 ? '...'
@@ -173,9 +189,14 @@ export default function SessionDetailScreen() {
                   : 'Annuler la réservation'}
             </Text>
           </Pressable>
+        ) : hasStarted ? (
+          <View style={styles.closed}>
+            <MaterialIcons name="event-busy" size={20} color={colors.muted} />
+            <Text style={styles.closedText}>Réservation fermée : le cours a déjà commencé</Text>
+          </View>
         ) : (
           <Pressable
-            onPress={handleReserve}
+            onPress={() => setConfirming(true)}
             disabled={createBooking.isPending}
             style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
           >
@@ -194,6 +215,28 @@ export default function SessionDetailScreen() {
         )}
       </View>
 
+      <BottomSheet visible={cancelling} onClose={() => setCancelling(false)}>
+        <Text style={styles.sheetTitle}>
+          {existingBooking?.status === 'WAITLISTED' ? 'Quitter la liste d’attente ?' : `Annuler ${session.classType.name} ?`}
+        </Text>
+        <Text style={styles.sheetText}>
+          {existingBooking?.status === 'WAITLISTED'
+            ? 'Vous perdrez votre position dans la liste d’attente.'
+            : 'L’annulation est gratuite. Votre place sera proposée à la liste d’attente.'}
+        </Text>
+        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+          <Button label="Oui, annuler" onPress={handleCancel} variant="secondary" loading={cancelBooking.isPending} />
+          <Button label="Garder ma place" onPress={() => setCancelling(false)} variant="outline" />
+        </View>
+      </BottomSheet>
+
+      <BookingConfirmSheet
+        session={confirming ? session : null}
+        pending={createBooking.isPending}
+        onConfirm={handleReserve}
+        onClose={() => setConfirming(false)}
+      />
+
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
       ) : null}
@@ -209,6 +252,8 @@ function traduireErreurReservation(e: ApiError): string {
       return 'Votre abonnement a expiré.';
     case 'MEMBERSHIP_SUSPENDED':
       return 'Votre abonnement est suspendu.';
+    case 'SESSION_STARTED':
+      return 'Ce cours a déjà commencé, la réservation est fermée.';
     case 'SESSION_FULL':
       return 'Ce cours est complet.';
     default:
@@ -218,6 +263,13 @@ function traduireErreurReservation(e: ApiError): string {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
+    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
+    closed: {
+      height: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+      backgroundColor: colors.surface2,
+    },
+    closedText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.muted },
     safeArea: { flex: 1, backgroundColor: colors.bg },
     content: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
@@ -262,9 +314,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     cta: { minHeight: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     ctaText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
     outlineDangerButton: {
-      minHeight: 56, borderRadius: 18, borderWidth: 1.5, borderColor: colors.danger, backgroundColor: colors.surface,
-      alignItems: 'center', justifyContent: 'center',
+      minHeight: 52, borderRadius: 18, borderWidth: 1, borderColor: colors.danger, backgroundColor: colors.surface,
+      flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center',
     },
-    outlineDangerText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.dangerInk },
+    outlineDangerText: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.dangerInk },
   });
 }

@@ -59,6 +59,7 @@ export class BookingsService {
       if (session.length === 0) throw new NotFoundException('SESSION_NOT_FOUND');
       const s = session[0];
       if (s.status === 'CANCELLED') throw new BadRequestException('SESSION_CANCELLED');
+      if (s.starts_at.getTime() <= Date.now()) throw new BadRequestException('SESSION_STARTED');
 
       const sessionForPolicy: Pick<ClassSession, 'id' | 'capacity' | 'startsAt' | 'status'> = {
         id: s.id,
@@ -116,6 +117,9 @@ export class BookingsService {
     const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking || booking.userId !== userId) throw new NotFoundException('BOOKING_NOT_FOUND');
     if (booking.status === 'CANCELLED') return booking;
+
+    const session = await this.prisma.classSession.findUnique({ where: { id: booking.sessionId }, select: { endsAt: true } });
+    if (session && session.endsAt.getTime() < Date.now()) throw new BadRequestException('SESSION_ENDED');
 
     return this.prisma.$transaction(async (tx) => {
       const cancelled = await tx.booking.update({

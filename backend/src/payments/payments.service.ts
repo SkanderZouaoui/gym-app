@@ -43,14 +43,16 @@ export class PaymentsService {
     return payment;
   }
 
-  findAll() {
+  /** Liste de la caisse : l'admin voit tous les encaissements de la salle, un agent d'accueil
+   * uniquement ceux qu'il a lui-même enregistrés. */
+  findAll(actorId: string, actorRole: Role) {
     return this.prisma.payment.findMany({
-      where: { deletedAt: null },
+      where: { deletedAt: null, ...(actorRole === Role.ADMIN ? {} : { recordedById: actorId }) },
       include: {
         membership: { include: { user: { select: { firstName: true, lastName: true } }, plan: { select: { name: true } } } },
       },
       orderBy: { recordedAt: 'desc' },
-      take: 50,
+      take: 100,
     });
   }
 

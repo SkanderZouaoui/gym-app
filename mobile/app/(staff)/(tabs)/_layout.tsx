@@ -2,17 +2,23 @@ import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FloatingTabBar, type FloatingTabBarProps } from '../../../src/components/FloatingTabBar';
 
-/** L'accueil s'ouvre sur la liste des adhérents ; « Aujourd'hui » reste accessible mais n'est plus dans la barre. */
-export const unstable_settings = { initialRouteName: 'members' };
+/** L'espace staff s'ouvre sur l'écran d'accueil (chiffres du jour, raccourcis). */
+export const unstable_settings = { initialRouteName: 'index' };
 
-/** Barre d'onglets Accueil v2 : Adhérents, Planning, Caisse, Profil + bouton rond de scan QR. */
+/** Barre d'onglets Accueil v2 : Accueil, Adhérents, Planning, Caisse, Profil + bouton rond de scan QR. */
 export default function StaffTabsLayout() {
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
       tabBar={(props) => <FloatingTabBar {...(props as unknown as FloatingTabBarProps)} actionRoute="scanner" actionIcon="qr-code-scanner" />}
     >
-      <Tabs.Screen name="index" options={{ href: null }} />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Accueil',
+          tabBarIcon: ({ color }) => <MaterialIcons name="home" size={24} color={color as string} />,
+        }}
+      />
       <Tabs.Screen
         name="members"
         options={{

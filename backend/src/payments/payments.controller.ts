@@ -20,8 +20,8 @@ export class PaymentsController {
 
   @Roles(Role.STAFF, Role.ADMIN)
   @Get('payments')
-  findAll() {
-    return this.paymentsService.findAll();
+  findAll(@CurrentUser() user: AuthenticatedUser) {
+    return this.paymentsService.findAll(user.userId, user.activeRole);
   }
 
   @Roles(Role.STAFF, Role.ADMIN)

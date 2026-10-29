@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useMemberDetail, useMemberMemberships, usePayments } from '../../../src/hooks/useStaff';
+import { useMemberDetail, useMemberMemberships, useMemberPayments } from '../../../src/hooks/useStaff';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { EmptyState } from '../../../src/components/ui';
 import { StatusTag, formatMoney, membershipBadge, METHOD_LABEL } from '../../../src/components/staff/staffUi';
@@ -29,7 +29,7 @@ export default function StaffMemberScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: member, isLoading, refetch } = useMemberDetail(id);
   const { data: memberships, refetch: refetchMemberships } = useMemberMemberships(id);
-  const { data: payments, refetch: refetchPayments } = usePayments();
+  const { data: memberPayments = [], refetch: refetchPayments } = useMemberPayments(memberships);
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetch(), refetchMemberships(), refetchPayments()]));
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.members));
@@ -58,7 +58,6 @@ export default function StaffMemberScreen() {
   const ratio = elapsed / total;
   const daysLeft = current ? Math.max(0, Math.ceil((new Date(current.endDate).getTime() - Date.now()) / 86_400_000)) : null;
   const badge = membershipBadge(current?.status, daysLeft);
-  const memberPayments = (payments ?? []).filter((p) => p.membership.userId === member.id);
   const paidTotal = memberPayments.reduce((s, p) => s + Number(p.amount), 0);
   const initials = `${member.firstName[0] ?? ''}${member.lastName[0] ?? ''}`.toUpperCase();
 
@@ -97,7 +96,35 @@ export default function StaffMemberScreen() {
             </LinearGradient>
           </View>
           <Text style={styles.name}>{member.firstName} {member.lastName}</Text>
-          <StatusTag label={badge.label} tone={badge.tone} />
+          <View style={styles.tagRow}>
+            <StatusTag label={badge.label} tone={badge.tone} />
+            {member.memberCode ? (
+              <View style={styles.codeBadge}>
+                <MaterialIcons name="pin" size={13} color={colors.primaryInk} />
+                <Text style={styles.codeText}>Code {member.memberCode.slice(0, 3)} {member.memberCode.slice(3)}</Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          {[
+            { icon: 'call' as const, label: 'Appeler', on: member.phone ? () => Linking.openURL(`tel:${member.phone}`) : undefined },
+            { icon: 'mail-outline' as const, label: 'E-mail', on: member.email ? () => Linking.openURL(`mailto:${member.email}`) : undefined },
+            { icon: 'payments' as const, label: 'Encaisser', on: () => router.push({ pathname: routes.cashSell, params: { memberId: member.id } }) },
+          ].map((a) => (
+            <Pressable
+              key={a.label}
+              disabled={!a.on}
+              onPress={a.on}
+              style={({ pressed }) => [styles.action, cardShadow, !a.on && { opacity: 0.4 }, pressed && { transform: [{ scale: 0.96 }] }]}
+            >
+              <View style={styles.actionIcon}>
+                <MaterialIcons name={a.icon} size={20} color={colors.primaryInk} />
+              </View>
+              <Text style={styles.actionLabel}>{a.label}</Text>
+            </Pressable>
+          ))}
         </View>
 
         {current ? (
@@ -120,11 +147,23 @@ export default function StaffMemberScreen() {
           </View>
         ) : (
           <View style={[styles.noPlan, cardShadow]}>
-            <MaterialIcons name="card-membership" size={26} color={colors.primaryInk} />
-            <Text style={styles.noPlanText}>Aucun abonnement enregistré pour cet adhérent.</Text>
+            <View style={styles.noPlanIcon}>
+              <MaterialIcons name="card-membership" size={30} color={colors.primaryInk} />
+            </View>
+            <Text style={styles.noPlanTitle}>Pas encore d’abonnement</Text>
+            <Text style={styles.noPlanText}>Souscrivez un forfait pour que cet adhérent puisse réserver et pointer aux cours.</Text>
+            <Pressable
+              onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
+              style={({ pressed }) => [styles.ctaShadow, { alignSelf: 'stretch' }, pressed && { transform: [{ scale: 0.98 }] }]}
+            >
+              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+                <Text style={styles.ctaText}>Souscrire un abonnement</Text>
+              </LinearGradient>
+            </Pressable>
           </View>
         )}
 
+        {current ? (
         <View style={styles.statsRow}>
           {[
             { n: String(sorted.length), l: 'Abonnements' },
@@ -137,6 +176,7 @@ export default function StaffMemberScreen() {
             </View>
           ))}
         </View>
+        ) : null}
 
         <View>
           <Text style={styles.sectionTitle}>Coordonnées</Text>
@@ -165,7 +205,7 @@ export default function StaffMemberScreen() {
                 <View key={p.id} style={[styles.row, i < memberPayments.length - 1 && styles.rowBorder]}>
                   <MaterialIcons name="receipt-long" size={22} color={colors.primaryInk} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.rowValue}>{p.membership.plan.name}</Text>
+                    <Text style={styles.rowValue}>{p.planName}</Text>
                     <Text style={styles.rowKey}>{fmtDate(p.recordedAt)} · {METHOD_LABEL[p.method]}</Text>
                   </View>
                   <Text style={styles.amount}>{formatMoney(p.amount)}</Text>
@@ -175,15 +215,17 @@ export default function StaffMemberScreen() {
           </View>
         </View>
 
+        {current ? (
         <Pressable
           onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="payments" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>Renouveler / souscrire</Text>
+            <Text style={styles.ctaText}>Renouveler l’abonnement</Text>
           </LinearGradient>
         </Pressable>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -213,11 +255,26 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     trackFill: { height: '100%', borderRadius: 4, backgroundColor: '#FFFFFF' },
     heroBottom: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
     heroBottomText: { fontFamily: fonts.body, fontSize: 12, color: 'rgba(255,255,255,0.95)' },
-    noPlan: {
-      flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: colors.surface, borderRadius: radii.lg,
-      borderWidth: 1, borderColor: colors.border,
+    tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
+    codeBadge: {
+      flexDirection: 'row', alignItems: 'center', gap: 4, height: 26, paddingHorizontal: 10, borderRadius: 13,
+      backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder,
     },
-    noPlanText: { flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
+    codeText: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.6, color: colors.primaryInk },
+    actions: { flexDirection: 'row', gap: 10 },
+    action: {
+      flex: 1, alignItems: 'center', gap: 6, paddingVertical: 12, backgroundColor: colors.surface,
+      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+    },
+    actionIcon: { width: 40, height: 40, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    actionLabel: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.text },
+    noPlan: {
+      alignItems: 'center', gap: 8, padding: 20, backgroundColor: colors.surface, borderRadius: radii.xl,
+      borderWidth: 1, borderColor: colors.primaryBorder,
+    },
+    noPlanIcon: { width: 60, height: 60, borderRadius: 20, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    noPlanTitle: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.5, color: colors.text },
+    noPlanText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted, textAlign: 'center', marginBottom: 6 },
     statsRow: { flexDirection: 'row', gap: 10 },
     statCard: { flex: 1, paddingVertical: 14, paddingHorizontal: 12, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     statValue: { fontFamily: fonts.head, fontSize: 22, lineHeight: 26, letterSpacing: -0.8, color: colors.text },

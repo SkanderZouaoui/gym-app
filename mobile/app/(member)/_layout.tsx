@@ -1,5 +1,4 @@
 import { Stack } from 'expo-router';
-import { NetworkStatusProvider } from '../../src/hooks/NetworkStatusContext';
 import { usePrefetchOfflineData } from '../../src/hooks/usePrefetchOfflineData';
 
 /** Pile de navigation Adhérent : les 5 onglets vivent dans (tabs) (Tabs natif),
@@ -8,11 +7,7 @@ import { usePrefetchOfflineData } from '../../src/hooks/usePrefetchOfflineData';
  * le swipe-back iOS par défaut (gestureEnabled), contrairement à l'ancienne
  * structure où tout vivait à plat dans le même Tabs navigator. */
 export default function MemberStackLayout() {
-  return (
-    <NetworkStatusProvider>
-      <MemberStackInner />
-    </NetworkStatusProvider>
-  );
+  return <MemberStackInner />;
 }
 
 function MemberStackInner() {

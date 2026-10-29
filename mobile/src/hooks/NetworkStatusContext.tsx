@@ -8,7 +8,7 @@ interface NetworkStatusContextValue {
 
 const NetworkStatusContext = createContext<NetworkStatusContextValue | null>(null);
 
-/** Monté une seule fois (ex. app/(member)/_layout.tsx) pour partager un seul état réseau entre tous les écrans membre. */
+/** Monté une seule fois à la racine (app/_layout.tsx) pour partager un seul état réseau entre tous les écrans, quel que soit le rôle. */
 export function NetworkStatusProvider({ children }: { children: ReactNode }) {
   const status = useNetworkStatus();
   return <NetworkStatusContext.Provider value={status}>{children}</NetworkStatusContext.Provider>;

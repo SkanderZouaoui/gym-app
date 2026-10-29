@@ -19,6 +19,7 @@ const ROWS: Row[] = [
   { icon: 'fitness-center', title: 'Programmes', sub: 'Validation et exercices', href: '/(admin)/programs' },
   { icon: 'notification-important', title: 'Alertes adhérents', sub: 'Bandeaux sur l’accueil de l’app', href: '/(admin)/alerts' },
   { icon: 'card-membership', title: 'Abonnements', sub: 'Forfaits, tarifs et visibilité', href: '/(admin)/plans' },
+  { icon: 'tune', title: 'Configuration', sub: 'Période de scan et règles de présence', href: '/(admin)/settings' },
   { icon: 'person', title: 'Profil et confidentialité', sub: 'Compte, sécurité, données', href: '/(admin)/profile' },
 ];
 
@@ -61,7 +62,7 @@ export default function AdminMoreScreen() {
             </Pressable>
           ))}
         </View>
-        <Text style={styles.note}>La configuration complète (identité visuelle, horaires, règles) se gère depuis le back-office web.</Text>
+        <Text style={styles.note}>L’identité visuelle et les horaires se gèrent depuis le back-office web.</Text>
         <Pressable style={styles.logout} onPress={() => setLogoutVisible(true)}>
           <MaterialIcons name="logout" size={22} color={colors.dangerInk} />
           <Text style={styles.logoutText}>Se déconnecter</Text>

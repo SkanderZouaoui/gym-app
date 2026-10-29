@@ -171,6 +171,7 @@ export default function ProfileScreen() {
           initials={initials}
           photoUrl={user?.photoUrl}
           name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
+          memberCode={user?.memberCode ?? undefined}
           subtitle={memberSince ? t('profile.memberSince', { date: memberSince }) : undefined}
           completion={completion}
           tags={

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
@@ -11,6 +12,8 @@ interface ProfileHeaderProps {
   photoUrl?: string | null;
   name: string;
   subtitle?: string;
+  /** Code de pointage à 6 chiffres, affiché en badge sous le sous-titre. */
+  memberCode?: string;
   /** Complétion du profil, entre 0 et 1 : anneau autour de l'avatar. */
   completion: number;
   tags?: { label: string; tone: PillTone }[];
@@ -22,7 +25,7 @@ const R = (SIZE - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 /** En-tête de Profil v2 : avatar en dégradé dans un anneau de complétion, nom 30 pt, pastilles. */
-export function ProfileHeader({ initials, photoUrl, name, subtitle, completion, tags }: ProfileHeaderProps) {
+export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, completion, tags }: ProfileHeaderProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const pct = Math.round(Math.min(1, Math.max(0, completion)) * 100);
@@ -58,6 +61,13 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, completion, 
       </View>
       <Text style={styles.name}>{name}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      {memberCode ? (
+        <View style={styles.codeBadge}>
+          <MaterialIcons name="pin" size={14} color={colors.primaryInk} />
+          <Text style={styles.codeLabel}>Code</Text>
+          <Text style={styles.codeValue}>{memberCode.slice(0, 3)} {memberCode.slice(3)}</Text>
+        </View>
+      ) : null}
       {tags && tags.length > 0 ? (
         <View style={styles.tags}>
           {tags.map((tag) => (
@@ -86,6 +96,12 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     pctText: { fontFamily: fonts.head, fontSize: 11, color: colors.primaryInk },
     name: { ...typography.largeTitle, fontSize: 30, letterSpacing: -1, color: colors.text, marginTop: 14, textAlign: 'center' },
     subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, marginTop: 2 },
+    codeBadge: {
+      flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 999,
+      backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder,
+    },
+    codeLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.primaryInk },
+    codeValue: { fontFamily: fonts.head, fontSize: 13, letterSpacing: 1.5, color: colors.primaryInk },
     tags: { flexDirection: 'row', gap: 8, marginTop: 12, flexWrap: 'wrap', justifyContent: 'center' },
   });
 }
