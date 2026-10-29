@@ -84,6 +84,12 @@ export default function StaffCashScreen() {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
+        {isAdmin ? (
+          <Pressable style={styles.back} onPress={() => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'))} hitSlop={8}>
+            <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
+            <Text style={styles.backText}>Plus</Text>
+          </Pressable>
+        ) : null}
         <ScreenTitle title={isAdmin ? 'Encaissements' : 'Ma caisse'} subtitle={isAdmin ? 'Historique de la caisse de la salle' : 'Les encaissements que vous avez enregistrés'} />
 
         <View style={styles.heroShadow}>
@@ -184,6 +190,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
+    back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
+    backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     heroShadow: {
       borderRadius: radii.xl, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8,
     },
