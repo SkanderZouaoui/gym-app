@@ -448,6 +448,12 @@ model Exercise {
   @@map("exercises")
 }
 
+enum ProgramStatus {
+  PENDING // soumis par un coach, en attente de validation de l'admin
+  APPROVED
+  REJECTED
+}
+
 model Program {
   id           String    @id @default(uuid())
   name         String
@@ -455,6 +461,13 @@ model Program {
   assignedToId String    @map("assigned_to")
   startDate    DateTime? @map("start_date")
   endDate      DateTime? @map("end_date")
+  level        String? // Débutant | Intermédiaire | Avancé
+  goal         String? // Perte de poids | Masse | Endurance | Mobilité
+  status       ProgramStatus @default(APPROVED)
+  rejectionNote String?  @map("rejection_note")
+  /** Visible par tous les adhérents une fois validé (rubrique « Proposés »). */
+  isPublic     Boolean   @default(false) @map("is_public")
+  reviewedAt   DateTime? @map("reviewed_at")
   createdAt    DateTime  @default(now()) @map("created_at")
 
   createdBy   User         @relation("ProgramCreatedBy", fields: [createdById], references: [id])
@@ -463,6 +476,7 @@ model Program {
   workoutLogs WorkoutLog[]
 
   @@index([assignedToId])
+  @@index([status, isPublic])
   @@map("programs")
 }
 

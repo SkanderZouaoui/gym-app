@@ -17,11 +17,13 @@ interface ProgramCardProps {
   highlighted?: boolean;
   /** Petit libellé en capitales au-dessus du nom du programme à la une. */
   kicker?: string;
+  /** Programme proposé à tous les adhérents (pastille « Proposé »). */
+  proposed?: boolean;
 }
 
 /** Carte programme — version mise en avant (fond secondary) ou compacte,
  * FitZone App Entraînement.dc.html, D1. */
-export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCount, onPress, onStart, highlighted, kicker }: ProgramCardProps) {
+export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCount, onPress, onStart, highlighted, kicker, proposed }: ProgramCardProps) {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   if (highlighted) {
@@ -31,7 +33,7 @@ export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCo
         <View style={styles.heroDecor} />
         <View style={styles.heroHeaderRow}>
           <Text style={styles.heroLabel}>{kicker ?? 'EN COURS'}</Text>
-          <View style={styles.heroTag}><Text style={styles.heroTagText}>{isOwn ? 'Personnel' : 'Coach'}</Text></View>
+          <View style={styles.heroTag}><Text style={styles.heroTagText}>{proposed ? 'Proposé' : isOwn ? 'Personnel' : 'Coach'}</Text></View>
         </View>
         <Text style={styles.heroName}>{name}</Text>
         <Text style={styles.heroMeta}>{dayCount} jour{dayCount > 1 ? 's' : ''} / semaine</Text>
@@ -63,7 +65,7 @@ export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCo
         <View style={styles.compactTitleRow}>
           <Text style={styles.compactName} numberOfLines={1}>{name}</Text>
           <View style={[styles.tag, isOwn ? styles.tagOwn : styles.tagCoach]}>
-            <Text style={[styles.tagText, isOwn ? styles.tagTextOwn : styles.tagTextCoach]}>{isOwn ? 'Perso' : 'Coach'}</Text>
+            <Text style={[styles.tagText, isOwn ? styles.tagTextOwn : styles.tagTextCoach]}>{proposed ? 'Proposé' : isOwn ? 'Perso' : 'Coach'}</Text>
           </View>
         </View>
         <Text style={styles.compactMeta}>{dayCount} jour{dayCount > 1 ? 's' : ''} / semaine</Text>

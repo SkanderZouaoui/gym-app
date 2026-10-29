@@ -15,6 +15,8 @@ export interface MeResponse {
   photoUrl: string | null;
   status: string;
   roles: { role: Role }[];
+  /** Spécialités du coach (vide pour un adhérent). */
+  specialties?: string[];
 }
 
 export interface ClassSessionSummary {

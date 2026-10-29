@@ -102,7 +102,7 @@ export default function ProgramDetailScreen() {
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
-              <Text style={styles.heroTagText}>{isOwn ? 'Perso' : 'Coach'}</Text>
+              <Text style={styles.heroTagText}>{isOwn ? 'Perso' : program.isPublic ? 'Proposé' : 'Coach'}</Text>
             </View>
             <Text style={styles.heroTitle}>{program.name}</Text>
             <Text style={styles.heroSub}>

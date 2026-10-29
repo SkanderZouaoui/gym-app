@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,8 @@ import { ProgressView } from '../../../src/components/training/views/ProgressVie
 import { OfflineBanner, ScreenTitle } from '../../../src/components/ui';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { useQueryClient } from '@tanstack/react-query';
 
 /** Onglet Progrès : mesures corporelles, régularité et série — v2. */
 export default function ProgressScreen() {
@@ -18,6 +20,8 @@ export default function ProgressScreen() {
   const { t } = useTranslation();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { isOnline, lastSyncAt } = useNetworkStatusContext();
+  const queryClient = useQueryClient();
+  const { refreshing, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -26,7 +30,11 @@ export default function ProgressScreen() {
           <OfflineBanner lastSyncAt={lastSyncAt} />
         </View>
       ) : null}
-      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
+      <ScrollView
+        {...tabBarScroll}
+        contentContainerStyle={styles.container}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <ScreenTitle
           title={t('progress.title')}
           right={

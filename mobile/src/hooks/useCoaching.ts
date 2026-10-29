@@ -39,6 +39,9 @@ export interface Program {
   name: string;
   createdById: string;
   assignedToId: string;
+  isPublic?: boolean;
+  level?: string | null;
+  goal?: string | null;
   startDate: string | null;
   endDate: string | null;
   days: ProgramDay[];
@@ -71,6 +74,14 @@ export function useMyPrograms() {
   return useQuery({
     queryKey: ['me', 'programs'],
     queryFn: () => apiRequest<Program[]>('/v1/me/programs'),
+  });
+}
+
+/** Programmes proposés à tous les adhérents (créés par les coachs, validés par l'admin). */
+export function useProposedPrograms() {
+  return useQuery({
+    queryKey: ['programs', 'proposed'],
+    queryFn: () => apiRequest<Program[]>('/v1/programs/proposed'),
   });
 }
 

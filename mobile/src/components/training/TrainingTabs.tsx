@@ -4,9 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 
-export type TrainingTab = 'programs' | 'history' | 'exercises';
+export type TrainingTab = 'proposed' | 'programs' | 'history' | 'exercises';
 
 const TABS: { value: TrainingTab; label: string }[] = [
+  { value: 'proposed', label: 'Proposés' },
   { value: 'programs', label: 'Mes programmes' },
   { value: 'history', label: 'Historique' },
   { value: 'exercises', label: 'Exercices' },

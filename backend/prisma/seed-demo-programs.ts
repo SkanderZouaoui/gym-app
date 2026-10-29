@@ -153,6 +153,51 @@ async function main() {
     created++;
   }
 
+  // Programmes créés par le coach pour tous les adhérents, à différents stades de validation
+  const publicDefs: { name: string; level: string; goal: string; status: 'APPROVED' | 'PENDING' | 'REJECTED'; note?: string; exercises: ExDef[] }[] = [
+    { name: 'Full body débutant', level: 'Débutant', goal: 'Perte de poids', status: 'APPROVED', exercises: [
+      { name: 'Romanian Deadlift', sets: 3, reps: '10', rest: 75, weight: 30 }, { name: 'Barbell Bench Press', sets: 3, reps: '10', rest: 75, weight: 30 },
+      { name: 'Lat Pulldown', sets: 3, reps: '10', rest: 60, weight: 30 }, { name: 'Plank', sets: 3, reps: '30s', rest: 30 } ] },
+    { name: 'Prise de masse 4 jours', level: 'Intermédiaire', goal: 'Masse', status: 'PENDING', exercises: [
+      { name: 'Barbell Bench Press', sets: 4, reps: '8', rest: 90, weight: 60 }, { name: 'Dumbbell Shoulder Press', sets: 4, reps: '10', rest: 75, weight: 18 },
+      { name: 'Bent-Over Dumbbell Row', sets: 4, reps: '10', rest: 75, weight: 22 } ] },
+    { name: 'HIIT brûle-graisse', level: 'Intermédiaire', goal: 'Endurance', status: 'PENDING', exercises: [
+      { name: 'Lunge', sets: 4, reps: '15', rest: 30 }, { name: 'Plank', sets: 4, reps: '40s', rest: 20 } ] },
+    { name: 'Cardio intensif', level: 'Débutant', goal: 'Endurance', status: 'REJECTED', note: 'Volume trop élevé pour le niveau débutant. Réduire à 3 séries par exercice et ajouter un échauffement.', exercises: [
+      { name: 'Lunge', sets: 6, reps: '20', rest: 20 }, { name: 'Plank', sets: 6, reps: '60s', rest: 15 } ] },
+  ];
+  let publicCreated = 0;
+  for (const def of publicDefs) {
+    const exists = await prisma.program.findFirst({ where: { name: def.name, createdById: coach.id, isPublic: true } });
+    if (exists) continue;
+    await prisma.program.create({
+      data: {
+        name: def.name,
+        createdById: coach.id,
+        assignedToId: coach.id,
+        isPublic: true,
+        level: def.level,
+        goal: def.goal,
+        status: def.status,
+        rejectionNote: def.note,
+        reviewedAt: def.status === 'PENDING' ? null : new Date(),
+        days: {
+          create: [{
+            dayOfWeek: 1,
+            label: 'Séance complète',
+            exercises: {
+              create: await Promise.all(def.exercises.map(async (e, order) => ({
+                exerciseId: await exerciseId(e.name), order, sets: e.sets, reps: e.reps, restSeconds: e.rest ?? null,
+                setDetails: { create: Array.from({ length: e.sets }, (_, i) => ({ setNumber: i + 1, reps: parseInt(e.reps, 10) || null, weightKg: e.weight ?? null, restSeconds: e.rest ?? null })) },
+              }))),
+            },
+          }],
+        },
+      },
+    });
+    publicCreated++;
+  }
+
   // Historique : séances réalisées sur le programme « Haut du corps » ces 3 dernières semaines
   const main = await prisma.program.findFirst({
     where: { name: 'Haut du corps', assignedToId: member.id },
@@ -191,7 +236,7 @@ async function main() {
     }
   }
 
-  console.log(`Programmes : ${created} créés. Historique : ${logs} séances ajoutées.`);
+  console.log(`Programmes coach : ${publicCreated} créés. Programmes : ${created} créés. Historique : ${logs} séances ajoutées.`);
 }
 
 main()

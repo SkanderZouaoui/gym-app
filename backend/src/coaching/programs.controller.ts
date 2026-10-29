@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { ProgramsService } from './programs.service.js';
 import { CreateProgramDto } from './dto/create-program.dto.js';
 import { CreateOwnProgramDto } from './dto/create-own-program.dto.js';
+import { RejectProgramDto } from './dto/reject-program.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
@@ -16,6 +17,12 @@ export class ProgramsController {
   @Get('me/programs')
   findMine(@CurrentUser() user: AuthenticatedUser) {
     return this.programsService.findForMember(user.userId);
+  }
+
+  /** Programmes proposés à tous les adhérents (créés par les coachs et validés par l'admin). */
+  @Get('programs/proposed')
+  findProposed() {
+    return this.programsService.findProposed();
   }
 
   /** L'adhérent compose librement son propre programme (section 4.1 — hors assignation coach). */
@@ -50,6 +57,24 @@ export class ProgramsController {
   @Get('coach/students')
   getStudents(@CurrentUser() user: AuthenticatedUser) {
     return this.programsService.getStudents(user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Get('admin/programs')
+  findForReview(@Query('status') status?: 'PENDING' | 'APPROVED' | 'REJECTED') {
+    return this.programsService.findForReview(status);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/programs/:id/approve')
+  approve(@Param('id') id: string) {
+    return this.programsService.approve(id);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/programs/:id/reject')
+  reject(@Param('id') id: string, @Body() dto: RejectProgramDto) {
+    return this.programsService.reject(id, dto.note);
   }
 
   @Get('programs/:id')

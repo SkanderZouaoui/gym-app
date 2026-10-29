@@ -43,7 +43,8 @@ export class UsersService {
       select: PUBLIC_USER_SELECT,
     });
     if (!user) throw new NotFoundException('USER_NOT_FOUND');
-    return this.withPhotoUrl(user);
+    const coach = await this.prisma.coachProfile.findUnique({ where: { userId }, select: { specialties: true } });
+    return { ...(await this.withPhotoUrl(user)), specialties: coach?.specialties ?? [] };
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {

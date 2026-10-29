@@ -20,7 +20,7 @@ import { EQUIPMENT_CATEGORIES, equipmentOptionsByCategory } from '../../../src/c
 export default function CoachExercisesLibraryScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { pickFor, studentId, studentName } = useLocalSearchParams<{ pickFor?: string; studentId?: string; studentName?: string }>();
+  const { pickFor, studentId, studentName, returnTo } = useLocalSearchParams<{ pickFor?: string; studentId?: string; studentName?: string; returnTo?: string }>();
   const [search, setSearch] = useState('');
   const [muscleGroup, setMuscleGroup] = useState<string | null>(null);
   const [equipment, setEquipment] = useState<string[]>([]);
@@ -45,7 +45,7 @@ export default function CoachExercisesLibraryScreen() {
   const handlePress = (exerciseId: string) => {
     router.push({
       pathname: '/(coach)/exercises/configure',
-      params: { exerciseId, dayIndex: pickFor, studentId, studentName },
+      params: { exerciseId, dayIndex: pickFor, studentId, studentName, returnTo },
     });
   };
 

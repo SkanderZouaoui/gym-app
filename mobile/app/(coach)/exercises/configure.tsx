@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { useExercisePickStore } from '../../../src/store/exercisePick';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useExercise } from '../../../src/hooks/useCoaching';
 import { Button } from '../../../src/components/Button';
@@ -16,13 +17,14 @@ import { SetRow, type SetDraft } from '../../../src/components/training/SetRow';
 export default function CoachConfigureExerciseScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { exerciseId, dayIndex, studentId, studentName, initialSets, editingIndex } = useLocalSearchParams<{
+  const { exerciseId, dayIndex, studentId, studentName, initialSets, editingIndex, returnTo } = useLocalSearchParams<{
     exerciseId: string;
     dayIndex: string;
     studentId: string;
     studentName: string;
     initialSets?: string;
     editingIndex?: string;
+    returnTo?: string;
   }>();
   const { data: exercise, isLoading } = useExercise(exerciseId);
   const [sets, setSets] = useState<SetDraft[]>(
@@ -41,8 +43,16 @@ export default function CoachConfigureExerciseScreen() {
   const updateSet = (index: number, patch: Partial<SetDraft>) =>
     setSets((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
 
+  const setPick = useExercisePickStore((st) => st.setPick);
+
   const handleConfirm = () => {
     if (!exercise) return;
+    // Nouveau programme : l'écran d'origine est resté monté, on lui passe l'exercice via le store.
+    if (returnTo === 'builder' && router.canDismiss()) {
+      setPick({ target: 'builder', exerciseId: exercise.id, name: exercise.name, sets });
+      router.dismiss(2);
+      return;
+    }
     router.replace({
       pathname: '/(coach)/program-builder',
       params: {

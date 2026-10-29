@@ -39,12 +39,18 @@ function mapDays(days: CreateProgramDto['days'] | CreateOwnProgramDto['days']) {
 export class ProgramsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /** Programme créé par un coach : soumis à la validation de l'admin avant d'être visible des adhérents.
+   * Sans destinataire, il est destiné à tous les adhérents (rubrique « Proposés »). */
   create(dto: CreateProgramDto, createdById: string) {
     return this.prisma.program.create({
       data: {
         name: dto.name,
         createdById,
-        assignedToId: dto.assignedToId,
+        assignedToId: dto.assignedToId ?? createdById,
+        isPublic: !dto.assignedToId,
+        level: dto.level,
+        goal: dto.goal,
+        status: 'PENDING',
         startDate: dto.startDate ? new Date(dto.startDate) : undefined,
         endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         days: { create: mapDays(dto.days) },
@@ -53,19 +59,59 @@ export class ProgramsService {
     });
   }
 
+  /** Programmes de l'adhérent : les siens et ceux que ses coachs lui ont assignés une fois validés. */
   findForMember(memberId: string) {
     return this.prisma.program.findMany({
-      where: { assignedToId: memberId },
+      where: { assignedToId: memberId, status: 'APPROVED', isPublic: false },
       include: EXERCISE_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
   }
 
+  /** Programmes « Proposés » : validés par l'admin et visibles par tous les adhérents. */
+  findProposed() {
+    return this.prisma.program.findMany({
+      where: { status: 'APPROVED', isPublic: true },
+      include: EXERCISE_INCLUDE,
+      orderBy: { reviewedAt: 'desc' },
+    });
+  }
+
   findCreatedByCoach(coachId: string) {
     return this.prisma.program.findMany({
-      where: { createdById: coachId },
-      include: { assignedTo: { select: { id: true, firstName: true, lastName: true } } },
+      where: { createdById: coachId, NOT: { assignedToId: coachId, isPublic: false } },
+      include: { ...EXERCISE_INCLUDE, assignedTo: { select: { id: true, firstName: true, lastName: true } } },
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  // --- Validation par l'admin ------------------------------------------------
+
+  findForReview(status?: 'PENDING' | 'APPROVED' | 'REJECTED') {
+    return this.prisma.program.findMany({
+      where: { createdBy: { roles: { some: { role: 'COACH' } } }, ...(status ? { status } : {}) },
+      include: {
+        ...EXERCISE_INCLUDE,
+        createdBy: { select: { id: true, firstName: true, lastName: true } },
+        assignedTo: { select: { id: true, firstName: true, lastName: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async approve(id: string) {
+    await this.findOne(id);
+    return this.prisma.program.update({
+      where: { id },
+      data: { status: 'APPROVED', rejectionNote: null, reviewedAt: new Date() },
+    });
+  }
+
+  async reject(id: string, note?: string) {
+    await this.findOne(id);
+    return this.prisma.program.update({
+      where: { id },
+      data: { status: 'REJECTED', rejectionNote: note ?? null, reviewedAt: new Date() },
     });
   }
 

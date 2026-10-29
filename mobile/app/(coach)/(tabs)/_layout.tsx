@@ -2,26 +2,19 @@ import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FloatingTabBar, type FloatingTabBarProps } from '../../../src/components/FloatingTabBar';
 
-/** Barre d'onglets Coach — cf. Design System/FZ CoachTabBar.dc.html :
- * 4 onglets plats ÉGAUX, PAS de bouton surélevé (contrairement à l'Adhérent/Staff/Admin).
- * Les écrans de détail vivent au niveau parent (coach)/_layout.tsx (Stack) pour garder
- * un vrai historique de navigation (bouton retour + swipe iOS). */
-export default function CoachTabsLayout() {
+/** Barre d'onglets Coach v2 : Planning, Programmes, Profil. « Aujourd'hui » et « Élèves » restent
+ * accessibles par navigation directe mais ne figurent plus dans la barre. Les écrans de détail
+ * vivent au niveau parent (coach)/_layout.tsx (Stack) pour garder un vrai historique de navigation. */
+/** L'onglet « Aujourd'hui » (index) est masqué : l'app s'ouvre sur le Planning. */
+export const unstable_settings = { initialRouteName: 'planning' };
 
+export default function CoachTabsLayout() {
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-      }}
+      screenOptions={{ headerShown: false }}
       tabBar={(props) => <FloatingTabBar {...(props as unknown as FloatingTabBarProps)} />}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Aujourd'hui",
-          tabBarIcon: ({ color }) => <MaterialIcons name="today" size={24} color={color as string} />,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen
         name="planning"
         options={{
@@ -30,12 +23,13 @@ export default function CoachTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="students"
+        name="programs"
         options={{
-          title: 'Élèves',
-          tabBarIcon: ({ color }) => <MaterialIcons name="group" size={24} color={color as string} />,
+          title: 'Programmes',
+          tabBarIcon: ({ color }) => <MaterialIcons name="fitness-center" size={24} color={color as string} />,
         }}
       />
+      <Tabs.Screen name="students" options={{ href: null }} />
       <Tabs.Screen
         name="profile"
         options={{

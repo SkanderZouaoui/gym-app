@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../theme/tokens';
 import { useTheme } from '../../../theme/ThemeContext';
-import { useMyPrograms } from '../../../hooks/useCoaching';
+import { useMyPrograms, useProposedPrograms } from '../../../hooks/useCoaching';
 import { EmptyState } from '../../ui';
 import { ProgramCard } from '../ProgramCard';
 
@@ -12,10 +12,12 @@ const DAY_LABELS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendr
 
 /** Vue « Mes programmes » de l'onglet Entraînement : programme à la une en dégradé, bouton
  * pointillé de création, puis les autres programmes (assignés par le coach ou personnels). */
-export function ProgramsView() {
+export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed' }) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: programs, isLoading, isError, refetch } = useMyPrograms();
+  const mine = useMyPrograms();
+  const proposed = useProposedPrograms();
+  const { data: programs, isLoading, isError, refetch } = source === 'proposed' ? proposed : mine;
 
   if (isLoading) return null;
 
@@ -53,24 +55,33 @@ export function ProgramsView() {
       {main ? (
         <ProgramCard
           highlighted
-          kicker={isOwn(main) ? 'MON PROGRAMME' : 'ASSIGNÉ PAR VOTRE COACH'}
+          kicker={source === 'proposed' ? 'RECOMMANDÉ POUR VOUS' : isOwn(main) ? 'MON PROGRAMME' : 'ASSIGNÉ PAR VOTRE COACH'}
           name={main.name}
           isOwn={isOwn(main)}
+          proposed={source === 'proposed'}
           dayCount={main.days.length}
           todayLabel={todayDay ? todayDay.label ?? DAY_LABELS_FR[todayDay.dayOfWeek] : undefined}
           todayExerciseCount={todayDay?.exercises.length}
           onPress={() => router.push(`/(member)/program/${main.id}`)}
           onStart={() => router.push(`/(member)/program/${main.id}`)}
         />
+      ) : source === 'proposed' ? (
+        <EmptyState
+          icon="auto-awesome"
+          title="Aucun programme proposé"
+          text="Les programmes validés par la salle apparaîtront ici."
+          tone="primary"
+        />
       ) : null}
 
-      {createButton}
+      {source === 'mine' ? createButton : null}
 
       {others.map((p) => (
         <ProgramCard
           key={p.id}
           name={p.name}
           isOwn={isOwn(p)}
+          proposed={source === 'proposed'}
           dayCount={p.days.length}
           onPress={() => router.push(`/(member)/program/${p.id}`)}
         />

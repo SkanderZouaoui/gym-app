@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsInt, IsISO8601, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsIn, IsInt, IsISO8601, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
 import { ProgramExerciseSetInputDto } from './program-exercise-set-input.dto.js';
 
 class ProgramExerciseInputDto {
@@ -53,8 +53,18 @@ export class CreateProgramDto {
   @IsString()
   name!: string;
 
+  /** Adhérent destinataire (programme personnel). Absent = programme pour tous les adhérents. */
+  @IsOptional()
   @IsString()
-  assignedToId!: string;
+  assignedToId?: string;
+
+  @IsOptional()
+  @IsIn(['Débutant', 'Intermédiaire', 'Avancé'])
+  level?: string;
+
+  @IsOptional()
+  @IsIn(['Perte de poids', 'Masse', 'Endurance', 'Mobilité'])
+  goal?: string;
 
   @IsOptional()
   @IsISO8601()

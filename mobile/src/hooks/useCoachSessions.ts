@@ -80,12 +80,20 @@ export function useStudentWorkouts(memberId: string | undefined) {
   });
 }
 
+export type ProgramStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
 export interface CoachProgramSummary {
   id: string;
   name: string;
+  level: string | null;
+  goal: string | null;
+  status: ProgramStatus;
+  rejectionNote: string | null;
+  isPublic: boolean;
   startDate: string | null;
   endDate: string | null;
   assignedTo: { id: string; firstName: string; lastName: string };
+  days: ProgramDetail['days'];
 }
 
 export function useCoachPrograms() {
@@ -108,6 +116,11 @@ export interface ProgramDetail {
   name: string;
   createdById: string;
   assignedToId: string;
+  level?: string | null;
+  goal?: string | null;
+  status?: ProgramStatus;
+  rejectionNote?: string | null;
+  isPublic?: boolean;
   days: {
     id: string;
     dayOfWeek: number;
@@ -156,7 +169,10 @@ export interface AssignProgramDayInput {
 
 export interface AssignProgramInput {
   name: string;
-  assignedToId: string;
+  /** Absent : programme pour tous les adhérents (soumis à validation). */
+  assignedToId?: string;
+  level?: string;
+  goal?: string;
   startDate?: string;
   endDate?: string;
   days: AssignProgramDayInput[];
