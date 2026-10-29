@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
-import { useStaffToday, type StaffTodaySession } from '../../src/hooks/useStaff';
-import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { useTheme } from '../../../src/theme/ThemeContext';
+import { useStaffToday, type StaffTodaySession } from '../../../src/hooks/useStaff';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 export default function StaffTodayScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
@@ -46,7 +46,7 @@ function SessionRow({ session }: { session: StaffTodaySession }) {
   return (
     <Pressable
       style={styles.card}
-      onPress={() => router.push({ pathname: '/(staff)/scanner', params: { sessionId: session.id } })}
+      onPress={() => router.push({ pathname: '/(staff)/(tabs)/scanner', params: { sessionId: session.id } })}
     >
       <View style={{ flex: 1 }}>
         <Text style={styles.className}>{session.classTypeName}</Text>

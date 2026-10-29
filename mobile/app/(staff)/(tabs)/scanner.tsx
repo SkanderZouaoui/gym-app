@@ -2,10 +2,10 @@ import { useMemo, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Scanner } from '../../src/components/Scanner';
-import { fonts, spacing } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
-import { useStaffToday } from '../../src/hooks/useStaff';
+import { Scanner } from '../../../src/components/Scanner';
+import { fonts, spacing } from '../../../src/theme/tokens';
+import { useTheme } from '../../../src/theme/ThemeContext';
+import { useStaffToday } from '../../../src/hooks/useStaff';
 
 export default function StaffScannerScreen() {
   const { colors } = useTheme();

@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fonts, radii, spacing, typography } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
-import { useSessions } from '../../src/hooks/useClasses';
-import { useHideTabBarOnScroll } from '../../src/hooks/useHideTabBarOnScroll';
+import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { useTheme } from '../../../src/theme/ThemeContext';
+import { useSessions } from '../../../src/hooks/useClasses';
+import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 
 export default function StaffPlanningScreen() {
   const tabBarScroll = useHideTabBarOnScroll();

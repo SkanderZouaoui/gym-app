@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 /** Données de démo pour l'Accueil adhérent (abonnement actif, prochains cours,
  * réservation, actualités) pour le compte member-phase2@muscleup.dev :
  *   npx tsx prisma/seed-demo-home.ts
- * Idempotent : relancer ne crée pas de doublons. Crée aussi un coach et un admin de démo
- * (coach-demo@ / admin-demo@muscleup.dev, mot de passe Muscle123!).
+ * Idempotent : relancer ne crée pas de doublons. Crée aussi un coach, un admin et un agent d'accueil de démo
+ * (coach-demo@ / admin-demo@ / staff-demo@muscleup.dev, mot de passe Muscle123!).
  */
 const PASSWORD = 'Muscle123!';
 
-async function upsertUser(email: string, firstName: string, lastName: string, role: 'COACH' | 'ADMIN') {
+async function upsertUser(email: string, firstName: string, lastName: string, role: 'COACH' | 'ADMIN' | 'STAFF') {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return existing;
   return prisma.user.create({
@@ -31,6 +31,7 @@ async function main() {
 
   const coachUser = await upsertUser('coach-demo@muscleup.dev', 'Sarah', 'Benali', 'COACH');
   const admin = await upsertUser('admin-demo@muscleup.dev', 'Karim', 'Admin', 'ADMIN');
+  await upsertUser('staff-demo@muscleup.dev', 'Nour', 'Accueil', 'STAFF');
   await prisma.coachProfile.upsert({
     where: { userId: coachUser.id },
     update: {},

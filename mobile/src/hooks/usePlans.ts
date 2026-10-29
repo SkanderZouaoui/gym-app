@@ -12,10 +12,14 @@ export interface MembershipPlan {
   includesLabel: string | null;
 }
 
-/** Formules proposées par la salle (catalogue visible dans l'app). */
-export function usePlans() {
+/** Formules proposées par la salle. Par défaut : catalogue visible des adhérents ; `all` = toutes les formules actives (accueil). */
+export function usePlans(options?: { all?: boolean }) {
+  const all = options?.all ?? false;
   return useQuery({
-    queryKey: ['plans'],
-    queryFn: async () => (await apiRequest<MembershipPlan[]>('/v1/plans')).filter((p) => p.isVisibleInApp),
+    queryKey: ['plans', all ? 'all' : 'visible'],
+    queryFn: async () => {
+      const plans = await apiRequest<MembershipPlan[]>('/v1/plans');
+      return all ? plans : plans.filter((p) => p.isVisibleInApp);
+    },
   });
 }
