@@ -1559,5 +1559,12 @@
     "demo_spots": "4 أماكن",
     "demo_book": "احجز",
     "back": "رجوع"
+  },
+  "splash": {
+    "traction": "سحب",
+    "transition": "انتقال",
+    "push": "دفع",
+    "tagline": "تجاوز.",
+    "loading": "جارٍ التحميل"
   }
 }

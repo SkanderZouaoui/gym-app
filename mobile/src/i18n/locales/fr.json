@@ -1559,5 +1559,12 @@
     "demo_spots": "4 places",
     "demo_book": "Réserver",
     "back": "Retour"
+  },
+  "splash": {
+    "traction": "TRACTION",
+    "transition": "TRANSITION",
+    "push": "POUSSÉE",
+    "tagline": "Passe au-dessus.",
+    "loading": "CHARGEMENT"
   }
 }

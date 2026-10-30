@@ -36,7 +36,7 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-font",
-      "expo-splash-screen",
+      ["expo-splash-screen", { "backgroundColor": "#6D28D9", "dark": { "backgroundColor": "#0F0B1E" } }],
       [
         "expo-camera",
         {

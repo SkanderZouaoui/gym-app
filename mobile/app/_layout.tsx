@@ -32,6 +32,7 @@ import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import { RemoteConfigProvider } from '../src/config/RemoteConfigContext';
 import { LanguageProvider } from '../src/i18n/LanguageContext';
 import '../src/i18n';
+import { SplashAnimation } from '../src/components/SplashAnimation';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -95,6 +96,7 @@ export default function RootLayout() {
   });
   const [bootstrapped, setBootstrapped] = useState(false);
   const [cacheRestored, setCacheRestored] = useState(false);
+  const [splashDone, setSplashDone] = useState(false);
   const setSession = useSessionStore((s) => s.setSession);
 
   useEffect(() => {
@@ -129,10 +131,9 @@ export default function RootLayout() {
   }, [cacheRestored, setSession]);
 
   useEffect(() => {
-    if (fontsLoaded && bootstrapped) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, bootstrapped]);
+    // Le splash animé prend le relais du splash natif dès son premier rendu.
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
 
   useEffect(() => {
     return onlineManager.subscribe((isOnline) => {
@@ -158,6 +159,7 @@ export default function RootLayout() {
           </RemoteConfigProvider>
         )}
       </PersistQueryClientProvider>
+      {splashDone ? null : <SplashAnimation ready={fontsLoaded && bootstrapped} onFinish={() => setSplashDone(true)} />}
     </GestureHandlerRootView>
   );
 }

@@ -1559,5 +1559,12 @@
     "demo_spots": "4 spots",
     "demo_book": "Book",
     "back": "Back"
+  },
+  "splash": {
+    "traction": "PULL",
+    "transition": "TRANSITION",
+    "push": "PUSH",
+    "tagline": "Get over it.",
+    "loading": "LOADING"
   }
 }
