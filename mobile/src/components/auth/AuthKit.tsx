@@ -48,8 +48,8 @@ function Hero({ compact, width, height }: { compact?: boolean; width: number; he
             <Rect x={0} y={130} width={width} height={9} fill="#fff" />
             <Rect x={0} y={120} width={14} height={29} rx={4} fill="#fff" />
             <Rect x={width - 14} y={120} width={14} height={29} rx={4} fill="#fff" />
-            <SvgText x={26} y={122} fontSize={88} fontWeight="900" fontStyle="italic" fill="#fff">UP</SvgText>
-            <SvgText x={28} y={196} fontSize={54} fontWeight="900" fontStyle="italic" fill="none" stroke="#fff" strokeWidth={1.6}>MUSCLE</SvgText>
+            <SvgText x={28} y={116} fontSize={54} fontWeight="900" fontStyle="italic" fill="none" stroke="#fff" strokeWidth={1.6}>MUSCLE</SvgText>
+            <SvgText x={26} y={218} fontSize={88} fontWeight="900" fontStyle="italic" fill="#fff">UP</SvgText>
             <G transform={`translate(${width - 390} 0)`}>
             <Path d="M318 252 C318 222 276 206 288 176 S308 150 300 80" fill="none" stroke="#DDD6FE" strokeWidth={3} strokeDasharray="2 9" strokeLinecap="round" />
             <Polyline points="287,94 300,76 313,94" fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
@@ -60,8 +60,8 @@ function Hero({ compact, width, height }: { compact?: boolean; width: number; he
             <SvgText x={288} y={187} fontSize={13} fontWeight="800" fill={VIOLET_DARK} textAnchor="middle">2</SvgText>
             <SvgText x={302} y={117} fontSize={13} fontWeight="800" fill={VIOLET_DARK} textAnchor="middle">3</SvgText>
             </G>
-            <SvgText x={28} y={226} fontSize={15} fontWeight="500" fill="#fff" opacity={0.92}>{t('auth.hero_tagline')}</SvgText>
-            <SvgText x={28} y={256} fontSize={12} fontWeight="700" letterSpacing={1} fill="#DDD6FE">{t('auth.hero_steps')}</SvgText>
+            <SvgText x={28} y={248} fontSize={15} fontWeight="500" fill="#fff" opacity={0.92}>{t('auth.hero_tagline')}</SvgText>
+            <SvgText x={28} y={276} fontSize={12} fontWeight="700" letterSpacing={1} fill="#DDD6FE">{t('auth.hero_steps')}</SvgText>
           </>
         )}
       </Svg>
