@@ -4,7 +4,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextField } from '../../src/components/TextField';
-import { Button } from '../../src/components/Button';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../src/components/ui/StickyActionBar';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';

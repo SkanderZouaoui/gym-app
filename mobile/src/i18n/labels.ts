@@ -1,4 +1,7 @@
-import i18n from './index';
+import i18n, { dateLocale } from './index';
+
+// --- Jours et mois : noms fournis par Intl selon la langue courante -------------------------
+
 
 /**
  * Valeurs « métier » stockées en base en français (niveau, objectif, public d'une alerte) :
@@ -13,10 +16,6 @@ export const levelLabel = (v?: string | null): string => (v && LEVELS[v] ? i18n.
 export const goalLabel = (v?: string | null): string => (v && GOALS[v] ? i18n.t(`labels.goal_${GOALS[v]}`) : v ?? '');
 export const announcementAudienceLabel = (v?: string | null): string => (v && (ANN_AUDIENCES as readonly string[]).includes(v) ? i18n.t(`labels.ann_${v.toLowerCase()}`) : i18n.t('labels.ann_members'));
 export const audienceLabel = (v?: string | null): string => (v && AUDIENCES[v] ? i18n.t(`labels.audience_${AUDIENCES[v]}`) : v ?? '');
-
-// --- Jours et mois : noms fournis par Intl selon la langue courante -------------------------
-
-import { dateLocale } from './index';
 
 const tidy = (s: string) => {
   const t = s.replace(/\.$/, '');

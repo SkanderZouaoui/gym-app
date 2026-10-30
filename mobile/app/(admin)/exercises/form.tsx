@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { fonts, radii, spacing } from '../../../src/theme/tokens';
+import { fonts, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { TextField } from '../../../src/components/TextField';
 import { Banner, ScreenTitle } from '../../../src/components/ui';

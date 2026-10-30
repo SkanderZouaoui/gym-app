@@ -13,10 +13,9 @@ import { pendingPassword } from '../../src/auth/pendingPassword';
 import { rootRouteForRole } from '../../src/navigation/roleRoutes';
 import { Banner } from '../../src/components/ui';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../src/i18n';
+import i18n, { LANGUAGE_LABELS } from '../../src/i18n';
 import { LanguageSheet } from '../../src/components/LanguageSheet';
 import { useLanguage } from '../../src/i18n/LanguageContext';
-import { LANGUAGE_LABELS } from '../../src/i18n';
 
 /** Écran de connexion — FitZone App Adherent.dc.html, A3. */
 export default function LoginScreen() {

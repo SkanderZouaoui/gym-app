@@ -32,7 +32,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow, preference, setScheme } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { language } = useLanguage();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
   const updateProfile = useUpdateProfile();

@@ -29,9 +29,8 @@ import {
 import { useMyWorkouts } from '../../../src/hooks/useCoaching';
 import { usePreferencesStore } from '../../../src/store/preferences';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
-import { dateLocale } from '../../../src/i18n';
+import { dateLocale , LANGUAGE_LABELS } from '../../../src/i18n';
 import { LanguageSheet } from '../../../src/components/LanguageSheet';
-import { LANGUAGE_LABELS } from '../../../src/i18n';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
@@ -40,7 +39,7 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const prefs = usePreferencesStore();
   const { data: workouts, refetch: refetchWorkouts } = useMyWorkouts();
-  const { isRtl, language, setLanguage } = useLanguage();
+  const { isRtl, language } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const { data: user, refetch: refetchMe } = useMe();
   const { data: memberships, refetch: refetchMemberships } = useMyMemberships();

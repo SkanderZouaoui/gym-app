@@ -14,7 +14,17 @@ allowBuilds:
   workerd: false
   unrs-resolver: false
 
+overrides:
+  body-parser: ">=2.4.0"
+  qs: ">=6.16.1"
+  multer: ">=2.5.0"
+  zod: ">=4.6.6"
+
 minimumReleaseAgeExclude:
+  - body-parser@2.4.0
+  - qs@6.17.1
+  - multer@2.5.0
+  - zod@4.6.7
   - "@expo/cli@58.1.17"
   - "@expo/config-plugins@58.0.11"
   - "@expo/config@58.0.9"

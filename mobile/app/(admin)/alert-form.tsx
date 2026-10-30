@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { fonts, radii, spacing } from '../../src/theme/tokens';
+import { fonts, spacing } from '../../src/theme/tokens';
 import { DateField } from '../../src/components/ui/DateTimeFields';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminHomeAlerts, useDeleteHomeAlert, useSaveHomeAlert, type AdminHomeAlert } from '../../src/hooks/useAdmin';

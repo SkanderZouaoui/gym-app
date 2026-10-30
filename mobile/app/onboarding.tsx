@@ -4,7 +4,7 @@ import { Animated, Easing, KeyboardAvoidingView, PanResponder, Platform, Pressab
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { fonts, radii, spacing } from '../src/theme/tokens';
+import { fonts, radii } from '../src/theme/tokens';
 import { useTheme } from '../src/theme/ThemeContext';
 import { Banner } from '../src/components/ui';
 import { meApi } from '../src/api/endpoints';

@@ -26,10 +26,9 @@ import { TimeButton } from '../../src/components/ui/DateTimeFields';
 import { Button } from '../../src/components/Button';
 import { TextField } from '../../src/components/TextField';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../src/i18n';
+import i18n, { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../src/i18n';
 import { WEEKDAYS_LONG_MON } from '../../src/i18n/labels';
 import { useLanguage } from '../../src/i18n/LanguageContext';
-import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../src/i18n';
 
 function Stepper({
   label, hint, value, unit, min = 0, max = 240, step = 5, onChange,

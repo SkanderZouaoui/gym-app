@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
@@ -11,18 +12,23 @@ import { Public } from './decorators/public.decorator.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from './types/authenticated-user.js';
 
+// Limite stricte (10 req/min/IP) sur les routes sensibles au brute-force.
+const STRICT = { default: { limit: 10, ttl: 60_000 } };
+
 @ApiTags('auth')
 @Controller('v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
+  @Throttle(STRICT)
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @Public()
+  @Throttle(STRICT)
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
@@ -35,6 +41,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle(STRICT)
   @HttpCode(204)
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -42,6 +49,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle(STRICT)
   @HttpCode(204)
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto) {

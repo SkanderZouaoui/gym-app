@@ -41,8 +41,8 @@ describe('BookingsService — concurrence et liste d\'attente (e2e)', () => {
     const session = await prisma.classSession.create({
       data: {
         classTypeId: classType.id,
-        startsAt: new Date(),
-        endsAt: new Date(Date.now() + 3_600_000),
+        startsAt: new Date(Date.now() + 2 * 86_400_000),
+        endsAt: new Date(Date.now() + 2 * 86_400_000 + 3_600_000),
         capacity: 2, // capacité volontairement petite pour forcer la liste d'attente
       },
     });

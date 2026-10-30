@@ -1,6 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState , useCallback } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
 import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -22,11 +21,9 @@ import { DEFAULT_ADMIN_SHORTCUTS, usePreferencesStore } from '../../../src/store
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
-import { WEEKDAYS_NARROW_SUN } from '../../../src/i18n/labels';
 
 const nf = (n: number) => n.toLocaleString(dateLocale());
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
-const DAY_LETTERS = WEEKDAYS_NARROW_SUN;
 
 /** Pilotage (admin) : encaissé du mois, indicateurs clés, remplissage et alertes — FitZone Mobile Admin v2. */
 export default function AdminDashboardScreen() {
@@ -39,7 +36,7 @@ export default function AdminDashboardScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
   const { data, isLoading, refetch } = useAdminDashboard();
-  const { data: daily, refetch: refetchDaily } = useDailyAttendance();
+  const { refetch: refetchDaily } = useDailyAttendance();
   const { data: expiring, isLoading: expiringLoading } = useExpiringMemberships();
   const { data: reports } = useOpenReports();
   const { data: setupAlerts, refetch: refetchSetup } = useSetupAlerts();
@@ -57,6 +54,7 @@ export default function AdminDashboardScreen() {
 
   // Courbe : encaissements cumulés par semaine du mois en cours ; variation vs mois précédent.
   const { points, variation, prevMonthName } = useMemo(() => {
+    const now = new Date();
     const list = payments ?? [];
     const thisMonth = list.filter((p) => {
       const d = new Date(p.recordedAt);
@@ -149,9 +147,6 @@ export default function AdminDashboardScreen() {
     warning: { bg: colors.warningSoft, fg: colors.warningInk, icon: 'warning-amber' as const },
     info: { bg: colors.infoSoft, fg: colors.infoInk, icon: 'info-outline' as const },
   } as const;
-
-  const days = daily?.days ?? [];
-  const maxCount = Math.max(...days.map((d) => d.count), 1);
 
   if (isLoading) {
     return (

@@ -26,7 +26,7 @@ services:
       garage:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-muscleup}:${POSTGRES_PASSWORD:-muscleup}@postgres:5432/${POSTGRES_DB:-muscleup}?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-muscleup}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requis}@postgres:5432/${POSTGRES_DB:-muscleup}?schema=public
       REDIS_URL: redis://redis:6379
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
@@ -40,5 +40,8 @@ services:
       S3_BUCKET: ${S3_BUCKET:-muscleup}
       S3_FORCE_PATH_STYLE: "true"
       PORT: 3000
+      NODE_ENV: production
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      TRUST_PROXY: ${TRUST_PROXY:-}
     ports:
       - "${API_PORT:-3000}:3000"

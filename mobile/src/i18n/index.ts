@@ -7,6 +7,7 @@ import ar from './locales/ar.json';
 export const SUPPORTED_LANGUAGES = ['fr', 'en', 'ar'] as const;
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
+// eslint-disable-next-line import/no-named-as-default-member -- API i18next officielle
 i18n.use(initReactI18next).init({
   resources: {
     fr: { translation: fr },
