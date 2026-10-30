@@ -21,12 +21,14 @@ import { DEFAULT_ADMIN_SHORTCUTS, usePreferencesStore } from '../../../src/store
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
+import { useNow } from '../../../src/hooks/useNow';
 
 const nf = (n: number) => n.toLocaleString(dateLocale());
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
 
 /** Pilotage (admin) : encaissé du mois, indicateurs clés, remplissage et alertes — FitZone Mobile Admin v2. */
 export default function AdminDashboardScreen() {
+  const nowMs = useNow();
   useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
@@ -134,12 +136,12 @@ export default function AdminDashboardScreen() {
 
   const { data: teamOnShift, isLoading: teamLoading } = useTeamOnShift();
   const liveClasses = (staffToday?.sessions ?? []).filter((c) => {
-    const n = Date.now();
+    const n = nowMs;
     return new Date(c.startsAt).getTime() <= n && n <= new Date(c.endsAt).getTime();
   });
   const renewals = [...(expiring ?? [])].sort((x, y) => new Date(x.endDate).getTime() - new Date(y.endDate).getTime()).slice(0, 3);
   const lastPayments = (payments ?? []).slice(0, 3);
-  const daysUntil = (iso: string) => Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
+  const daysUntil = (iso: string) => Math.max(0, Math.ceil((new Date(iso).getTime() - nowMs) / 86_400_000));
   const clockOf = (iso: string) => new Date(iso).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
   const setupTone = {

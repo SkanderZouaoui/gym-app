@@ -14,12 +14,14 @@ import { Button } from '../../src/components/Button';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../src/i18n';
+import { useNow } from '../../src/hooks/useNow';
 
 type Tab = 'upcoming' | 'waitlist' | 'past';
 
 /** Mes réservations — v2 : lien retour, grand titre, pastilles À venir / En attente / Passées,
  * cartes à bloc date en dégradé et bouton d'annulation carré. */
 export default function ReservationsScreen() {
+  const nowMs = useNow();
   useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -30,7 +32,7 @@ export default function ReservationsScreen() {
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
 
   const { upcoming, waitlist, past } = useMemo(() => {
-    const now = Date.now();
+    const now = nowMs;
     const result: Record<Tab, Booking[]> = { upcoming: [], waitlist: [], past: [] };
     for (const b of bookings ?? []) {
       const startsAt = b.session ? new Date(b.session.startsAt).getTime() : 0;
@@ -45,7 +47,7 @@ export default function ReservationsScreen() {
     result.waitlist.sort(byDate);
     result.past.sort((a, b) => byDate(b, a));
     return result;
-  }, [bookings]);
+  }, [bookings, nowMs]);
 
   const list = tab === 'upcoming' ? upcoming : tab === 'waitlist' ? waitlist : past;
   const tabs: { value: Tab; label: string }[] = [
@@ -123,7 +125,7 @@ export default function ReservationsScreen() {
                 <Text style={styles.meta} numberOfLines={1}>{meta}</Text>
                 {note ? <Text style={styles.note}>{note}</Text> : null}
               </View>
-              {tab !== 'past' && !(session && new Date(session.endsAt).getTime() < Date.now()) ? (
+              {tab !== 'past' && !(session && new Date(session.endsAt).getTime() < nowMs) ? (
                 <Pressable style={styles.cancelButton} onPress={() => setCancelTarget(item)} hitSlop={6}>
                   <MaterialIcons name="close" size={20} color={colors.dangerInk} />
                 </Pressable>

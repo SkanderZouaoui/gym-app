@@ -15,11 +15,13 @@ import { StatusTag } from '../../../src/components/staff/staffUi';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { dateLocale } from '../../../src/i18n';
 import { levelLabel } from '../../../src/i18n/labels';
+import { useNow } from '../../../src/hooks/useNow';
 
 type Filter = 'all' | 'present' | 'todo';
 
 /** Détail d'un cours (coach) : infos du cours, présence, inscrits avec leur formule et pointage, liste d'attente. */
 export default function CoachSessionDetailScreen() {
+  const nowMs = useNow();
   const client = useQueryClient();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => client.invalidateQueries());
   const { t } = useTranslation();
@@ -44,7 +46,6 @@ export default function CoachSessionDetailScreen() {
 
   const start = new Date(session.startsAt);
   const end = new Date(session.endsAt);
-  const nowMs = Date.now();
   const minutes = Math.round((end.getTime() - start.getTime()) / 60000);
   const state = end.getTime() < nowMs ? 'done' : start.getTime() <= nowMs ? 'live' : 'upcoming';
   const tag = state === 'done' ? { label: t('common.termine'), tone: 'muted' as const } : state === 'live' ? { label: t('common.en_cours'), tone: 'success' as const } : { label: t('coach.detail_upcoming'), tone: 'warning' as const };

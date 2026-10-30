@@ -27,8 +27,10 @@ import { Banner, BottomSheet, OfflineBanner, SkeletonBlock, Toast } from '../../
 import { Button } from '../../../src/components/Button';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import i18n, { dateLocale } from '../../../src/i18n';
+import { useNow } from '../../../src/hooks/useNow';
 
 export default function HomeScreen() {
+  const nowMs = useNow();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -81,7 +83,7 @@ export default function HomeScreen() {
 
   const activeMembership = memberships?.find((m) => m.status === 'ACTIVE');
   const expiredMembership = !activeMembership && memberships?.some((m) => m.status === 'EXPIRED');
-  const now = Date.now();
+  const now = nowMs;
   const nextBooking = bookings
     ?.filter((b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= now)
     .sort((a, b) => new Date(a.session!.startsAt).getTime() - new Date(b.session!.startsAt).getTime())[0];
@@ -90,7 +92,7 @@ export default function HomeScreen() {
 
   const expiringSoon =
     activeMembership?.endDate &&
-    new Date(activeMembership.endDate).getTime() - Date.now() < 14 * 24 * 60 * 60 * 1000;
+    new Date(activeMembership.endDate).getTime() - nowMs < 14 * 24 * 60 * 60 * 1000;
 
   const daysLeft = activeMembership
     ? Math.max(0, Math.ceil((new Date(activeMembership.endDate).getTime() - now) / 86_400_000))

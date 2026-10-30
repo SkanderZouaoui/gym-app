@@ -17,9 +17,11 @@ import { ImageGallery } from '../../../src/components/adherent/ImageGallery';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { levelLabel } from '../../../src/i18n/labels';
+import { useNow } from '../../../src/hooks/useNow';
 
 /** Détail d'un cours — FitZone App Adherent.dc.html, C1. */
 export default function SessionDetailScreen() {
+  const nowMs = useNow();
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
@@ -47,8 +49,8 @@ export default function SessionDetailScreen() {
 
   const spotsLeft = session.capacity - session._count.bookings;
   const isFull = spotsLeft <= 0;
-  const hasEnded = new Date(session.endsAt).getTime() < Date.now();
-  const hasStarted = new Date(session.startsAt).getTime() <= Date.now();
+  const hasEnded = new Date(session.endsAt).getTime() < nowMs;
+  const hasStarted = new Date(session.startsAt).getTime() <= nowMs;
   const progress = session._count.bookings / Math.max(session.capacity, 1);
   const durationMinutes = Math.round((new Date(session.endsAt).getTime() - new Date(session.startsAt).getTime()) / 60000);
 

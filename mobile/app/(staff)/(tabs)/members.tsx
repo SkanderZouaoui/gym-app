@@ -15,6 +15,7 @@ import { InitialsAvatar, StatusTag, membershipBadge } from '../../../src/compone
 import type { MemberSearchResult } from '../../../src/hooks/useStaff';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../src/i18n';
+import { useNow } from '../../../src/hooks/useNow';
 
 type StatusFilter = 'all' | 'active' | 'expiring' | 'expired' | 'none';
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
@@ -38,6 +39,7 @@ function membershipState(m: MemberSearchResult): StatusFilter {
 
 /** Adhérents (accueil) : recherche, liste, ouverture de la fiche, création de compte. */
 export default function StaffMembersScreen() {
+  const nowMs = useNow();
   const { t } = useTranslation();
   const routes = useStaffRoutes();
   const tabBarScroll = useHideTabBarOnScroll();
@@ -179,7 +181,7 @@ export default function StaffMembersScreen() {
         renderItem={({ item }) => {
           const badge = badgeFor(item);
           const last = item.memberships?.[0];
-          const daysLeft = last?.status === 'ACTIVE' ? Math.max(0, Math.ceil((new Date(last.endDate).getTime() - Date.now()) / 86_400_000)) : null;
+          const daysLeft = last?.status === 'ACTIVE' ? Math.max(0, Math.ceil((new Date(last.endDate).getTime() - nowMs) / 86_400_000)) : null;
           const ring = badge.tone === 'success' ? colors.success : badge.tone === 'warning' ? colors.warning : badge.tone === 'danger' ? colors.danger : colors.border;
           return (
             <Pressable

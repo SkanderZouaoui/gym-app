@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { meApi } from '../api/endpoints';
 import { getItem, setItem } from '../api/storage';
+import { useNow } from './useNow';
 
 const OFFLINE_TOKEN_KEY = 'muscleup.offlineQrToken';
 const OFFLINE_EXPIRES_KEY = 'muscleup.offlineQrTokenExpiresAt';
@@ -59,7 +60,8 @@ export function useOfflineQrToken() {
     })();
   }, [refresh]);
 
-  const isValid = !!cached && cached.expiresAt > Date.now();
+  const nowMs = useNow(10_000);
+  const isValid = !!cached && cached.expiresAt > nowMs;
 
   return {
     loaded,

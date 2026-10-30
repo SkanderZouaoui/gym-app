@@ -14,6 +14,7 @@ import { Avatar, Banner, Pill, ProgressBar, ScreenTitle } from '../../../src/com
 import { dateLocale } from '../../../src/i18n';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { useNow } from '../../../src/hooks/useNow';
 
 // Repli uniquement : la vraie durée de vie vient de `expiresInSeconds`,
 // renvoyée par le serveur à chaque émission de token (45s — qr-token.service.ts).
@@ -21,6 +22,7 @@ const FALLBACK_REFRESH_SECONDS = 45;
 
 /** Écran "QR d'accès" — FitZone App Adherent.dc.html, C3. */
 export default function QrScreen() {
+  const nowMs = useNow();
   const pullClient = useQueryClient();
   const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { colors, cardShadow } = useTheme();
@@ -67,7 +69,7 @@ export default function QrScreen() {
   }, []);
 
   const nextBooking = bookings
-    ?.filter((b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= Date.now())
+    ?.filter((b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= nowMs)
     .sort((a, b) => new Date(a.session!.startsAt).getTime() - new Date(b.session!.startsAt).getTime())[0];
 
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();

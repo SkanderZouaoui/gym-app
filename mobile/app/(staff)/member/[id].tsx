@@ -15,6 +15,7 @@ import { EmptyState, DetailSkeleton } from '../../../src/components/ui';
 import { StatusTag, formatMoney, membershipBadge, METHOD_LABEL } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../../src/i18n';
+import { useNow } from '../../../src/hooks/useNow';
 
 const RING = 104;
 const STROKE = 5;
@@ -26,6 +27,7 @@ const fmtDate = (d: string, year = true) =>
 
 /** Fiche adhérent (accueil) : identité, abonnement en cours, coordonnées, paiements, renouvellement. */
 export default function StaffMemberScreen() {
+  const nowMs = useNow();
   const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -58,9 +60,9 @@ export default function StaffMemberScreen() {
   const sorted = [...(memberships ?? [])].sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
   const current = sorted.find((m) => m.status === 'ACTIVE') ?? sorted[0];
   const total = current ? Math.max(1, new Date(current.endDate).getTime() - new Date(current.startDate).getTime()) : 1;
-  const elapsed = current ? Math.min(total, Math.max(0, Date.now() - new Date(current.startDate).getTime())) : 0;
+  const elapsed = current ? Math.min(total, Math.max(0, nowMs - new Date(current.startDate).getTime())) : 0;
   const ratio = elapsed / total;
-  const daysLeft = current ? Math.max(0, Math.ceil((new Date(current.endDate).getTime() - Date.now()) / 86_400_000)) : null;
+  const daysLeft = current ? Math.max(0, Math.ceil((new Date(current.endDate).getTime() - nowMs) / 86_400_000)) : null;
   const badge = membershipBadge(current?.status, daysLeft);
   const paidTotal = memberPayments.reduce((s, p) => s + Number(p.amount), 0);
   const initials = `${member.firstName[0] ?? ''}${member.lastName[0] ?? ''}`.toUpperCase();

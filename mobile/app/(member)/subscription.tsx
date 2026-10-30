@@ -12,6 +12,7 @@ import { MembershipHeroCard } from '../../src/components/adherent/MembershipHero
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../src/i18n';
+import { useNow } from '../../src/hooks/useNow';
 
 function durationLabel(days: number): string {
   if (days >= 360) return `${Math.round(days / 365)} an${days >= 730 ? 's' : ''}`;
@@ -27,6 +28,7 @@ function periodLabel(start: string, end: string): string {
 
 /** Abonnement : formule en cours (carte héro) et autres formules proposées par la salle. */
 export default function SubscriptionScreen() {
+  const nowMs = useNow();
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -36,7 +38,7 @@ export default function SubscriptionScreen() {
 
   const active = memberships?.find((m) => m.status === 'ACTIVE');
   const expired = !active && memberships?.some((m) => m.status === 'EXPIRED');
-  const daysLeft = active ? Math.max(0, Math.ceil((new Date(active.endDate).getTime() - Date.now()) / 86_400_000)) : 0;
+  const daysLeft = active ? Math.max(0, Math.ceil((new Date(active.endDate).getTime() - nowMs) / 86_400_000)) : 0;
   const ratio = active ? Math.min(1, daysLeft / Math.max(1, active.plan.durationDays)) : 0;
   const otherPlans = (plans ?? []).filter((p) => p.id !== active?.planId);
 

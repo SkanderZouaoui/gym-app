@@ -14,6 +14,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useManualCheckin, useScan, type ScanOutcome } from '../hooks/useAttendance';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../i18n';
+import { useNow } from '../hooks/useNow';
 
 export interface ScanSessionOption {
   id: string;
@@ -35,6 +36,7 @@ const ACCENT = '#A78BFA';
 /** Écran de scan v2 : titre, viseur avec cadre à coins lumineux et ligne de balayage animée,
  * sélecteur de cours, pointage manuel par code de réservation. */
 export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) {
+  const nowMs = useNow();
   useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -270,7 +272,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
               {sessions.map((s) => {
                 const active = s.id === sessionId;
-                const live = new Date(s.startsAt).getTime() <= Date.now();
+                const live = new Date(s.startsAt).getTime() <= nowMs;
                 return (
                   <Pressable key={s.id} onPress={() => onSelectSession?.(s.id)} style={({ pressed }) => [styles.sessionCard, active && styles.sessionCardActive, pressed && { opacity: 0.9 }]}>
                     {active ? (

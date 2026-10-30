@@ -16,6 +16,7 @@ import { StatusTag } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
+import { useNow } from '../../../src/hooks/useNow';
 
 const WEEKDAYS = WEEKDAYS_SHORT_SUN;
 type StatusFilter = 'all' | 'upcoming' | 'full' | 'low';
@@ -61,7 +62,7 @@ export default function StaffPlanningScreen() {
   const [type, setType] = useState<string | null>(null);
   const [coach, setCoach] = useState<string | null>(null);
 
-  const now = Date.now();
+  const now = useNow();
   const day = days[selectedDay].date;
   const daySessions = useMemo(
     () =>

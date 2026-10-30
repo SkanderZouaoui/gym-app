@@ -7,6 +7,7 @@ import { ScreenTitle } from './ui';
 import { fonts, radii, spacing } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useNow } from '../hooks/useNow';
 
 interface ScannerScreenProps {
   /** Cours scannables aujourd'hui ; undefined tant qu'ils chargent. */
@@ -18,12 +19,13 @@ interface ScannerScreenProps {
 
 /** Écran de scan commun (accueil, admin, coach) : choisit le cours actif puis affiche le scanner v2. */
 export function ScannerScreen({ sessions, initialSessionId, emptyText }: ScannerScreenProps) {
+  const nowMs = useNow();
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [selected, setSelected] = useState<string | undefined>(initialSessionId);
 
-  const now = Date.now();
+  const now = nowMs;
   // Les cours terminés ne sont plus scannables : seuls restent le cours en cours et ceux à venir.
   const sorted = (sessions ?? [])
     .filter((s) => new Date(s.endsAt).getTime() >= now)

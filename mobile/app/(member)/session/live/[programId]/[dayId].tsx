@@ -97,7 +97,7 @@ export default function LiveSessionScreen() {
   const [foundDraft, setFoundDraft] = useState(() => (programId && dayId ? readSessionDraft(programId, dayId) : null));
   const [draftPromptVisible, setDraftPromptVisible] = useState(() => !!foundDraft);
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
-  const startedAt = useRef<number>(Date.now() - (foundDraft?.elapsedSeconds ?? 0) * 1000);
+  const [startedAtMs] = useState(() => Date.now() - (foundDraft?.elapsedSeconds ?? 0) * 1000);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const exerciseOffsets = useRef<Record<string, number>>({});
   const lastScrolledExerciseId = useRef<string | null>(null);
@@ -153,9 +153,9 @@ export default function LiveSessionScreen() {
   }, [day, workouts, lastWeightByExercise, isLoadingWorkouts, draftPromptVisible]);
 
   useEffect(() => {
-    const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - startedAt.current) / 1000)), 1000);
+    const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - startedAtMs) / 1000)), 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [startedAtMs]);
 
   useEffect(() => {
     if (!programId || !dayId || !hydratedRef.current || sets.length === 0) return;
@@ -163,7 +163,7 @@ export default function LiveSessionScreen() {
       writeSessionDraft({
         programId,
         dayId,
-        startedAt: startedAt.current,
+        startedAt: startedAtMs,
         elapsedSeconds,
         sets,
         addedExercises,
@@ -171,7 +171,7 @@ export default function LiveSessionScreen() {
       });
     }, 800);
     return () => clearTimeout(t);
-  }, [programId, dayId, sets, addedExercises, removedExerciseIds, elapsedSeconds]);
+  }, [programId, dayId, sets, addedExercises, removedExerciseIds, elapsedSeconds, startedAtMs]);
 
   useEffect(() => {
     if (restSecondsLeft === null) return;

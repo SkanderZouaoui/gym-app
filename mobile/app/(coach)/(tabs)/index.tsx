@@ -17,11 +17,13 @@ import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefres
 import { NotificationBell } from '../../../src/components/NotificationBell';
 import { RoleAnnouncements, RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
+import { useNow } from '../../../src/hooks/useNow';
 
 const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
 /** Accueil Coach — Design System/FitZone Mobile Coach.dc.html (vue Accueil) : prochain cours, chiffres du jour, à traiter, cours du jour. */
 export default function CoachHomeScreen() {
+  const nowMs = useNow();
   const client = useQueryClient();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => client.invalidateQueries());
   const { t } = useTranslation();
@@ -44,11 +46,11 @@ export default function CoachHomeScreen() {
         .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()),
     [sessions],
   );
-  const next = today.find((s) => new Date(s.endsAt).getTime() > Date.now());
+  const next = today.find((s) => new Date(s.endsAt).getTime() > nowMs);
   const totalEnrolled = today.reduce((n, s) => n + s._count.bookings, 0);
   const totalPresent = today.reduce((n, s) => n + (s.attendedCount ?? 0), 0);
   // Cours terminés ou en cours dont le pointage n'est pas complet.
-  const toValidate = today.filter((s) => new Date(s.startsAt).getTime() <= Date.now() && (s.attendedCount ?? 0) < s._count.bookings).length;
+  const toValidate = today.filter((s) => new Date(s.startsAt).getTime() <= nowMs && (s.attendedCount ?? 0) < s._count.bookings).length;
   const pending = (programs ?? []).filter((p) => p.status === 'PENDING').length;
   const rejected = (programs ?? []).filter((p) => p.status === 'REJECTED').length;
 

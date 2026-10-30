@@ -22,6 +22,7 @@ import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll'
 import { dateLocale } from '../../../src/i18n';
 import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
 import { HScroll } from '../../../src/components/ui/HScroll';
+import { useNow } from '../../../src/hooks/useNow';
 
 const WEEKDAY_LABELS = WEEKDAYS_SHORT_SUN;
 
@@ -36,6 +37,7 @@ function buildWeek() {
 }
 
 export default function PlanningScreen() {
+  const nowMs = useNow();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const { t } = useTranslation();
@@ -66,8 +68,8 @@ export default function PlanningScreen() {
   const activeType = classTypeFilter && classTypeOptions.includes(classTypeFilter) ? classTypeFilter : null;
 
   const upcomingCount = useMemo(
-    () => (myBookings ?? []).filter((b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= Date.now()).length,
-    [myBookings],
+    () => (myBookings ?? []).filter((b) => b.status === 'CONFIRMED' && b.session && new Date(b.session.startsAt).getTime() >= nowMs).length,
+    [myBookings, nowMs],
   );
 
   const bookedStatus = useMemo(() => {
@@ -211,9 +213,10 @@ function SessionCard({
   onPress: () => void;
 }) {
   const { t } = useTranslation();
+  const nowMs = useNow();
   const spotsLeft = session.capacity - session._count.bookings;
   const isFull = spotsLeft <= 0;
-  const started = new Date(session.startsAt).getTime() <= Date.now();
+  const started = new Date(session.startsAt).getTime() <= nowMs;
   const progress = session._count.bookings / Math.max(session.capacity, 1);
   const durationMinutes = Math.round(
     (new Date(session.endsAt).getTime() - new Date(session.startsAt).getTime()) / 60000,

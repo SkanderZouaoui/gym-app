@@ -31,9 +31,11 @@ import { usePreferencesStore } from '../../../src/store/preferences';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { dateLocale , LANGUAGE_LABELS } from '../../../src/i18n';
 import { LanguageSheet } from '../../../src/components/LanguageSheet';
+import { useNow } from '../../../src/hooks/useNow';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
+  const nowMs = useNow();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, preference, setScheme } = useTheme();
   const { t } = useTranslation();
@@ -67,7 +69,7 @@ export default function ProfileScreen() {
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
 
   const activeMembership = memberships?.find((m) => m.status === 'ACTIVE');
-  const now = Date.now();
+  const now = nowMs;
   const totalDays = activeMembership
     ? Math.max(1, Math.round((new Date(activeMembership.endDate).getTime() - new Date(activeMembership.startDate).getTime()) / 86_400_000))
     : 0;
@@ -115,7 +117,7 @@ export default function ProfileScreen() {
   const GOAL_TARGET = goalTarget((user?.fitnessProfile as { sessionsPerWeek?: string } | null | undefined)?.sessionsPerWeek);
   const weekSessions = weekCounts[weekCounts.length - 1] ?? 0;
   const memberMonths = memberships?.length
-    ? (Date.now() - Math.min(...memberships.map((m) => new Date(m.startDate).getTime()))) / (30 * 86_400_000)
+    ? (nowMs - Math.min(...memberships.map((m) => new Date(m.startDate).getTime()))) / (30 * 86_400_000)
     : 0;
   const badges: BadgeInfo[] = [
     { icon: 'local-fire-department', label: t('member.serie_4_sem'), unlocked: streakWeeks >= 4 },
