@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>body{margin:0;-webkit-font-smoothing:antialiased}a{color:#7C3AED;text-decoration:none}a:hover{color:#5B21B6;text-decoration:underline}input,button{font:inherit;color:inherit}input{outline:none}@keyframes sp{to{transform:rotate(360deg)}}@keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}</style>
+</helmet>
+<div style="min-height:100vh;background:#E8E5F1;padding:36px 24px 56px;display:flex;flex-direction:column;align-items:center;gap:24px;font-family:-apple-system,'SF Pro Text','Inter',sans-serif;box-sizing:border-box">
+<div style="text-align:center"><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5B21B6;font-weight:700">Muscle UP · Refonte</div><div style="font-size:30px;font-weight:800;letter-spacing:-.025em;color:#1B1530;margin-top:6px">Connexion &amp; mot de passe</div></div>
+<div style="display:flex;gap:28px;flex-wrap:wrap;justify-content:center;align-items:center">
+<div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;font-weight:700;color:#6B6485;letter-spacing:.08em;text-transform:uppercase">Thème</span><sc-for list="{{ themeBtns }}" as="h" hint-placeholder-count="2"><button onClick="{{ h.on }}" style="{{ h.st }}">{{ h.l }}</button></sc-for></div>
+</div>
+<div style="max-width:620px;text-align:center;font-size:14px;color:#4A4463;text-wrap:pretty">{{ heroNote }}</div>
+<div style="display:flex;gap:44px;flex-wrap:wrap;justify-content:center">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+<div style="width:390px;height:844px;border-radius:54px;overflow:hidden;position:relative;border:10px solid #0B0A12;box-sizing:content-box;box-shadow:0 30px 70px rgba(40,20,90,.35);background:{{ s.bg }};color:{{ s.fg }}">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;justify-content:space-between;align-items:center;padding:6px 30px 0;font-weight:700;font-size:15px;z-index:5;color:#fff"><span>9:41</span><span style="font-family:'Material Symbols Rounded';font-size:18px;letter-spacing:4px">signal_cellular_alt wifi battery_full</span></div>
+
+<sc-if value="{{ s.isLogin }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;right:0;top:0;height:330px;background:linear-gradient(160deg,#8B5CF6 0%,#6D28D9 45%,#2E1065 100%);overflow:hidden">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 26px)"></div>
+<sc-if value="{{ s.hA }}" hint-placeholder-val="{{ true }}"><svg width="390" height="330" style="position:absolute;left:0;top:0">
+<rect x="0" y="130" width="390" height="9" style="fill:#fff"></rect><rect x="0" y="120" width="14" height="29" rx="4" style="fill:#fff"></rect><rect x="376" y="120" width="14" height="29" rx="4" style="fill:#fff"></rect>
+<text x="26" y="122" style="font-size:88px;font-weight:900;font-style:italic;letter-spacing:-.05em;fill:#fff">UP</text>
+<text x="28" y="196" style="font-size:54px;font-weight:900;font-style:italic;letter-spacing:-.03em;fill:none;stroke:#fff;stroke-width:1.6">MUSCLE</text>
+<text x="28" y="226" style="font-size:15px;font-weight:500;fill:#fff;opacity:.92">Passe au-dessus de la barre.</text>
+<path d="M318 252 C318 222 276 206 288 176 S308 150 300 80" style="fill:none;stroke:#DDD6FE;stroke-width:3;stroke-dasharray:2 9;stroke-linecap:round"></path>
+<polyline points="287,94 300,76 313,94" style="fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"></polyline>
+<circle cx="318" cy="252" r="11" style="fill:#fff"></circle><circle cx="288" cy="182" r="11" style="fill:#fff"></circle><circle cx="302" cy="112" r="11" style="fill:#fff"></circle>
+<text x="318" y="257" style="font-size:13px;font-weight:800;fill:#5B21B6;text-anchor:middle">1</text><text x="288" y="187" style="font-size:13px;font-weight:800;fill:#5B21B6;text-anchor:middle">2</text><text x="302" y="117" style="font-size:13px;font-weight:800;fill:#5B21B6;text-anchor:middle">3</text>
+<text x="28" y="256" style="font-size:12px;font-weight:700;letter-spacing:.08em;fill:#DDD6FE">1 TRACTION · 2 TRANSITION · 3 POUSSÉE</text>
+</svg></sc-if>
+<div style="position:absolute;right:28px;top:60px;width:42px;height:42px;border-radius:13px;background:#fff;display:grid;place-items:center;z-index:2"><div style="display:flex;align-items:center"><div style="width:5px;height:18px;border-radius:2px;background:#5B21B6"></div><div style="width:5px;height:12px;border-radius:2px;background:#5B21B6;margin-left:2px"></div><div style="width:10px;height:4px;background:#5B21B6"></div><div style="width:5px;height:12px;border-radius:2px;background:#5B21B6"></div><div style="width:5px;height:18px;border-radius:2px;background:#5B21B6;margin-left:2px"></div></div></div>
+</div>
+</sc-if>
+<sc-if value="{{ s.isPw }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;top:0;height:220px;background:linear-gradient(160deg,#8B5CF6 0%,#6D28D9 45%,#2E1065 100%);overflow:hidden">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 26px)"></div>
+<svg width="390" height="220" style="position:absolute;left:0;top:0">
+<rect x="0" y="122" width="390" height="8" style="fill:#fff"></rect><rect x="0" y="113" width="12" height="26" rx="4" style="fill:#fff"></rect><rect x="378" y="113" width="12" height="26" rx="4" style="fill:#fff"></rect>
+<text x="26" y="114" style="font-size:72px;font-weight:900;font-style:italic;letter-spacing:-.05em;fill:#fff">UP</text>
+<text x="28" y="174" style="font-size:38px;font-weight:900;font-style:italic;letter-spacing:-.03em;fill:none;stroke:#fff;stroke-width:1.4">MUSCLE</text>
+<path d="M330 190 L330 60" style="fill:none;stroke:#DDD6FE;stroke-width:3;stroke-dasharray:2 9;stroke-linecap:round"></path>
+<polyline points="317,76 330,58 343,76" style="fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round"></polyline>
+</svg>
+</div>
+</sc-if>
+
+<div style="{{ s.sheet }}">
+<sc-if value="{{ s.isLogin }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ s.l.ok }}"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding-bottom:80px;text-align:center"><div style="width:84px;height:84px;border-radius:50%;background:#16A34A;color:#fff;display:grid;place-items:center;box-shadow:0 12px 30px rgba(22,163,74,.4)"><span style="font-family:'Material Symbols Rounded';font-size:46px">check</span></div><div style="font-size:28px;font-weight:800;letter-spacing:-.03em">Prêt à t’entraîner&nbsp;!</div><button onClick="{{ s.l.reset }}" style="border:0;background:none;color:#7C3AED;font-weight:600;font-size:14px;cursor:pointer;padding:10px">Rejouer</button></div></sc-if>
+<sc-if value="{{ s.l.form }}"><div>
+<div style="font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.05">Content de te revoir</div>
+<div style="font-size:14px;color:{{ s.mu }};margin-top:6px">Connecte-toi à ton espace.</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+<div style="height:56px;border-radius:18px;background:{{ s.sf }};border:1.5px solid {{ s.bd }};display:flex;align-items:center;gap:12px;padding:0 16px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ s.mu }}">mail</span><input value="{{ s.l.id }}" onInput="{{ s.l.setId }}" placeholder="Email ou téléphone" style="flex:1;border:0;background:none;font-size:16px;height:100%;min-width:0"></div>
+<div style="{{ s.l.pwBox }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ s.mu }}">lock</span><input type="{{ s.l.pwType }}" value="{{ s.l.pw }}" onInput="{{ s.l.setPw }}" placeholder="Mot de passe" style="flex:1;border:0;background:none;font-size:16px;height:100%;min-width:0"><button onClick="{{ s.l.toggle }}" style="border:0;background:none;cursor:pointer;padding:6px;display:grid;color:{{ s.mu }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ s.l.eye }}</span></button></div>
+</div>
+<sc-if value="{{ s.l.err }}"><div style="display:flex;align-items:center;gap:8px;color:#EF4444;font-size:13px;font-weight:600;margin-top:10px"><span style="font-family:'Material Symbols Rounded';font-size:18px">error</span>Renseigne ton identifiant et ton mot de passe.</div></sc-if>
+<div style="display:flex;justify-content:flex-end;margin-top:6px"><button onClick="{{ s.l.forgot }}" style="border:0;background:none;color:#7C3AED;font-weight:600;font-size:14px;padding:10px 0;cursor:pointer">Mot de passe oublié ?</button></div>
+<sc-if value="{{ s.l.showFg }}"><div style="background:{{ s.prs }};color:#7C3AED;border-radius:14px;padding:11px 14px;font-size:13px;display:flex;gap:10px;align-items:center;margin-bottom:10px"><span style="font-family:'Material Symbols Rounded';font-size:20px">mark_email_read</span>Lien de réinitialisation envoyé.</div></sc-if>
+<div style="display:flex;gap:10px">
+<button onClick="{{ s.l.login }}" style-active="transform:scale(.97)" style="flex:1;height:58px;border:0;border-radius:18px;background:linear-gradient(180deg,#8B5CF6,#5B21B6);box-shadow:0 10px 24px rgba(124,58,237,.45);color:#fff;font-weight:800;font-size:17px;letter-spacing:.02em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px"><sc-if value="{{ s.l.loading }}"><span style="width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .7s linear infinite"></span>Connexion…</sc-if><sc-if value="{{ s.l.idle }}" hint-placeholder-val="{{ true }}">Se connecter<span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_forward</span></sc-if></button>
+<button onClick="{{ s.l.login }}" style-active="transform:scale(.95)" style="width:58px;height:58px;border-radius:18px;background:{{ s.sf }};border:1.5px solid {{ s.bd }};cursor:pointer;display:grid;place-items:center;color:#7C3AED"><span style="font-family:'Material Symbols Rounded';font-size:30px">face</span></button>
+</div>
+<div style="font-size:13px;color:{{ s.mu }};text-align:center;margin-top:14px;text-wrap:pretty">Pas d’auto-inscription : ton compte est créé par l’admin ou l’accueil.</div>
+</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ s.isPw }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ s.p.done }}"><div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:0 10px 90px;text-align:center"><div style="width:84px;height:84px;border-radius:50%;background:#16A34A;color:#fff;display:grid;place-items:center;box-shadow:0 12px 30px rgba(22,163,74,.4)"><span style="font-family:'Material Symbols Rounded';font-size:46px">check</span></div><div style="font-size:28px;font-weight:800;letter-spacing:-.03em">{{ s.p.doneT }}</div><div style="font-size:14px;color:{{ s.mu }};text-wrap:pretty">{{ s.p.doneS }}</div><button onClick="{{ s.p.reset }}" style-active="transform:scale(.97)" style="margin-top:12px;width:100%;height:58px;border:0;border-radius:18px;background:linear-gradient(180deg,#8B5CF6,#5B21B6);box-shadow:0 10px 24px rgba(124,58,237,.45);color:#fff;font-weight:800;font-size:17px;cursor:pointer">{{ s.p.doneB }}</button></div></sc-if>
+<sc-if value="{{ s.p.form }}"><div>
+<div style="display:inline-flex;align-items:center;gap:6px;background:{{ s.prs }};color:#7C3AED;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;letter-spacing:.04em"><span style="font-family:'Material Symbols Rounded';font-size:16px">{{ s.p.chipI }}</span>{{ s.p.chip }}</div>
+<div style="font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.08;margin-top:12px">{{ s.p.title }}</div>
+<div style="font-size:14px;color:{{ s.mu }};margin-top:6px;text-wrap:pretty">{{ s.p.sub }}</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+<div style="height:56px;border-radius:18px;background:{{ s.sf }};border:1.5px solid {{ s.bd }};display:flex;align-items:center;gap:12px;padding:0 8px 0 16px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ s.mu }}">lock</span><input type="{{ s.p.type }}" value="{{ s.p.pw }}" onInput="{{ s.p.setPw }}" placeholder="Nouveau mot de passe" style="flex:1;border:0;background:none;font-size:16px;height:100%;min-width:0"><button onClick="{{ s.p.toggle }}" style="border:0;background:none;cursor:pointer;padding:6px;display:grid;color:{{ s.mu }}"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ s.p.eye }}</span></button></div>
+<div style="{{ s.p.box2 }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ s.mu }}">lock_reset</span><input type="{{ s.p.type }}" value="{{ s.p.pw2 }}" onInput="{{ s.p.setPw2 }}" placeholder="Confirmer le mot de passe" style="flex:1;border:0;background:none;font-size:16px;height:100%;min-width:0"></div>
+</div>
+<div style="display:flex;align-items:center;gap:6px;margin-top:14px"><sc-for list="{{ s.p.bars }}" as="b" hint-placeholder-count="4"><div style="{{ b.st }}"></div></sc-for><span style="font-size:12px;font-weight:700;margin-left:6px;min-width:44px;color:{{ s.p.lvlC }}">{{ s.p.lvl }}</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:12px"><sc-for list="{{ s.p.rules }}" as="r" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:6px;font-size:13px;color:{{ r.c }};font-weight:{{ r.w }}"><span style="font-family:'Material Symbols Rounded';font-size:18px">{{ r.i }}</span>{{ r.l }}</div></sc-for></div>
+<sc-if value="{{ s.p.mis }}"><div style="display:flex;align-items:center;gap:8px;color:#EF4444;font-size:13px;font-weight:600;margin-top:12px"><span style="font-family:'Material Symbols Rounded';font-size:18px">error</span>Les deux mots de passe sont différents.</div></sc-if>
+<button onClick="{{ s.p.submit }}" style-active="transform:scale(.97)" style="{{ s.p.btn }}">{{ s.p.btnL }}<span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_forward</span></button>
+<div style="font-size:13px;color:{{ s.mu }};text-align:center;margin-top:14px;text-wrap:pretty">{{ s.p.foot }}</div>
+</div></sc-if>
+</sc-if>
+</div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:{{ s.fg }};opacity:.85;z-index:6"></div>
+</div>
+<div style="font-size:14px;font-weight:700;color:#1B1530">{{ s.label }}</div>
+</div>
+</sc-for>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { hero: 'A', theme: 'dark',
+    l: { id: '', pw: '', show: false, err: false, loading: false, ok: false, fg: false },
+    first: { pw: '', pw2: '', show: false, done: false },
+    reset: { pw: '', pw2: '', show: false, done: false } };
+  renderVals() {
+    const S = this.state, up = (k, o) => this.setState(s => ({ [k]: { ...s[k], ...o } }));
+    const T = S.theme === 'dark'
+      ? { bg: '#0F0B1E', fg: '#F5F2FF', sf: '#1A1431', bd: '#2E2650', mu: '#A29BC2', prs: 'rgba(124,58,237,.2)' }
+      : { bg: '#FFFFFF', fg: '#1B1530', sf: '#F5F3FB', bd: '#E3DEF0', mu: '#6B6485', prs: '#EFE8FF' };
+    const chip = on => `border:0;cursor:pointer;height:34px;padding:0 16px;border-radius:999px;font-weight:700;font-size:13px;background:${on ? '#7C3AED' : '#fff'};color:${on ? '#fff' : '#4A4463'};box-shadow:0 1px 3px rgba(40,20,90,.15)`;
+    const notes = { A: 'A · Trajectoire — la barre de traction coupe le nom : « UP » passe au-dessus, « MUSCLE » reste dessous. La ligne pointillée suit le mouvement : traction, transition, poussée.',
+      B: 'B · Anneaux — deux anneaux de gymnastique suspendus, où le muscle-up se pratique aussi. Une flèche montre la montée entre les deux.',
+      C: 'C · Répétition — un « UP » géant en filigrane, la barre et trois chevrons qui montent : la progression, une rep de plus.' };
+    const sheetLogin = `position:absolute;left:0;right:0;bottom:0;top:276px;background:${T.bg};border-radius:34px 34px 0 0;padding:24px 24px 0;box-sizing:border-box;box-shadow:0 -12px 40px rgba(20,8,60,.25);z-index:2`;
+    const sheetPw = `position:absolute;left:0;right:0;bottom:0;top:188px;background:${T.bg};border-radius:34px 34px 0 0;padding:22px 24px 0;box-sizing:border-box;box-shadow:0 -12px 40px rgba(20,8,60,.25);z-index:2`;
+    const L = S.l;
+    const login = { ok: L.ok, form: !L.ok, err: L.err, showFg: L.fg, loading: L.loading, idle: !L.loading, id: L.id, pw: L.pw,
+      pwType: L.show ? 'text' : 'password', eye: L.show ? 'visibility_off' : 'visibility',
+      pwBox: `height:56px;border-radius:18px;background:${T.sf};border:1.5px solid ${L.err && !L.pw ? '#EF4444' : T.bd};display:flex;align-items:center;gap:12px;padding:0 8px 0 16px;${L.err && !L.pw ? 'animation:sh .35s' : ''}`,
+      setId: e => up('l', { id: e.target.value }), setPw: e => up('l', { pw: e.target.value, err: false }),
+      toggle: () => up('l', { show: !L.show }), forgot: () => up('l', { fg: true }), reset: () => up('l', { ok: false, pw: '', loading: false }),
+      login: () => { if (!L.id || !L.pw) return up('l', { err: true }); up('l', { loading: true, err: false, fg: false }); setTimeout(() => up('l', { loading: false, ok: true }), 1200); } };
+    const mkPw = (k, cfg) => {
+      const P = S[k], pw = P.pw;
+      const ok = [pw.length >= 8, /[A-Z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)];
+      const labs = ['8 caractères min.', '1 majuscule', '1 chiffre', '1 symbole'];
+      const n = ok.filter(Boolean).length, lvlC = n < 2 ? '#EF4444' : n < 4 ? '#F59E0B' : '#16A34A';
+      const match = pw && pw === P.pw2, mis = !!P.pw2 && P.pw2 !== pw, valid = n === 4 && match;
+      return { done: P.done, form: !P.done, ...cfg, pw, pw2: P.pw2, type: P.show ? 'text' : 'password', eye: P.show ? 'visibility_off' : 'visibility',
+        box2: `height:56px;border-radius:18px;background:${T.sf};border:1.5px solid ${mis ? '#EF4444' : match ? '#16A34A' : T.bd};display:flex;align-items:center;gap:12px;padding:0 16px`,
+        bars: [0, 1, 2, 3].map(i => ({ st: `flex:1;height:6px;border-radius:3px;background:${i < n ? lvlC : T.bd}` })),
+        lvl: pw ? (n < 2 ? 'Faible' : n < 4 ? 'Moyen' : 'Fort') : '', lvlC,
+        rules: ok.map((o, i) => ({ l: labs[i], i: o ? 'check_circle' : 'radio_button_unchecked', c: o ? '#16A34A' : T.mu, w: o ? 700 : 500 })),
+        mis, btnL: cfg.btnL,
+        btn: `margin-top:16px;width:100%;height:58px;border:0;border-radius:18px;color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:${valid ? 'pointer' : 'not-allowed'};background:${valid ? 'linear-gradient(180deg,#8B5CF6,#5B21B6)' : '#8E86A8'};box-shadow:${valid ? '0 10px 24px rgba(124,58,237,.45)' : 'none'}`,
+        setPw: e => up(k, { pw: e.target.value }), setPw2: e => up(k, { pw2: e.target.value }),
+        toggle: () => up(k, { show: !P.show }), submit: () => { if (valid) up(k, { done: true }); }, reset: () => up(k, { pw: '', pw2: '', done: false }) };
+    };
+    const first = mkPw('first', { chip: 'ÉTAPE 1 SUR 1 · SÉCURITÉ', chipI: 'shield', title: 'Bienvenue, Karim', sub: 'C’est ta première connexion. Remplace le mot de passe provisoire par le tien.', btnL: 'Activer mon compte', foot: 'Le mot de passe provisoire ne fonctionnera plus.', doneT: 'Compte activé', doneS: 'Ton mot de passe est enregistré. Ton espace t’attend.', doneB: 'Accéder à mon espace' });
+    const reset = mkPw('reset', { chip: 'LIEN VALIDE 23 MIN', chipI: 'timer', title: 'Nouveau mot de passe', sub: 'Lien vérifié pour karim.b@email.com. Choisis un mot de passe que tu n’as pas déjà utilisé.', btnL: 'Réinitialiser', foot: 'Lien expiré ? Redemande-en un depuis la page de connexion.', doneT: 'Mot de passe mis à jour', doneS: 'Tu peux te connecter avec ton nouveau mot de passe.', doneB: 'Se connecter' });
+    const base = { ...T, hA: true, hB: S.hero === 'B', hC: S.hero === 'C' };
+    return {
+      heroes: ['A', 'B', 'C'].map(h => ({ l: 'Option ' + h, st: chip(S.hero === h), on: () => this.setState({ hero: h }) })),
+      themeBtns: [['dark', 'Sombre'], ['light', 'Clair']].map(([k, l]) => ({ l, st: chip(S.theme === k), on: () => this.setState({ theme: k }) })),
+      heroNote: notes[S.hero],
+      screens: [
+        { ...base, isLogin: true, isPw: false, sheet: sheetLogin, l: login, label: '1 · Connexion' },
+        { ...base, isLogin: false, isPw: true, sheet: sheetPw, p: first, label: '2 · Première connexion' },
+        { ...base, isLogin: false, isPw: true, sheet: sheetPw, p: reset, label: '3 · Lien « mot de passe oublié »' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

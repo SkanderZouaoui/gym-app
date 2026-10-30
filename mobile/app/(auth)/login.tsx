@@ -1,12 +1,9 @@
-import { useMemo, useState } from 'react';
-import { Link, router } from 'expo-router';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { router } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button } from '../../src/components/Button';
-import { TextField } from '../../src/components/TextField';
-import { fonts, spacing, typography } from '../../src/theme/tokens';
-import { useTheme } from '../../src/theme/ThemeContext';
+import { fonts } from '../../src/theme/tokens';
+import { AuthButton, AuthField, AuthScreen, ErrorLine, LogoTile, useAuthPalette } from '../../src/components/auth/AuthKit';
 import { authApi, meApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
 import { useQueryClient } from '@tanstack/react-query';
@@ -24,8 +21,7 @@ import { LANGUAGE_LABELS } from '../../src/i18n';
 /** Écran de connexion — FitZone App Adherent.dc.html, A3. */
 export default function LoginScreen() {
   const { t } = useTranslation();
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const pal = useAuthPalette();
   const { language } = useLanguage();
   const [languageOpen, setLanguageOpen] = useState(false);
   const [email, setEmail] = useState('');
@@ -67,58 +63,51 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <>
+      <AuthScreen
+        topRight={<LogoTile />}
       >
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <Pressable style={styles.langButton} onPress={() => setLanguageOpen(true)} hitSlop={8} accessibilityLabel={t('common.langue')}>
-            <MaterialIcons name="language" size={18} color={colors.primaryInk} />
-            <Text style={styles.langText}>{LANGUAGE_LABELS[language]}</Text>
+        <Text style={{ fontFamily: fonts.head, fontSize: 28, letterSpacing: -0.8, lineHeight: 30, color: pal.fg }}>{t('auth.bon_retour')}</Text>
+        <Text style={{ fontFamily: fonts.body, fontSize: 14, color: pal.mu, marginTop: 6 }}>{t('auth.login_subtitle')}</Text>
+
+        <View style={{ gap: 12, marginTop: 16 }}>
+          {offline ? <Banner tone="warning" icon="wifi-off" text={t('auth.pas_de_connexion_la_connexion')} /> : null}
+          <AuthField icon="mail" value={email} onChangeText={(v) => { setEmail(v); setError(null); }} keyboardType="email-address" placeholder={t('auth.id_placeholder')} autoComplete="email" />
+          <AuthField
+            icon="lock"
+            secure
+            value={password}
+            onChangeText={(v) => { setPassword(v); setError(null); }}
+            placeholder={t('common.mot_de_passe')}
+            borderColor={error && !password ? '#EF4444' : undefined}
+            onSubmitEditing={handleLogin}
+          />
+        </View>
+        {error ? <ErrorLine text={error} /> : null}
+
+        <View style={{ alignItems: 'flex-end', marginTop: 6, marginBottom: 6 }}>
+          <Pressable onPress={() => router.push('/(auth)/forgot-password')} hitSlop={6} style={{ paddingVertical: 10 }}>
+            <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 14, color: pal.accent }}>{t('auth.mot_de_passe_oublie_2')}</Text>
           </Pressable>
-          <View style={styles.header}>
-            <View style={styles.logo}>
-              <Text style={styles.logoText}>{t('common.mu')}</Text>
-            </View>
-            <Text style={styles.title}>{t('auth.bon_retour')}</Text>
-            <Text style={styles.subtitle}>{t('auth.connectez_vous_pour_reserver_vos')}</Text>
-          </View>
+        </View>
 
-          <View style={styles.form}>
-            {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-            {offline ? (
-              <Banner tone="warning" icon="wifi-off" text={t('auth.pas_de_connexion_la_connexion')} />
-            ) : null}
+        <AuthButton label={loading ? t('auth.connexion') : t('auth.se_connecter')} onPress={handleLogin} loading={loading} disabled={offline || !email.trim() || !password} />
+        <Text style={{ fontFamily: fonts.body, fontSize: 13, color: pal.mu, textAlign: 'center', marginTop: 14 }}>{t('auth.no_self_signup')}</Text>
 
-            <TextField
-              label={t('common.e_mail')}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              placeholder={t('auth.toi_exemple_com')}
-            />
-            <TextField
-              label={t('common.mot_de_passe')}
-              value={password}
-              onChangeText={setPassword}
-              isPassword
-              placeholder="••••••••"
-              error={error ?? undefined}
-            />
-            <Link href="/(auth)/forgot-password" style={styles.forgotLink}>{t('auth.mot_de_passe_oublie_2')}</Link>
-            <Button label={loading ? t('auth.connexion') : t('auth.se_connecter')} onPress={handleLogin} loading={loading} disabled={offline} />
-          </View>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>{t('auth.pas_encore_de_compte')}</Text>
-            <Link href="/(auth)/register" style={styles.footerLink}>{t('common.creer_un_compte')}</Link>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingTop: 24 }}>
+          <Pressable
+            onPress={() => setLanguageOpen(true)}
+            accessibilityLabel={t('common.langue')}
+            style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, paddingHorizontal: 18, borderRadius: 23, backgroundColor: pal.sf, borderWidth: 1.5, borderColor: pal.bd }, pressed && { opacity: 0.7 }]}
+          >
+            <MaterialIcons name="language" size={20} color={pal.accent} />
+            <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14, color: pal.fg }}>{LANGUAGE_LABELS[language]}</Text>
+            <MaterialIcons name="expand-more" size={20} color={pal.mu} />
+          </Pressable>
+        </View>
+      </AuthScreen>
       <LanguageSheet visible={languageOpen} onClose={() => setLanguageOpen(false)} />
-    </SafeAreaView>
+    </>
   );
 }
 
@@ -131,34 +120,4 @@ function traduireErreur(code: string): string {
     default:
       return i18n.t('auth.impossible_de_se_connecter_reessayez');
   }
-}
-
-function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
-  return StyleSheet.create({
-    langButton: {
-      alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 18,
-      backgroundColor: colors.primarySoft,
-    },
-    langText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
-    safeArea: { flex: 1, backgroundColor: colors.bg },
-    container: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center', gap: spacing.xl },
-    header: { alignItems: 'flex-start', gap: spacing.sm },
-    logo: {
-      width: 64,
-      height: 64,
-      borderRadius: 20,
-      backgroundColor: colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: spacing.sm,
-    },
-    logoText: { fontFamily: fonts.head, color: colors.primaryContrast, fontSize: 22, letterSpacing: -0.5 },
-    title: { ...typography.largeTitle, fontSize: 32, color: colors.text },
-    subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },
-    form: { gap: spacing.md },
-    forgotLink: { fontFamily: fonts.bodySemiBold, color: colors.primaryInk, fontSize: 14, alignSelf: 'flex-start' },
-    footer: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
-    footerText: { fontFamily: fonts.body, color: colors.muted },
-    footerLink: { fontFamily: fonts.bodyBold, color: colors.primaryInk },
-  });
 }
