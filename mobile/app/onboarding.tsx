@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { Animated, Easing, KeyboardAvoidingView, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -67,9 +67,11 @@ export default function OnboardingScreen() {
   // Balayage horizontal : le contenu suit le doigt, puis glisse vers l'écran suivant / précédent (inversé en arabe).
   // Le dernier écran se valide avec le bouton.
   const { width } = useWindowDimensions();
-  const x = useRef(new Animated.Value(0)).current;
+  const x = useState(() => new Animated.Value(0))[0];
   const live = useRef({ step, isRtl, width, busy: false });
-  live.current = { ...live.current, step, isRtl, width };
+  useEffect(() => {
+    live.current = { ...live.current, step, isRtl, width };
+  });
   const goTo = (target: number, dir: 1 | -1) => {
     const w = live.current.width;
     live.current.busy = true;
@@ -81,7 +83,7 @@ export default function OnboardingScreen() {
       });
     });
   };
-  const pan = useRef(
+  const [pan] = useState(() =>
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => !live.current.busy && Math.abs(g.dx) > 12 && Math.abs(g.dx) > Math.abs(g.dy) * 1.5,
       onPanResponderMove: (_, g) => {
@@ -100,7 +102,7 @@ export default function OnboardingScreen() {
       },
       onPanResponderTerminate: () => Animated.spring(x, { toValue: 0, useNativeDriver: true }).start(),
     }),
-  ).current;
+  );
   const opacity = x.interpolate({ inputRange: [-width, 0, width], outputRange: [0.2, 1, 0.2], extrapolate: 'clamp' });
 
   const next = () => (step < STEPS - 1 ? (!live.current.busy && goTo(step + 1, 1)) : void finish());

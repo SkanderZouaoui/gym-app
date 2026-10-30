@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Defs, Line, Polyline, RadialGradient, Stop, Text as SvgText } from 'react-native-svg';
@@ -24,7 +24,7 @@ const easeInOut = (k: number) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2,
 
 /** Apparition / disparition douce d'un élément. */
 function Fade({ visible, duration = 350, style, children }: { visible: boolean; duration?: number; style?: object; children?: React.ReactNode }) {
-  const v = useRef(new Animated.Value(visible ? 1 : 0)).current;
+  const v = useState(() => new Animated.Value(visible ? 1 : 0))[0];
   useEffect(() => {
     Animated.timing(v, { toValue: visible ? 1 : 0, duration, useNativeDriver: true }).start();
   }, [visible, duration, v]);
@@ -37,11 +37,11 @@ export function SplashAnimation({ ready, onFinish }: { ready: boolean; onFinish:
   const [p, setP] = useState(0);
   const [ph, setPh] = useState(0);
   const [animDone, setAnimDone] = useState(false);
-  const out = useRef(new Animated.Value(1)).current;
-  const muscleX = useRef(new Animated.Value(-16)).current;
-  const barScale = useRef(new Animated.Value(0)).current;
-  const upY = useRef(new Animated.Value(150)).current;
-  const fill = useRef(new Animated.Value(0)).current;
+  const out = useState(() => new Animated.Value(1))[0];
+  const muscleX = useState(() => new Animated.Value(-16))[0];
+  const barScale = useState(() => new Animated.Value(0))[0];
+  const upY = useState(() => new Animated.Value(150))[0];
+  const fill = useState(() => new Animated.Value(0))[0];
   const fillWidth = fill.interpolate({ inputRange: [0, 1], outputRange: [0, 140] });
 
   useEffect(() => {

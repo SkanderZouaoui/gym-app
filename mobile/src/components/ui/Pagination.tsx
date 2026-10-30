@@ -40,8 +40,9 @@ export function Pagination({ page, pageCount, pageSize, total, onChange, unit }:
   const first = page * pageSize + 1;
   const last = Math.min((page + 1) * pageSize, total);
 
-  const Arrow = ({ dir, disabled, onPress }: { dir: 'prev' | 'next'; disabled: boolean; onPress: () => void }) => (
+  const renderArrow = ({ dir, disabled, onPress }: { dir: 'prev' | 'next'; disabled: boolean; onPress: () => void }) => (
     <Pressable
+      key={dir}
       accessibilityLabel={dir === 'prev' ? i18n.t('common.page_precedente') : i18n.t('common.page_suivante')}
       disabled={disabled}
       onPress={onPress}
@@ -55,7 +56,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange, unit }:
   return (
     <View style={styles.wrap}>
       <View style={[styles.capsule, cardShadow]}>
-        <Arrow dir="prev" disabled={page === 0} onPress={() => onChange(page - 1)} />
+        {renderArrow({ dir: 'prev', disabled: page === 0, onPress: () => onChange(page - 1) })}
         <View style={styles.numbers}>
           {visiblePages(page, pageCount).map((p) =>
             typeof p === 'string' ? (
@@ -71,7 +72,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange, unit }:
             ),
           )}
         </View>
-        <Arrow dir="next" disabled={page >= pageCount - 1} onPress={() => onChange(page + 1)} />
+        {renderArrow({ dir: 'next', disabled: page >= pageCount - 1, onPress: () => onChange(page + 1) })}
       </View>
       <Text style={styles.summary}>
         <Text style={styles.summaryStrong}>{first}–{last}</Text>{t('common.pagination_rest', { total, page: page + 1, pageCount, unit: unit ?? t('common.pagination_unit_payments') })}

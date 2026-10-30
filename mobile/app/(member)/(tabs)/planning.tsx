@@ -51,7 +51,7 @@ export default function PlanningScreen() {
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [toBook, setToBook] = useState<ClassSessionSummary | null>(null);
-  const days = useMemo(buildWeek, []);
+  const days = useMemo(() => buildWeek(), []);
 
   const [classTypeFilter, setClassTypeFilter] = useState<string | null>(null);
 
