@@ -24,6 +24,7 @@ import { StatsModule } from './stats/stats.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { StorageModule } from './storage/storage.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
+import { MailModule } from './mail/mail.module.js';
 import { CoachesModule } from './coaches/coaches.module.js';
 
 @Module({
@@ -33,6 +34,7 @@ import { CoachesModule } from './coaches/coaches.module.js';
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
     PrismaModule,
+    MailModule,
     AuthModule,
     OrganizationModule,
     UsersModule,

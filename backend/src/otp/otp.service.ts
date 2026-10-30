@@ -1,20 +1,24 @@
 import { randomInt, createHash } from 'node:crypto';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import type { OtpPurpose } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { MailService } from '../mail/mail.service.js';
+import { buildOtpMail } from '../mail/otp-mail.js';
 
 const OTP_TTL_MS = 10 * 60 * 1000;
 
 /** Codes à usage unique (6 chiffres) — mot de passe oublié, changement
- * d'e-mail. Aucun fournisseur d'e-mail n'est branché pour l'instant : le
- * code est loggé en console (section Compte/Profil, mode dev) à la place
- * d'un envoi réel — à remplacer par un vrai envoi plus tard sans changer
- * cette interface. */
+ * d'e-mail. Le code est envoyé par e-mail (MailService) et n'est jamais loggé. */
 @Injectable()
 export class OtpService {
   private readonly logger = new Logger(OtpService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mail: MailService,
+    private readonly config: ConfigService,
+  ) {}
 
   async generateAndStore(userId: string, purpose: OtpPurpose, newEmail?: string) {
     const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
@@ -34,7 +38,25 @@ export class OtpService {
       },
     });
 
-    this.logger.warn(`[DEV OTP] purpose=${purpose} userId=${userId} code=${code} (valide 10 min)`);
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { email: true, firstName: true } });
+    const to = newEmail ?? user?.email;
+    if (!user || !to) return;
+
+    // Envoi en arrière-plan : le délai du SMTP ne doit pas trahir l'existence d'un compte
+    // (mot de passe oublié) et une panne SMTP ne doit pas faire échouer la requête.
+    void this.mail
+      .send(
+        buildOtpMail({
+          purpose,
+          to,
+          firstName: user.firstName,
+          code,
+          brand: this.config.get<string>('MAIL_BRAND') ?? 'MuscleUP',
+        }),
+      )
+      .then((sent) => {
+        if (!sent) this.logger.error(`Code ${purpose} non délivré pour l'utilisateur ${userId}`);
+      });
   }
 
   /** Vérifie le code sans le consommer — l'appelant marque `consumedAt`
