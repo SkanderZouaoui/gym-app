@@ -36,7 +36,7 @@ const GOAL_STROKE = 8;
 const GOAL_R = (GOAL_RING - GOAL_STROKE) / 2;
 const GOAL_CIRC = 2 * Math.PI * GOAL_R;
 
-export function ProfileActivity({ weeks, goalDone, goalTarget }: { weeks: number[]; goalDone: number; goalTarget: number }) {
+export function ProfileActivity({ weeks, goalDone, goalTarget, onPressGoal }: { weeks: number[]; goalDone: number; goalTarget: number; onPressGoal?: () => void }) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -60,8 +60,11 @@ export function ProfileActivity({ weeks, goalDone, goalTarget }: { weeks: number
           })}
         </View>
       </View>
-      <View style={[styles.activityCard, cardShadow, { flex: 1, alignItems: 'center', gap: 6 }]}>
-        <Text style={[styles.cardTitle, { alignSelf: 'flex-start' }]}>{t('common.objectif')}</Text>
+      <Pressable onPress={onPressGoal} style={({ pressed }) => [styles.activityCard, cardShadow, { flex: 1, alignItems: 'center', gap: 6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', gap: 2 }}>
+          <Text style={[styles.cardTitle, { flex: 1, fontSize: 12.5 }]} numberOfLines={2}>{t('member.weekly_goal')}</Text>
+          <MaterialIcons name="chevron-right" size={18} color={colors.muted} />
+        </View>
         <View style={styles.goalBox}>
           <Svg width={GOAL_RING} height={GOAL_RING} style={{ transform: [{ rotate: '-90deg' }] }}>
             <Circle cx={GOAL_RING / 2} cy={GOAL_RING / 2} r={GOAL_R} stroke={colors.surface2} strokeWidth={GOAL_STROKE} fill="none" />
@@ -81,7 +84,7 @@ export function ProfileActivity({ weeks, goalDone, goalTarget }: { weeks: number
             <Text style={styles.goalText}>{goalDone}/{goalTarget}</Text>
           </View>
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 }

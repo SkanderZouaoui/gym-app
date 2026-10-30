@@ -6,6 +6,8 @@ import { CreatePrivilegedUserDto } from './dto/create-privileged-user.dto.js';
 import { CreateMemberDto } from './dto/create-member.dto.js';
 import { UpdateMemberDto } from './dto/update-member.dto.js';
 import { AssignRoleDto } from './dto/assign-role.dto.js';
+import { UpdateWeeklyGoalDto } from './dto/complete-onboarding.dto.js';
+import { CompleteOnboardingDto } from './dto/complete-onboarding.dto.js';
 import { UpdateProfileDto } from './dto/update-profile.dto.js';
 import { DeleteAccountDto } from './dto/delete-account.dto.js';
 import { ChangePasswordDto } from './dto/change-password.dto.js';
@@ -29,6 +31,16 @@ export class UsersController {
   @Patch('me')
   updateMe(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(user.userId, dto);
+  }
+
+  @Patch('me/weekly-goal')
+  updateWeeklyGoal(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateWeeklyGoalDto) {
+    return this.usersService.updateWeeklyGoal(user.userId, dto.sessionsPerWeek);
+  }
+
+  @Post('me/onboarding')
+  completeOnboarding(@CurrentUser() user: AuthenticatedUser, @Body() dto: CompleteOnboardingDto) {
+    return this.usersService.completeOnboarding(user.userId, dto);
   }
 
   @Post('me/avatar-upload-url')

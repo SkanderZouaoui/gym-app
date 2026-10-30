@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import type { CompleteOnboardingDto } from './dto/complete-onboarding.dto.js';
 import { notifyAdmins } from '../notifications/admin-notify.js';
 import { readOrganizationConfig } from '../organization/organization-config.js';
 import { generateMemberCode } from './member-code.js';
@@ -27,6 +28,8 @@ const PUBLIC_USER_SELECT = {
   photoKey: true,
   status: true,
   consents: true,
+  onboardedAt: true,
+  fitnessProfile: true,
   createdAt: true,
   roles: { select: { role: true } },
 } as const;
@@ -53,6 +56,24 @@ export class UsersService {
     if (!user.memberCode) user.memberCode = await this.assignMemberCode(userId);
     const coach = await this.prisma.coachProfile.findUnique({ where: { userId }, select: { specialties: true } });
     return { ...(await this.withPhotoUrl(user)), specialties: coach?.specialties ?? [] };
+  }
+
+  /** Enregistre l'objectif et le profil physique de l'adhérent (onboarding) et sa première mesure de poids. */
+  async completeOnboarding(userId: string, dto: CompleteOnboardingDto) {
+    const { weightKg, ...profile } = dto;
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: userId }, data: { fitnessProfile: profile, onboardedAt: new Date() } }),
+      this.prisma.bodyMetric.create({ data: { userId, weightKg } }),
+    ]);
+    return this.findMe(userId);
+  }
+
+  /** Modifie l'objectif de séances par semaine (profil physique conservé). */
+  async updateWeeklyGoal(userId: string, sessionsPerWeek: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { fitnessProfile: true } });
+    const profile = (user?.fitnessProfile ?? {}) as Record<string, unknown>;
+    await this.prisma.user.update({ where: { id: userId }, data: { fitnessProfile: { ...profile, sessionsPerWeek } } });
+    return this.findMe(userId);
   }
 
   /** Attribue un code à 6 chiffres unique à un compte qui n'en a pas encore. */

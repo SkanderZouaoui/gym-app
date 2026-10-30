@@ -11,6 +11,7 @@ import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
+import { goalTarget } from '../../../src/hooks/useWeeklyGoal';
 import { useSessionStore } from '../../../src/store/session';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
 import { Banner, BottomSheet, OfflineBanner, Toast } from '../../../src/components/ui';
@@ -111,11 +112,9 @@ export default function ProfileScreen() {
     }
     return n;
   })();
-  const GOAL_TARGET = 16;
-  const monthSessions = activityDates.filter((d) => {
-    const n = new Date();
-    return d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
-  }).length;
+  // Objectif hebdomadaire = séances par semaine choisies à l'onboarding ('1-2' → 2, '3-4' → 4, '5+' → 5).
+  const GOAL_TARGET = goalTarget((user?.fitnessProfile as { sessionsPerWeek?: string } | null | undefined)?.sessionsPerWeek);
+  const weekSessions = weekCounts[weekCounts.length - 1] ?? 0;
   const memberMonths = memberships?.length
     ? (Date.now() - Math.min(...memberships.map((m) => new Date(m.startDate).getTime()))) / (30 * 86_400_000)
     : 0;
@@ -195,7 +194,7 @@ export default function ProfileScreen() {
           ]}
         />
 
-        <ProfileActivity weeks={weekCounts} goalDone={monthSessions} goalTarget={GOAL_TARGET} />
+        <ProfileActivity weeks={weekCounts} goalDone={weekSessions} goalTarget={GOAL_TARGET} onPressGoal={() => router.push('/(member)/weekly-goal' as any)} />
 
         <View>
           <Text style={styles.sectionHeading}>{t('member.badges')}</Text>

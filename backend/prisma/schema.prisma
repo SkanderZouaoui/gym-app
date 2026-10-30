@@ -69,6 +69,10 @@ model User {
   photoKey     String?    @map("photo_key")
   status       UserStatus @default(ACTIVE)
   consents     Json       @default("{}")
+  /** Fin de l'onboarding adhérent (objectif, profil physique) ; null tant qu'il n'est pas rempli. */
+  onboardedAt    DateTime? @map("onboarded_at")
+  /** Objectif et profil physique saisis à l'onboarding (goal, gender, heightCm, age, level, sessionsPerWeek). */
+  fitnessProfile Json?     @map("fitness_profile")
   createdAt    DateTime   @default(now()) @map("created_at")
   updatedAt    DateTime   @updatedAt @map("updated_at")
   deletedAt    DateTime?  @map("deleted_at")

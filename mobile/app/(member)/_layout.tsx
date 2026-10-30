@@ -1,4 +1,6 @@
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
+import { useSessionStore } from '../../src/store/session';
+import { onboardingSkipped } from '../../src/store/onboardingSkip';
 import { usePrefetchOfflineData } from '../../src/hooks/usePrefetchOfflineData';
 
 /** Pile de navigation Adhérent : les 5 onglets vivent dans (tabs) (Tabs natif),
@@ -12,6 +14,9 @@ export default function MemberStackLayout() {
 
 function MemberStackInner() {
   usePrefetchOfflineData();
+  const onboardedAt = useSessionStore((s) => s.user?.onboardedAt);
+  // Tant que l'objectif et le profil physique ne sont pas remplis, l'onboarding revient à chaque connexion (« Passer » ne vaut que pour la session).
+  if (onboardedAt === null && !onboardingSkipped.value) return <Redirect href={'/onboarding' as any} />;
   return (
     <Stack
       screenOptions={{

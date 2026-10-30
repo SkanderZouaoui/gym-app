@@ -19,6 +19,9 @@ export interface MeResponse {
   memberCode?: string | null;
   /** Mot de passe provisoire : le changement est obligatoire avant d'utiliser l'app. */
   mustChangePassword?: boolean;
+  /** Onboarding adhérent : null tant que l'objectif et le profil physique ne sont pas renseignés. */
+  onboardedAt?: string | null;
+  fitnessProfile?: Record<string, unknown> | null;
   /** Spécialités du coach (vide pour un adhérent). */
   specialties?: string[];
 }

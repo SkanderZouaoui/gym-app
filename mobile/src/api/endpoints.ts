@@ -47,6 +47,7 @@ export const authApi = {
 
 export const meApi = {
   getMe: () => apiRequest<MeResponse>('/v1/me'),
+  completeOnboarding: (body: OnboardingInput) => apiRequest<MeResponse>('/v1/me/onboarding', { method: 'POST', body }),
   getMemberships: () => apiRequest<MembershipSummary[]>('/v1/me/memberships'),
   getBookings: () => apiRequest<Booking[]>('/v1/me/bookings'),
   getQrToken: () => apiRequest<QrTokenResponse>('/v1/me/qr-token'),
@@ -69,3 +70,13 @@ export const bookingsApi = {
     apiRequest<Booking>('/v1/bookings', { method: 'POST', body: { sessionId } }),
   cancel: (id: string) => apiRequest<Booking>(`/v1/bookings/${id}`, { method: 'DELETE' }),
 };
+
+export interface OnboardingInput {
+  goal: string;
+  gender: string;
+  heightCm: number;
+  weightKg: number;
+  age: number;
+  level: string;
+  sessionsPerWeek: string;
+}
