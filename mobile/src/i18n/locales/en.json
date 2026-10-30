@@ -253,7 +253,7 @@
     "strength_3": "Good",
     "strength_4": "Excellent",
     "welcome": "Welcome",
-    "pagination_rest": " of {{total}} payments · page {{page}} of {{pageCount}}",
+    "pagination_rest": " of {{total}} {{unit}} · page {{page}} of {{pageCount}}",
     "session_expired": "Session expired",
     "share_email_line": "\nEmail: {{email}}",
     "wrong_code": "Incorrect code.",
@@ -273,7 +273,8 @@
     "notif_admin_payment": "New payment",
     "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · by {{actor}}",
     "notif_admin_member": "New member account",
-    "notif_admin_member_body": "{{member}} · created by {{actor}}"
+    "notif_admin_member_body": "{{member}} · created by {{actor}}",
+    "pagination_unit_payments": "payments"
   },
   "home": {
     "membershipNone": "No membership",
@@ -1308,7 +1309,11 @@
     "goal_none_title": "No session this week",
     "goal_none_text": "Your workouts and attended classes will appear here.",
     "goal_class": "Group class",
-    "goal_workout": "Workout"
+    "goal_workout": "Workout",
+    "goal_last_week": "Last week",
+    "goal_week_count": "{{count}}/{{target}} sessions",
+    "goal_weeks_unit": "weeks",
+    "goal_this_week_label": "This week"
   },
   "staff": {
     "caisse": "Cash register",

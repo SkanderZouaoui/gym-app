@@ -14,6 +14,8 @@ interface Props {
   pageSize: number;
   total: number;
   onChange: (page: number) => void;
+  /** Ce qui est paginé (« encaissements » par défaut). */
+  unit?: string;
 }
 
 /** Pages affichées : première, dernière, courante et ses voisines ; « … » pour les trous. */
@@ -30,7 +32,7 @@ function visiblePages(page: number, count: number): (number | 'gap-left' | 'gap-
 }
 
 /** Pagination : flèches, numéros de page avec page active en dégradé, et « 11–20 sur 47 » dessous. */
-export function Pagination({ page, pageCount, pageSize, total, onChange }: Props) {
+export function Pagination({ page, pageCount, pageSize, total, onChange, unit }: Props) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -72,7 +74,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange }: Props
         <Arrow dir="next" disabled={page >= pageCount - 1} onPress={() => onChange(page + 1)} />
       </View>
       <Text style={styles.summary}>
-        <Text style={styles.summaryStrong}>{first}–{last}</Text>{t('common.pagination_rest', { total, page: page + 1, pageCount })}
+        <Text style={styles.summaryStrong}>{first}–{last}</Text>{t('common.pagination_rest', { total, page: page + 1, pageCount, unit: unit ?? t('common.pagination_unit_payments') })}
       </Text>
     </View>
   );

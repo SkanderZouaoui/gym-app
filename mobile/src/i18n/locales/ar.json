@@ -253,7 +253,7 @@
     "strength_3": "جيدة",
     "strength_4": "ممتازة",
     "welcome": "مرحبًا",
-    "pagination_rest": " من {{total}} مدفوعات · الصفحة {{page}} من {{pageCount}}",
+    "pagination_rest": " من {{total}} {{unit}} · الصفحة {{page}} من {{pageCount}}",
     "session_expired": "انتهت الجلسة",
     "share_email_line": "\nالبريد الإلكتروني: {{email}}",
     "wrong_code": "الرمز غير صحيح.",
@@ -273,7 +273,8 @@
     "notif_admin_payment": "دفعة جديدة",
     "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · بواسطة {{actor}}",
     "notif_admin_member": "حساب عضو جديد",
-    "notif_admin_member_body": "{{member}} · أنشأه {{actor}}"
+    "notif_admin_member_body": "{{member}} · أنشأه {{actor}}",
+    "pagination_unit_payments": "مدفوعات"
   },
   "home": {
     "membershipNone": "بدون اشتراك",
@@ -1308,7 +1309,11 @@
     "goal_none_title": "لا حصص هذا الأسبوع",
     "goal_none_text": "ستظهر هنا تمارينك والحصص التي حضرتها.",
     "goal_class": "حصة جماعية",
-    "goal_workout": "تمرين"
+    "goal_workout": "تمرين",
+    "goal_last_week": "الأسبوع الماضي",
+    "goal_week_count": "{{count}}/{{target}} حصص",
+    "goal_weeks_unit": "أسابيع",
+    "goal_this_week_label": "هذا الأسبوع"
   },
   "staff": {
     "caisse": "الصندوق",

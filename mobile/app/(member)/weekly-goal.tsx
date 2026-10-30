@@ -7,10 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { Button } from '../../src/components/Button';
 import { EmptyState, ProgressBar } from '../../src/components/ui';
+import { Pagination } from '../../src/components/ui/Pagination';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { GOAL_OPTIONS, goalTarget, useUpdateWeeklyGoal, useWeeklyGoal, weekStart } from '../../src/hooks/useWeeklyGoal';
 import { dateLocale } from '../../src/i18n';
+
+const WEEKS_PER_PAGE = 2;
 
 /** Séances enregistrées et objectif hebdomadaire (modifiable), depuis la carte Objectif du profil. */
 export default function WeeklyGoalScreen() {
@@ -25,8 +28,28 @@ export default function WeeklyGoalScreen() {
   const [saved, setSaved] = useState(false);
 
   const thisWeek = weekStart(new Date());
-  const current = sessions.filter((s) => weekStart(s.date) === thisWeek);
-  const earlier = sessions.filter((s) => weekStart(s.date) !== thisWeek).slice(0, 30);
+  // Toutes les séances regroupées par semaine (la plus récente d'abord) ; la semaine en cours ouvre la page 1, même vide.
+  const allWeeks = useMemo(() => {
+    const map = new Map<number, typeof sessions>([[thisWeek, []]]);
+    for (const s of sessions) {
+      const w = weekStart(s.date);
+      map.set(w, [...(map.get(w) ?? []), s]);
+    }
+    return [...map.entries()].sort((a, b) => b[0] - a[0]);
+  }, [sessions, thisWeek]);
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(allWeeks.length / WEEKS_PER_PAGE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const pagedWeeks = allWeeks.slice(currentPage * WEEKS_PER_PAGE, (currentPage + 1) * WEEKS_PER_PAGE);
+  const weekLabel = (w: number) => {
+    if (w === thisWeek) return t('member.goal_this_week_label');
+    if (w === thisWeek - 7 * 86_400_000 || Math.round((thisWeek - w) / (7 * 86_400_000)) === 1) return t('member.goal_last_week');
+    const from = new Date(w);
+    const to = new Date(w);
+    to.setDate(to.getDate() + 6);
+    const fmt = (d: Date, withMonth: boolean) => d.toLocaleDateString(dateLocale(), withMonth ? { day: 'numeric', month: 'short' } : { day: 'numeric' });
+    return from.getMonth() === to.getMonth() ? `${fmt(from, false)} – ${fmt(to, true)}` : `${fmt(from, true)} – ${fmt(to, true)}`;
+  };
 
   const row = (s: (typeof sessions)[number]) => (
     <Pressable key={s.id} onPress={() => router.push(s.href as any)} style={({ pressed }) => [styles.row, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}>
@@ -78,15 +101,16 @@ export default function WeeklyGoalScreen() {
           )
         ) : null}
 
-        <Text style={styles.section}>{t('member.goal_this_week_sessions')}</Text>
-        {current.length ? current.map(row) : <EmptyState icon="event-busy" title={t('member.goal_none_title')} text={t('member.goal_none_text')} tone="muted" />}
-
-        {earlier.length ? (
-          <>
-            <Text style={styles.section}>{t('member.goal_earlier')}</Text>
-            {earlier.map(row)}
-          </>
-        ) : null}
+        {pagedWeeks.map(([w, list]) => (
+          <View key={w} style={{ gap: 12 }}>
+            <View style={styles.weekHeader}>
+              <Text style={styles.section}>{weekLabel(w)}</Text>
+              <Text style={styles.weekCount}>{t('member.goal_week_count', { count: list.length, target })}</Text>
+            </View>
+            {list.length ? list.map(row) : <EmptyState icon="event-busy" title={t('member.goal_none_title')} text={t('member.goal_none_text')} tone="muted" />}
+          </View>
+        ))}
+        <Pagination page={currentPage} pageCount={pageCount} pageSize={WEEKS_PER_PAGE} total={allWeeks.length} onChange={setPage} unit={t('member.goal_weeks_unit')} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -101,6 +125,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     heroTarget: { fontFamily: fonts.head, fontSize: 24, color: colors.muted },
     heroLabel: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.muted },
     reached: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.successInk },
+    weekHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 },
+    weekCount: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
     section: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase', color: colors.muted, marginTop: 8 },
     chips: { flexDirection: 'row', gap: 8 },
     chip: { flex: 1, alignItems: 'center', gap: 2, paddingVertical: 12, borderRadius: radii.sm, borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.surface },

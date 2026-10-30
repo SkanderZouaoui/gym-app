@@ -253,7 +253,7 @@
     "strength_3": "Bon",
     "strength_4": "Excellent",
     "welcome": "Bienvenue",
-    "pagination_rest": " sur {{total}} encaissements · page {{page}} sur {{pageCount}}",
+    "pagination_rest": " sur {{total}} {{unit}} · page {{page}} sur {{pageCount}}",
     "session_expired": "Session expirée",
     "share_email_line": "\nE-mail : {{email}}",
     "wrong_code": "Code incorrect.",
@@ -273,7 +273,8 @@
     "notif_admin_payment": "Nouvel encaissement",
     "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · par {{actor}}",
     "notif_admin_member": "Nouveau compte adhérent",
-    "notif_admin_member_body": "{{member}} · créé par {{actor}}"
+    "notif_admin_member_body": "{{member}} · créé par {{actor}}",
+    "pagination_unit_payments": "encaissements"
   },
   "home": {
     "membershipNone": "Sans abonnement",
@@ -1308,7 +1309,11 @@
     "goal_none_title": "Aucune séance cette semaine",
     "goal_none_text": "Vos entraînements et cours suivis apparaîtront ici.",
     "goal_class": "Cours collectif",
-    "goal_workout": "Entraînement"
+    "goal_workout": "Entraînement",
+    "goal_last_week": "Semaine dernière",
+    "goal_week_count": "{{count}}/{{target}} séances",
+    "goal_weeks_unit": "semaines",
+    "goal_this_week_label": "Cette semaine"
   },
   "staff": {
     "caisse": "Caisse",
