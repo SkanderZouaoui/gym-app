@@ -1,24 +1,28 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMembers } from '../../src/hooks/useStaff';
-import { ScreenTitle } from '../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { InitialsAvatar, StatusTag } from '../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 /** Nouvel encaissement, étape 1 : choisir l'adhérent à encaisser (ou créer un compte). */
 export default function StaffCashSelectScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [query, setQuery] = useState('');
-  const { data: members } = useMembers(query.trim());
+  const { data: members, isLoading } = useMembers(query.trim());
   const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.cash));
 
   return (
@@ -43,6 +47,7 @@ export default function StaffCashSelectScreen() {
       </View>
 
       <FlatList
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />}
         data={members ?? []}
         keyExtractor={(m) => m.id}
         keyboardShouldPersistTaps="handled"
@@ -60,11 +65,9 @@ export default function StaffCashSelectScreen() {
             <StatusTag label={item.status === 'ACTIVE' ? t('home.statusActive') : t('staff.inactif')} tone={item.status === 'ACTIVE' ? 'success' : 'muted'} />
           </Pressable>
         )}
-        ListEmptyComponent={
-          <View style={[styles.empty, cardShadow]}>
+        ListEmptyComponent={isLoading ? <SkeletonList count={6} /> : (<View style={[styles.empty, cardShadow]}>
             <Text style={styles.emptyText}>{t('common.aucun_adherent_trouve')}</Text>
-          </View>
-        }
+          </View>)}
         ListFooterComponent={
           <Pressable style={styles.create} onPress={() => router.push(routes.memberCreate)}>
             <MaterialIcons name="person-add" size={22} color={colors.primaryInk} />

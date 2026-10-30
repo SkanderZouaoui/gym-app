@@ -258,7 +258,22 @@
     "share_email_line": "\nالبريد الإلكتروني: {{email}}",
     "wrong_code": "الرمز غير صحيح.",
     "qr_not_recognized": "لم يتم التعرف على الرمز",
-    "enjoy_class": "حصة موفقة!"
+    "enjoy_class": "حصة موفقة!",
+    "notice_understood": "حسنًا",
+    "notice_next": "التالي (+{{count}})",
+    "notice_urgent": "عاجل",
+    "notice_warning": "تحذير",
+    "notice_info": "معلومة",
+    "notif_tab_notifications": "الإشعارات",
+    "notif_tab_announcements": "الإعلانات",
+    "notif_tab_alerts": "التنبيهات",
+    "notif_empty": "لا شيء هنا حاليًا",
+    "notif_empty_text": "ستظهر هنا إشعاراتك وإعلاناتك وتنبيهاتك.",
+    "notif_ended": "منتهية",
+    "notif_admin_payment": "دفعة جديدة",
+    "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · بواسطة {{actor}}",
+    "notif_admin_member": "حساب عضو جديد",
+    "notif_admin_member_body": "{{member}} · أنشأه {{actor}}"
   },
   "home": {
     "membershipNone": "بدون اشتراك",
@@ -295,7 +310,8 @@
     "statusActive": "نشط",
     "statusExpired": "منتهٍ",
     "nextCourseTitle": "الحصة القادمة",
-    "greetingFallback": "مرحبًا،"
+    "greetingFallback": "مرحبًا،",
+    "announcementImportant": "مهم"
   },
   "planning": {
     "title": "الجدول",
@@ -804,7 +820,31 @@
     "aud_EXPIRING": "ينتهون قريبًا",
     "aud_EXPIRED": "المنتهية اشتراكاتهم",
     "aud_plan": "باقة",
-    "rule_summary": "{{days}} في {{time}} · {{audience}}{{condition}}"
+    "rule_summary": "{{days}} في {{time}} · {{audience}}{{condition}}",
+    "live_classes": "الحصص الجارية الآن",
+    "no_live_classes": "لا توجد حصة جارية الآن",
+    "renewals": "اشتراكات للمتابعة",
+    "renewals_none": "لا توجد اشتراكات تنتهي خلال 7 أيام",
+    "expires_in": "ينتهي بعد {{days}} يومًا",
+    "expires_today": "ينتهي اليوم",
+    "no_phone": "لا يوجد رقم",
+    "recent_payments": "آخر المدفوعات",
+    "see_history": "السجل",
+    "today_activity": "اليوم",
+    "new_members": "أعضاء جدد",
+    "team_on_shift": "الفريق المناوب",
+    "no_one_on_shift": "لا أحد مجدول يوم {{day}}",
+    "on_duty_now": "في الخدمة",
+    "edit_shortcuts": "تعديل",
+    "customize_shortcuts": "تخصيص الاختصارات",
+    "customize_hint": "اختر حتى 6 اختصارات لشاشتك الرئيسية.",
+    "shortcut_limit": "6 اختصارات كحد أقصى",
+    "shortcut_reset": "إعادة الضبط",
+    "activity_title": "نشاط اليوم",
+    "key_figures": "أرقام رئيسية",
+    "alert_format": "شكل التنبيهات",
+    "alert_format_hint": "عرض التنبيهات على الشاشة الرئيسية للأعضاء",
+    "recipients_label": "المستلمون"
   },
   "auth": {
     "mot_de_passe_mis_a": "تم تحديث كلمة المرور",
@@ -1432,6 +1472,14 @@
     "goal_mobility": "المرونة",
     "audience_all": "الجميع",
     "audience_active": "النشطون",
-    "audience_expired": "المنتهية اشتراكاتهم"
+    "audience_expired": "المنتهية اشتراكاتهم",
+    "audience_team": "الفريق (الاستقبال والمدرّبون)",
+    "audience_staff": "الاستقبال",
+    "audience_coach": "المدرّبون",
+    "ann_members": "الأعضاء",
+    "ann_staff": "الاستقبال",
+    "ann_coach": "المدرّبون",
+    "ann_team": "الفريق",
+    "ann_all": "الجميع"
   }
 }

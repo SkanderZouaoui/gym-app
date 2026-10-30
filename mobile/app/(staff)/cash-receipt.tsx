@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,15 +9,19 @@ import { useStaffRoutes } from '../../src/navigation/staffRoutes';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { usePayments } from '../../src/hooks/useStaff';
 import { useRemoteConfig } from '../../src/config/RemoteConfigContext';
-import { EmptyState } from '../../src/components/ui';
+import { EmptyState, DetailSkeleton } from '../../src/components/ui';
 import { METHOD_LABEL, formatMoney } from '../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 const fmt = (d: string) => new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 
 /** Reçu d'un encaissement : après un encaissement (« Paiement reçu ») ou depuis l'historique de la caisse. */
 export default function StaffCashReceiptScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { paymentId, fresh } = useLocalSearchParams<{ paymentId: string; fresh?: string }>();
@@ -36,7 +40,7 @@ export default function StaffCashReceiptScreen() {
   if (isLoading && !payment) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }
@@ -66,7 +70,8 @@ export default function StaffCashReceiptScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         {isFresh ? (
           <View style={styles.success}>
             <View style={styles.successCircle}>

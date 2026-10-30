@@ -1,21 +1,25 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachStudents } from '../../../src/hooks/useCoachSessions';
-import { Avatar, EmptyState } from '../../../src/components/ui';
+import { Avatar, EmptyState, SkeletonList } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Élèves — FitZone App Coach.dc.html, L1. */
 export default function CoachStudentsScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: students } = useCoachStudents();
+  const { data: students, isLoading } = useCoachStudents();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -23,7 +27,8 @@ export default function CoachStudentsScreen() {
         <Text style={styles.title}>{t('coach.eleves')}</Text>
         <Text style={styles.count}>{students?.length ?? 0}</Text>
       </View>
-      <FlatList {...tabBarScroll}
+      <FlatList
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} {...tabBarScroll}
         data={students ?? []}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
@@ -33,14 +38,12 @@ export default function CoachStudentsScreen() {
             <Text style={styles.name}>{item.firstName} {item.lastName}</Text>
           </Pressable>
         )}
-        ListEmptyComponent={
-          <EmptyState
+        ListEmptyComponent={isLoading ? <SkeletonList count={5} /> : (<EmptyState
             icon="group"
             title={t('coach.pas_encore_deleve_suivi')}
             text={t('coach.les_adherents_apparaissent_ici_apres')}
             tone="muted"
-          />
-        }
+          />)}
       />
     </SafeAreaView>
   );

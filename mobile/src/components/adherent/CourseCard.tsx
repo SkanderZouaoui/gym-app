@@ -45,7 +45,7 @@ export function CourseCard({
           end={{ x: 1, y: 1 }}
           style={styles.timeBlock}
         >
-          <Text style={styles.timeText}>{time}</Text>
+          <Text style={styles.timeText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{time}</Text>
           <Text style={styles.timeSub}>{duration}</Text>
         </LinearGradient>
         <View style={{ flex: 1, minWidth: 0 }}>

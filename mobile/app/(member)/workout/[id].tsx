@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme, type ColorPalette } from '../../../src/theme/ThemeContext';
 import { useMyWorkouts } from '../../../src/hooks/useCoaching';
-import { ScreenTitle, Toast } from '../../../src/components/ui';
+import { ScreenTitle, Toast, DetailSkeleton } from '../../../src/components/ui';
 import { WorkoutHeroCard } from '../../../src/components/training/WorkoutHeroCard';
 import { formatClock, workoutSeconds } from '../../../src/utils/duration';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
@@ -47,7 +47,7 @@ export default function WorkoutDetailScreen() {
   if (isLoading || !log) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

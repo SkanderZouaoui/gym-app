@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { fonts, typography } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
-import { Avatar, IconCircleButton } from '../ui';
+import { Avatar } from '../ui';
+import { NotificationBell } from '../NotificationBell';
 
 interface AppHeaderProps {
   /** Petite ligne au-dessus du prénom ("Bonjour,"). */
@@ -26,7 +27,7 @@ export function AppHeader({ greeting, firstName, lastName, hasUnreadNotification
         <Text style={styles.greeting}>{greeting}</Text>
         <Text style={styles.name} numberOfLines={1}>{firstName ?? ''}</Text>
       </View>
-      <IconCircleButton icon="notifications-none" radius={14} badgeColor={colors.primary} onPress={onPressNotifications} badge={hasUnreadNotification} />
+      <NotificationBell onPress={onPressNotifications ?? (() => undefined)} />
     </View>
   );
 }

@@ -1,18 +1,22 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachSessions, useManualCheckin, useSessionRoster } from '../../../src/hooks/useCoachSessions';
-import { EmptyState, ProgressBar } from '../../../src/components/ui';
+import { EmptyState, ProgressBar, DetailSkeleton } from '../../../src/components/ui';
 import { RosterRow } from '../../../src/components/coach/RosterRow';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Détail d'un cours + appel — FitZone App Coach.dc.html, I3. */
 export default function CoachSessionDetailScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -26,7 +30,7 @@ export default function CoachSessionDetailScreen() {
   if (isLoading || !session) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }
@@ -38,7 +42,8 @@ export default function CoachSessionDetailScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title={session.classType.name} fallbackHref="/(coach)" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <Text style={styles.subtitle}>
           {new Date(session.startsAt).toLocaleString(dateLocale(), { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
           {session.room ? ` · ${session.room.name}` : ''}

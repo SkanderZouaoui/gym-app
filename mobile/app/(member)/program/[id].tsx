@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -10,7 +10,7 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../src/hooks/useCoachSessions';
 import { useDeleteOwnProgram } from '../../../src/hooks/useCoaching';
 import { Button } from '../../../src/components/Button';
-import { BottomSheet, EmptyState, OfflineBanner, Toast } from '../../../src/components/ui';
+import { BottomSheet, EmptyState, OfflineBanner, Toast, DetailSkeleton } from '../../../src/components/ui';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
@@ -36,7 +36,7 @@ export default function ProgramDetailScreen() {
   if (isLoading && !program) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

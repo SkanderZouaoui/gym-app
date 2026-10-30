@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
@@ -11,9 +11,13 @@ import { Button } from '../../../src/components/Button';
 import { CoachProgramCard } from '../../../src/components/coach/CoachProgramCard';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Fiche élève — FitZone App Coach.dc.html, L2. */
 export default function CoachStudentDetailScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -30,7 +34,8 @@ export default function CoachStudentDetailScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref="/(coach)/(tabs)/students" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <View style={styles.identityRow}>
           <Avatar initials={`${student.firstName[0]}${student.lastName[0]}`.toUpperCase()} size={68} background={colors.accent} color={colors.onAccent} />
           <Text style={styles.name}>{student.firstName} {student.lastName}</Text>

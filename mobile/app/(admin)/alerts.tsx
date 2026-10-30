@@ -8,10 +8,11 @@ import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminHomeAlerts, useSaveHomeAlert } from '../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
-import { ScreenTitle } from '../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../src/i18n';
 import { audienceLabel } from '../../src/i18n/labels';
+import { HScroll } from '../../src/components/ui/HScroll';
 
 const fmt = (d: string) => new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
@@ -20,7 +21,7 @@ export default function AdminAlertsScreen() {
   useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: alerts, refetch } = useAdminHomeAlerts();
+  const { data: alerts, refetch, isLoading } = useAdminHomeAlerts();
   const save = useSaveHomeAlert();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const [filter, setFilter] = useState<'all' | 'active' | 'scheduled' | 'ended'>('all');
@@ -68,13 +69,13 @@ export default function AdminAlertsScreen() {
           }
         />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+        <HScroll contentContainerStyle={{ gap: 8 }}>
           {(['all', 'active', 'scheduled', 'ended'] as const).map((k) => (
             <Pressable key={k} onPress={() => setFilter(k)} style={[styles.filterChip, filter === k && styles.filterChipOn]}>
               <Text style={[styles.filterText, filter === k && { color: colors.primaryContrast }]}>{i18n.t(`admin.alert_filter_${k}`)} · {counts[k]}</Text>
             </Pressable>
           ))}
-        </ScrollView>
+        </HScroll>
 
         <View style={{ gap: 10 }}>
           {shown.map((a) => {
@@ -111,7 +112,7 @@ export default function AdminAlertsScreen() {
               </Pressable>
             );
           })}
-          {shown.length === 0 ? (
+          {isLoading ? <SkeletonList count={5} /> : shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="notification-important" size={34} color={colors.primaryInk} />
               <Text style={styles.emptyText}>{i18n.t('admin.aucune_alerte_dans_cette_categorie')}</Text>

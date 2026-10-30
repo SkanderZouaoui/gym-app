@@ -11,6 +11,11 @@ export class CreateAnnouncementDto {
   @IsString()
   planId?: string;
 
+  /** Qui reçoit l'annonce (adhérents par défaut). */
+  @IsOptional()
+  @IsIn(['MEMBERS', 'STAFF', 'COACH', 'TEAM', 'ALL'])
+  audience?: 'MEMBERS' | 'STAFF' | 'COACH' | 'TEAM' | 'ALL';
+
   @IsOptional()
   @IsIn(['info', 'accent', 'danger'])
   tone?: 'info' | 'accent' | 'danger';

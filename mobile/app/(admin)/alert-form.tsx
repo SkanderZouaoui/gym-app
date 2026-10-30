@@ -18,7 +18,7 @@ const LEVELS: { value: AdminHomeAlert['level']; label: string; icon: keyof typeo
   { value: 'warn', get label() { return i18n.t('admin.avertissement'); }, icon: 'warning' },
   { value: 'urgent', get label() { return i18n.t('admin.urgent'); }, icon: 'error' },
 ];
-const AUDIENCES: AdminHomeAlert['audience'][] = ['Tous', 'Actifs', 'Expirés'];
+const AUDIENCES: AdminHomeAlert['audience'][] = ['Tous', 'Actifs', 'Expirés', 'Équipe', 'Accueil', 'Coachs'];
 
 const toDay = (offset: number) => {
   const d = new Date();

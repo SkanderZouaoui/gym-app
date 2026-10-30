@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AnnouncementsService } from './announcements.service.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
@@ -11,7 +11,7 @@ export class MyAnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Get()
-  findMine(@CurrentUser() user: AuthenticatedUser) {
-    return this.announcementsService.findForMember(user.userId);
+  findMine(@CurrentUser() user: AuthenticatedUser, @Query('history') history?: string) {
+    return this.announcementsService.findForUser(user.userId, user.activeRole, history === '1');
   }
 }

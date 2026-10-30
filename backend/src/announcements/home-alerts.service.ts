@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { readOrganizationConfig } from '../organization/organization-config.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateHomeAlertDto, UpdateHomeAlertDto } from './dto/home-alert.dto.js';
 
@@ -6,6 +7,12 @@ import type { CreateHomeAlertDto, UpdateHomeAlertDto } from './dto/home-alert.dt
 @Injectable()
 export class HomeAlertsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Formats d'affichage (bandeau, pop-up, encart) choisis par l'admin pour les annonces et les alertes. */
+  async displayConfig() {
+    const { announcements } = await readOrganizationConfig(this.prisma);
+    return { announcementFormat: announcements.format, alertFormat: announcements.alertFormat };
+  }
 
   findAll() {
     return this.prisma.homeAlert.findMany({ orderBy: [{ startsOn: 'desc' }, { createdAt: 'desc' }] });
@@ -49,19 +56,37 @@ export class HomeAlertsService {
     return alert;
   }
 
-  /** Alertes à afficher aujourd'hui à cet adhérent (actives, dans leur période, audience adaptée à son abonnement). */
-  async findForMember(userId: string) {
+  /** Alertes à afficher aujourd'hui à cet utilisateur : actives, dans leur période, adaptées à son rôle (et, pour un adhérent, à son abonnement). */
+  async findForUser(userId: string, role: string, history = false) {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
     const [alerts, memberships] = await Promise.all([
       this.prisma.homeAlert.findMany({
-        where: { isActive: true, startsOn: { lte: today }, endsOn: { gte: today } },
+        where: history ? { startsOn: { lte: today } } : { isActive: true, startsOn: { lte: today }, endsOn: { gte: today } },
         orderBy: { createdAt: 'desc' },
+        ...(history ? { take: 60 } : {}),
       }),
-      this.prisma.membership.findMany({ where: { userId }, select: { status: true } }),
+      role === 'MEMBER' ? this.prisma.membership.findMany({ where: { userId }, select: { status: true } }) : Promise.resolve([]),
     ]);
     const hasActive = memberships.some((m) => m.status === 'ACTIVE');
     const expired = !hasActive && memberships.some((m) => m.status === 'EXPIRED');
-    return alerts.filter((a) => a.audience === 'Tous' || (a.audience === 'Actifs' && hasActive) || (a.audience === 'Expirés' && expired));
+    return alerts.filter((a) => {
+      switch (a.audience) {
+        case 'Tous':
+          return true;
+        case 'Actifs':
+          return role === 'MEMBER' && hasActive;
+        case 'Expirés':
+          return role === 'MEMBER' && expired;
+        case 'Équipe':
+          return role === 'STAFF' || role === 'COACH';
+        case 'Accueil':
+          return role === 'STAFF';
+        case 'Coachs':
+          return role === 'COACH';
+        default:
+          return false;
+      }
+    });
   }
 }

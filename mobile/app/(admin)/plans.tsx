@@ -8,7 +8,7 @@ import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminPlans, useOrganizationConfig, useTogglePlanActive, useUpdateOrganizationConfig } from '../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
-import { ScreenTitle } from '../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { formatMoney } from '../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 
@@ -23,7 +23,7 @@ export default function AdminPlansScreen() {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: plans, refetch } = useAdminPlans();
+  const { data: plans, refetch, isLoading } = useAdminPlans();
   const toggle = useTogglePlanActive();
   const { data: config } = useOrganizationConfig();
   const saveConfig = useUpdateOrganizationConfig();
@@ -80,6 +80,7 @@ export default function AdminPlansScreen() {
         </View>
 
         <View style={{ gap: 10 }}>
+          {isLoading ? <SkeletonList count={4} height={96} /> : null}
           {(plans ?? []).map((p) => (
             <Pressable
               key={p.id}

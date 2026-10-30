@@ -7,7 +7,7 @@ import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useBodyMetrics, useCreateBodyMetric, useUploadProgressPhoto } from '../../src/hooks/useProgress';
-import { Banner, EmptyState, Toast } from '../../src/components/ui';
+import { Banner, EmptyState, Toast, DetailSkeleton } from '../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../src/i18n';
@@ -60,7 +60,7 @@ export default function PhotosScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

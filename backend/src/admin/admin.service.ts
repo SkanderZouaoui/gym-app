@@ -83,7 +83,7 @@ export class AdminService {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const [activeMembers, attendanceToday, revenueToday, revenueMonth, todaySessions] =
+    const [activeMembers, attendanceToday, revenueToday, revenueMonth, todaySessions, newMembersToday, paymentsToday] =
       await Promise.all([
         this.prisma.membership.count({
           where: {
@@ -109,6 +109,10 @@ export class AdminService {
           where: { startsAt: { gte: startOfDay, lte: endOfDay }, status: { not: 'CANCELLED' } },
           include: { _count: { select: { bookings: { where: { status: { in: ['CONFIRMED', 'ATTENDED'] } } } } } },
         }),
+        this.prisma.user.count({
+          where: { deletedAt: null, createdAt: { gte: startOfDay, lte: endOfDay }, roles: { some: { role: 'MEMBER' }, none: { role: { in: ['STAFF', 'ADMIN'] } } } },
+        }),
+        this.prisma.payment.count({ where: { recordedAt: { gte: startOfDay, lte: endOfDay }, deletedAt: null } }),
       ]);
 
     const avgFillRate =
@@ -127,6 +131,8 @@ export class AdminService {
       revenueToday: revenueToday._sum.amount ?? 0,
       revenueMonth: revenueMonth._sum.amount ?? 0,
       classesToday: todaySessions.length,
+      newMembersToday,
+      paymentsToday,
       avgFillRate,
       alerts: await this.getAlerts(),
     };

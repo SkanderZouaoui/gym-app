@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -12,6 +12,8 @@ import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe
 import { useOfflineQrToken } from '../../../src/hooks/useOfflineQrToken';
 import { Avatar, Banner, Pill, ProgressBar, ScreenTitle } from '../../../src/components/ui';
 import { dateLocale } from '../../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 // Repli uniquement : la vraie durée de vie vient de `expiresInSeconds`,
 // renvoyée par le serveur à chaque émission de token (45s — qr-token.service.ts).
@@ -19,6 +21,8 @@ const FALLBACK_REFRESH_SECONDS = 45;
 
 /** Écran "QR d'accès" — FitZone App Adherent.dc.html, C3. */
 export default function QrScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { colors, cardShadow } = useTheme();
   const { t } = useTranslation();
   const { isRtl } = useLanguage();
@@ -70,7 +74,8 @@ export default function QrScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <ScreenTitle title={t('qr.title')} subtitle={t('qr.subtitle')} />
 
         {offline || !token ? (

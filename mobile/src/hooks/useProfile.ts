@@ -53,7 +53,12 @@ export function useMarkNotificationRead() {
   return useMutation({
     mutationKey: ['markNotificationRead'],
     mutationFn: (id: string) => apiRequest(`/v1/me/notifications/${id}/read`, { method: 'PATCH' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
+    onMutate: (id: string) => {
+      queryClient.setQueryData<NotificationItem[]>(['me', 'notifications'], (old) =>
+        old?.map((n) => (n.id === id ? { ...n, readAt: n.readAt ?? new Date().toISOString() } : n)),
+      );
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
   });
 }
 

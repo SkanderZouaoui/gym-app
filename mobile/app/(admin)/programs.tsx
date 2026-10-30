@@ -9,10 +9,11 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { muscleGroupLabel } from '../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercises, useReviewPrograms } from '../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
-import { ScreenTitle } from '../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../src/components/ui';
 import type { ProgramStatus } from '../../src/hooks/useCoachSessions';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import { HScroll } from '../../src/components/ui/HScroll';
 
 type Segment = 'PENDING' | 'APPROVED' | 'REJECTED';
 const SEGMENTS: { value: Segment; label: string }[] = [
@@ -32,11 +33,11 @@ export default function AdminProgramsScreen() {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: programs, refetch } = useReviewPrograms();
+  const { data: programs, refetch, isLoading } = useReviewPrograms();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const [segment, setSegment] = useState<Segment>('PENDING');
 
-  const { data: exercises } = useAdminExercises();
+  const { data: exercises, isLoading: exercisesLoading } = useAdminExercises();
   const list = (programs ?? []).filter((p) => p.status === segment);
   const groups = useMemo(() => {
     const map = new Map<string, number>();
@@ -69,7 +70,7 @@ export default function AdminProgramsScreen() {
           }
         />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.segments}>
+        <HScroll contentContainerStyle={styles.segments}>
           {SEGMENTS.map((s) => {
             const active = s.value === segment;
             const count = (programs ?? []).filter((p) => p.status === s.value).length;
@@ -82,7 +83,7 @@ export default function AdminProgramsScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </HScroll>
 
         <View style={{ gap: 10 }}>
             {list.map((p) => {
@@ -125,7 +126,7 @@ export default function AdminProgramsScreen() {
                 </Pressable>
               );
             })}
-            {list.length === 0 ? (
+            {isLoading ? <SkeletonList count={3} height={96} /> : list.length === 0 ? (
               <View style={[styles.empty, cardShadow]}>
                 <MaterialIcons name="task-alt" size={34} color={colors.primaryInk} />
                 <Text style={styles.emptyText}>
@@ -165,7 +166,7 @@ export default function AdminProgramsScreen() {
             </Pressable>
           ))}
         </View>
-        {groups.length === 0 ? <Text style={styles.emptyText}>{t('admin.aucun_exercice_dans_la_bibliotheque')}</Text> : null}
+        {exercisesLoading ? <SkeletonList count={2} height={64} /> : groups.length === 0 ? <Text style={styles.emptyText}>{t('admin.aucun_exercice_dans_la_bibliotheque')}</Text> : null}
         <Text style={styles.hint}>{t('admin.touchez_une_zone_pour_voir')}</Text>
       </ScrollView>
     </SafeAreaView>

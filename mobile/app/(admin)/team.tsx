@@ -8,7 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
-import { Banner, BottomSheet, ScreenTitle } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
 import { ResetPasswordButton } from '../../src/components/ResetPasswordButton';
 import { TimeButton } from '../../src/components/ui/DateTimeFields';
@@ -29,7 +29,7 @@ export default function AdminTeamScreen() {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: team, refetch } = useTeam();
+  const { data: team, refetch, isLoading } = useTeam();
   const create = useCreateTeamMember();
   const update = useUpdateTeamMember();
   const remove = useDeleteTeamMember();
@@ -154,7 +154,7 @@ export default function AdminTeamScreen() {
               </View>
             );
           })}
-          {staff.length === 0 ? (
+          {isLoading ? <SkeletonList count={5} /> : staff.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="badge" size={34} color={colors.primaryInk} />
               <Text style={styles.emptyText}>{t('admin.aucun_compte_pour_le_moment')}</Text>
@@ -297,7 +297,7 @@ export default function AdminTeamScreen() {
               ))}
             </View>
 
-            {statsLoading ? <Text style={styles.meta}>{t('admin.chargement')}</Text> : null}
+            {statsLoading ? <SkeletonList count={3} height={84} /> : null}
 
             {stats?.staff ? (
               <>

@@ -204,6 +204,18 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
           </View>
         </View>
         <View style={styles.sep} />
+        <View style={{ paddingVertical: 14, gap: 4 }}>
+          <Text style={styles.rowTitle}>{t('admin.alert_format')}</Text>
+          <Text style={styles.rowHint}>{t('admin.alert_format_hint')}</Text>
+          <View style={styles.formatRow}>
+            {(['Bandeau', 'Pop-up', 'Encart'] as const).map((f) => (
+              <Pressable key={f} onPress={() => patch({ announcements: { ...cfg.announcements, alertFormat: f } })} style={[styles.formatChip, cfg.announcements.alertFormat === f && styles.formatChipOn]}>
+                <Text style={[styles.formatText, cfg.announcements.alertFormat === f && { color: colors.primaryContrast }]}>{t(`admin.format_${f === 'Pop-up' ? 'popup' : f.toLowerCase()}`)}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+        <View style={styles.sep} />
         <ToggleRow label={t('admin.notifications_push')} hint={t('admin.annonces_et_alertes_dexpiration')} value={cfg.announcements.push} onChange={(v) => patch({ announcements: { ...cfg.announcements, push: v } })} />
       </View>
         </>

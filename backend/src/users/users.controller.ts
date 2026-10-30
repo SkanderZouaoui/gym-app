@@ -127,6 +127,12 @@ export class UsersController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('admin/team-on-shift')
+  teamOnShift() {
+    return this.usersService.teamOnShift();
+  }
+
+  @Roles(Role.ADMIN)
   @Get('admin/team/:id/schedule')
   teamSchedule(@Param('id') id: string) {
     return this.usersService.getSchedule(id);

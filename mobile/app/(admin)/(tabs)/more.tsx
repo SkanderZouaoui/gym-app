@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
@@ -13,6 +13,8 @@ import { BottomSheet, ScreenTitle } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 type Row = { icon: keyof typeof MaterialIcons.glyphMap; title: string; sub: string; href: string };
 
@@ -56,6 +58,8 @@ const SECTIONS: { title: string; rows: Row[] }[] = [
 
 /** Plus (admin) : accès aux fonctions d'accueil et d'administration. */
 export default function AdminMoreScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
@@ -74,7 +78,8 @@ export default function AdminMoreScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} {...tabBarScroll} contentContainerStyle={styles.container}>
         <ScreenTitle title={t('common.plus')} subtitle={t('admin.fonctions_daccueil_et_dadministration')} />
         {SECTIONS.map((section) => (
           <View key={section.title} style={{ gap: 8 }}>

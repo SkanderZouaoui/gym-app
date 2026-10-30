@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,7 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useApproveProgram, useRejectProgram, useReviewPrograms } from '../../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { BottomSheet, EmptyState } from '../../../src/components/ui';
+import { BottomSheet, EmptyState, DetailSkeleton } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { estimateMinutes } from '../../../src/components/coach/programStatus';
@@ -34,7 +34,7 @@ export default function AdminProgramDetailScreen() {
   if (isLoading && !program) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

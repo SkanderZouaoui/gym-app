@@ -258,7 +258,22 @@
     "share_email_line": "\nE-mail : {{email}}",
     "wrong_code": "Code incorrect.",
     "qr_not_recognized": "QR non reconnu",
-    "enjoy_class": "Bon cours !"
+    "enjoy_class": "Bon cours !",
+    "notice_understood": "Compris",
+    "notice_next": "Suivant ({{count}} de plus)",
+    "notice_urgent": "Urgent",
+    "notice_warning": "Avertissement",
+    "notice_info": "Information",
+    "notif_tab_notifications": "Notifications",
+    "notif_tab_announcements": "Annonces",
+    "notif_tab_alerts": "Alertes",
+    "notif_empty": "Rien ici pour le moment",
+    "notif_empty_text": "Vos notifications, annonces et alertes apparaîtront ici.",
+    "notif_ended": "Terminée",
+    "notif_admin_payment": "Nouvel encaissement",
+    "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · par {{actor}}",
+    "notif_admin_member": "Nouveau compte adhérent",
+    "notif_admin_member_body": "{{member}} · créé par {{actor}}"
   },
   "home": {
     "membershipNone": "Sans abonnement",
@@ -295,7 +310,8 @@
     "statusActive": "Actif",
     "statusExpired": "Expiré",
     "nextCourseTitle": "Prochain cours",
-    "greetingFallback": "Bonjour,"
+    "greetingFallback": "Bonjour,",
+    "announcementImportant": "Important"
   },
   "planning": {
     "title": "Planning",
@@ -804,7 +820,31 @@
     "aud_EXPIRING": "Expirent bientôt",
     "aud_EXPIRED": "Expirés",
     "aud_plan": "Forfait",
-    "rule_summary": "{{days}} à {{time}} · {{audience}}{{condition}}"
+    "rule_summary": "{{days}} à {{time}} · {{audience}}{{condition}}",
+    "live_classes": "Cours en ce moment",
+    "no_live_classes": "Aucun cours en ce moment",
+    "renewals": "Abonnements à relancer",
+    "renewals_none": "Aucune échéance dans les 7 prochains jours",
+    "expires_in": "Expire dans {{days}} j",
+    "expires_today": "Expire aujourd’hui",
+    "no_phone": "Pas de numéro",
+    "recent_payments": "Derniers encaissements",
+    "see_history": "Historique",
+    "today_activity": "Aujourd’hui",
+    "new_members": "Nouveaux adhérents",
+    "team_on_shift": "Équipe en poste",
+    "no_one_on_shift": "Personne n’est planifié ce {{day}}",
+    "on_duty_now": "En poste",
+    "edit_shortcuts": "Modifier",
+    "customize_shortcuts": "Personnaliser les raccourcis",
+    "customize_hint": "Choisissez jusqu’à 6 raccourcis pour votre accueil.",
+    "shortcut_limit": "6 raccourcis maximum",
+    "shortcut_reset": "Réinitialiser",
+    "activity_title": "Activité du jour",
+    "key_figures": "Chiffres clés",
+    "alert_format": "Format des alertes",
+    "alert_format_hint": "Affichage des alertes sur l’accueil adhérent",
+    "recipients_label": "Destinataires"
   },
   "auth": {
     "mot_de_passe_mis_a": "Mot de passe mis à jour",
@@ -1430,8 +1470,16 @@
     "goal_mass": "Masse",
     "goal_endurance": "Endurance",
     "goal_mobility": "Mobilité",
-    "audience_all": "Tous",
+    "audience_all": "Tout le monde",
     "audience_active": "Actifs",
-    "audience_expired": "Expirés"
+    "audience_expired": "Expirés",
+    "audience_team": "Équipe (accueil et coachs)",
+    "audience_staff": "Accueil",
+    "audience_coach": "Coachs",
+    "ann_members": "Adhérents",
+    "ann_staff": "Accueil",
+    "ann_coach": "Coachs",
+    "ann_team": "Équipe",
+    "ann_all": "Tout le monde"
   }
 }

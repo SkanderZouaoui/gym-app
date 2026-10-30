@@ -7,12 +7,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { useDismissedNotices } from '../../../src/store/preferences';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useRemoteConfig } from '../../../src/config/RemoteConfigContext';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
-import { useHomeAlerts } from '../../../src/hooks/useHomeAlerts';
+import { useDisplayConfig, useHomeAlerts } from '../../../src/hooks/useHomeAlerts';
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
@@ -21,6 +22,7 @@ import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
 import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
+import { Notice, NoticeList, NoticePopups } from '../../../src/components/adherent/Notices';
 import { Banner, BottomSheet, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
@@ -39,7 +41,22 @@ export default function HomeScreen() {
   const { data: bookings } = useMyBookings();
   const { data: announcements } = useMyAnnouncements();
   const { data: homeAlerts } = useHomeAlerts();
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const { data: display } = useDisplayConfig();
+  const { isDismissed, dismiss: dismissNotice } = useDismissedNotices();
+  const alertFormat = display?.alertFormat ?? 'Bandeau';
+  const announcementFormat = display?.announcementFormat ?? 'Bandeau';
+  const toLevel = (l: string): Notice['level'] => (l === 'urgent' || l === 'warn' ? l : 'info');
+  const allAlerts: Notice[] = (homeAlerts ?? []).map((a) => ({ id: `alert:${a.id}`, title: a.title, message: a.message, level: toLevel(a.level) }));
+  const allAnnouncements: Notice[] = (announcements ?? []).slice(0, 3).map((a) => ({
+    id: `news:${a.id}`,
+    title: a.title,
+    message: a.body,
+    level: (a.tone === 'danger' ? 'urgent' : a.tone === 'accent' ? 'warn' : 'info') as Notice['level'],
+    icon: 'campaign' as const,
+  }));
+  // Dans la page, un message fermé disparaît ; le pop-up, lui, ne touche pas à la liste de la page.
+  const alertNotices = allAlerts.filter((n) => !isDismissed(n.id));
+  const announcementNotices = allAnnouncements.filter((n) => !isDismissed(n.id));
   const { data: notifications } = useNotifications();
   const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const isDegraded = useSessionStore((s) => s.isDegraded);
@@ -130,33 +147,8 @@ export default function HomeScreen() {
           onPressNotifications={() => router.push('/(member)/notifications')}
         />
 
-        {(homeAlerts ?? [])
-          .filter((a) => !dismissedAlerts.has(a.id))
-          .map((a) => {
-            const tone =
-              a.level === 'urgent'
-                ? { icon: 'error' as const, bg: colors.dangerSoft, ink: colors.dangerInk }
-                : a.level === 'warn'
-                  ? { icon: 'warning' as const, bg: colors.warningSoft, ink: colors.warningInk }
-                  : { icon: 'info' as const, bg: colors.primarySoft, ink: colors.primaryInk };
-            return (
-              <View key={a.id} style={[styles.alertCard, { backgroundColor: tone.bg }]}>
-                <MaterialIcons name={tone.icon} size={24} color={tone.ink} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.alertTitle, { color: tone.ink }]}>{a.title}</Text>
-                  <Text style={[styles.alertMessage, { color: tone.ink }]}>{a.message}</Text>
-                </View>
-                <Pressable
-                  style={styles.alertClose}
-                  hitSlop={6}
-                  accessibilityLabel={t('member.fermer_lalerte')}
-                  onPress={() => setDismissedAlerts((prev) => new Set(prev).add(a.id))}
-                >
-                  <MaterialIcons name="close" size={20} color={tone.ink} />
-                </Pressable>
-              </View>
-            );
-          })}
+        <NoticeList items={alertNotices} format={alertFormat === 'Pop-up' ? 'Bandeau' : alertFormat} onDismiss={dismissNotice} />
+        {announcementFormat === 'Bandeau' ? <NoticeList items={announcementNotices} format="Bandeau" onDismiss={dismissNotice} /> : null}
 
         {isDegraded ? (
           <Banner
@@ -244,17 +236,17 @@ export default function HomeScreen() {
           </Pressable>
         ) : null}
 
-        {announcements && announcements.length > 0 ? (
+        {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
           <View style={{ gap: spacing.sm }}>
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>{t('home.announcementsTitle')}</Text>
             </View>
-            {announcements.slice(0, 3).map((a, i) => (
+            {(announcements ?? []).slice(0, 3).map((a) => (
               <View key={a.id} style={styles.newsCard}>
                 <LinearGradient colors={[colors.secondary, '#0B0B0F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                 <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.8)']} style={StyleSheet.absoluteFill} />
-                <View style={styles.newsPill}>
-                  <Text style={styles.newsPillText}>{i === 0 ? t('home.announcementNew') : t('home.announcementInfo')}</Text>
+                <View style={[styles.newsPill, NEWS_TONES[a.tone ?? 'info'].pill]}>
+                  <Text style={[styles.newsPillText, { color: NEWS_TONES[a.tone ?? 'info'].ink }]}>{a.tone === 'danger' ? t('home.announcementImportant') : a.tone === 'accent' ? t('home.announcementNew') : t('home.announcementInfo')}</Text>
                 </View>
                 <View style={styles.newsText}>
                   <Text style={styles.newsTitle} numberOfLines={2}>{a.title}</Text>
@@ -277,6 +269,10 @@ export default function HomeScreen() {
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
+      <NoticePopups
+        items={[...(alertFormat === 'Pop-up' ? allAlerts : []), ...(announcementFormat === 'Pop-up' ? allAnnouncements : [])].filter((n) => !isDismissed(n.id))}
+        onDismiss={dismissNotice}
+      />
       <BottomSheet visible={confirmCancel} onClose={() => setConfirmCancel(false)}>
         <Text style={styles.sheetTitle}>{t('common.annuler_2', { name: nextBooking?.session?.classType.name })}</Text>
         <Text style={styles.sheetText}>{t('member.lannulation_est_gratuite_votre_place')}</Text>
@@ -293,6 +289,13 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+
+/** Pastilles des annonces : teinte translucide discrète sur la carte sombre (info, nouveauté, important). */
+const NEWS_TONES = {
+  info: { ink: '#DDD6FE', pill: { backgroundColor: 'rgba(167,139,250,0.22)', borderColor: 'rgba(167,139,250,0.4)' } },
+  accent: { ink: '#A7F3D0', pill: { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.4)' } },
+  danger: { ink: '#FECACA', pill: { backgroundColor: 'rgba(248,113,113,0.22)', borderColor: 'rgba(248,113,113,0.42)' } },
+} as const;
 
 /** Salutation pilotée par le back-office (clé "home.greeting", éditable
  * côté CMS) — distincte des textes fixes de l'app, traduits statiquement.
@@ -377,10 +380,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
     height: 176, borderRadius: 26, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: '#0B0B0F',
   },
   newsPill: {
-    position: 'absolute', top: 14, left: 14, paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999,
+    position: 'absolute', top: 14, left: 14, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
-  newsPillText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
+  newsPillText: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, letterSpacing: 0.2, color: '#FFFFFF' },
   newsText: { padding: 18 },
   newsTitle: { fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.4, color: '#FFFFFF' },
   newsBody: { fontFamily: fonts.body, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 3 },

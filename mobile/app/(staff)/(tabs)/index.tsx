@@ -11,10 +11,12 @@ import { usePayments, useStaffToday, type StaffTodaySession } from '../../../src
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
-import { Avatar } from '../../../src/components/ui';
+import { Avatar, SkeletonList } from '../../../src/components/ui';
 import { useSessionStore } from '../../../src/store/session';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
+import { NotificationBell } from '../../../src/components/NotificationBell';
+import { RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
 
 /** Accueil de l'espace staff : chiffres du jour, raccourcis, cours du jour et derniers encaissements. */
@@ -26,8 +28,8 @@ export default function StaffHomeScreen() {
   const routes = useStaffRoutes();
   const { data: user } = useMe();
   const isAdmin = useSessionStore((st) => st.activeRole) === 'ADMIN';
-  const { data: today, refetch: refetchToday } = useStaffToday();
-  const { data: payments, refetch: refetchPayments } = usePayments();
+  const { data: today, refetch: refetchToday, isLoading: todayLoading } = useStaffToday();
+  const { data: payments, refetch: refetchPayments, isLoading: paymentsLoading } = usePayments();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetchToday(), refetchPayments()]));
 
   const now = new Date();
@@ -57,7 +59,10 @@ export default function StaffHomeScreen() {
             <Text style={styles.hello}>{t('staff.bonjour')}</Text>
             <Text style={styles.name} numberOfLines={1}>{user?.firstName ?? ''}</Text>
           </View>
+          <NotificationBell onPress={() => router.push('/(staff)/notifications')} />
         </View>
+
+        <RoleNotices />
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
@@ -99,7 +104,7 @@ export default function StaffHomeScreen() {
             {(upcoming.length > 0 ? upcoming : sessions).map((s) => (
               <SessionRow key={s.id} session={s} />
             ))}
-            {sessions.length === 0 ? (
+            {todayLoading ? <SkeletonList count={2} height={96} /> : sessions.length === 0 ? (
               <View style={[styles.empty, cardShadow]}>
                 <Text style={styles.emptyText}>{t('staff.aucun_cours_aujourdhui')}</Text>
               </View>
@@ -132,7 +137,7 @@ export default function StaffHomeScreen() {
                 </View>
               </Pressable>
             ))}
-            {(payments ?? []).length === 0 ? (
+            {paymentsLoading ? <SkeletonList count={3} /> : (payments ?? []).length === 0 ? (
               <View style={[styles.empty, cardShadow]}>
                 <Text style={styles.emptyText}>{t('staff.aucun_encaissement_pour_le_moment')}</Text>
               </View>
@@ -156,7 +161,7 @@ function SessionRow({ session }: { session: StaffTodaySession }) {
       onPress={() => router.push({ pathname: '/(staff)/(tabs)/scanner', params: { sessionId: session.id } })}
     >
       <View style={styles.timeBlock}>
-        <Text style={styles.timeText}>{time}</Text>
+        <Text style={styles.timeText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{time}</Text>
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={styles.className} numberOfLines={1}>{session.classTypeName}</Text>

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,7 +9,7 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCancelBooking, useCreateBooking, useSession } from '../../../src/hooks/useClasses';
 import { useMyBookings } from '../../../src/hooks/useMe';
 import { Button } from '../../../src/components/Button';
-import { Banner, BottomSheet, ProgressBar, Toast } from '../../../src/components/ui';
+import { Banner, BottomSheet, ProgressBar, Toast, DetailSkeleton } from '../../../src/components/ui';
 import { ApiError } from '../../../src/api/client';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
@@ -40,7 +40,7 @@ export default function SessionDetailScreen() {
   if (isLoading || !session) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

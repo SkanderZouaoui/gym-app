@@ -1,23 +1,27 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { BottomSheet } from '../../../src/components/ui';
+import { BottomSheet, DetailSkeleton } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercise, useDeactivateExercise } from '../../../src/hooks/useAdmin';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../src/i18n';
 import { levelLabel } from '../../../src/i18n/labels';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 const TYPE_LABEL = { get STRENGTH() { return i18n.t('admin.force'); }, get CARDIO() { return i18n.t('common.cardio'); }, get MOBILITY() { return i18n.t('admin.mobilite'); } } as const;
 
 /** Détail d'un exercice de la bibliothèque (admin) : niveau, utilisation, muscles, exécution. */
 export default function AdminExerciseDetailScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
@@ -30,7 +34,7 @@ export default function AdminExerciseDetailScreen() {
   if (isLoading || !ex) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }
@@ -42,7 +46,8 @@ export default function AdminExerciseDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>{i18n.t('common.retour')}</Text>

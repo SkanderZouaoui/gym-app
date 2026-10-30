@@ -32,6 +32,7 @@ export class AnnouncementsService {
         startsOn: dto.startsOn ? new Date(dto.startsOn) : null,
         endsOn: dto.endsOn ? new Date(dto.endsOn) : null,
         push: dto.push ?? true,
+        audience: dto.audience ?? 'MEMBERS',
         createdById: actorId,
         sentAt: new Date(),
       },
@@ -96,8 +97,8 @@ export class AnnouncementsService {
     return { deleted: true };
   }
 
-  /** Annonces envoyées reçues par l'adhérent courant — GET /v1/me/announcements. */
-  async findForMember(userId: string) {
+  /** Annonces reçues par l'utilisateur courant selon le rôle sous lequel il utilise l'app — GET /v1/me/announcements. */
+  async findForUser(userId: string, role: string, history = false) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { memberships: { where: { status: 'ACTIVE' }, select: { planId: true } } },
@@ -107,27 +108,51 @@ export class AnnouncementsService {
     const planIds = user.memberships.map((m) => m.planId);
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
+    const isTeam = role === 'STAFF' || role === 'COACH';
+
+    const audienceFilter = [
+      { audience: 'ALL' },
+      ...(role === 'MEMBER'
+        ? [{ audience: 'MEMBERS', OR: [{ planId: null }, ...(planIds.length > 0 ? [{ planId: { in: planIds } }] : [])] }]
+        : []),
+      ...(role === 'STAFF' ? [{ audience: 'STAFF' }] : []),
+      ...(role === 'COACH' ? [{ audience: 'COACH' }] : []),
+      ...(isTeam ? [{ audience: 'TEAM' }] : []),
+    ];
 
     return this.prisma.announcement.findMany({
       where: {
         sentAt: { not: null },
         AND: [
-          { OR: [{ planId: null }, ...(planIds.length > 0 ? [{ planId: { in: planIds } }] : [])] },
-          { OR: [{ startsOn: null }, { startsOn: { lte: today } }] },
-          { OR: [{ endsOn: null }, { endsOn: { gte: today } }] },
+          { OR: audienceFilter },
+          ...(history
+            ? []
+            : [{ OR: [{ startsOn: null }, { startsOn: { lte: today } }] }, { OR: [{ endsOn: null }, { endsOn: { gte: today } }] }]),
         ],
       },
       orderBy: { sentAt: 'desc' },
-      take: 20,
+      take: history ? 60 : 20,
     });
   }
 
   private targetFilter(dto: CreateAnnouncementDto) {
-    return {
-      deletedAt: null,
-      ...(dto.planId
-        ? { memberships: { some: { planId: dto.planId, status: 'ACTIVE' as const } } }
-        : {}),
-    };
+    const audience = dto.audience ?? 'MEMBERS';
+    const base = { deletedAt: null, status: 'ACTIVE' as const };
+    switch (audience) {
+      case 'STAFF':
+        return { ...base, roles: { some: { role: 'STAFF' as const } } };
+      case 'COACH':
+        return { ...base, roles: { some: { role: 'COACH' as const } } };
+      case 'TEAM':
+        return { ...base, roles: { some: { role: { in: ['STAFF' as const, 'COACH' as const] } } } };
+      case 'ALL':
+        return base;
+      default:
+        return {
+          ...base,
+          roles: { some: { role: 'MEMBER' as const } },
+          ...(dto.planId ? { memberships: { some: { planId: dto.planId, status: 'ACTIVE' as const } } } : {}),
+        };
+    }
   }
 }

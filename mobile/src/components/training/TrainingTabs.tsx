@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { HScroll } from '../ui/HScroll';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
 
@@ -21,7 +22,7 @@ export function TrainingTabs({ value, onChange }: { value: TrainingTab; onChange
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+    <HScroll contentContainerStyle={styles.row}>
       {TABS.map((tab) => {
         const active = tab.value === value;
         return (
@@ -33,7 +34,7 @@ export function TrainingTabs({ value, onChange }: { value: TrainingTab; onChange
           </Pressable>
         );
       })}
-    </ScrollView>
+    </HScroll>
   );
 }
 

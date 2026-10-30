@@ -1,22 +1,26 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachSessions, type CoachSession } from '../../../src/hooks/useCoachSessions';
-import { EmptyState, Pill, ProgressBar } from '../../../src/components/ui';
+import { EmptyState, Pill, ProgressBar, SkeletonList } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Mon planning — FitZone App Coach.dc.html, I2. */
 export default function CoachPlanningScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: sessions } = useCoachSessions();
+  const { data: sessions, isLoading } = useCoachSessions();
   const [selectedDay, setSelectedDay] = useState(0);
 
   const days = useMemo(() => {
@@ -51,12 +55,13 @@ export default function CoachPlanningScreen() {
         ))}
       </View>
 
-      <FlatList {...tabBarScroll}
+      <FlatList
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} {...tabBarScroll}
         data={daySessions}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => <SessionRow session={item} />}
-        ListEmptyComponent={<EmptyState icon="event-busy" title={t('coach.rien_de_prevu')} text={t('common.aucun_cours_ce_jour_la')} tone="muted" />}
+        ListEmptyComponent={isLoading ? <SkeletonList count={4} height={90} /> : (<EmptyState icon="event-busy" title={t('coach.rien_de_prevu')} text={t('common.aucun_cours_ce_jour_la')} tone="muted" />)}
       />
     </SafeAreaView>
   );
@@ -70,9 +75,14 @@ function SessionRow({ session }: { session: CoachSession }) {
   return (
     <Pressable style={styles.card} onPress={() => router.push(`/(coach)/session/${session.id}`)}>
       <View style={styles.cardTop}>
-        <Text style={styles.time}>
-          {new Date(session.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}
-        </Text>
+        <View style={styles.timeCol}>
+          <Text style={styles.time} numberOfLines={1}>
+            {new Date(session.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+          <Text style={styles.duration} numberOfLines={1}>
+            {t('staff.min', { minutes: Math.round((new Date(session.endsAt).getTime() - new Date(session.startsAt).getTime()) / 60000) })}
+          </Text>
+        </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.className}>{session.classType.name}</Text>
           {session.room ? <Text style={styles.meta}>{session.room.name}</Text> : null}
@@ -101,7 +111,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       padding: spacing.md, gap: 10,
     },
     cardTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    time: { fontFamily: fonts.headBold, fontSize: 14, color: colors.text, width: 46 },
+    timeCol: { minWidth: 48, flexShrink: 0, gap: 1 },
+    duration: { fontFamily: fonts.bodySemiBold, fontSize: 11, color: colors.muted },
+    time: { fontFamily: fonts.headBold, fontSize: 14, color: colors.text, minWidth: 48, flexShrink: 0 },
     className: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
     meta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
   });

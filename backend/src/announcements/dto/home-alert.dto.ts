@@ -14,7 +14,7 @@ export class CreateHomeAlertDto {
   level?: string;
 
   @IsOptional()
-  @IsIn(['Tous', 'Actifs', 'Expirés'])
+  @IsIn(['Tous', 'Actifs', 'Expirés', 'Équipe', 'Accueil', 'Coachs'])
   audience?: string;
 
   /** Premier jour d'affichage (AAAA-MM-JJ). */
@@ -34,7 +34,7 @@ export class UpdateHomeAlertDto {
   @IsOptional() @IsString() @MinLength(1) title?: string;
   @IsOptional() @IsString() @MinLength(1) message?: string;
   @IsOptional() @IsIn(['info', 'warn', 'urgent']) level?: string;
-  @IsOptional() @IsIn(['Tous', 'Actifs', 'Expirés']) audience?: string;
+  @IsOptional() @IsIn(['Tous', 'Actifs', 'Expirés', 'Équipe', 'Accueil', 'Coachs']) audience?: string;
   @IsOptional() @IsISO8601() startsOn?: string;
   @IsOptional() @IsISO8601() endsOn?: string;
   @IsOptional() @IsBoolean() isActive?: boolean;

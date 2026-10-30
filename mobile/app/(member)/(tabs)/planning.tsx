@@ -21,6 +21,7 @@ import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { dateLocale } from '../../../src/i18n';
 import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
+import { HScroll } from '../../../src/components/ui/HScroll';
 
 const WEEKDAY_LABELS = WEEKDAYS_SHORT_SUN;
 
@@ -121,7 +122,7 @@ export default function PlanningScreen() {
 
       <View style={styles.sticky}>
         <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+        <HScroll contentContainerStyle={styles.filterRow}>
           {[null, ...classTypeOptions].map((name) => {
             const active = activeType === name;
             return (
@@ -133,7 +134,7 @@ export default function PlanningScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </HScroll>
       </View>
 
       {bookingError ? (

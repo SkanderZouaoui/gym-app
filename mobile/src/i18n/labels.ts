@@ -6,10 +6,12 @@ import i18n from './index';
  */
 const LEVELS: Record<string, string> = { Débutant: 'beginner', Intermédiaire: 'intermediate', Avancé: 'advanced' };
 const GOALS: Record<string, string> = { 'Perte de poids': 'weight_loss', Masse: 'mass', Endurance: 'endurance', Mobilité: 'mobility' };
-const AUDIENCES: Record<string, string> = { Tous: 'all', Actifs: 'active', Expirés: 'expired' };
+const AUDIENCES: Record<string, string> = { Tous: 'all', Actifs: 'active', Expirés: 'expired', Équipe: 'team', Accueil: 'staff', Coachs: 'coach' };
+const ANN_AUDIENCES = ['MEMBERS', 'STAFF', 'COACH', 'TEAM', 'ALL'] as const;
 
 export const levelLabel = (v?: string | null): string => (v && LEVELS[v] ? i18n.t(`labels.level_${LEVELS[v]}`) : v ?? '');
 export const goalLabel = (v?: string | null): string => (v && GOALS[v] ? i18n.t(`labels.goal_${GOALS[v]}`) : v ?? '');
+export const announcementAudienceLabel = (v?: string | null): string => (v && (ANN_AUDIENCES as readonly string[]).includes(v) ? i18n.t(`labels.ann_${v.toLowerCase()}`) : i18n.t('labels.ann_members'));
 export const audienceLabel = (v?: string | null): string => (v && AUDIENCES[v] ? i18n.t(`labels.audience_${AUDIENCES[v]}`) : v ?? '');
 
 // --- Jours et mois : noms fournis par Intl selon la langue courante -------------------------

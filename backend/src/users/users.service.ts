@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
+import { notifyAdmins } from '../notifications/admin-notify.js';
 import { readOrganizationConfig } from '../organization/organization-config.js';
 import { generateMemberCode } from './member-code.js';
 import * as argon2 from 'argon2';
@@ -247,7 +248,7 @@ export class UsersService {
     const passwordHash = await argon2.hash(dto.password);
     const memberCode = await generateMemberCode(this.prisma);
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
           memberCode,
@@ -287,6 +288,21 @@ export class UsersService {
       });
       return { ...user, membership, payment };
     });
+
+    const actor = await this.prisma.user.findUnique({ where: { id: actorId }, select: { firstName: true, lastName: true } });
+    const actorName = actor ? `${actor.firstName} ${actor.lastName}` : '—';
+    const memberName = `${dto.firstName} ${dto.lastName}`;
+    await notifyAdmins(this.prisma, actorId, { kind: 'new_member', memberName, actorName });
+    if (result.payment) {
+      await notifyAdmins(this.prisma, actorId, {
+        kind: 'payment',
+        amount: Number(result.payment.amount),
+        method: String(dto.paymentMethod),
+        memberName,
+        actorName,
+      });
+    }
+    return result;
   }
 
   /** Édition d'un adhérent par un admin/staff — contrairement à updateProfile
@@ -394,6 +410,28 @@ export class UsersService {
       this.prisma.auditLog.create({ data: { actorId, action: 'ADMIN_RESET_PASSWORD', entity: 'User', entityId: targetId } }),
     ]);
     return { password };
+  }
+
+  /** Équipe en poste aujourd'hui, d'après le planning de travail (lundi = 0). */
+  async teamOnShift() {
+    const dow = (new Date().getDay() + 6) % 7;
+    const shifts = await this.prisma.workShift.findMany({
+      where: { dayOfWeek: dow, user: { deletedAt: null, status: 'ACTIVE' } },
+      include: { user: { select: { id: true, firstName: true, lastName: true, roles: { select: { role: true } } } } },
+      orderBy: { startTime: 'asc' },
+    });
+    const now = new Date();
+    const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return shifts.map((sh) => ({
+      id: sh.user.id,
+      firstName: sh.user.firstName,
+      lastName: sh.user.lastName,
+      role: sh.user.roles.some((r) => r.role === 'COACH') ? 'COACH' : 'STAFF',
+      startTime: sh.startTime,
+      endTime: sh.endTime,
+      /** Le créneau est en cours à cet instant. */
+      onDutyNow: sh.startTime <= hhmm && hhmm < sh.endTime,
+    }));
   }
 
   // --- Planning de travail ---------------------------------------------------

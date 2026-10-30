@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { ScreenTitle } from '../../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercises } from '../../../src/hooks/useAdmin';
@@ -20,7 +20,7 @@ export default function AdminExercisesScreen() {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [search, setSearch] = useState('');
-  const { data: exercises, refetch } = useAdminExercises({ muscleGroup: group });
+  const { data: exercises, refetch, isLoading } = useAdminExercises({ muscleGroup: group });
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/programs'));
 
@@ -82,12 +82,10 @@ export default function AdminExercisesScreen() {
             <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
           </Pressable>
         )}
-        ListEmptyComponent={
-          <View style={[styles.empty, cardShadow]}>
+        ListEmptyComponent={isLoading ? <SkeletonList count={6} height={64} /> : (<View style={[styles.empty, cardShadow]}>
             <MaterialIcons name="fitness-center" size={32} color={colors.primaryInk} />
             <Text style={styles.emptyText}>{t('admin.aucun_exercice_ajoutez_en_un')}</Text>
-          </View>
-        }
+          </View>)}
       />
     </SafeAreaView>
   );

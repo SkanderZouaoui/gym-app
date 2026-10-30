@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
@@ -13,10 +13,16 @@ import { CoachStatCard } from '../../../src/components/coach/CoachStatCard';
 import { DayScheduleRow } from '../../../src/components/coach/DayScheduleRow';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useTranslation } from 'react-i18next';
+import { NotificationBell } from '../../../src/components/NotificationBell';
+import { RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Accueil Coach — FitZone App Coach.dc.html, I1. */
 export default function CoachTodayScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
@@ -78,13 +84,17 @@ export default function CoachTodayScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} {...tabBarScroll} contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
           <View>
             <Text style={styles.title}>{t('coach.bonjour', { firstName: user?.firstName })}</Text>
             <Text style={styles.subtitle}>{t('coach.cours', { v0: dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1), classCount })}</Text>
           </View>
+          <NotificationBell onPress={() => router.push('/(coach)/notifications')} />
         </View>
+
+        <RoleNotices />
 
         {!isOnline ? <OfflineBanner lastSyncAt={lastSyncAt} /> : null}
 

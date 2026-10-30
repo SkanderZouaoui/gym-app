@@ -9,10 +9,11 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachPrograms, type ProgramStatus } from '../../../src/hooks/useCoachSessions';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
-import { ScreenTitle } from '../../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import { PROGRAM_STATUS_LABEL } from '../../../src/components/coach/programStatus';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../src/i18n';
+import { HScroll } from '../../../src/components/ui/HScroll';
 
 type Filter = 'all' | ProgramStatus;
 
@@ -29,7 +30,7 @@ export default function CoachProgramsScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: programs, refetch } = useCoachPrograms();
+  const { data: programs, refetch, isLoading } = useCoachPrograms();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -73,7 +74,7 @@ export default function CoachProgramsScreen() {
           ))}
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+        <HScroll contentContainerStyle={styles.filters}>
           {FILTERS.map((f) => {
             const active = f.value === filter;
             return (
@@ -85,7 +86,7 @@ export default function CoachProgramsScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </HScroll>
 
         <View style={{ gap: 10 }}>
           {shown.map((p) => (
@@ -116,7 +117,7 @@ export default function CoachProgramsScreen() {
               <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
             </Pressable>
           ))}
-          {shown.length === 0 ? (
+          {isLoading ? <SkeletonList count={3} height={96} /> : shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <Text style={styles.emptyText}>{t('coach.aucun_programme_dans_cette_categorie')}</Text>
             </View>

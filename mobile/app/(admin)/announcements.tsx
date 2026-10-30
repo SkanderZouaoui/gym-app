@@ -7,8 +7,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
-import { Banner, BottomSheet, ScreenTitle } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
+import { announcementAudienceLabel } from '../../src/i18n/labels';
 import { DateField } from '../../src/components/ui/DateTimeFields';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../src/components/ui/StickyActionBar';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
@@ -31,7 +32,7 @@ export default function AdminAnnouncementsScreen() {
   useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: announcements, refetch } = useAnnouncements();
+  const { data: announcements, refetch, isLoading } = useAnnouncements();
   const send = useSendAnnouncement();
   const updateAnn = useUpdateAnnouncement();
   const deleteAnn = useDeleteAnnouncement();
@@ -44,6 +45,7 @@ export default function AdminAnnouncementsScreen() {
   const [startsOn, setStartsOn] = useState(iso(new Date()));
   const [endsOn, setEndsOn] = useState('');
   const [push, setPush] = useState(true);
+  const [audience, setAudience] = useState<'MEMBERS' | 'STAFF' | 'COACH' | 'TEAM' | 'ALL'>('MEMBERS');
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
@@ -58,6 +60,7 @@ export default function AdminAnnouncementsScreen() {
     setStartsOn(iso(new Date()));
     setEndsOn('');
     setPush(true);
+    setAudience('MEMBERS');
   };
 
   const startEdit = (a: Announcement) => {
@@ -88,7 +91,7 @@ export default function AdminAnnouncementsScreen() {
       return;
     }
     send.mutate(
-      { title: title.trim(), body: body.trim(), startsOn, endsOn: endsOn || undefined, push },
+      { title: title.trim(), body: body.trim(), startsOn, endsOn: endsOn || undefined, push, audience },
       {
         onSuccess: (r) => {
           setDone(push ? i18n.t('admin.publiee_et_envoyee_en_push', { recipientCount: r.recipientCount }) : i18n.t('admin.annonce_publiee'));
@@ -134,6 +137,18 @@ export default function AdminAnnouncementsScreen() {
               <View style={{ flex: 1 }}><DateField label={i18n.t('admin.fin_facultatif')} value={endsOn} onChange={setEndsOn} clearable icon="event-available" minimumDate={startsOn ? new Date(startsOn) : undefined} /></View>
             </View>
             {!editingId ? (
+              <View style={{ gap: 8 }}>
+                <Text style={styles.switchLabel}>{i18n.t('admin.recipients_label')}</Text>
+                <View style={styles.audRow}>
+                  {(['MEMBERS', 'TEAM', 'STAFF', 'COACH', 'ALL'] as const).map((k) => (
+                    <Pressable key={k} onPress={() => setAudience(k)} style={[styles.audChip, audience === k && styles.audChipOn]}>
+                      <Text style={[styles.audText, audience === k && { color: colors.primaryContrast }]}>{announcementAudienceLabel(k)}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            ) : null}
+            {!editingId ? (
             <View style={styles.switchRow}>
               <Text style={styles.switchLabel}>{i18n.t('admin.envoyer_une_notification_push')}</Text>
               <Switch value={push} onValueChange={setPush} trackColor={{ true: colors.primary, false: colors.surface2 }} thumbColor="#FFFFFF" ios_backgroundColor={colors.surface2} />
@@ -159,7 +174,7 @@ export default function AdminAnnouncementsScreen() {
                 <Text style={styles.itemBody} numberOfLines={3}>{a.body}</Text>
                 <View style={styles.period}>
                   <MaterialIcons name="event" size={16} color={colors.primaryInk} />
-                  <Text style={[styles.periodText, { flex: 1 }]}>{fr(a.startsOn)} → {fr(a.endsOn)}{a.push ? i18n.t('admin.push_envoye') : ''}</Text>
+                  <Text style={[styles.periodText, { flex: 1 }]}>{announcementAudienceLabel(a.audience)} · {fr(a.startsOn)} → {fr(a.endsOn)}{a.push ? i18n.t('admin.push_envoye') : ''}</Text>
                   <Pressable accessibilityLabel={i18n.t('admin.modifier_lannonce')} onPress={() => startEdit(a)} style={styles.iconBtn} hitSlop={6}>
                     <MaterialIcons name="edit" size={18} color={colors.primaryInk} />
                   </Pressable>
@@ -170,7 +185,7 @@ export default function AdminAnnouncementsScreen() {
               </View>
             );
           })}
-          {(announcements ?? []).length === 0 ? <Text style={styles.empty}>{i18n.t('admin.aucune_annonce_pour_le_moment')}</Text> : null}
+          {isLoading ? <SkeletonList count={5} /> : (announcements ?? []).length === 0 ? <Text style={styles.empty}>{i18n.t('admin.aucune_annonce_pour_le_moment')}</Text> : null}
         </View>
       </ScrollView>
       <StickyActionBar visible={open} label={editingId ? i18n.t('common.enregistrer_les_modifications') : i18n.t('admin.publier')} icon={editingId ? 'check' : 'send'} loading={send.isPending || updateAnn.isPending} disabled={!valid} onPress={publish} />
@@ -206,6 +221,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
     tagText: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
     itemBody: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.muted, marginTop: 4 },
+    audRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    audChip: { height: 36, paddingHorizontal: 14, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+    audChipOn: { backgroundColor: colors.primary },
+    audText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
     editNote: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
     iconBtn: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },

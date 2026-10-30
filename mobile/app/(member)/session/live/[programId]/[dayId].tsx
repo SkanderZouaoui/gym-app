@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../../../src/theme/tokens';
 import { useTheme } from '../../../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../../../src/hooks/useCoachSessions';
-import { Banner, BottomSheet, EmptyState, ScreenTitle } from '../../../../../src/components/ui';
+import { Banner, BottomSheet, EmptyState, ScreenTitle, DetailSkeleton } from '../../../../../src/components/ui';
 import { WorkoutHeroCard } from '../../../../../src/components/training/WorkoutHeroCard';
 import { Button } from '../../../../../src/components/Button';
 import { SetTableRow, type SetRowState } from '../../../../../src/components/training/SetTableRow';
@@ -439,7 +439,7 @@ export default function LiveSessionScreen() {
   if ((isLoading || isLoadingWorkouts) && !program) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }
@@ -485,7 +485,7 @@ export default function LiveSessionScreen() {
   if (isLoadingWorkouts && !workouts) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

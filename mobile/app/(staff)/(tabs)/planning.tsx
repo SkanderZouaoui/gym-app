@@ -10,7 +10,7 @@ import { useSessions } from '../../../src/hooks/useClasses';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
-import { FilterDropdown, ProgressBar, ScreenTitle } from '../../../src/components/ui';
+import { FilterDropdown, ProgressBar, ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { StatusTag } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
@@ -53,7 +53,7 @@ export default function StaffPlanningScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: sessions, refetch } = useSessions();
+  const { data: sessions, refetch, isLoading } = useSessions();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const days = useMemo(() => buildDays(14), []);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -162,7 +162,7 @@ export default function StaffPlanningScreen() {
                     end={{ x: 1, y: 1 }}
                     style={styles.timeBlock}
                   >
-                    <Text style={styles.timeText}>{time}</Text>
+                    <Text style={styles.timeText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{time}</Text>
                     <Text style={styles.timeSub}>{i18n.t('staff.min', { minutes })}</Text>
                   </LinearGradient>
                   <View style={{ flex: 1, minWidth: 0 }}>
@@ -188,7 +188,7 @@ export default function StaffPlanningScreen() {
               </Pressable>
             );
           })}
-          {shown.length === 0 ? (
+          {isLoading ? <SkeletonList count={3} height={120} /> : shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
               <Text style={styles.emptyText}>{i18n.t('staff.aucun_cours_ne_correspond_a')}</Text>

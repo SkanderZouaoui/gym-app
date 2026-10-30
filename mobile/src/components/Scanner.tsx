@@ -281,7 +281,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                       <Text style={[styles.sessionState, active && { color: 'rgba(255,255,255,0.9)' }]}>{live ? i18n.t('common.en_cours_2') : i18n.t('common.a_venir_2')}</Text>
                     </View>
                     <Text style={[styles.sessionName, active && { color: '#FFFFFF' }]} numberOfLines={1}>{s.name}</Text>
-                    <Text style={[styles.sessionTime, active && { color: 'rgba(255,255,255,0.9)' }]}>{timeOf(s.startsAt)} – {timeOf(s.endsAt)}</Text>
+                    <Text numberOfLines={1} style={[styles.sessionTime, active && { color: 'rgba(255,255,255,0.9)' }]}>{timeOf(s.startsAt)} – {timeOf(s.endsAt)}</Text>
                   </Pressable>
                 );
               })}

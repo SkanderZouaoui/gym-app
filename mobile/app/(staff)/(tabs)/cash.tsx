@@ -10,13 +10,14 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { usePayments, type PaymentMethod } from '../../../src/hooks/useStaff';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { ScreenTitle } from '../../../src/components/ui';
+import { ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import { useSessionStore } from '../../../src/store/session';
 import { Pagination } from '../../../src/components/ui/Pagination';
 import { DateField } from '../../../src/components/ui/DateTimeFields';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
+import { HScroll } from '../../../src/components/ui/HScroll';
 
 type Filter = 'all' | PaymentMethod;
 const FILTERS: { value: Filter; label: string }[] = [
@@ -52,7 +53,7 @@ export default function StaffCashScreen() {
     return { from: new Date(fy, fm - 1, fd, 0, 0, 0, 0).toISOString(), to: new Date(ty, tm - 1, td, 23, 59, 59, 999).toISOString() };
   }, [isAdmin, period, customFrom, customTo]);
 
-  const { data: payments, refetch } = usePayments(range);
+  const { data: payments, refetch, isLoading } = usePayments(range);
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const list = payments ?? [];
@@ -106,13 +107,13 @@ export default function StaffCashScreen() {
 
         {isAdmin ? (
           <View style={{ gap: 10 }}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+            <HScroll contentContainerStyle={styles.filters}>
               {(['month', 'last', 'custom'] as const).map((k) => (
                 <Pressable key={k} onPress={() => setPeriod(k)} style={[styles.filterPill, period === k && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
                   <Text style={[styles.filterText, period === k && styles.filterTextActive]}>{t(`staff.period_${k}`)}</Text>
                 </Pressable>
               ))}
-            </ScrollView>
+            </HScroll>
             {period === 'custom' ? (
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}><DateField label={t('staff.du')} value={customFrom} onChange={(v) => { setCustomFrom(v); if (v > customTo) setCustomTo(v); }} /></View>
@@ -143,7 +144,7 @@ export default function StaffCashScreen() {
           </LinearGradient>
         </Pressable>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+        <HScroll contentContainerStyle={styles.filters}>
           {FILTERS.map((f) => {
             const active = f.value === filter;
             return (
@@ -155,7 +156,7 @@ export default function StaffCashScreen() {
               </Pressable>
             );
           })}
-        </ScrollView>
+        </HScroll>
 
         <View style={{ gap: 10 }}>
           {shown.map((p) => (
@@ -178,7 +179,7 @@ export default function StaffCashScreen() {
             </Pressable>
           ))}
           <Pagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onChange={setPage} />
-          {shown.length === 0 ? (
+          {isLoading ? <SkeletonList count={5} /> : shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <Text style={styles.emptyText}>{isAdmin ? t('staff.aucun_encaissement_sur_cette_periode') : t('staff.aucun_encaissement_avec_ce_moyen')}</Text>
             </View>

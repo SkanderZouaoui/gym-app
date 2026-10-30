@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
-import { Banner, ScreenTitle } from '../../src/components/ui';
+import { Banner, ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../src/components/ui/StickyActionBar';
 import { DateTimeFields } from '../../src/components/ui/DateTimeFields';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
@@ -26,6 +26,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../src/i18n';
 import { WEEKDAYS_NARROW_MON, WEEKDAYS_SHORT_MON } from '../../src/i18n/labels';
+import { HScroll } from '../../src/components/ui/HScroll';
 
 const KINDS = ['Annonce', 'Rappel', 'Offre'] as const;
 const DAY_LETTERS = WEEKDAYS_NARROW_MON;
@@ -52,9 +53,9 @@ export default function AdminNotificationsScreen() {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: aud } = useAudiences();
-  const { data: scheduled, refetch } = useScheduledNotifications();
-  const { data: history, refetch: refetchHistory } = useNotificationHistory();
-  const { data: rules } = useNotificationRules();
+  const { data: scheduled, refetch, isLoading: scheduledLoading } = useScheduledNotifications();
+  const { data: history, refetch: refetchHistory, isLoading: historyLoading } = useNotificationHistory();
+  const { data: rules, isLoading: rulesLoading } = useNotificationRules();
   const send = useSendNotification();
   const cancel = useCancelScheduledNotification();
   const createRule = useCreateNotificationRule();
@@ -145,13 +146,13 @@ export default function AdminNotificationsScreen() {
         </Pressable>
         <ScreenTitle title={t('common.notifications')} subtitle={t('admin.envoyer_ou_programmer_une_notification')} />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+        <HScroll contentContainerStyle={{ gap: 8 }}>
           {segs.map((l, i) => (
             <Pressable key={l} onPress={() => setSeg(i)} style={[styles.seg, seg === i && styles.segActive]}>
               <Text style={[styles.segText, seg === i && { color: colors.primaryContrast }]}>{l}</Text>
             </Pressable>
           ))}
-        </ScrollView>
+        </HScroll>
 
         {flash ? <Banner tone="success" icon="check-circle-outline" text={flash} /> : null}
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
@@ -220,7 +221,7 @@ export default function AdminNotificationsScreen() {
                 </View>
               </View>
             ))}
-            {(scheduled ?? []).length === 0 ? <Empty icon="schedule-send" text={t('admin.aucune_notification_programmee')} /> : null}
+            {scheduledLoading ? <SkeletonList count={3} height={96} /> : (scheduled ?? []).length === 0 ? <Empty icon="schedule-send" text={t('admin.aucune_notification_programmee')} /> : null}
           </View>
         ) : null}
 
@@ -240,7 +241,7 @@ export default function AdminNotificationsScreen() {
                 </View>
               </View>
             ))}
-            {(history ?? []).length === 0 ? <Empty icon="history" text={t('admin.aucune_notification_envoyee_pour_le')} /> : null}
+            {historyLoading ? <SkeletonList count={3} height={96} /> : (history ?? []).length === 0 ? <Empty icon="history" text={t('admin.aucune_notification_envoyee_pour_le')} /> : null}
           </View>
         ) : null}
 
@@ -328,7 +329,7 @@ export default function AdminNotificationsScreen() {
                 </View>
               </View>
             ))}
-            {(rules ?? []).length === 0 && !ruleOpen ? <Empty icon="repeat" text={t('admin.aucune_regle_recurrente')} /> : null}
+            {rulesLoading ? <SkeletonList count={2} height={96} /> : (rules ?? []).length === 0 && !ruleOpen ? <Empty icon="repeat" text={t('admin.aucune_regle_recurrente')} /> : null}
           </View>
         ) : null}
       </ScrollView>

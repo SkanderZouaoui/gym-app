@@ -16,7 +16,7 @@ import {
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
-import { BottomSheet, ProgressBar, ScreenTitle } from '../../../src/components/ui';
+import { BottomSheet, ProgressBar, ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,7 @@ export default function AdminPlanningScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: sessions, refetch } = useSessions();
+  const { data: sessions, refetch, isLoading } = useSessions();
   const { data: coaches } = useAdminCoaches();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
   const setCapacity = useSetSessionCapacity();
@@ -102,7 +102,10 @@ export default function AdminPlanningScreen() {
             return (
               <View key={s.id} style={[styles.card, cardShadow, cancelled && { opacity: 0.6 }]}>
                 <View style={styles.row}>
-                  <Text style={styles.time}>{new Date(s.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}</Text>
+                  <View style={styles.timeCol}>
+                    <Text style={styles.time} numberOfLines={1}>{new Date(s.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}</Text>
+                    <Text style={styles.duration} numberOfLines={1}>{i18n.t('staff.min', { minutes: Math.round((new Date(s.endsAt).getTime() - new Date(s.startsAt).getTime()) / 60000) })}</Text>
+                  </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.name} numberOfLines={1}>{s.classType.name}</Text>
                     <Text style={styles.meta} numberOfLines={1}>
@@ -151,7 +154,7 @@ export default function AdminPlanningScreen() {
               </View>
             );
           })}
-          {list.length === 0 ? (
+          {isLoading ? <SkeletonList count={3} height={96} /> : list.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
               <Text style={styles.emptyText}>{i18n.t('common.aucun_cours_ce_jour_la')}</Text>
@@ -205,7 +208,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     addButton: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
     card: { padding: 14, backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    time: { width: 54, fontFamily: fonts.head, fontSize: 18, color: colors.text },
+    timeCol: { minWidth: 56, flexShrink: 0, gap: 1 },
+    duration: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, color: colors.muted },
+    time: { minWidth: 56, flexShrink: 0, fontFamily: fonts.head, fontSize: 18, color: colors.text },
     name: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
     meta: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
     tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },

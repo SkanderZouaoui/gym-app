@@ -3,6 +3,7 @@ import { readOrganizationConfig } from '../organization/organization-config.js';
 import { Role, type AttendancePolicy } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { OrganizationService } from '../organization/organization.service.js';
+import { notifyAdmins } from '../notifications/admin-notify.js';
 import type { CreatePaymentDto } from './dto/create-payment.dto.js';
 
 @Injectable()
@@ -44,6 +45,18 @@ export class PaymentsService {
         entityId: payment.id,
         newValue: { amount: dto.amount, method: dto.method, membershipId: dto.membershipId },
       },
+    });
+
+    const [actor, membership] = await Promise.all([
+      this.prisma.user.findUnique({ where: { id: actorId }, select: { firstName: true, lastName: true } }),
+      this.prisma.membership.findUnique({ where: { id: dto.membershipId }, select: { user: { select: { firstName: true, lastName: true } } } }),
+    ]);
+    await notifyAdmins(this.prisma, actorId, {
+      kind: 'payment',
+      amount: Number(dto.amount),
+      method: dto.method,
+      memberName: membership ? `${membership.user.firstName} ${membership.user.lastName}` : '—',
+      actorName: actor ? `${actor.firstName} ${actor.lastName}` : '—',
     });
 
     return payment;

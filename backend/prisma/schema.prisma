@@ -604,6 +604,8 @@ enum NotificationType {
   ANNOUNCEMENT
   ATTENDANCE_CONFIRMED
   PERSONAL_RECORD
+  ADMIN_PAYMENT
+  ADMIN_NEW_MEMBER
 }
 
 model Notification {
@@ -653,6 +655,8 @@ model Announcement {
   startsOn    DateTime? @map("starts_on") @db.Date
   endsOn      DateTime? @map("ends_on") @db.Date
   push        Boolean   @default(true)
+  /// Destinataires : MEMBERS (adhérents, filtrés par formule) | STAFF | COACH | TEAM (accueil + coachs) | ALL.
+  audience    String    @default("MEMBERS")
   createdAt   DateTime  @default(now()) @map("created_at")
 
   plan      MembershipPlan? @relation(fields: [planId], references: [id])

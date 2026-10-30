@@ -258,7 +258,22 @@
     "share_email_line": "\nEmail: {{email}}",
     "wrong_code": "Incorrect code.",
     "qr_not_recognized": "QR code not recognized",
-    "enjoy_class": "Enjoy your class!"
+    "enjoy_class": "Enjoy your class!",
+    "notice_understood": "Got it",
+    "notice_next": "Next ({{count}} more)",
+    "notice_urgent": "Urgent",
+    "notice_warning": "Warning",
+    "notice_info": "Information",
+    "notif_tab_notifications": "Notifications",
+    "notif_tab_announcements": "Announcements",
+    "notif_tab_alerts": "Alerts",
+    "notif_empty": "Nothing here yet",
+    "notif_empty_text": "Your notifications, announcements and alerts will appear here.",
+    "notif_ended": "Ended",
+    "notif_admin_payment": "New payment",
+    "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · by {{actor}}",
+    "notif_admin_member": "New member account",
+    "notif_admin_member_body": "{{member}} · created by {{actor}}"
   },
   "home": {
     "membershipNone": "No membership",
@@ -295,7 +310,8 @@
     "statusActive": "Active",
     "statusExpired": "Expired",
     "nextCourseTitle": "Next class",
-    "greetingFallback": "Hello,"
+    "greetingFallback": "Hello,",
+    "announcementImportant": "Important"
   },
   "planning": {
     "title": "Schedule",
@@ -804,7 +820,31 @@
     "aud_EXPIRING": "Expiring soon",
     "aud_EXPIRED": "Expired",
     "aud_plan": "Plan",
-    "rule_summary": "{{days}} at {{time}} · {{audience}}{{condition}}"
+    "rule_summary": "{{days}} at {{time}} · {{audience}}{{condition}}",
+    "live_classes": "Classes right now",
+    "no_live_classes": "No class right now",
+    "renewals": "Memberships to follow up",
+    "renewals_none": "No expiry in the next 7 days",
+    "expires_in": "Expires in {{days}} d",
+    "expires_today": "Expires today",
+    "no_phone": "No phone number",
+    "recent_payments": "Latest payments",
+    "see_history": "History",
+    "today_activity": "Today",
+    "new_members": "New members",
+    "team_on_shift": "Team on shift",
+    "no_one_on_shift": "Nobody is scheduled on {{day}}",
+    "on_duty_now": "On duty",
+    "edit_shortcuts": "Edit",
+    "customize_shortcuts": "Customize shortcuts",
+    "customize_hint": "Choose up to 6 shortcuts for your home screen.",
+    "shortcut_limit": "6 shortcuts maximum",
+    "shortcut_reset": "Reset to default",
+    "activity_title": "Today's activity",
+    "key_figures": "Key figures",
+    "alert_format": "Alert format",
+    "alert_format_hint": "How alerts appear on the member home screen",
+    "recipients_label": "Recipients"
   },
   "auth": {
     "mot_de_passe_mis_a": "Password updated",
@@ -1432,6 +1472,14 @@
     "goal_mobility": "Mobility",
     "audience_all": "Everyone",
     "audience_active": "Active",
-    "audience_expired": "Expired"
+    "audience_expired": "Expired",
+    "audience_team": "Team (front desk and coaches)",
+    "audience_staff": "Front desk",
+    "audience_coach": "Coaches",
+    "ann_members": "Members",
+    "ann_staff": "Front desk",
+    "ann_coach": "Coaches",
+    "ann_team": "Team",
+    "ann_all": "Everyone"
   }
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,7 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../src/hooks/useCoachSessions';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { EmptyState } from '../../../src/components/ui';
+import { EmptyState, DetailSkeleton } from '../../../src/components/ui';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { PROGRAM_STATUS_LABEL, estimateMinutes } from '../../../src/components/coach/programStatus';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ export default function CoachProgramDetailScreen() {
   if (isLoading && !program) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

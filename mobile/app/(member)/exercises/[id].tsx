@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useExercise, useMyWorkouts } from '../../../src/hooks/useCoaching';
-import { EmptyState, ScreenTitle, Toast } from '../../../src/components/ui';
+import { EmptyState, ScreenTitle, Toast, DetailSkeleton } from '../../../src/components/ui';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
@@ -49,7 +49,7 @@ export default function ExerciseDetailScreen() {
   if (isLoading && !exercise) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

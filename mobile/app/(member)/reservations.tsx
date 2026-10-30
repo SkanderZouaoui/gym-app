@@ -9,7 +9,7 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useCancelBooking } from '../../src/hooks/useClasses';
 import { useMyBookings } from '../../src/hooks/useMe';
 import type { Booking } from '../../src/api/types';
-import { BottomSheet, EmptyState, ScreenTitle, Toast } from '../../src/components/ui';
+import { BottomSheet, EmptyState, ScreenTitle, Toast, SkeletonList } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +23,7 @@ export default function ReservationsScreen() {
   useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: bookings, refetch } = useMyBookings();
+  const { data: bookings, refetch, isLoading } = useMyBookings();
   const cancelBooking = useCancelBooking();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const [tab, setTab] = useState<Tab>('upcoming');
@@ -131,8 +131,7 @@ export default function ReservationsScreen() {
             </Pressable>
           );
         }}
-        ListEmptyComponent={
-          <EmptyState
+        ListEmptyComponent={isLoading ? <SkeletonList count={4} height={84} /> : (<EmptyState
             icon="event-available"
             title={tab === 'upcoming' ? i18n.t('member.aucune_reservation_a_venir') : tab === 'waitlist' ? i18n.t('member.aucune_liste_dattente') : i18n.t('member.aucune_seance_passee')}
             text={
@@ -145,8 +144,7 @@ export default function ReservationsScreen() {
             tone="primary"
             actionLabel={tab === 'upcoming' ? i18n.t('member.explorer_le_planning') : undefined}
             onAction={tab === 'upcoming' ? () => router.push('/(member)/(tabs)/planning') : undefined}
-          />
-        }
+          />)}
       />
 
       <BottomSheet visible={!!cancelTarget} onClose={() => setCancelTarget(null)}>

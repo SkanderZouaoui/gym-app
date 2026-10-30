@@ -9,6 +9,8 @@ export interface AdminDashboard {
   revenueToday: string | number;
   revenueMonth: string | number;
   classesToday: number;
+  newMembersToday?: number;
+  paymentsToday?: number;
   avgFillRate: number;
   alerts: { expiringMemberships: number; underfilledClasses: number };
 }
@@ -95,7 +97,7 @@ export interface AdminHomeAlert {
   title: string;
   message: string;
   level: 'info' | 'warn' | 'urgent';
-  audience: 'Tous' | 'Actifs' | 'Expirés';
+  audience: 'Tous' | 'Actifs' | 'Expirés' | 'Équipe' | 'Accueil' | 'Coachs';
   startsOn: string;
   endsOn: string;
   isActive: boolean;
@@ -323,6 +325,7 @@ export interface Announcement {
   startsOn: string | null;
   endsOn: string | null;
   push: boolean;
+  audience?: 'MEMBERS' | 'STAFF' | 'COACH' | 'TEAM' | 'ALL';
   createdAt: string;
 }
 export interface AnnouncementInput {
@@ -333,6 +336,7 @@ export interface AnnouncementInput {
   startsOn?: string;
   endsOn?: string;
   push?: boolean;
+  audience?: 'MEMBERS' | 'STAFF' | 'COACH' | 'TEAM' | 'ALL';
 }
 
 export function useAnnouncements() {
@@ -547,7 +551,7 @@ export interface OrganizationConfig {
   contact: { address: string; phone: string; email: string; visibleToMembers: boolean };
   hours: { open: boolean; from: string; to: string }[];
   paymentMethods: { CASH: boolean; OTHER: boolean; TRANSFER: boolean; CHECK: boolean };
-  announcements: { format: 'Bandeau' | 'Pop-up' | 'Encart'; push: boolean; expiryReminderDays: number };
+  announcements: { format: 'Bandeau' | 'Pop-up' | 'Encart'; alertFormat: 'Bandeau' | 'Pop-up' | 'Encart'; push: boolean; expiryReminderDays: number };
   booking: { cancelHoursBefore: number; defaultCapacity: number; waitlist: boolean };
   discounts: Record<string, number>;
 }
@@ -748,4 +752,18 @@ export function muscleIcon(group: string): 'fitness-center' | 'directions-run' |
   if (/mobilit|souplesse|étirement|levator/.test(g)) return 'self-improvement';
   if (/dos|lats|traps|spine|upper back/.test(g)) return 'sports-gymnastics';
   return 'fitness-center';
+}
+
+export interface TeamOnShift {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: 'STAFF' | 'COACH';
+  startTime: string;
+  endTime: string;
+  onDutyNow: boolean;
+}
+/** Équipe planifiée aujourd'hui (planning de travail). */
+export function useTeamOnShift() {
+  return useQuery({ queryKey: ['admin', 'team-on-shift'], queryFn: () => apiRequest<TeamOnShift[]>('/v1/admin/team-on-shift') });
 }

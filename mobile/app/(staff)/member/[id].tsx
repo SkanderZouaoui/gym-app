@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +11,7 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { ResetPasswordButton } from '../../../src/components/ResetPasswordButton';
 import { resetMemberPassword, useMemberDetail, useMemberMemberships, useMemberPayments } from '../../../src/hooks/useStaff';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { EmptyState } from '../../../src/components/ui';
+import { EmptyState, DetailSkeleton } from '../../../src/components/ui';
 import { StatusTag, formatMoney, membershipBadge, METHOD_LABEL } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../../src/i18n';
@@ -41,7 +41,7 @@ export default function StaffMemberScreen() {
   if (isLoading && !member) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }

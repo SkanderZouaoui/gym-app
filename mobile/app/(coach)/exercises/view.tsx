@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -7,15 +7,19 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useExercise } from '../../../src/hooks/useCoaching';
 import { useStudentWorkouts } from '../../../src/hooks/useCoachSessions';
-import { Banner, Pill } from '../../../src/components/ui';
+import { Banner, Pill, DetailSkeleton } from '../../../src/components/ui';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRecordCard';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
  * vue coach, avec le record personnel de l'élève. FitZone App Coach.dc.html. */
 export default function CoachViewProgramExerciseScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -57,7 +61,7 @@ export default function CoachViewProgramExerciseScreen() {
   if (isLoading || !exercise) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <ActivityIndicator style={{ marginTop: 60 }} color={colors.primary} />
+        <DetailSkeleton />
       </SafeAreaView>
     );
   }
@@ -65,7 +69,8 @@ export default function CoachViewProgramExerciseScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref={studentId ? `/(coach)/student/${studentId}` : '/(coach)/(tabs)/students'} />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <View style={styles.mediaWrap}>
           <ExerciseGif uri={exercise.mediaKey} size={200} />
         </View>

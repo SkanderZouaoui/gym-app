@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { HScroll } from '../ui/HScroll';
 
 interface DaySelectorProps {
   days: { label: string; dayNumber: string; date: Date }[];
@@ -15,7 +16,7 @@ export function DaySelector({ days, selectedIndex, onSelect }: DaySelectorProps)
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+    <HScroll contentContainerStyle={styles.row}>
       {days.map((d, i) => {
         const active = i === selectedIndex;
         return (
@@ -28,7 +29,7 @@ export function DaySelector({ days, selectedIndex, onSelect }: DaySelectorProps)
           </Pressable>
         );
       })}
-    </ScrollView>
+    </HScroll>
   );
 }
 

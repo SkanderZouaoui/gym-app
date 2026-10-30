@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
 import Constants from 'expo-constants';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +10,8 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { ScreenTitle } from '../../src/components/ui';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -40,6 +42,8 @@ const SECTIONS: { icon: IconName; title: string; text: string }[] = [
 
 /** À propos : identité de l'application, règlement, mentions légales, confidentialité, contact, crédits. */
 export default function AppInfoScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -49,7 +53,8 @@ export default function AppInfoScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>{t('common.profil')}</Text>

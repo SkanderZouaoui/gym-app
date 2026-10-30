@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMembers } from '../../../src/hooks/useStaff';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { FilterDropdown, ScreenTitle } from '../../../src/components/ui';
+import { FilterDropdown, ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import { InitialsAvatar, StatusTag, membershipBadge } from '../../../src/components/staff/staffUi';
 import type { MemberSearchResult } from '../../../src/hooks/useStaff';
 import { useTranslation } from 'react-i18next';
@@ -45,13 +45,27 @@ export default function StaffMembersScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [query, setQuery] = useState('');
   const { status: initialStatus } = useLocalSearchParams<{ status?: StatusFilter }>();
-  const [status, setStatus] = useState<StatusFilter>(initialStatus ?? 'all');
-  // Arrivée depuis un raccourci (ex. carte « Adhérents actifs ») : le filtre suit le paramètre.
+  const [status, setStatus] = useState<StatusFilter>('all');
+  // Arrivée avec un filtre (carte « Adhérents actifs », « Voir tout »…) : on l'applique puis on retire le
+  // paramètre de la route, pour qu'il ne reste pas collé à l'onglet.
   useEffect(() => {
-    if (initialStatus) setStatus(initialStatus);
+    if (!initialStatus) return;
+    setStatus(initialStatus);
+    router.setParams({ status: undefined });
   }, [initialStatus]);
   const [plan, setPlan] = useState<string | null>(null);
-  const { data: members, refetch } = useMembers(query.trim());
+  // En quittant l'écran, tous les filtres et la recherche sont réinitialisés.
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        setStatus('all');
+        setPlan(null);
+        setQuery('');
+      },
+      [],
+    ),
+  );
+  const { data: members, refetch, isLoading } = useMembers(query.trim());
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const plans = useMemo(
@@ -190,12 +204,10 @@ export default function StaffMembersScreen() {
             </Pressable>
           );
         }}
-        ListEmptyComponent={
-          <View style={[styles.empty, cardShadow]}>
+        ListEmptyComponent={isLoading ? <SkeletonList count={6} /> : (<View style={[styles.empty, cardShadow]}>
             <MaterialIcons name="person-search" size={34} color={colors.primaryInk} />
             <Text style={styles.emptyText}>{t('staff.aucun_adherent_ne_correspond_a')}</Text>
-          </View>
-        }
+          </View>)}
       />
     </SafeAreaView>
   );

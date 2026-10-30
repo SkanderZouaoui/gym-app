@@ -18,7 +18,10 @@ export const organizationConfigSchema = z.object({
     .object({ CASH: z.boolean(), OTHER: z.boolean(), TRANSFER: z.boolean(), CHECK: z.boolean() })
     .refine((m) => Object.values(m).some(Boolean), { message: 'AT_LEAST_ONE_PAYMENT_METHOD' }),
   announcements: z.object({
+    /** Affichage des annonces sur l'accueil adhérent. */
     format: z.enum(['Bandeau', 'Pop-up', 'Encart']),
+    /** Affichage des alertes (bandeaux d'information, avertissement, urgence). */
+    alertFormat: z.enum(['Bandeau', 'Pop-up', 'Encart']),
     push: z.boolean(),
     expiryReminderDays: z.number().int().min(1).max(60),
   }),
@@ -38,7 +41,7 @@ export const DEFAULT_ORGANIZATION_CONFIG: OrganizationConfig = {
   contact: { address: '', phone: '', email: '', visibleToMembers: true },
   hours: DEFAULT_HOURS,
   paymentMethods: { CASH: true, OTHER: true, TRANSFER: true, CHECK: true },
-  announcements: { format: 'Bandeau', push: true, expiryReminderDays: 7 },
+  announcements: { format: 'Bandeau', alertFormat: 'Bandeau', push: true, expiryReminderDays: 7 },
   booking: { cancelHoursBefore: 2, defaultCapacity: 16, waitlist: true },
   discounts: { '3': 5, '6': 10, '12': 15 },
 };

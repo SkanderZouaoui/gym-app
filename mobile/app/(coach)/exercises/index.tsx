@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -13,12 +13,16 @@ import { MuscleGroupPickerSheet } from '../../../src/components/training/MuscleG
 import { GroupedFilterSheet, type FilterGroup } from '../../../src/components/training/GroupedFilterSheet';
 import { EQUIPMENT_CATEGORIES, equipmentOptionsByCategory } from '../../../src/constants/equipment';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Bibliothèque d'exercices — variante coach : le retour se fait vers le
  * composeur de programme de l'élève sélectionné. Même filtre muscle
  * (silhouette, affichée dès l'accès à la page) et équipement (liste groupée)
  * que la bibliothèque adhérent. */
 export default function CoachExercisesLibraryScreen() {
+  const pullClient = useQueryClient();
+  const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -108,6 +112,7 @@ export default function CoachExercisesLibraryScreen() {
         </View>
       ) : (
         <FlatList
+        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />}
           data={exercises ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}

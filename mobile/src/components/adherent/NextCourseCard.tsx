@@ -26,7 +26,7 @@ export function NextCourseCard({ className, meta, startsAt, countdownText, onPre
   return (
     <Pressable style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]} onPress={onPress}>
       <View style={styles.time}>
-        {time ? <Text style={styles.timeText}>{time}</Text> : <MaterialIcons name="local-fire-department" size={24} color={colors.primaryInk} />}
+        {time ? <Text style={styles.timeText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{time}</Text> : <MaterialIcons name="local-fire-department" size={24} color={colors.primaryInk} />}
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.className} numberOfLines={1}>{className}</Text>
