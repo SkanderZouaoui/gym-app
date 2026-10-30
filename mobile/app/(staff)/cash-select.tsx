@@ -9,9 +9,11 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useMembers } from '../../src/hooks/useStaff';
 import { ScreenTitle } from '../../src/components/ui';
 import { InitialsAvatar, StatusTag } from '../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
 
 /** Nouvel encaissement, étape 1 : choisir l'adhérent à encaisser (ou créer un compte). */
 export default function StaffCashSelectScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -24,14 +26,14 @@ export default function StaffCashSelectScreen() {
       <View style={styles.header}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Encaissements</Text>
+          <Text style={styles.backText}>{t('common.encaissements')}</Text>
         </Pressable>
-        <ScreenTitle title="Nouvel encaissement" subtitle="Choisissez l’adhérent à encaisser." />
+        <ScreenTitle title={t('staff.nouvel_encaissement')} subtitle={t('staff.choisissez_ladherent_a_encaisser')} />
         <View style={styles.searchBox}>
           <MaterialIcons name="search" size={24} color={colors.muted} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Rechercher un adhérent…"
+            placeholder={t('staff.rechercher_un_adherent')}
             placeholderTextColor={colors.muted}
             value={query}
             onChangeText={setQuery}
@@ -55,18 +57,18 @@ export default function StaffCashSelectScreen() {
               <Text style={styles.name} numberOfLines={1}>{item.firstName} {item.lastName}</Text>
               <Text style={styles.meta} numberOfLines={1}>{item.phone ?? item.email ?? ''}</Text>
             </View>
-            <StatusTag label={item.status === 'ACTIVE' ? 'Actif' : 'Inactif'} tone={item.status === 'ACTIVE' ? 'success' : 'muted'} />
+            <StatusTag label={item.status === 'ACTIVE' ? t('home.statusActive') : t('staff.inactif')} tone={item.status === 'ACTIVE' ? 'success' : 'muted'} />
           </Pressable>
         )}
         ListEmptyComponent={
           <View style={[styles.empty, cardShadow]}>
-            <Text style={styles.emptyText}>Aucun adhérent trouvé.</Text>
+            <Text style={styles.emptyText}>{t('common.aucun_adherent_trouve')}</Text>
           </View>
         }
         ListFooterComponent={
           <Pressable style={styles.create} onPress={() => router.push(routes.memberCreate)}>
             <MaterialIcons name="person-add" size={22} color={colors.primaryInk} />
-            <Text style={styles.createText}>Créer un nouveau compte</Text>
+            <Text style={styles.createText}>{t('staff.creer_un_nouveau_compte')}</Text>
           </Pressable>
         }
       />

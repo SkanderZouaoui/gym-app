@@ -11,16 +11,19 @@ import { EmptyState } from '../../ui';
 import { BodyMuscleMap } from '../BodyMuscleMap';
 import { ExerciseGif } from '../ExerciseGif';
 import { muscleGroupLabel, type BodyView } from '../../../constants/muscleGroups';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 
 const SIDES: { value: BodyView; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
-  { value: 'front', label: 'Face', icon: 'accessibility-new' },
-  { value: 'back', label: 'Dos', icon: 'airline-seat-recline-normal' },
+  { value: 'front', get label() { return i18n.t('member.face'); }, icon: 'accessibility-new' },
+  { value: 'back', get label() { return i18n.t('member.dos'); }, icon: 'airline-seat-recline-normal' },
 ];
 
 /** Segment « Exercices » de l'onglet Entraînement, intégré (maquette v2) : bascule Face / Dos,
  * silhouette anatomique de l'app (react-native-body-highlighter), puis grille des exercices
  * du groupe choisi avec leurs démonstrations. */
 export function ExercisesView() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [side, setSide] = useState<BodyView>('front');
@@ -30,17 +33,18 @@ export function ExercisesView() {
     <ExerciseGrid group={group} onBack={() => setGroup(null)} />
   ) : (
     <View>
-      <Text style={styles.heading}>Filtrer par groupe musculaire</Text>
+      <Text style={styles.heading}>{t('member.filtrer_par_groupe_musculaire')}</Text>
       <SideToggle value={side} onChange={setSide} />
       <View style={[styles.bodyCard, cardShadow]}>
         <BodyMuscleMap view={side} selected={[]} onToggle={(g) => setGroup(g)} />
-        <Text style={styles.hint}>Touchez une zone pour filtrer</Text>
+        <Text style={styles.hint}>{t('member.touchez_une_zone_pour_filtrer')}</Text>
       </View>
     </View>
   );
 }
 
 function SideToggle({ value, onChange }: { value: BodyView; onChange: (v: BodyView) => void }) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [width, setWidth] = useState(0);
@@ -72,6 +76,7 @@ function SideToggle({ value, onChange }: { value: BodyView; onChange: (v: BodyVi
 }
 
 function ExerciseGrid({ group, onBack }: { group: string; onBack: () => void }) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: exercises, isLoading, isError, refetch } = useExercises({ muscleGroup: [group] });
@@ -84,7 +89,7 @@ function ExerciseGrid({ group, onBack }: { group: string; onBack: () => void }) 
       <View style={styles.groupHeader}>
         <Pressable onPress={onBack} style={styles.back} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Groupes</Text>
+          <Text style={styles.backText}>{t('member.groupes')}</Text>
         </Pressable>
         <Text style={styles.groupName}>{label}</Text>
       </View>
@@ -92,15 +97,15 @@ function ExerciseGrid({ group, onBack }: { group: string; onBack: () => void }) 
       {isError ? (
         <EmptyState
           icon="cloud-off"
-          title="Exercices indisponibles"
-          text="Impossible de récupérer les exercices pour le moment."
+          title={t('member.exercices_indisponibles')}
+          text={t('member.impossible_de_recuperer_les_exercices_2')}
           tone="danger"
-          actionLabel="Réessayer"
+          actionLabel={t('common.reessayer')}
           onAction={() => refetch()}
         />
       ) : !isLoading && (exercises ?? []).length === 0 ? (
         <View style={styles.empty}>
-          <Text style={styles.emptyText}>Aucun exercice pour ce groupe.</Text>
+          <Text style={styles.emptyText}>{t('member.aucun_exercice_pour_ce_groupe')}</Text>
         </View>
       ) : (
         <View style={styles.grid}>

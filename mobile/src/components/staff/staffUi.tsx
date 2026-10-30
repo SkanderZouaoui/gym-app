@@ -4,9 +4,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import type { PaymentMethod } from '../../hooks/useStaff';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../i18n';
 
 /** Pastille ronde à initiales (dégradé d'accent). */
 export function InitialsAvatar({ first, last, size = 44 }: { first: string; last: string; size?: number }) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => StyleSheet.create({ box: { alignItems: 'center', justifyContent: 'center' }, text: { fontFamily: fonts.bodyBold, color: '#FFFFFF' } }), []);
   return (
@@ -22,10 +25,10 @@ export function InitialsAvatar({ first, last, size = 44 }: { first: string; last
 }
 
 export const METHOD_LABEL: Record<PaymentMethod, string> = {
-  CASH: 'Espèces',
-  TRANSFER: 'Virement',
-  CHECK: 'Chèque',
-  OTHER: 'Carte',
+  get CASH() { return i18n.t('common.especes'); },
+  get TRANSFER() { return i18n.t('common.virement'); },
+  get CHECK() { return i18n.t('common.cheque'); },
+  get OTHER() { return i18n.t('common.carte'); },
 };
 
 export const METHOD_ICON: Record<PaymentMethod, 'payments' | 'account-balance' | 'receipt-long' | 'credit-card'> = {
@@ -36,19 +39,20 @@ export const METHOD_ICON: Record<PaymentMethod, 'payments' | 'account-balance' |
 };
 
 export function formatMoney(amount: number | string): string {
-  return `${Number(amount).toLocaleString('fr-FR')} DT`;
+  return `${Number(amount).toLocaleString(dateLocale())} DT`;
 }
 
 /** Statut affiché pour un adhérent à partir de son abonnement le plus récent. */
 export function membershipBadge(status: string | undefined, daysLeft: number | null) {
-  if (status === 'ACTIVE') return daysLeft !== null && daysLeft <= 14 ? { label: 'Expire bientôt', tone: 'warning' as const } : { label: 'Actif', tone: 'success' as const };
-  if (status === 'EXPIRED') return { label: 'Expiré', tone: 'danger' as const };
-  if (status === 'SUSPENDED') return { label: 'Suspendu', tone: 'warning' as const };
-  return { label: 'Sans abonnement', tone: 'muted' as const };
+  if (status === 'ACTIVE') return daysLeft !== null && daysLeft <= 14 ? { label: i18n.t('staff.expire_bientot'), tone: 'warning' as const } : { label: i18n.t('staff.actif'), tone: 'success' as const };
+  if (status === 'EXPIRED') return { label: i18n.t('staff.expire'), tone: 'danger' as const };
+  if (status === 'SUSPENDED') return { label: i18n.t('staff.suspendu'), tone: 'warning' as const };
+  return { label: i18n.t('staff.sans_abonnement'), tone: 'muted' as const };
 }
 
 /** Pastille de statut colorée (succès / alerte / danger / neutre). */
 export function StatusTag({ label, tone }: { label: string; tone: 'success' | 'warning' | 'danger' | 'muted' }) {
+  useTranslation();
   const { colors } = useTheme();
   const palette = {
     success: { bg: colors.successSoft, ink: colors.successInk },

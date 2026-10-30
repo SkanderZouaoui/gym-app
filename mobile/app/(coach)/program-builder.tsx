@@ -12,8 +12,10 @@ import { ProgramExerciseSummary } from '../../src/components/training/ProgramExe
 import type { SetDraft } from '../../src/components/training/SetRow';
 import { useAssignProgram, type AssignProgramDayInput, type AssignProgramExerciseInput } from '../../src/hooks/useCoachSessions';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
+import { WEEKDAYS_SHORT_MON } from '../../src/i18n/labels';
 
-const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const DAY_LABELS = WEEKDAYS_SHORT_MON;
 
 type DraftExercise = { exerciseId: string; name: string; sets: SetDraft[] };
 type DraftDay = { dayOfWeek: number; label: string; exercises: DraftExercise[] };
@@ -29,6 +31,7 @@ function summarizeReps(sets: SetDraft[]): string {
  * avec des séries personnalisables individuellement (reps + poids).
  * FitZone App Coach.dc.html, L3. */
 export default function CoachProgramBuilderScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const params = useLocalSearchParams<{
@@ -41,8 +44,8 @@ export default function CoachProgramBuilderScreen() {
     editingIndex?: string;
   }>();
 
-  const [name, setName] = useState('Programme');
-  const [days, setDays] = useState<DraftDay[]>([{ dayOfWeek: 0, label: 'Jour 1', exercises: [] }]);
+  const [name, setName] = useState(t('coach.default_program_name'));
+  const [days, setDays] = useState<DraftDay[]>([{ dayOfWeek: 0, label: t('common.jour_1'), exercises: [] }]);
   const [activeDay, setActiveDay] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const assignProgram = useAssignProgram();
@@ -75,7 +78,7 @@ export default function CoachProgramBuilderScreen() {
   }, [params.pickedExerciseId]);
 
   const addDay = () => {
-    setDays((prev) => [...prev, { dayOfWeek: prev.length % 7, label: `Jour ${prev.length + 1}`, exercises: [] }]);
+    setDays((prev) => [...prev, { dayOfWeek: prev.length % 7, label: t('common.jour', { v0: prev.length + 1 }), exercises: [] }]);
     setActiveDay(days.length);
   };
 
@@ -88,7 +91,7 @@ export default function CoachProgramBuilderScreen() {
   const handleSave = () => {
     setError(null);
     if (days.every((d) => d.exercises.length === 0)) {
-      setError('Ajoutez au moins un exercice avant d’assigner.');
+      setError(t('coach.ajoutez_au_moins_un_exercice'));
       return;
     }
     const payload = {
@@ -113,7 +116,7 @@ export default function CoachProgramBuilderScreen() {
     };
     assignProgram.mutate(payload, {
       onSuccess: () => router.replace(`/(coach)/student/${params.studentId}`),
-      onError: (e) => setError(e instanceof ApiError ? e.message : "Erreur lors de l'assignation"),
+      onError: (e) => setError(e instanceof ApiError ? e.message : t('coach.erreur_lors_de_lassignation')),
     });
   };
 
@@ -121,11 +124,11 @@ export default function CoachProgramBuilderScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title={`Programme pour ${params.studentName ?? ''}`} fallbackHref={`/(coach)/student/${params.studentId}`} />
+      <ScreenHeader title={t('coach.programme_pour', { v0: params.studentName ?? '' })} fallbackHref={`/(coach)/student/${params.studentId}`} />
       <ScrollView contentContainerStyle={styles.container}>
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-        <TextInput value={name} onChangeText={setName} style={styles.nameInput} placeholder="Nom du programme" placeholderTextColor={colors.muted} />
+        <TextInput value={name} onChangeText={setName} style={styles.nameInput} placeholder={t('common.nom_du_programme')} placeholderTextColor={colors.muted} />
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayTabs}>
           {days.map((day, i) => (
@@ -142,7 +145,7 @@ export default function CoachProgramBuilderScreen() {
 
         <View style={{ gap: spacing.sm }}>
           {current.exercises.length === 0 ? (
-            <EmptyState icon="playlist-add" title="Aucun exercice" text="Ajoutez des exercices depuis la bibliothèque." tone="primary" />
+            <EmptyState icon="playlist-add" title={t('common.aucun_exercice')} text={t('common.ajoutez_des_exercices_depuis_la')} tone="primary" />
           ) : (
             current.exercises.map((ex, i) => (
               <ProgramExerciseSummary
@@ -172,13 +175,13 @@ export default function CoachProgramBuilderScreen() {
             onPress={() => router.push({ pathname: '/(coach)/exercises', params: { pickFor: String(activeDay), studentId: params.studentId, studentName: params.studentName } })}
           >
             <MaterialIcons name="library-add" size={18} color={colors.primaryInk} />
-            <Text style={styles.addExerciseText}>Ajouter depuis la bibliothèque</Text>
+            <Text style={styles.addExerciseText}>{t('coach.ajouter_depuis_la_bibliotheque')}</Text>
           </Pressable>
         </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button label={assignProgram.isPending ? 'Envoi…' : `Assigner à ${params.studentName ?? ''}`} onPress={handleSave} loading={assignProgram.isPending} />
+        <Button label={assignProgram.isPending ? t('common.envoi') : t('coach.assigner_a', { v0: params.studentName ?? '' })} onPress={handleSave} loading={assignProgram.isPending} />
       </View>
     </SafeAreaView>
   );

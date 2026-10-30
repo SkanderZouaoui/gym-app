@@ -1,5 +1,7 @@
 import { RoleProfileScreen } from '../../../src/components/RoleProfileScreen';
+import { useTranslation } from 'react-i18next';
 
 export default function StaffProfileScreen() {
-  return <RoleProfileScreen roleLabel="Accueil" />;
+  const { t } = useTranslation();
+  return <RoleProfileScreen roleLabel={t('common.accueil')} />;
 }

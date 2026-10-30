@@ -11,10 +11,12 @@ import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRecordCard';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
  * accessible depuis la visualisation d'un programme. FitZone App Entraînement.dc.html, E3. */
 export default function ViewProgramExerciseScreen() {
+  const { t } = useTranslation();
   const { exerciseId, programId } = useLocalSearchParams<{
     exerciseId: string;
     sets: string;
@@ -66,10 +68,10 @@ export default function ViewProgramExerciseScreen() {
         <View style={{ padding: spacing.lg }}>
           <EmptyState
             icon="cloud-off"
-            title="Exercice indisponible"
-            text={isError ? 'Impossible de récupérer cet exercice pour le moment. Vérifiez votre connexion.' : 'Cet exercice est introuvable.'}
+            title={t('member.exercice_indisponible')}
+            text={isError ? t('member.impossible_de_recuperer_cet_exercice') : t('member.cet_exercice_est_introuvable')}
             tone="danger"
-            actionLabel={isError ? 'Réessayer' : undefined}
+            actionLabel={isError ? t('common.reessayer') : undefined}
             onAction={isError ? () => refetch() : undefined}
           />
         </View>
@@ -109,7 +111,7 @@ export default function ViewProgramExerciseScreen() {
 
         {parsed.steps.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Consignes</Text>
+            <Text style={styles.sectionTitle}>{t('common.consignes')}</Text>
             <View style={styles.stepsList}>
               {parsed.steps.map((step, i) => (
                 <View key={i} style={styles.stepRow}>
@@ -126,12 +128,12 @@ export default function ViewProgramExerciseScreen() {
         <Banner
           tone="warning"
           icon="warning"
-          text="Utilisez des pinces et un pareur au-delà de 80 % de votre maximum."
+          text={t('common.utilisez_des_pinces_et_un')}
         />
       </ScrollView>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

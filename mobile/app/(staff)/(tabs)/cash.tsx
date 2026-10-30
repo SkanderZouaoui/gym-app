@@ -15,18 +15,21 @@ import { useSessionStore } from '../../../src/store/session';
 import { Pagination } from '../../../src/components/ui/Pagination';
 import { DateField } from '../../../src/components/ui/DateTimeFields';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../src/i18n';
 
 type Filter = 'all' | PaymentMethod;
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'all', label: 'Tous' },
-  { value: 'CASH', label: 'Espèces' },
-  { value: 'OTHER', label: 'Carte' },
-  { value: 'TRANSFER', label: 'Virement' },
-  { value: 'CHECK', label: 'Chèque' },
+  { value: 'all', get label() { return i18n.t('common.tous'); } },
+  { value: 'CASH', get label() { return i18n.t('common.especes'); } },
+  { value: 'OTHER', get label() { return i18n.t('common.carte'); } },
+  { value: 'TRANSFER', get label() { return i18n.t('common.virement'); } },
+  { value: 'CHECK', get label() { return i18n.t('common.cheque'); } },
 ];
 
 /** Caisse (accueil) : total encaissé, nouvel encaissement, historique filtrable par moyen de paiement. */
 export default function StaffCashScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
@@ -73,9 +76,9 @@ export default function StaffCashScreen() {
   const byMethod = (['CASH', 'OTHER', 'TRANSFER', 'CHECK'] as PaymentMethod[])
     .map((m) => ({ m, total: monthPayments.filter((p) => p.method === m).reduce((s, p) => s + Number(p.amount), 0), count: monthPayments.filter((p) => p.method === m).length }))
     .filter((x) => x.count > 0);
-  const fmtShort = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  const fmtShort = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short' });
   const periodKicker =
-    period === 'month' ? 'ENCAISSÉ CE MOIS' : period === 'last' ? 'ENCAISSÉ LE MOIS DERNIER' : `ENCAISSÉ DU ${fmtShort(customFrom).toUpperCase()} AU ${fmtShort(customTo).toUpperCase()}`;
+    period === 'month' ? t('staff.encaisse_ce_mois') : period === 'last' ? t('staff.encaisse_le_mois_dernier') : t('staff.encaisse_du_au', { v0: fmtShort(customFrom).toUpperCase(), v1: fmtShort(customTo).toUpperCase() });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -87,33 +90,33 @@ export default function StaffCashScreen() {
         {isAdmin ? (
           <Pressable style={styles.back} onPress={() => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'))} hitSlop={8}>
             <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-            <Text style={styles.backText}>Plus</Text>
+            <Text style={styles.backText}>{t('common.plus')}</Text>
           </Pressable>
         ) : null}
-        <ScreenTitle title={isAdmin ? 'Encaissements' : 'Ma caisse'} subtitle={isAdmin ? 'Historique de la caisse de la salle' : 'Les encaissements que vous avez enregistrés'} />
+        <ScreenTitle title={isAdmin ? t('common.encaissements') : t('staff.ma_caisse')} subtitle={isAdmin ? t('staff.historique_de_la_caisse_de') : t('staff.les_encaissements_que_vous_avez')} />
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
-            <Text style={styles.heroKicker}>{isAdmin ? periodKicker : 'VOUS AVEZ ENCAISSÉ CE MOIS'}</Text>
+            <Text style={styles.heroKicker}>{isAdmin ? periodKicker : t('staff.vous_avez_encaisse_ce_mois')}</Text>
             <Text style={styles.heroValue}>{formatMoney(monthTotal)}</Text>
-            <Text style={styles.heroSub}>{monthPayments.length} encaissement{monthPayments.length > 1 ? 's' : ''}</Text>
+            <Text style={styles.heroSub}>{t('staff.encaissement', { length: monthPayments.length, v2: monthPayments.length > 1 ? 's' : '' })}</Text>
           </LinearGradient>
         </View>
 
         {isAdmin ? (
           <View style={{ gap: 10 }}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-              {([['month', 'Ce mois'], ['last', 'Mois dernier'], ['custom', 'Période…']] as const).map(([k, l]) => (
+              {(['month', 'last', 'custom'] as const).map((k) => (
                 <Pressable key={k} onPress={() => setPeriod(k)} style={[styles.filterPill, period === k && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
-                  <Text style={[styles.filterText, period === k && styles.filterTextActive]}>{l}</Text>
+                  <Text style={[styles.filterText, period === k && styles.filterTextActive]}>{t(`staff.period_${k}`)}</Text>
                 </Pressable>
               ))}
             </ScrollView>
             {period === 'custom' ? (
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <View style={{ flex: 1 }}><DateField label="Du" value={customFrom} onChange={(v) => { setCustomFrom(v); if (v > customTo) setCustomTo(v); }} /></View>
-                <View style={{ flex: 1 }}><DateField label="Au" value={customTo} onChange={(v) => { setCustomTo(v); if (v < customFrom) setCustomFrom(v); }} icon="event-available" /></View>
+                <View style={{ flex: 1 }}><DateField label={t('staff.du')} value={customFrom} onChange={(v) => { setCustomFrom(v); if (v > customTo) setCustomTo(v); }} /></View>
+                <View style={{ flex: 1 }}><DateField label={t('staff.au')} value={customTo} onChange={(v) => { setCustomTo(v); if (v < customFrom) setCustomFrom(v); }} icon="event-available" /></View>
               </View>
             ) : null}
             {byMethod.length > 0 ? (
@@ -122,7 +125,7 @@ export default function StaffCashScreen() {
                   <View key={x.m} style={[styles.methodCell, cardShadow]}>
                     <Text style={styles.methodLabel}>{METHOD_LABEL[x.m]}</Text>
                     <Text style={styles.methodValue} numberOfLines={1} adjustsFontSizeToFit>{formatMoney(x.total)}</Text>
-                    <Text style={styles.methodCount}>{x.count} paiement{x.count > 1 ? 's' : ''}</Text>
+                    <Text style={styles.methodCount}>{t('staff.paiement', { count: x.count, v2: x.count > 1 ? 's' : '' })}</Text>
                   </View>
                 ))}
               </View>
@@ -136,7 +139,7 @@ export default function StaffCashScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="add" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>Nouvel encaissement</Text>
+            <Text style={styles.ctaText}>{t('staff.nouvel_encaissement')}</Text>
           </LinearGradient>
         </Pressable>
 
@@ -165,7 +168,7 @@ export default function StaffCashScreen() {
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.name} numberOfLines={1}>{p.membership.user.firstName} {p.membership.user.lastName}</Text>
                 <Text style={styles.meta} numberOfLines={1}>
-                  {p.membership.plan.name} · {new Date(p.recordedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                  {p.membership.plan.name} · {new Date(p.recordedAt).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short' })}
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end', gap: 4 }}>
@@ -177,7 +180,7 @@ export default function StaffCashScreen() {
           <Pagination page={currentPage} pageCount={pageCount} pageSize={PAGE_SIZE} total={filtered.length} onChange={setPage} />
           {shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
-              <Text style={styles.emptyText}>{isAdmin ? 'Aucun encaissement sur cette période avec ce moyen de paiement.' : 'Aucun encaissement avec ce moyen de paiement.'}</Text>
+              <Text style={styles.emptyText}>{isAdmin ? t('staff.aucun_encaissement_sur_cette_periode') : t('staff.aucun_encaissement_avec_ce_moyen')}</Text>
             </View>
           ) : null}
         </View>

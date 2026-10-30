@@ -19,8 +19,11 @@ import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { BottomSheet, ProgressBar, ScreenTitle } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import type { ClassSessionSummary } from '../../../src/api/types';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../src/i18n';
+import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
 
-const WEEKDAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const WEEKDAYS = WEEKDAYS_SHORT_SUN;
 
 function buildDays(count: number) {
   const today = new Date();
@@ -34,6 +37,7 @@ function buildDays(count: number) {
 
 /** Planning (admin) : cours du jour, capacité, remplacement de coach, annulation, édition — FitZone Mobile Admin v2. */
 export default function AdminPlanningScreen() {
+  useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -56,13 +60,13 @@ export default function AdminPlanningScreen() {
         .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()),
     [sessions, day],
   );
-  const dayLabel = day.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dayLabel = day.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
 
   const tag = (s: ClassSessionSummary) => {
-    if (s.status === 'CANCELLED') return { label: 'Annulé', bg: colors.dangerSoft, fg: colors.dangerInk };
+    if (s.status === 'CANCELLED') return { label: i18n.t('admin.annule'), bg: colors.dangerSoft, fg: colors.dangerInk };
     const left = s.capacity - s._count.bookings;
-    if (left <= 0) return { label: 'Complet', bg: colors.dangerSoft, fg: colors.dangerInk };
-    if (s._count.bookings / Math.max(1, s.capacity) >= 0.7) return { label: 'Presque plein', bg: colors.warningSoft, fg: colors.warningInk };
+    if (left <= 0) return { label: i18n.t('common.complet'), bg: colors.dangerSoft, fg: colors.dangerInk };
+    if (s._count.bookings / Math.max(1, s.capacity) >= 0.7) return { label: i18n.t('common.presque_plein'), bg: colors.warningSoft, fg: colors.warningInk };
     return { label: `${left} places`, bg: colors.surface2, fg: colors.muted };
   };
 
@@ -74,11 +78,11 @@ export default function AdminPlanningScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenTitle
-          title="Planning"
-          subtitle={`${dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} · ${list.length} cours`}
+          title={i18n.t('common.planning')}
+          subtitle={i18n.t('admin.cours', { v0: dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1), length: list.length })}
           right={
             <Pressable
-              accessibilityLabel="Ajouter un cours"
+              accessibilityLabel={i18n.t('admin.ajouter_un_cours')}
               onPress={() => router.push('/(admin)/course-form')}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -98,18 +102,18 @@ export default function AdminPlanningScreen() {
             return (
               <View key={s.id} style={[styles.card, cardShadow, cancelled && { opacity: 0.6 }]}>
                 <View style={styles.row}>
-                  <Text style={styles.time}>{new Date(s.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</Text>
+                  <Text style={styles.time}>{new Date(s.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}</Text>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.name} numberOfLines={1}>{s.classType.name}</Text>
                     <Text style={styles.meta} numberOfLines={1}>
-                      {s.coach ? `${s.coach.user.firstName} ${s.coach.user.lastName.charAt(0)}.` : 'Sans coach'} · {s.room?.name ?? '—'}
+                      {s.coach ? `${s.coach.user.firstName} ${s.coach.user.lastName.charAt(0)}.` : i18n.t('common.sans_coach')} · {s.room?.name ?? '—'}
                     </Text>
                   </View>
                   <View style={[styles.tag, { backgroundColor: t.bg }]}>
                     <Text style={[styles.tagText, { color: t.fg }]}>{t.label}</Text>
                   </View>
                   <Pressable
-                    accessibilityLabel="Modifier le cours"
+                    accessibilityLabel={i18n.t('admin.modifier_le_cours')}
                     onPress={() => router.push({ pathname: '/(admin)/course-form', params: { id: s.id } })}
                     style={styles.editBtn}
                   >
@@ -125,22 +129,22 @@ export default function AdminPlanningScreen() {
                   <View style={styles.actions}>
                     <View style={styles.stepper}>
                       <Pressable
-                        accessibilityLabel="Moins"
+                        accessibilityLabel={i18n.t('admin.moins')}
                         style={styles.stepBtn}
                         onPress={() => setCapacity.mutate({ id: s.id, capacity: Math.max(s._count.bookings, 1, s.capacity - 1) })}
                       >
                         <MaterialIcons name="remove" size={18} color={colors.text} />
                       </Pressable>
-                      <Text style={styles.stepText}>{s.capacity} places</Text>
-                      <Pressable accessibilityLabel="Plus" style={styles.stepBtn} onPress={() => setCapacity.mutate({ id: s.id, capacity: s.capacity + 1 })}>
+                      <Text style={styles.stepText}>{i18n.t('admin.places', { capacity: s.capacity })}</Text>
+                      <Pressable accessibilityLabel={i18n.t('common.plus')} style={styles.stepBtn} onPress={() => setCapacity.mutate({ id: s.id, capacity: s.capacity + 1 })}>
                         <MaterialIcons name="add" size={18} color={colors.text} />
                       </Pressable>
                     </View>
                     <Pressable style={styles.pill} onPress={() => setCoachFor(s)}>
-                      <Text style={styles.pillText}>Remplacer coach</Text>
+                      <Text style={styles.pillText}>{i18n.t('admin.remplacer_coach')}</Text>
                     </Pressable>
                     <Pressable style={[styles.pill, styles.pillDanger]} onPress={() => setCancelFor(s)}>
-                      <Text style={[styles.pillText, { color: colors.dangerInk }]}>Annuler</Text>
+                      <Text style={[styles.pillText, { color: colors.dangerInk }]}>{i18n.t('common.annuler')}</Text>
                     </Pressable>
                   </View>
                 ) : null}
@@ -150,15 +154,15 @@ export default function AdminPlanningScreen() {
           {list.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
-              <Text style={styles.emptyText}>Aucun cours ce jour-là.</Text>
+              <Text style={styles.emptyText}>{i18n.t('common.aucun_cours_ce_jour_la')}</Text>
             </View>
           ) : null}
         </View>
       </ScrollView>
 
       <BottomSheet visible={!!coachFor} onClose={() => setCoachFor(null)}>
-        <Text style={styles.sheetTitle}>Remplacer le coach</Text>
-        <Text style={styles.sheetText}>{coachFor?.classType.name} · choisissez le nouveau coach.</Text>
+        <Text style={styles.sheetTitle}>{i18n.t('admin.remplacer_le_coach')}</Text>
+        <Text style={styles.sheetText}>{i18n.t('admin.choisissez_le_nouveau_coach', { name: coachFor?.classType.name })}</Text>
         <View style={{ gap: 8, marginTop: 6 }}>
           {(coaches ?? []).map((c) => {
             const active = coachFor?.coachId === c.userId;
@@ -177,18 +181,16 @@ export default function AdminPlanningScreen() {
       </BottomSheet>
 
       <BottomSheet visible={!!cancelFor} onClose={() => setCancelFor(null)}>
-        <Text style={styles.sheetTitle}>Annuler {cancelFor?.classType.name} ?</Text>
-        <Text style={styles.sheetText}>
-          Les {cancelFor?._count.bookings ?? 0} inscrit(s) seront prévenus et leur réservation sera annulée.
-        </Text>
+        <Text style={styles.sheetTitle}>{i18n.t('common.annuler_2', { name: cancelFor?.classType.name })}</Text>
+        <Text style={styles.sheetText}>{i18n.t('admin.les_inscrit_s_seront_prevenus', { v1: cancelFor?._count.bookings ?? 0 })}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
-            label="Oui, annuler le cours"
+            label={i18n.t('admin.oui_annuler_le_cours')}
             variant="secondary"
             loading={cancel.isPending}
             onPress={() => cancelFor && cancel.mutate(cancelFor.id, { onSettled: () => setCancelFor(null) })}
           />
-          <Button label="Garder le cours" variant="outline" onPress={() => setCancelFor(null)} />
+          <Button label={i18n.t('admin.garder_le_cours')} variant="outline" onPress={() => setCancelFor(null)} />
         </View>
       </BottomSheet>
     </SafeAreaView>

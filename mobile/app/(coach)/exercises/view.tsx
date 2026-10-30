@@ -11,10 +11,12 @@ import { Banner, Pill } from '../../../src/components/ui';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRecordCard';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
+import { useTranslation } from 'react-i18next';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
  * vue coach, avec le record personnel de l'élève. FitZone App Coach.dc.html. */
 export default function CoachViewProgramExerciseScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { exerciseId, sets, reps, setDetails, studentId } = useLocalSearchParams<{
@@ -88,7 +90,7 @@ export default function CoachViewProgramExerciseScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>Séries du programme</Text>
+          <Text style={styles.sectionTitle}>{t('coach.series_du_programme')}</Text>
           {parsedSetDetails.length > 0 ? (
             <View style={styles.setsList}>
               {parsedSetDetails.map((s) => (
@@ -96,20 +98,18 @@ export default function CoachViewProgramExerciseScreen() {
                   <View style={styles.setBadge}>
                     <Text style={styles.setBadgeText}>{s.setNumber}</Text>
                   </View>
-                  <Text style={styles.setText}>
-                    {s.reps ?? '—'} répétitions{s.weightKg ? ` · ${s.weightKg} kg` : ''}
-                  </Text>
+                  <Text style={styles.setText}>{t('coach.repetitions', { v1: s.reps ?? '—', v3: s.weightKg ? t('member.kg', { weightKg: s.weightKg }) : '' })}</Text>
                 </View>
               ))}
             </View>
           ) : (
-            <Text style={styles.summaryText}>{sets} séries · {reps}</Text>
+            <Text style={styles.summaryText}>{t('coach.series', { sets, reps })}</Text>
           )}
         </View>
 
         {parsed.steps.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Consignes</Text>
+            <Text style={styles.sectionTitle}>{t('common.consignes')}</Text>
             <View style={styles.stepsList}>
               {parsed.steps.map((step, i) => (
                 <View key={i} style={styles.stepRow}>
@@ -126,7 +126,7 @@ export default function CoachViewProgramExerciseScreen() {
         <Banner
           tone="warning"
           icon="warning"
-          text="Utilisez des pinces et un pareur au-delà de 80 % de votre maximum."
+          text={t('common.utilisez_des_pinces_et_un')}
         />
       </ScrollView>
     </SafeAreaView>

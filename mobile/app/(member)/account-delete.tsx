@@ -12,8 +12,10 @@ import { useDeleteAccount } from '../../src/hooks/useProfile';
 import { tokenStorage } from '../../src/api/storage';
 import { authApi } from '../../src/api/endpoints';
 import { useSessionStore } from '../../src/store/session';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountDeleteScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const clearSession = useSessionStore((s) => s.clear);
@@ -32,26 +34,22 @@ export default function AccountDeleteScreen() {
         clearSession();
         router.replace('/(auth)/login');
       },
-      onError: () => setError('Mot de passe incorrect.'),
+      onError: () => setError(t('member.mot_de_passe_incorrect')),
     });
   };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title="Supprimer mon compte" fallbackHref="/(member)/account-security" />
+      <ScreenHeader title={t('common.supprimer_mon_compte')} fallbackHref="/(member)/account-security" />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.warningBox}>
           <MaterialIcons name="warning" size={28} color={colors.dangerInk} />
-          <Text style={styles.warningTitle}>Cette action est définitive</Text>
-          <Text style={styles.warningText}>
-            La suppression de votre compte entraîne la perte de votre historique de présence, de vos
-            séances d’entraînement et de vos réservations. Votre abonnement en cours n’est pas annulé automatiquement
-            — contactez l’accueil de votre salle si besoin.
-          </Text>
+          <Text style={styles.warningTitle}>{t('member.cette_action_est_definitive')}</Text>
+          <Text style={styles.warningText}>{t('member.la_suppression_de_votre_compte')}</Text>
         </View>
 
         <TextField
-          label="Confirmez avec votre mot de passe"
+          label={t('member.confirmez_avec_votre_mot_de')}
           value={password}
           onChangeText={setPassword}
           isPassword
@@ -60,7 +58,7 @@ export default function AccountDeleteScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Button
-          label="Supprimer définitivement mon compte"
+          label={t('member.supprimer_definitivement_mon_compte')}
           onPress={handleDelete}
           variant="secondary"
           loading={deleteAccount.isPending}

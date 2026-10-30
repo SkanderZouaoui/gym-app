@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -36,6 +37,7 @@ const GOAL_R = (GOAL_RING - GOAL_STROKE) / 2;
 const GOAL_CIRC = 2 * Math.PI * GOAL_R;
 
 export function ProfileActivity({ weeks, goalDone, goalTarget }: { weeks: number[]; goalDone: number; goalTarget: number }) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const max = Math.max(...weeks, 1);
@@ -43,7 +45,7 @@ export function ProfileActivity({ weeks, goalDone, goalTarget }: { weeks: number
   return (
     <View style={styles.activityRow}>
       <View style={[styles.activityCard, cardShadow, { flex: 1.35 }]}>
-        <Text style={styles.cardTitle}>Activité · 8 sem.</Text>
+        <Text style={styles.cardTitle}>{t('member.activite_8_sem')}</Text>
         <View style={styles.bars}>
           {weeks.map((count, i) => {
             const last = i === weeks.length - 1;
@@ -59,7 +61,7 @@ export function ProfileActivity({ weeks, goalDone, goalTarget }: { weeks: number
         </View>
       </View>
       <View style={[styles.activityCard, cardShadow, { flex: 1, alignItems: 'center', gap: 6 }]}>
-        <Text style={[styles.cardTitle, { alignSelf: 'flex-start' }]}>Objectif</Text>
+        <Text style={[styles.cardTitle, { alignSelf: 'flex-start' }]}>{t('common.objectif')}</Text>
         <View style={styles.goalBox}>
           <Svg width={GOAL_RING} height={GOAL_RING} style={{ transform: [{ rotate: '-90deg' }] }}>
             <Circle cx={GOAL_RING / 2} cy={GOAL_RING / 2} r={GOAL_R} stroke={colors.surface2} strokeWidth={GOAL_STROKE} fill="none" />

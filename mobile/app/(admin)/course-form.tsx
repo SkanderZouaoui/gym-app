@@ -22,6 +22,8 @@ import {
   useSaveSession,
 } from '../../src/hooks/useAdmin';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../src/i18n';
 
 function defaultStart(): Date {
   const d = new Date();
@@ -32,6 +34,7 @@ function defaultStart(): Date {
 
 /** Création / édition d'un cours : type, date et heure, coach, salle, capacité. */
 export default function CourseFormScreen() {
+  useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const editing = !!id;
   const { colors, cardShadow } = useTheme();
@@ -79,7 +82,7 @@ export default function CourseFormScreen() {
 
   const valid = !!typeId && capacity >= 1 && duration >= 5;
   const end = new Date(start.getTime() + duration * 60000);
-  const clock = (d: Date) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const clock = (d: Date) => d.toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
   const typeName = (types ?? []).find((t) => t.id === typeId)?.name;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/planning'));
 
@@ -93,8 +96,8 @@ export default function CourseFormScreen() {
         onError: (e) =>
           setError(
             e instanceof ApiError && e.code === 'CAPACITY_BELOW_BOOKINGS'
-              ? 'La capacité ne peut pas être inférieure au nombre d’inscrits.'
-              : 'Impossible d’enregistrer le cours. Vérifiez les informations.',
+              ? i18n.t('admin.la_capacite_ne_peut_pas')
+              : i18n.t('admin.impossible_denregistrer_le_cours_verifiez'),
           ),
       },
     );
@@ -105,52 +108,52 @@ export default function CourseFormScreen() {
       <ScrollView contentContainerStyle={[styles.container, { paddingBottom: STICKY_BAR_SPACE + 30 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Planning</Text>
+          <Text style={styles.backText}>{i18n.t('common.planning')}</Text>
         </Pressable>
-        <ScreenTitle title={editing ? 'Modifier le cours' : 'Nouveau cours'} subtitle="Horaire, coach, salle et capacité." />
+        <ScreenTitle title={editing ? i18n.t('admin.modifier_le_cours') : i18n.t('admin.nouveau_cours')} subtitle={i18n.t('admin.horaire_coach_salle_et_capacite')} />
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
-            <Text style={styles.heroKicker}>APERÇU</Text>
-            <Text style={styles.heroTitle} numberOfLines={1}>{typeName ?? 'Choisissez un type de cours'}</Text>
+            <Text style={styles.heroKicker}>{i18n.t('admin.apercu')}</Text>
+            <Text style={styles.heroTitle} numberOfLines={1}>{typeName ?? i18n.t('admin.choisissez_un_type_de_cours')}</Text>
             <Text style={styles.heroSub}>
-              {start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} · {clock(start)} – {clock(end)}
+              {start.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })} · {clock(start)} – {clock(end)}
             </Text>
-            <Text style={styles.heroSub}>{capacity} places · {duration} min</Text>
+            <Text style={styles.heroSub}>{i18n.t('admin.places_min', { capacity, duration })}</Text>
           </LinearGradient>
         </View>
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-        <Text style={styles.section}>Cours</Text>
+        <Text style={styles.section}>{i18n.t('common.cours_2')}</Text>
         <SelectField
-          label="Type de cours"
+          label={i18n.t('admin.type_de_cours')}
           icon="fitness-center"
-          placeholder="Choisir un type"
+          placeholder={i18n.t('admin.choisir_un_type')}
           value={typeId}
-          options={activeTypes.map((t) => ({ value: t.id, label: t.name, sub: `${t.defaultDurationMin} min · ${t.defaultCapacity} places` }))}
+          options={activeTypes.map((t) => ({ value: t.id, label: t.name, sub: i18n.t('admin.min_places', { defaultDurationMin: t.defaultDurationMin, defaultCapacity: t.defaultCapacity }) }))}
           onChange={pickType}
           create={{
-            label: 'Nouveau type de cours',
-            placeholder: 'Ex. Cross training',
-            extra: { label: 'Capacité', unit: 'places', defaultValue: 16 },
+            label: i18n.t('admin.nouveau_type_de_cours'),
+            placeholder: i18n.t('admin.ex_cross_training'),
+            extra: { label: i18n.t('admin.capacite'), unit: 'places', defaultValue: 16 },
             submit: async (name, cap) => (await saveType.mutateAsync({ name, defaultCapacity: cap || 16 })).id,
           }}
         />
 
-        <Text style={styles.section}>Horaire</Text>
+        <Text style={styles.section}>{i18n.t('admin.horaire')}</Text>
         <DateTimeFields value={start} onChange={setStart} minimumDate={editing ? undefined : new Date()} />
         <View style={[styles.stepCard, cardShadow]}>
           <View>
-            <Text style={styles.stepValue}>{duration} <Text style={styles.stepUnit}>min</Text></Text>
-            <Text style={styles.stepSub}>Durée · fin à {clock(end)}</Text>
+            <Text style={styles.stepValue}>{duration} <Text style={styles.stepUnit}>{i18n.t('admin.min')}</Text></Text>
+            <Text style={styles.stepSub}>{i18n.t('admin.duree_fin_a', { v1: clock(end) })}</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable accessibilityLabel="Moins" style={styles.minus} onPress={() => setDuration((d) => Math.max(15, d - 5))}>
+            <Pressable accessibilityLabel={i18n.t('admin.moins')} style={styles.minus} onPress={() => setDuration((d) => Math.max(15, d - 5))}>
               <MaterialIcons name="remove" size={24} color={colors.text} />
             </Pressable>
-            <Pressable accessibilityLabel="Plus" onPress={() => setDuration((d) => Math.min(240, d + 5))}>
+            <Pressable accessibilityLabel={i18n.t('common.plus')} onPress={() => setDuration((d) => Math.min(240, d + 5))}>
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.plus}>
                 <MaterialIcons name="add" size={24} color="#FFFFFF" />
               </LinearGradient>
@@ -158,26 +161,26 @@ export default function CourseFormScreen() {
           </View>
         </View>
 
-        <Text style={styles.section}>Encadrement</Text>
+        <Text style={styles.section}>{i18n.t('admin.encadrement')}</Text>
         <SelectField
-          label="Coach"
+          label={i18n.t('common.coach')}
           icon="sports"
-          placeholder="Sans coach"
+          placeholder={i18n.t('common.sans_coach')}
           value={coachId}
-          options={[{ value: null, label: 'Sans coach' }, ...(coaches ?? []).map((c) => ({ value: c.userId, label: `${c.user.firstName} ${c.user.lastName}` }))]}
+          options={[{ value: null, label: i18n.t('common.sans_coach') }, ...(coaches ?? []).map((c) => ({ value: c.userId, label: `${c.user.firstName} ${c.user.lastName}` }))]}
           onChange={setCoachId}
         />
         <SelectField
-          label="Salle"
+          label={i18n.t('common.salle')}
           icon="meeting-room"
-          placeholder="Aucune salle"
+          placeholder={i18n.t('admin.aucune_salle')}
           value={roomId}
-          options={[{ value: null, label: 'Aucune salle' }, ...(rooms ?? []).map((r) => ({ value: r.id, label: r.name, sub: `${r.capacity} places` }))]}
+          options={[{ value: null, label: i18n.t('admin.aucune_salle') }, ...(rooms ?? []).map((r) => ({ value: r.id, label: r.name, sub: `${r.capacity} places` }))]}
           onChange={setRoomId}
           create={{
-            label: 'Nouvelle salle',
-            placeholder: 'Ex. Studio B',
-            extra: { label: 'Capacité', unit: 'places', defaultValue: 20 },
+            label: i18n.t('admin.nouvelle_salle'),
+            placeholder: i18n.t('admin.ex_studio_b'),
+            extra: { label: i18n.t('admin.capacite'), unit: 'places', defaultValue: 20 },
             submit: async (name, cap) => {
               const room = await saveRoom.mutateAsync({ name, capacity: cap || 20 });
               if (!editing) setCapacity((c) => Math.min(c, room.capacity));
@@ -186,17 +189,17 @@ export default function CourseFormScreen() {
           }}
         />
 
-        <Text style={styles.section}>Capacité</Text>
+        <Text style={styles.section}>{i18n.t('admin.capacite')}</Text>
         <View style={[styles.stepCard, cardShadow]}>
           <View>
             <Text style={styles.stepValue}>{capacity}</Text>
-            <Text style={styles.stepSub}>places disponibles</Text>
+            <Text style={styles.stepSub}>{i18n.t('admin.places_disponibles')}</Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable accessibilityLabel="Moins" style={styles.minus} onPress={() => setCapacity((c) => Math.max(1, c - 1))}>
+            <Pressable accessibilityLabel={i18n.t('admin.moins')} style={styles.minus} onPress={() => setCapacity((c) => Math.max(1, c - 1))}>
               <MaterialIcons name="remove" size={24} color={colors.text} />
             </Pressable>
-            <Pressable accessibilityLabel="Plus" onPress={() => setCapacity((c) => c + 1)}>
+            <Pressable accessibilityLabel={i18n.t('common.plus')} onPress={() => setCapacity((c) => c + 1)}>
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.plus}>
                 <MaterialIcons name="add" size={24} color="#FFFFFF" />
               </LinearGradient>
@@ -207,24 +210,24 @@ export default function CourseFormScreen() {
         {editing ? (
           <Pressable onPress={() => setConfirmDelete(true)} style={styles.deleteBtn}>
             <MaterialIcons name="delete" size={22} color={colors.dangerInk} />
-            <Text style={styles.deleteText}>Supprimer le cours</Text>
+            <Text style={styles.deleteText}>{i18n.t('admin.supprimer_le_cours')}</Text>
           </Pressable>
         ) : null}
       </ScrollView>
 
-      <StickyActionBar visible={!editing || hydrated} label={editing ? 'Enregistrer' : 'Créer le cours'} loading={save.isPending} disabled={!valid} onPress={submit} />
+      <StickyActionBar visible={!editing || hydrated} label={editing ? i18n.t('member.enregistrer') : i18n.t('admin.creer_le_cours')} loading={save.isPending} disabled={!valid} onPress={submit} />
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
-        <Text style={styles.sheetTitle}>Supprimer ce cours ?</Text>
-        <Text style={styles.sheetText}>S’il y a des inscrits, le cours sera annulé et ils seront prévenus. Cette action est définitive.</Text>
+        <Text style={styles.sheetTitle}>{i18n.t('admin.supprimer_ce_cours')}</Text>
+        <Text style={styles.sheetText}>{i18n.t('admin.sil_y_a_des_inscrits')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
-            label="Oui, supprimer"
+            label={i18n.t('admin.oui_supprimer')}
             variant="secondary"
             loading={remove.isPending}
             onPress={() => id && remove.mutate(id, { onSuccess: () => { setConfirmDelete(false); goBack(); } })}
           />
-          <Button label="Annuler" variant="outline" onPress={() => setConfirmDelete(false)} />
+          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirmDelete(false)} />
         </View>
       </BottomSheet>
     </SafeAreaView>

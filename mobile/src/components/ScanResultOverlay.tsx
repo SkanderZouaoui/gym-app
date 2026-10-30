@@ -7,38 +7,40 @@ import { useTheme } from '../theme/ThemeContext';
 import { useAttendancePolicy } from '../hooks/useAdmin';
 import { useTabBarStore } from '../store/tabBar';
 import type { ScanOutcome } from '../hooks/useAttendance';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 
 const REASON_LABELS: Record<string, string> = {
-  TOKEN_INVALID: 'QR non reconnu',
-  TOKEN_EXPIRED: 'QR expiré',
-  TOKEN_REPLAYED: 'QR déjà utilisé',
-  SCANNER_NOT_AUTHORIZED: 'Scan non autorisé',
-  SESSION_CANCELLED: 'Cours annulé',
-  OUTSIDE_WINDOW: 'Pointage fermé pour ce cours',
-  NO_BOOKING: 'Pas de réservation',
-  MEMBER_NOT_FOUND: 'Code inconnu',
-  BOOKING_WAITLISTED: "Sur liste d'attente",
-  BOOKING_CANCELLED: 'Réservation annulée',
-  ALREADY_CHECKED_IN: 'Déjà pointé',
-  NO_MEMBERSHIP: 'Aucun abonnement',
-  MEMBERSHIP_EXPIRED: 'Abonnement expiré',
-  MEMBERSHIP_SUSPENDED: 'Abonnement suspendu',
+  get TOKEN_INVALID() { return i18n.t('common.qr_not_recognized'); },
+  get TOKEN_EXPIRED() { return i18n.t('common.qr_expire'); },
+  get TOKEN_REPLAYED() { return i18n.t('common.qr_deja_utilise'); },
+  get SCANNER_NOT_AUTHORIZED() { return i18n.t('common.scan_non_autorise'); },
+  get SESSION_CANCELLED() { return i18n.t('common.cours_annule'); },
+  get OUTSIDE_WINDOW() { return i18n.t('common.pointage_ferme_pour_ce_cours'); },
+  get NO_BOOKING() { return i18n.t('common.pas_de_reservation'); },
+  get MEMBER_NOT_FOUND() { return i18n.t('common.code_inconnu'); },
+  get BOOKING_WAITLISTED() { return i18n.t('common.sur_liste_dattente'); },
+  get BOOKING_CANCELLED() { return i18n.t('common.reservation_annulee'); },
+  get ALREADY_CHECKED_IN() { return i18n.t('common.deja_pointe'); },
+  get NO_MEMBERSHIP() { return i18n.t('common.aucun_abonnement'); },
+  get MEMBERSHIP_EXPIRED() { return i18n.t('common.abonnement_expire'); },
+  get MEMBERSHIP_SUSPENDED() { return i18n.t('common.abonnement_suspendu'); },
 };
 
 const REASON_HINTS: Record<string, string> = {
-  TOKEN_INVALID: 'Ce QR ne vient pas de l’application. Demandez à l’adhérent d’ouvrir son code.',
-  TOKEN_EXPIRED: 'Demandez à l’adhérent de rouvrir son QR dans l’application.',
-  TOKEN_REPLAYED: 'Ce QR a déjà servi. Demandez à l’adhérent d’en afficher un nouveau.',
-  SCANNER_NOT_AUTHORIZED: 'Vous n’avez pas le droit de pointer ce cours.',
-  SESSION_CANCELLED: 'Ce cours a été annulé, personne ne peut être pointé.',
-  NO_BOOKING: 'Cet adhérent n’a pas réservé ce cours.',
-  MEMBER_NOT_FOUND: 'Aucun adhérent n’a ce code. Vérifiez-le ou cherchez par nom.',
-  BOOKING_WAITLISTED: 'Il est sur liste d’attente : aucune place ne s’est libérée.',
-  BOOKING_CANCELLED: 'L’adhérent a annulé sa réservation pour ce cours.',
-  ALREADY_CHECKED_IN: 'Sa présence à ce cours est déjà enregistrée.',
-  NO_MEMBERSHIP: 'Proposez-lui de souscrire un abonnement à la caisse.',
-  MEMBERSHIP_EXPIRED: 'Son abonnement est terminé : à renouveler à la caisse.',
-  MEMBERSHIP_SUSPENDED: 'Son abonnement est suspendu. Voir avec l’administration.',
+  get TOKEN_INVALID() { return i18n.t('common.ce_qr_ne_vient_pas'); },
+  get TOKEN_EXPIRED() { return i18n.t('common.demandez_a_ladherent_de_rouvrir'); },
+  get TOKEN_REPLAYED() { return i18n.t('common.ce_qr_a_deja_servi'); },
+  get SCANNER_NOT_AUTHORIZED() { return i18n.t('common.vous_navez_pas_le_droit'); },
+  get SESSION_CANCELLED() { return i18n.t('common.ce_cours_a_ete_annule'); },
+  get NO_BOOKING() { return i18n.t('common.cet_adherent_na_pas_reserve'); },
+  get MEMBER_NOT_FOUND() { return i18n.t('common.aucun_adherent_na_ce_code'); },
+  get BOOKING_WAITLISTED() { return i18n.t('common.il_est_sur_liste_dattente'); },
+  get BOOKING_CANCELLED() { return i18n.t('common.ladherent_a_annule_sa_reservation'); },
+  get ALREADY_CHECKED_IN() { return i18n.t('common.sa_presence_a_ce_cours'); },
+  get NO_MEMBERSHIP() { return i18n.t('common.proposez_lui_de_souscrire_un'); },
+  get MEMBERSHIP_EXPIRED() { return i18n.t('common.son_abonnement_est_termine_a'); },
+  get MEMBERSHIP_SUSPENDED() { return i18n.t('common.son_abonnement_est_suspendu_voir'); },
 };
 
 export function ScanResultOverlay({
@@ -50,6 +52,7 @@ export function ScanResultOverlay({
   onDismiss: () => void;
   onManual?: () => void;
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(), []);
   const granted = outcome.result === 'GRANTED';
@@ -66,7 +69,7 @@ export function ScanResultOverlay({
   const { data: policy } = useAttendancePolicy();
   const hint =
     outcome.reasonCode === 'OUTSIDE_WINDOW'
-      ? `On peut pointer de ${policy?.scanOpensMinutesBefore ?? 15} min avant le début du cours jusqu’à ${policy?.scanClosesMinutesAfterStart ?? 10} min après. Ce créneau est passé ou pas encore ouvert.`
+      ? t('common.on_peut_pointer_de_min', { v0: policy?.scanOpensMinutesBefore ?? 15, v1: policy?.scanClosesMinutesAfterStart ?? 10 })
       : REASON_HINTS[outcome.reasonCode];
   const memberName = outcome.member ? `${outcome.member.firstName} ${outcome.member.lastName}` : null;
 
@@ -91,14 +94,14 @@ export function ScanResultOverlay({
         </View>
 
         <Text style={[styles.eyebrow, { color: granted ? '#6EE7B7' : '#FCA5A5' }]}>
-          {granted ? 'PRÉSENCE CONFIRMÉE' : 'SCAN REFUSÉ'}
+          {granted ? t('common.presence_confirmee') : t('common.scan_refuse')}
         </Text>
-        <Text style={styles.title}>{granted ? memberName ?? 'Bienvenue' : reason}</Text>
+        <Text style={styles.title}>{granted ? memberName ?? t('common.welcome') : reason}</Text>
         {!granted && memberName ? <Text style={styles.member}>{memberName}</Text> : null}
         <Text style={styles.subtitle}>
           {granted
-            ? 'Bon cours !'
-            : hint ?? 'Veuillez réessayer.'}
+            ? t('common.enjoy_class')
+            : hint ?? t('common.veuillez_reessayer')}
         </Text>
       </View>
 
@@ -110,7 +113,7 @@ export function ScanResultOverlay({
             end={{ x: 1, y: 1 }}
             style={styles.primaryBtn}
           >
-            <Text style={styles.primaryText}>{granted ? 'Continuer' : 'Réessayer'}</Text>
+            <Text style={styles.primaryText}>{granted ? t('auth.continuer') : t('common.reessayer')}</Text>
           </LinearGradient>
         </Pressable>
         {!granted && onManual ? (
@@ -121,7 +124,7 @@ export function ScanResultOverlay({
             }}
             style={({ pressed }) => [styles.ghostBtn, pressed && { transform: [{ scale: 0.98 }] }]}
           >
-            <Text style={styles.ghostText}>Pointage manuel</Text>
+            <Text style={styles.ghostText}>{t('common.pointage_manuel')}</Text>
           </Pressable>
         ) : null}
       </View>

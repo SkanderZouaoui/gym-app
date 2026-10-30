@@ -11,11 +11,14 @@ import { usePayments } from '../../src/hooks/useStaff';
 import { useRemoteConfig } from '../../src/config/RemoteConfigContext';
 import { EmptyState } from '../../src/components/ui';
 import { METHOD_LABEL, formatMoney } from '../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../src/i18n';
 
-const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+const fmt = (d: string) => new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
 
 /** Reçu d'un encaissement : après un encaissement (« Paiement reçu ») ou depuis l'historique de la caisse. */
 export default function StaffCashReceiptScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { paymentId, fresh } = useLocalSearchParams<{ paymentId: string; fresh?: string }>();
   const { colors, cardShadow } = useTheme();
@@ -41,7 +44,7 @@ export default function StaffCashReceiptScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={{ padding: spacing.lg }}>
-          <EmptyState icon="receipt-long" title="Reçu introuvable" text="Cet encaissement n'existe plus." tone="danger" actionLabel="Retour" onAction={close} />
+          <EmptyState icon="receipt-long" title={t('staff.recu_introuvable')} text={t('staff.cet_encaissement_nexiste_plus')} tone="danger" actionLabel={t('common.retour')} onAction={close} />
         </View>
       </SafeAreaView>
     );
@@ -50,15 +53,15 @@ export default function StaffCashReceiptScreen() {
   const number = payment.id.slice(0, 8).toUpperCase();
   const name = `${payment.membership.user.firstName} ${payment.membership.user.lastName}`;
   const rows = [
-    { k: 'Adhérent', v: name },
-    { k: 'Formule', v: payment.membership.plan.name },
-    { k: 'Validité', v: `${fmt(payment.membership.startDate)} → ${fmt(payment.membership.endDate)}` },
-    { k: 'Moyen de paiement', v: METHOD_LABEL[payment.method] },
+    { k: t('staff.adherent_2'), v: name },
+    { k: t('staff.formule'), v: payment.membership.plan.name },
+    { k: t('staff.validite'), v: `${fmt(payment.membership.startDate)} → ${fmt(payment.membership.endDate)}` },
+    { k: t('staff.moyen_de_paiement'), v: METHOD_LABEL[payment.method] },
   ];
 
   const share = () =>
     void Share.share({
-      message: `Reçu n° ${number} — ${config.branding.brand}\n${name}\n${payment.membership.plan.name}\nMontant : ${formatMoney(payment.amount)} (${METHOD_LABEL[payment.method]})\n${fmt(payment.recordedAt)}`,
+      message: t('staff.recu_n_montant', { number, brand: config.branding.brand, name, name_: payment.membership.plan.name, v4: formatMoney(payment.amount), v5: METHOD_LABEL[payment.method], v6: fmt(payment.recordedAt) }),
     });
 
   return (
@@ -69,13 +72,13 @@ export default function StaffCashReceiptScreen() {
             <View style={styles.successCircle}>
               <MaterialIcons name="check" size={38} color="#FFFFFF" />
             </View>
-            <Text style={styles.successTitle}>Paiement reçu</Text>
+            <Text style={styles.successTitle}>{t('staff.paiement_recu')}</Text>
             <Text style={styles.successSub}>{name}</Text>
           </View>
         ) : (
           <Pressable style={styles.back} onPress={close} hitSlop={8}>
             <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-            <Text style={styles.backText}>Encaissements</Text>
+            <Text style={styles.backText}>{t('common.encaissements')}</Text>
           </Pressable>
         )}
 
@@ -86,13 +89,13 @@ export default function StaffCashReceiptScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.brand}>{config.branding.brand}</Text>
-              <Text style={styles.receiptNo}>Reçu n° {number}</Text>
+              <Text style={styles.receiptNo}>{t('staff.recu_n', { number })}</Text>
             </View>
-            <Text style={styles.receiptDate}>{new Date(payment.recordedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
+            <Text style={styles.receiptDate}>{new Date(payment.recordedAt).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
           </LinearGradient>
 
           <View style={styles.amountBlock}>
-            <Text style={styles.amountKicker}>MONTANT ENCAISSÉ</Text>
+            <Text style={styles.amountKicker}>{t('staff.montant_encaisse')}</Text>
             <Text style={styles.amount}>{formatMoney(payment.amount)}</Text>
           </View>
 
@@ -110,19 +113,19 @@ export default function StaffCashReceiptScreen() {
               </View>
             ))}
           </View>
-          <Text style={styles.thanks}>Merci de votre confiance</Text>
+          <Text style={styles.thanks}>{t('staff.merci_de_votre_confiance')}</Text>
         </View>
 
         <View style={{ gap: 10 }}>
           <Pressable onPress={close} style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
               <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-              <Text style={styles.ctaText}>Terminer</Text>
+              <Text style={styles.ctaText}>{t('staff.terminer')}</Text>
             </LinearGradient>
           </Pressable>
           <Pressable style={({ pressed }) => [styles.share, pressed && { transform: [{ scale: 0.98 }] }]} onPress={share}>
             <MaterialIcons name="ios-share" size={22} color={colors.text} />
-            <Text style={styles.shareText}>Partager le reçu</Text>
+            <Text style={styles.shareText}>{t('staff.partager_le_recu')}</Text>
           </Pressable>
         </View>
       </ScrollView>

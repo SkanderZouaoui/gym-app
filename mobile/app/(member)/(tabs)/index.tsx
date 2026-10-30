@@ -24,6 +24,7 @@ import { MembershipHeroCard } from '../../../src/components/adherent/MembershipH
 import { Banner, BottomSheet, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import i18n, { dateLocale } from '../../../src/i18n';
 
 export default function HomeScreen() {
   const tabBarScroll = useHideTabBarOnScroll();
@@ -148,7 +149,7 @@ export default function HomeScreen() {
                 <Pressable
                   style={styles.alertClose}
                   hitSlop={6}
-                  accessibilityLabel="Fermer l'alerte"
+                  accessibilityLabel={t('member.fermer_lalerte')}
                   onPress={() => setDismissedAlerts((prev) => new Set(prev).add(a.id))}
                 >
                   <MaterialIcons name="close" size={20} color={tone.ink} />
@@ -161,8 +162,8 @@ export default function HomeScreen() {
           <Banner
             tone="warning"
             icon="sync-problem"
-            title="Session hors ligne"
-            text="Vos informations n'ont pas pu être vérifiées en ligne récemment. Certaines données peuvent être obsolètes."
+            title={t('member.session_hors_ligne')}
+            text={t('member.vos_informations_nont_pas_pu')}
           />
         ) : null}
 
@@ -177,7 +178,7 @@ export default function HomeScreen() {
           <Banner
             tone="warning"
             icon="event"
-            title={t('home.membershipExpiringTitle', { date: new Date(activeMembership.endDate).toLocaleDateString('fr-FR') })}
+            title={t('home.membershipExpiringTitle', { date: new Date(activeMembership.endDate).toLocaleDateString(dateLocale()) })}
             text={t('home.membershipExpiringText')}
           />
         ) : null}
@@ -274,19 +275,19 @@ export default function HomeScreen() {
       ) : null}
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
       <BottomSheet visible={confirmCancel} onClose={() => setConfirmCancel(false)}>
-        <Text style={styles.sheetTitle}>Annuler {nextBooking?.session?.classType.name} ?</Text>
-        <Text style={styles.sheetText}>L’annulation est gratuite. Votre place sera proposée à la liste d’attente.</Text>
+        <Text style={styles.sheetTitle}>{t('common.annuler_2', { name: nextBooking?.session?.classType.name })}</Text>
+        <Text style={styles.sheetText}>{t('member.lannulation_est_gratuite_votre_place')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
-            label="Oui, annuler"
+            label={t('member.oui_annuler')}
             variant="secondary"
             loading={cancelBooking.isPending}
             onPress={() => nextBooking && cancelBooking.mutate(nextBooking.id, { onSettled: () => setConfirmCancel(false) })}
           />
-          <Button label="Garder ma place" variant="outline" onPress={() => setConfirmCancel(false)} />
+          <Button label={t('member.garder_ma_place')} variant="outline" onPress={() => setConfirmCancel(false)} />
         </View>
       </BottomSheet>
     </SafeAreaView>
@@ -299,14 +300,14 @@ export default function HomeScreen() {
  * la petite ligne de l'en-tête, le prénom est affiché en grand à côté. */
 function greetingParts(config: ReturnType<typeof useRemoteConfig>['config'], language: string): { label: string } {
   const entry = config.strings.find((s) => s.k === 'home.greeting');
-  const template = (language === 'ar' && entry?.ar.trim() ? entry.ar : entry?.fr) ?? 'Bonjour, {prénom}';
+  const template = (language === 'ar' && entry?.ar.trim() ? entry.ar : entry?.fr) ?? i18n.t('member.bonjour_prenom');
   const label = template.split('{prénom}')[0].trim();
-  return { label: label || 'Bonjour,' };
+  return { label: label || i18n.t('member.hello_comma') };
 }
 
 function periodLabel(start: string, end: string): string {
   const fmt = (d: string, withYear: boolean) =>
-    new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) });
+    new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) });
   return `${fmt(start, false)} → ${fmt(end, true)}`;
 }
 

@@ -8,24 +8,27 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useBodyMetrics, useCreateBodyMetric } from '../../src/hooks/useProgress';
 import { Banner, BottomSheet } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../src/i18n';
 
 type MeasureType = 'weight' | 'waist' | 'arm' | 'bodyFat';
 
 const TYPES: { value: MeasureType; label: string; unit: string; icon: keyof typeof MaterialIcons.glyphMap; min: number; max: number }[] = [
-  { value: 'weight', label: 'Poids', unit: 'kg', icon: 'monitor-weight', min: 30, max: 250 },
-  { value: 'waist', label: 'Taille', unit: 'cm', icon: 'straighten', min: 40, max: 200 },
-  { value: 'arm', label: 'Bras', unit: 'cm', icon: 'fitness-center', min: 15, max: 70 },
-  { value: 'bodyFat', label: 'Masse grasse', unit: '%', icon: 'percent', min: 3, max: 60 },
+  { value: 'weight', get label() { return i18n.t('member.poids'); }, unit: 'kg', icon: 'monitor-weight', min: 30, max: 250 },
+  { value: 'waist', get label() { return i18n.t('member.taille'); }, unit: 'cm', icon: 'straighten', min: 40, max: 200 },
+  { value: 'arm', get label() { return i18n.t('member.bras'); }, unit: 'cm', icon: 'fitness-center', min: 15, max: 70 },
+  { value: 'bodyFat', get label() { return i18n.t('member.masse_grasse'); }, unit: '%', icon: 'percent', min: 3, max: 60 },
 ];
 
 function formatDateLabel(date: Date, isToday: boolean) {
-  const formatted = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-  return isToday ? `Aujourd’hui, ${formatted}` : `Hier, ${formatted}`;
+  const formatted = date.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long' });
+  return i18n.t(isToday ? 'member.today_date' : 'member.yesterday_date', { date: formatted });
 }
 
 /** Saisie d’une mesure — FitZone App Entraînement.dc.html, F2.
  * Présentée en bottom-sheet modale par-dessus l’écran Progression, comme la maquette. */
 export default function MeasureScreen() {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: metrics } = useBodyMetrics();
@@ -48,7 +51,7 @@ export default function MeasureScreen() {
   const handleSave = () => {
     const num = Number(value.replace(',', '.'));
     if (!num || num < config.min || num > config.max) {
-      setError(`Valeur hors plage : ${config.min} à ${config.max} ${config.unit}.`);
+      setError(i18n.t('member.valeur_hors_plage_a', { min: config.min, max: config.max, unit: config.unit }));
       return;
     }
     setError(null);
@@ -71,7 +74,7 @@ export default function MeasureScreen() {
         <View style={styles.sheet}>
           <View style={styles.handle} />
           <View style={styles.header}>
-            <Text style={styles.title}>Nouvelle mesure</Text>
+            <Text style={styles.title}>{i18n.t('member.nouvelle_mesure')}</Text>
             <Pressable onPress={handleClose} hitSlop={8}>
               <MaterialIcons name="close" size={22} color={colors.text} />
             </Pressable>
@@ -102,7 +105,7 @@ export default function MeasureScreen() {
               <Text style={styles.unit}>{config.unit}</Text>
             </View>
 
-            {lastValue ? <Text style={styles.helpText}>Dernière mesure : {lastValue} {config.unit}</Text> : null}
+            {lastValue ? <Text style={styles.helpText}>{i18n.t('member.derniere_mesure', { lastValue, unit: config.unit })}</Text> : null}
 
             <Pressable style={styles.dateRow} onPress={() => setShowDatePicker(true)}>
               <MaterialIcons name="calendar-today" size={16} color={colors.text} />
@@ -112,22 +115,22 @@ export default function MeasureScreen() {
 
             <View style={styles.tipRow}>
               <MaterialIcons name="lightbulb" size={16} color={colors.muted} />
-              <Text style={styles.tipText}>Conseil : mesurez-vous le matin, dans les mêmes conditions.</Text>
+              <Text style={styles.tipText}>{i18n.t('member.conseil_mesurez_vous_le_matin')}</Text>
             </View>
 
-            <Button label={createMetric.isPending ? 'Enregistrement…' : 'Enregistrer'} onPress={handleSave} loading={createMetric.isPending} />
+            <Button label={createMetric.isPending ? i18n.t('common.enregistrement') : i18n.t('member.enregistrer')} onPress={handleSave} loading={createMetric.isPending} />
           </View>
         </View>
       </SafeAreaView>
 
       <BottomSheet visible={showDatePicker} onClose={() => setShowDatePicker(false)}>
-        <Text style={styles.pickerTitle}>Date de la mesure</Text>
+        <Text style={styles.pickerTitle}>{i18n.t('member.date_de_la_mesure')}</Text>
         <Pressable style={styles.pickerOption} onPress={() => { setIsToday(true); setShowDatePicker(false); }}>
-          <Text style={styles.pickerOptionText}>Aujourd’hui</Text>
+          <Text style={styles.pickerOptionText}>{i18n.t('member.aujourdhui')}</Text>
           {isToday ? <MaterialIcons name="check" size={18} color={colors.primaryInk} /> : null}
         </Pressable>
         <Pressable style={styles.pickerOption} onPress={() => { setIsToday(false); setShowDatePicker(false); }}>
-          <Text style={styles.pickerOptionText}>Hier</Text>
+          <Text style={styles.pickerOptionText}>{i18n.t('member.hier')}</Text>
           {!isToday ? <MaterialIcons name="check" size={18} color={colors.primaryInk} /> : null}
         </Pressable>
       </BottomSheet>

@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FloatingTabBar, type FloatingTabBarProps } from '../../../src/components/FloatingTabBar';
+import { useTranslation } from 'react-i18next';
 
 /** Barre d'onglets Coach v2 : Planning, Programmes, Profil. « Aujourd'hui » et « Élèves » restent
  * accessibles par navigation directe mais ne figurent plus dans la barre. Les écrans de détail
@@ -9,6 +10,7 @@ import { FloatingTabBar, type FloatingTabBarProps } from '../../../src/component
 export const unstable_settings = { initialRouteName: 'planning' };
 
 export default function CoachTabsLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
@@ -18,14 +20,14 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="planning"
         options={{
-          title: 'Planning',
+          title: t('common.planning'),
           tabBarIcon: ({ color }) => <MaterialIcons name="calendar-month" size={24} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="programs"
         options={{
-          title: 'Programmes',
+          title: t('common.programmes'),
           tabBarIcon: ({ color }) => <MaterialIcons name="fitness-center" size={24} color={color as string} />,
         }}
       />
@@ -33,7 +35,7 @@ export default function CoachTabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profil',
+          title: t('common.profil'),
           tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color as string} />,
         }}
       />

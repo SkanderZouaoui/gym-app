@@ -19,8 +19,10 @@ import { CourseCard } from '../../../src/components/adherent/CourseCard';
 import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import { dateLocale } from '../../../src/i18n';
+import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
 
-const WEEKDAY_LABELS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const WEEKDAY_LABELS = WEEKDAYS_SHORT_SUN;
 
 function buildWeek() {
   const today = new Date();
@@ -106,7 +108,7 @@ export default function PlanningScreen() {
       <View style={styles.header}>
         <ScreenTitle
           title={t('planning.title')}
-          subtitle={t('planning.subtitle', { month: (days[selectedDay]?.date ?? new Date()).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) })}
+          subtitle={t('planning.subtitle', { month: (days[selectedDay]?.date ?? new Date()).toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' }) })}
         />
         <Pressable
           style={({ pressed }) => [styles.bookingsButton, pressed && { transform: [{ scale: 0.98 }] }]}
@@ -190,7 +192,7 @@ export default function PlanningScreen() {
       />
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );
@@ -218,7 +220,7 @@ function SessionCard({
 
   return (
     <CourseCard
-      time={new Date(session.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+      time={new Date(session.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}
       duration={`${durationMinutes} min`}
       name={session.classType.name}
       coach={session.coach ? `${session.coach.user.firstName} ${session.coach.user.lastName.charAt(0)}.` : undefined}
@@ -230,7 +232,7 @@ function SessionCard({
       progress={progress}
       booked={!!bookedAs}
       closed={started && !bookedAs}
-      ctaLabel={started && !bookedAs ? 'Réservation fermée' : bookedAs === 'WAITLISTED' ? 'En liste d’attente' : bookedAs ? 'Réservé' : isFull ? t('planning.waitlist') : t('planning.book')}
+      ctaLabel={started && !bookedAs ? t('member.reservation_fermee') : bookedAs === 'WAITLISTED' ? t('member.en_liste_dattente') : bookedAs ? t('member.reserve') : isFull ? t('planning.waitlist') : t('planning.book')}
       onPress={onPress}
       onPressCta={bookedAs || started ? onPress : onBook}
     />

@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, typography } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 
 interface ProgramCardProps {
@@ -24,6 +25,7 @@ interface ProgramCardProps {
 /** Carte programme — version mise en avant (fond secondary) ou compacte,
  * FitZone App Entraînement.dc.html, D1. */
 export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCount, onPress, onStart, highlighted, kicker, proposed }: ProgramCardProps) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   if (highlighted) {
@@ -32,23 +34,23 @@ export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCo
        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroCard}>
         <View style={styles.heroDecor} />
         <View style={styles.heroHeaderRow}>
-          <Text style={styles.heroLabel}>{kicker ?? 'EN COURS'}</Text>
-          <View style={styles.heroTag}><Text style={styles.heroTagText}>{proposed ? 'Proposé' : isOwn ? 'Personnel' : 'Coach'}</Text></View>
+          <Text style={styles.heroLabel}>{kicker ?? t('common.en_cours_2')}</Text>
+          <View style={styles.heroTag}><Text style={styles.heroTagText}>{proposed ? t('member.propose') : isOwn ? t('member.personnel') : t('common.coach')}</Text></View>
         </View>
         <Text style={styles.heroName}>{name}</Text>
-        <Text style={styles.heroMeta}>{dayCount} jour{dayCount > 1 ? 's' : ''} / semaine</Text>
+        <Text style={styles.heroMeta}>{t('member.jour_semaine', { dayCount, v2: dayCount > 1 ? 's' : '' })}</Text>
         {todayLabel ? (
           <View style={styles.todayRow}>
             <Text style={styles.todayText}>
-              Aujourd'hui : <Text style={styles.todayBold}>{todayLabel}</Text>
-              {todayExerciseCount ? ` · ${todayExerciseCount} exercices` : ''}
+              {t('member.today_colon')}<Text style={styles.todayBold}>{todayLabel}</Text>
+              {todayExerciseCount ? t('member.exercices', { todayExerciseCount }) : ''}
             </Text>
           </View>
         ) : null}
         {onStart ? (
           <Pressable style={styles.startButton} onPress={onStart}>
             <MaterialIcons name="play-arrow" size={20} color={colors.primaryInk} />
-            <Text style={styles.startButtonText}>Commencer la séance</Text>
+            <Text style={styles.startButtonText}>{t('member.commencer_la_seance')}</Text>
           </Pressable>
         ) : null}
        </LinearGradient>
@@ -65,10 +67,10 @@ export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCo
         <View style={styles.compactTitleRow}>
           <Text style={styles.compactName} numberOfLines={1}>{name}</Text>
           <View style={[styles.tag, isOwn ? styles.tagOwn : styles.tagCoach]}>
-            <Text style={[styles.tagText, isOwn ? styles.tagTextOwn : styles.tagTextCoach]}>{proposed ? 'Proposé' : isOwn ? 'Perso' : 'Coach'}</Text>
+            <Text style={[styles.tagText, isOwn ? styles.tagTextOwn : styles.tagTextCoach]}>{proposed ? t('member.propose') : isOwn ? t('member.perso') : t('common.coach')}</Text>
           </View>
         </View>
-        <Text style={styles.compactMeta}>{dayCount} jour{dayCount > 1 ? 's' : ''} / semaine</Text>
+        <Text style={styles.compactMeta}>{t('member.jour_semaine', { dayCount, v2: dayCount > 1 ? 's' : '' })}</Text>
       </View>
     </Pressable>
   );

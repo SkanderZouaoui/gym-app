@@ -13,9 +13,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSessionStore } from '../../src/store/session';
 import { ApiError } from '../../src/api/client';
 import { Banner } from '../../src/components/ui';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 /** Inscription — FitZone App Adherent.dc.html, A4. */
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [firstName, setFirstName] = useState('');
@@ -32,7 +35,7 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!agreed) {
-      setError("Cochez cette case pour créer votre compte.");
+      setError(t('auth.cochez_cette_case_pour_creer'));
       return;
     }
     setError(null);
@@ -51,7 +54,7 @@ export default function RegisterScreen() {
       setSession(user, user.roles.map((r) => r.role), 'MEMBER');
       setSuccess(true);
     } catch (e) {
-      setError(e instanceof ApiError ? traduireErreur(e.code) : 'Une erreur est survenue');
+      setError(e instanceof ApiError ? traduireErreur(e.code) : t('auth.une_erreur_est_survenue'));
     } finally {
       setLoading(false);
     }
@@ -64,11 +67,9 @@ export default function RegisterScreen() {
           <View style={styles.successIcon}>
             <MaterialIcons name="mark-email-read" size={48} color={colors.successInk} />
           </View>
-          <Text style={styles.successTitle}>Compte créé</Text>
-          <Text style={styles.successText}>
-            Un lien de confirmation a été envoyé à {email}. Votre abonnement sera activé à l’accueil de la salle, lors de votre premier règlement.
-          </Text>
-          <Button label="Continuer" onPress={() => router.replace('/(member)/(tabs)')} />
+          <Text style={styles.successTitle}>{t('auth.compte_cree')}</Text>
+          <Text style={styles.successText}>{t('auth.un_lien_de_confirmation_a', { email })}</Text>
+          <Button label={t('auth.continuer')} onPress={() => router.replace('/(member)/(tabs)')} />
         </View>
       </SafeAreaView>
     );
@@ -82,51 +83,49 @@ export default function RegisterScreen() {
             <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={8}>
               <MaterialIcons name="arrow-back" size={22} color={colors.text} />
             </Pressable>
-            <Text style={styles.step}>Étape 1 sur 1</Text>
+            <Text style={styles.step}>{t('auth.etape_1_sur_1')}</Text>
           </View>
-          <Text style={styles.title}>Créer un compte</Text>
+          <Text style={styles.title}>{t('common.creer_un_compte')}</Text>
 
           <View style={styles.form}>
             {error ? <Banner tone="danger" icon="error" text={error} /> : null}
             <View style={styles.row}>
               <View style={{ flex: 1 }}>
-                <TextField label="Prénom" value={firstName} onChangeText={setFirstName} />
+                <TextField label={t('common.prenom')} value={firstName} onChangeText={setFirstName} />
               </View>
               <View style={{ flex: 1 }}>
-                <TextField label="Nom" value={lastName} onChangeText={setLastName} />
+                <TextField label={t('common.nom')} value={lastName} onChangeText={setLastName} />
               </View>
             </View>
             <TextField
-              label="E-mail"
+              label={t('common.e_mail')}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            <TextField label="Téléphone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+216 22 345 678" />
+            <TextField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+216 22 345 678" />
             <TextField
-              label="Mot de passe"
+              label={t('common.mot_de_passe')}
               value={password}
               onChangeText={setPassword}
               isPassword
-              placeholder="8 caractères minimum, dont un chiffre"
+              placeholder={t('auth.8_caracteres_minimum_dont_un')}
             />
 
             <Pressable style={styles.cguRow} onPress={() => setAgreed((a) => !a)}>
               <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
                 {agreed ? <MaterialIcons name="check" size={16} color={colors.primaryContrast} /> : null}
               </View>
-              <Text style={styles.cguText}>J’accepte les conditions d’utilisation et le règlement intérieur.</Text>
+              <Text style={styles.cguText}>{t('auth.jaccepte_les_conditions_dutilisation_et')}</Text>
             </Pressable>
 
-            <Button label={loading ? 'Création…' : 'Créer mon compte'} onPress={handleRegister} loading={loading} />
+            <Button label={loading ? t('common.creation') : t('auth.creer_mon_compte')} onPress={handleRegister} loading={loading} />
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Déjà un compte ?</Text>
-            <Link href="/(auth)/login" style={styles.footerLink}>
-              Se connecter
-            </Link>
+            <Text style={styles.footerText}>{t('auth.deja_un_compte')}</Text>
+            <Link href="/(auth)/login" style={styles.footerLink}>{t('auth.se_connecter')}</Link>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -137,9 +136,9 @@ export default function RegisterScreen() {
 function traduireErreur(code: string): string {
   switch (code) {
     case 'EMAIL_OR_PHONE_ALREADY_USED':
-      return 'Cette adresse est déjà utilisée.';
+      return i18n.t('auth.cette_adresse_est_deja_utilisee');
     default:
-      return "Impossible de créer le compte.";
+      return i18n.t('auth.impossible_de_creer_le_compte');
   }
 }
 

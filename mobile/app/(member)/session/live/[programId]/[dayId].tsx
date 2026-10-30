@@ -21,6 +21,8 @@ import type { SetDraft } from '../../../../../src/components/training/SetRow';
 import { clearSessionDraft, readSessionDraft, writeSessionDraft } from '../../../../../src/hooks/useSessionDraft';
 import { useNetworkStatusContext } from '../../../../../src/hooks/NetworkStatusContext';
 import { useExercisePickStore } from '../../../../../src/store/exercisePick';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../../../src/i18n';
 
 interface LiveSet {
   exerciseId: string;
@@ -51,6 +53,7 @@ function summarizeReps(reps: string[]): string {
  * jour sont affichés en continu (terminés, en cours, à venir), minuteur de
  * repos en anneau circulaire entre les séries. */
 export default function LiveSessionScreen() {
+  useTranslation();
   const { programId, dayId, pickedExerciseId, pickedExerciseName, pickedExerciseSets } = useLocalSearchParams<{
     programId: string;
     dayId: string;
@@ -312,7 +315,7 @@ export default function LiveSessionScreen() {
     if (!current || current.done) return;
     setActiveExerciseId(current.exerciseId);
     if (!current.reps || Number(current.reps) <= 0 || Number(current.reps) > 50) {
-      setError('Saisissez un nombre de répétitions (1 à 50).');
+      setError(i18n.t('member.saisissez_un_nombre_de_repetitions'));
       setErrorGlobalIndex(globalIndex);
       return;
     }
@@ -447,14 +450,14 @@ export default function LiveSessionScreen() {
         <View style={{ padding: spacing.lg }}>
           <EmptyState
             icon="cloud-off"
-            title="Séance indisponible hors ligne"
-            text="Impossible de récupérer ce programme pour le moment. Vérifiez votre connexion."
+            title={i18n.t('member.seance_indisponible_hors_ligne')}
+            text={i18n.t('member.impossible_de_recuperer_ce_programme')}
             tone="danger"
-            actionLabel="Réessayer"
+            actionLabel={i18n.t('common.reessayer')}
             onAction={() => refetch()}
           />
           <Pressable style={styles.addExerciseButton} onPress={() => router.back()}>
-            <Text style={styles.addExerciseText}>Retour</Text>
+            <Text style={styles.addExerciseText}>{i18n.t('common.retour')}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -467,12 +470,12 @@ export default function LiveSessionScreen() {
         <View style={{ padding: spacing.lg }}>
           <EmptyState
             icon="error-outline"
-            title="Jour introuvable"
-            text="Ce jour de programme n'existe plus. Il a peut-être été modifié ou supprimé."
+            title={i18n.t('member.jour_introuvable')}
+            text={i18n.t('member.ce_jour_de_programme_nexiste')}
             tone="danger"
           />
           <Pressable style={styles.addExerciseButton} onPress={() => router.back()}>
-            <Text style={styles.addExerciseText}>Retour</Text>
+            <Text style={styles.addExerciseText}>{i18n.t('common.retour')}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -501,20 +504,20 @@ export default function LiveSessionScreen() {
         <View style={styles.topBar}>
           <Pressable style={styles.back} onPress={() => setExitConfirmVisible(true)} hitSlop={8}>
             <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-            <Text style={styles.backText}>Quitter</Text>
+            <Text style={styles.backText}>{i18n.t('member.quitter')}</Text>
           </Pressable>
           <View style={styles.liveTag}>
-            <Text style={styles.liveTagText}>● En cours</Text>
+            <Text style={styles.liveTagText}>{i18n.t('member.en_cours')}</Text>
           </View>
         </View>
 
-        <ScreenTitle title={day.label ?? program?.name ?? 'Séance'} subtitle="Suivi des exercices et des séries" />
+        <ScreenTitle title={day.label ?? program?.name ?? i18n.t('member.seance')} subtitle={i18n.t('member.suivi_des_exercices_et_des')} />
 
         <WorkoutHeroCard
           duration={`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`}
           progress={progressRatio}
           ringLabel={`${Math.round(progressRatio * 100)}%`}
-          volume={`${Math.round(volume).toLocaleString('fr-FR')} kg`}
+          volume={`${Math.round(volume).toLocaleString(dateLocale())} kg`}
           sets={`${doneSets}/${totalSets}`}
         />
 
@@ -522,13 +525,13 @@ export default function LiveSessionScreen() {
           <View style={styles.restBanner}>
             <MaterialIcons name="timer" size={24} color={colors.primaryInk} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.restLabel}>REPOS</Text>
+              <Text style={styles.restLabel}>{i18n.t('member.repos')}</Text>
               <Text style={styles.restTime}>
                 {Math.floor(restSecondsLeft / 60)}:{String(restSecondsLeft % 60).padStart(2, '0')}
               </Text>
             </View>
             <Pressable style={styles.restSkip} onPress={() => setRestSecondsLeft(0)}>
-              <Text style={styles.restSkipText}>Passer</Text>
+              <Text style={styles.restSkipText}>{i18n.t('member.passer')}</Text>
             </Pressable>
           </View>
         ) : null}
@@ -561,9 +564,7 @@ export default function LiveSessionScreen() {
                   </LinearGradient>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.exerciseName} numberOfLines={1}>{exSets[0]?.exerciseName}</Text>
-                    <Text style={styles.exerciseMeta}>
-                      Exercice {exIndex + 1} sur {exerciseGroups.length}
-                    </Text>
+                    <Text style={styles.exerciseMeta}>{i18n.t('member.exercice_sur', { v1: exIndex + 1, length: exerciseGroups.length })}</Text>
                   </View>
                   <View style={[styles.progTag, isExerciseDone ? styles.progTagDone : isCurrentExercise ? styles.progTagCurrent : null]}>
                     <Text style={[styles.progTagText, isExerciseDone ? styles.progTagTextDone : isCurrentExercise ? styles.progTagTextCurrent : null]}>
@@ -571,16 +572,16 @@ export default function LiveSessionScreen() {
                     </Text>
                   </View>
                   {exerciseGroups.length > 1 ? (
-                    <Pressable style={styles.trashButton} onPress={() => removeExercise(exId)} hitSlop={6} accessibilityLabel="Retirer l'exercice">
+                    <Pressable style={styles.trashButton} onPress={() => removeExercise(exId)} hitSlop={6} accessibilityLabel={i18n.t('member.retirer_lexercice')}>
                       <MaterialIcons name="delete-outline" size={22} color={colors.dangerInk} />
                     </Pressable>
                   ) : null}
                 </Pressable>
 
                 <View style={styles.tableHeader}>
-                  <Text style={[styles.tableHeaderText, { width: 34, textAlign: 'center' }]}>SÉRIE</Text>
-                  <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>KG</Text>
-                  <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>REPS</Text>
+                  <Text style={[styles.tableHeaderText, { width: 34, textAlign: 'center' }]}>{i18n.t('member.serie_2')}</Text>
+                  <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{i18n.t('member.kg_2')}</Text>
+                  <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{i18n.t('member.reps')}</Text>
                   <View style={{ width: 44 }} />
                 </View>
                 {exSets.map((s, i) => {
@@ -607,7 +608,7 @@ export default function LiveSessionScreen() {
                 })}
 
                 <Pressable style={styles.addSetButton} onPress={() => addSet(exId)}>
-                  <Text style={styles.addSetText}>+ Ajouter une série</Text>
+                  <Text style={styles.addSetText}>{i18n.t('member.ajouter_une_serie')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -624,7 +625,7 @@ export default function LiveSessionScreen() {
           }
         >
           <MaterialIcons name="add" size={22} color={colors.primaryInk} />
-          <Text style={styles.addExerciseText}>Ajouter un exercice</Text>
+          <Text style={styles.addExerciseText}>{i18n.t('common.ajouter_un_exercice')}</Text>
         </Pressable>
       </ScrollView>
 
@@ -636,64 +637,54 @@ export default function LiveSessionScreen() {
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.validateButton}>
             <MaterialIcons name={currentSetIndex >= 0 ? 'check' : 'flag'} size={24} color={colors.primaryContrast} />
             <Text style={styles.validateButtonText}>
-              {currentSetIndex >= 0 ? `Valider la série ${currentSets[currentSetIndex]?.setNumber}` : 'Terminer la séance'}
+              {currentSetIndex >= 0 ? i18n.t('member.valider_la_serie', { setNumber: currentSets[currentSetIndex]?.setNumber }) : i18n.t('member.terminer_la_seance')}
             </Text>
           </LinearGradient>
         </Pressable>
         {currentSetIndex >= 0 ? (
           <Pressable style={styles.finishLink} onPress={handleFinish}>
-            <Text style={styles.finishLinkText}>Terminer la séance</Text>
+            <Text style={styles.finishLinkText}>{i18n.t('member.terminer_la_seance')}</Text>
           </Pressable>
         ) : null}
       </View>
 
       <BottomSheet visible={saveChoiceOpen} onClose={() => setSaveChoiceOpen(false)}>
-        <Text style={styles.sheetTitle}>Programme modifié</Text>
-        <Text style={styles.sheetText}>
-          Vous avez changé des exercices ou des séries par rapport au programme enregistré. Voulez-vous
-          mettre à jour « {program?.name} » avec ces changements, ou garder le programme tel quel et
-          enregistrer seulement cette séance ?
-        </Text>
+        <Text style={styles.sheetTitle}>{i18n.t('member.programme_modifie')}</Text>
+        <Text style={styles.sheetText}>{i18n.t('member.vous_avez_change_des_exercices', { name: program?.name })}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
-            label="Mettre à jour le programme"
+            label={i18n.t('member.mettre_a_jour_le_programme')}
             onPress={handleUpdateProgramAndFinish}
             loading={updateProgram.isPending}
           />
-          <Button label="Garder le programme, enregistrer juste la séance" onPress={handleKeepProgramAndFinish} variant="outline" />
+          <Button label={i18n.t('member.garder_le_programme_enregistrer_juste')} onPress={handleKeepProgramAndFinish} variant="outline" />
         </View>
       </BottomSheet>
 
       <BottomSheet visible={draftPromptVisible} onClose={discardDraft}>
-        <Text style={styles.sheetTitle}>Reprendre la séance en cours ?</Text>
-        <Text style={styles.sheetText}>
-          Vous avez une progression sauvegardée
-          {foundDraft
-            ? ` du ${new Date(foundDraft.savedAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`
-            : ''}
-          . Voulez-vous la reprendre ou recommencer cette séance depuis le début ?
-        </Text>
+        <Text style={styles.sheetTitle}>{i18n.t('member.reprendre_la_seance_en_cours')}</Text>
+        <Text style={styles.sheetText}>{i18n.t('member.vous_avez_une_progression_sauvegardee', { v1: foundDraft
+            ? i18n.t('member.draft_at', { time: new Date(foundDraft.savedAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' }) })
+            : '' })}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Reprendre" onPress={resumeFromDraft} />
-          <Button label="Recommencer" onPress={discardDraft} variant="outline" />
+          <Button label={i18n.t('member.reprendre')} onPress={resumeFromDraft} />
+          <Button label={i18n.t('member.recommencer')} onPress={discardDraft} variant="outline" />
         </View>
       </BottomSheet>
 
       <BottomSheet visible={exitConfirmVisible} onClose={() => setExitConfirmVisible(false)}>
-        <Text style={styles.sheetTitle}>Abandonner la séance ?</Text>
-        <Text style={styles.sheetText}>
-          Votre progression reste sauvegardée et vous pourrez la reprendre en revenant sur cette séance.
-        </Text>
+        <Text style={styles.sheetTitle}>{i18n.t('member.abandonner_la_seance')}</Text>
+        <Text style={styles.sheetText}>{i18n.t('member.votre_progression_reste_sauvegardee_et')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
-            label="Abandonner"
+            label={i18n.t('member.abandonner')}
             onPress={() => {
               setExitConfirmVisible(false);
               router.navigate(`/(member)/program/${programId}`);
             }}
             variant="secondary"
           />
-          <Button label="Continuer la séance" onPress={() => setExitConfirmVisible(false)} variant="outline" />
+          <Button label={i18n.t('member.continuer_la_seance')} onPress={() => setExitConfirmVisible(false)} variant="outline" />
         </View>
       </BottomSheet>
     </SafeAreaView>

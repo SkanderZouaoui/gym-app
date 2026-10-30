@@ -4,6 +4,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 
 interface Props {
   /** Page courante, à partir de 0. */
@@ -29,6 +31,7 @@ function visiblePages(page: number, count: number): (number | 'gap-left' | 'gap-
 
 /** Pagination : flèches, numéros de page avec page active en dégradé, et « 11–20 sur 47 » dessous. */
 export function Pagination({ page, pageCount, pageSize, total, onChange }: Props) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   if (pageCount <= 1) return null;
@@ -37,7 +40,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange }: Props
 
   const Arrow = ({ dir, disabled, onPress }: { dir: 'prev' | 'next'; disabled: boolean; onPress: () => void }) => (
     <Pressable
-      accessibilityLabel={dir === 'prev' ? 'Page précédente' : 'Page suivante'}
+      accessibilityLabel={dir === 'prev' ? i18n.t('common.page_precedente') : i18n.t('common.page_suivante')}
       disabled={disabled}
       onPress={onPress}
       hitSlop={6}
@@ -60,7 +63,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange }: Props
                 <Text style={styles.pageActiveText}>{p + 1}</Text>
               </LinearGradient>
             ) : (
-              <Pressable key={p} onPress={() => onChange(p)} style={({ pressed }) => [styles.page, pressed && { backgroundColor: colors.primarySoft }]} accessibilityLabel={`Page ${p + 1}`}>
+              <Pressable key={p} onPress={() => onChange(p)} style={({ pressed }) => [styles.page, pressed && { backgroundColor: colors.primarySoft }]} accessibilityLabel={t('common.page', { v0: p + 1 })}>
                 <Text style={styles.pageText}>{p + 1}</Text>
               </Pressable>
             ),
@@ -69,7 +72,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange }: Props
         <Arrow dir="next" disabled={page >= pageCount - 1} onPress={() => onChange(page + 1)} />
       </View>
       <Text style={styles.summary}>
-        <Text style={styles.summaryStrong}>{first}–{last}</Text> sur {total} encaissements · page {page + 1} sur {pageCount}
+        <Text style={styles.summaryStrong}>{first}–{last}</Text>{t('common.pagination_rest', { total, page: page + 1, pageCount })}
       </Text>
     </View>
   );

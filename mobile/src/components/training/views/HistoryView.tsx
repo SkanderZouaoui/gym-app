@@ -8,6 +8,9 @@ import { useMyWorkouts, type WorkoutLog } from '../../../hooks/useCoaching';
 import { useMyBookings } from '../../../hooks/useMe';
 import { EmptyState } from '../../ui';
 import { formatDurationLabel, workoutSeconds } from '../../../utils/duration';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../../i18n';
+import { WEEKDAYS_LONG_SUN } from '../../../i18n/labels';
 
 function startOfWeek(date: Date) {
   const d = new Date(date);
@@ -27,6 +30,7 @@ type HistoryEntry =
 
 /** Vue "Historique" de l'onglet Entraînement — FitZone App Entraînement.dc.html, E1. */
 export function HistoryView() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: workouts, isLoading: workoutsLoading, isError: workoutsError, refetch: refetchWorkouts } = useMyWorkouts();
@@ -92,10 +96,10 @@ export function HistoryView() {
     return (
       <EmptyState
         icon="cloud-off"
-        title="Historique indisponible"
-        text="Impossible de récupérer votre historique pour le moment. Vérifiez votre connexion."
+        title={t('member.historique_indisponible')}
+        text={t('member.impossible_de_recuperer_votre_historique')}
         tone="danger"
-        actionLabel="Réessayer"
+        actionLabel={t('common.reessayer')}
         onAction={() => {
           void refetchWorkouts();
           void refetchBookings();
@@ -108,8 +112,8 @@ export function HistoryView() {
     return (
       <EmptyState
         icon="history"
-        title="Aucune séance enregistrée"
-        text="Démarrez une séance depuis un programme : charges, répétitions et durée seront gardées ici."
+        title={t('member.aucune_seance_enregistree')}
+        text={t('member.demarrez_une_seance_depuis_un')}
         tone="primary"
       />
     );
@@ -119,9 +123,9 @@ export function HistoryView() {
     <View style={{ gap: spacing.md }}>
       {stats ? (
         <View style={styles.statsRow}>
-          <Stat value={String(stats.count)} label="séances (3 mois)" />
-          <Stat value={stats.perWeek} label="par semaine" />
-          <Stat value={stats.totalHours ? `${stats.totalHours}h` : '—'} label="au total" />
+          <Stat value={String(stats.count)} label={t('member.seances_3_mois')} />
+          <Stat value={stats.perWeek} label={t('member.par_semaine')} />
+          <Stat value={stats.totalHours ? `${stats.totalHours}h` : '—'} label={t('member.au_total')} />
         </View>
       ) : null}
 
@@ -138,25 +142,26 @@ export function HistoryView() {
   );
 }
 
-const DAY_LABELS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAY_LABELS = WEEKDAYS_LONG_SUN;
 
 function DateBadge({ date, styles }: { date: string; styles: ReturnType<typeof makeStyles> }) {
   const d = new Date(date);
   return (
     <View style={styles.dateBadge}>
-      <Text style={styles.dateBadgeMonth}>{d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '').toUpperCase()}.</Text>
+      <Text style={styles.dateBadgeMonth}>{d.toLocaleDateString(dateLocale(), { month: 'short' }).replace('.', '').toUpperCase()}.</Text>
       <Text style={styles.dateBadgeDay}>{d.getDate()}</Text>
     </View>
   );
 }
 
 function WorkoutRow({ log, isRecord, styles }: { log: WorkoutLog; isRecord: boolean; styles: ReturnType<typeof makeStyles> }) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const exerciseCount = new Set(log.sets.map((s) => s.exerciseId)).size;
   const dayLabel = log.day ? (log.day.label ?? DAY_LABELS[log.day.dayOfWeek]) : null;
   const workoutTitle = log.program
     ? `${log.program.name}${dayLabel ? ` · ${dayLabel}` : ''}`
-    : `${log.sets[0]?.exercise.name ?? 'Séance'}${exerciseCount > 1 ? ` + ${exerciseCount - 1} autre${exerciseCount > 2 ? 's' : ''}` : ''}`;
+    : `${log.sets[0]?.exercise.name ?? t('member.seance')}${exerciseCount > 1 ? ` + ${exerciseCount - 1} autre${exerciseCount > 2 ? 's' : ''}` : ''}`;
   const volume = workoutVolume(log);
   return (
     <Pressable
@@ -171,15 +176,12 @@ function WorkoutRow({ log, isRecord, styles }: { log: WorkoutLog; isRecord: bool
           </Text>
           {isRecord ? (
             <View style={styles.recordBadge}>
-              <Text style={styles.recordBadgeText}>RECORD</Text>
+              <Text style={styles.recordBadgeText}>{t('member.record')}</Text>
             </View>
           ) : null}
         </View>
-        <Text style={styles.logMeta}>
-          {workoutSeconds(log) !== null ? `${formatDurationLabel(workoutSeconds(log)!)} · ` : ''}
-          {log.sets.length} série{log.sets.length > 1 ? 's' : ''}
-        </Text>
-        {volume > 0 ? <Text style={styles.logVolume}>{Math.round(volume).toLocaleString('fr-FR')} kg de volume</Text> : null}
+        <Text style={styles.logMeta}>{t('member.serie_4', { v1: workoutSeconds(log) !== null ? `${formatDurationLabel(workoutSeconds(log)!)} · ` : '', length: log.sets.length, v5: log.sets.length > 1 ? 's' : '' })}</Text>
+        {volume > 0 ? <Text style={styles.logVolume}>{t('member.kg_de_volume', { v0: Math.round(volume).toLocaleString(dateLocale()) })}</Text> : null}
       </View>
       <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
     </Pressable>
@@ -187,14 +189,15 @@ function WorkoutRow({ log, isRecord, styles }: { log: WorkoutLog; isRecord: bool
 }
 
 function ClassRow({ date, name, coachName, styles }: { date: string; name: string; coachName: string | null; styles: ReturnType<typeof makeStyles> }) {
+  const { t } = useTranslation();
   const { cardShadow } = useTheme();
   return (
     <View style={[styles.logRow, cardShadow]}>
       <DateBadge date={date} styles={styles} />
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.logName} numberOfLines={1}>{name} (cours)</Text>
+        <Text style={styles.logName} numberOfLines={1}>{t('member.cours', { name })}</Text>
         <Text style={styles.logMeta}>
-          {new Date(date).toLocaleDateString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(date).toLocaleDateString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}
           {coachName ? ` · ${coachName}` : ''}
         </Text>
       </View>

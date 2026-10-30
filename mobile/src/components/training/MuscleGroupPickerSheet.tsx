@@ -5,6 +5,7 @@ import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { BodyMuscleMap } from './BodyMuscleMap';
 import { muscleGroupLabel, type BodyView } from '../../constants/muscleGroups';
+import { useTranslation } from 'react-i18next';
 
 interface MuscleGroupPickerSheetProps {
   visible: boolean;
@@ -18,6 +19,7 @@ interface MuscleGroupPickerSheetProps {
  * affiché en bottom sheet. Tapoter une zone sélectionne ce groupe et ferme la
  * feuille ; "Effacer" retire le filtre. */
 export function MuscleGroupPickerSheet({ visible, value, onClose, onApply }: MuscleGroupPickerSheetProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [bodyView, setBodyView] = useState<BodyView>('front');
@@ -39,9 +41,9 @@ export function MuscleGroupPickerSheet({ visible, value, onClose, onApply }: Mus
   return (
     <BottomSheet visible={visible} onClose={onClose} scrollEnabled={false}>
       <View style={styles.header}>
-        <Text style={styles.title}>Filtrer par groupe musculaire</Text>
+        <Text style={styles.title}>{t('member.filtrer_par_groupe_musculaire')}</Text>
         <Pressable onPress={() => onApply(null)}>
-          <Text style={styles.clear}>Effacer</Text>
+          <Text style={styles.clear}>{t('member.effacer')}</Text>
         </Pressable>
       </View>
 
@@ -50,19 +52,19 @@ export function MuscleGroupPickerSheet({ visible, value, onClose, onApply }: Mus
           style={[styles.switchSegment, bodyView === 'front' && styles.switchSegmentActive]}
           onPress={setFront}
         >
-          <Text style={[styles.switchLabel, bodyView === 'front' && styles.switchLabelActive]}>Face</Text>
+          <Text style={[styles.switchLabel, bodyView === 'front' && styles.switchLabelActive]}>{t('member.face')}</Text>
         </Pressable>
         <Pressable
           style={[styles.switchSegment, bodyView === 'back' && styles.switchSegmentActive]}
           onPress={setBack}
         >
-          <Text style={[styles.switchLabel, bodyView === 'back' && styles.switchLabelActive]}>Dos</Text>
+          <Text style={[styles.switchLabel, bodyView === 'back' && styles.switchLabelActive]}>{t('member.dos')}</Text>
         </Pressable>
       </View>
 
       <BodyMuscleMap view={bodyView} selected={value ? [value] : []} onToggle={handleToggle} />
 
-      <Text style={styles.hint}>{value ? muscleGroupLabel(value) : 'Touchez une zone pour filtrer'}</Text>
+      <Text style={styles.hint}>{value ? muscleGroupLabel(value) : t('member.touchez_une_zone_pour_filtrer')}</Text>
     </BottomSheet>
   );
 }

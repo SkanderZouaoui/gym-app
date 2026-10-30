@@ -19,13 +19,16 @@ import { useExercisePickStore } from '../../src/store/exercisePick';
 import { estimateMinutes } from '../../src/components/coach/programStatus';
 import { ApiError } from '../../src/api/client';
 import { useSessionStore } from '../../src/store/session';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
+import { goalLabel, levelLabel } from '../../src/i18n/labels';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'] as const;
 const GOALS: { value: string; icon: keyof typeof MaterialIcons.glyphMap; sub: string }[] = [
-  { value: 'Perte de poids', icon: 'local-fire-department', sub: 'Brûler des calories' },
-  { value: 'Masse', icon: 'fitness-center', sub: 'Gagner du muscle' },
-  { value: 'Endurance', icon: 'directions-run', sub: 'Tenir l’effort' },
-  { value: 'Mobilité', icon: 'self-improvement', sub: 'Gagner en souplesse' },
+  { value: 'Perte de poids', icon: 'local-fire-department', get sub() { return i18n.t('coach.bruler_des_calories'); } },
+  { value: 'Masse', icon: 'fitness-center', get sub() { return i18n.t('coach.gagner_du_muscle'); } },
+  { value: 'Endurance', icon: 'directions-run', get sub() { return i18n.t('coach.tenir_leffort'); } },
+  { value: 'Mobilité', icon: 'self-improvement', get sub() { return i18n.t('coach.gagner_en_souplesse'); } },
 ];
 
 type DraftExercise = { exerciseId: string; name: string; sets: SetDraft[] };
@@ -39,6 +42,7 @@ function summarizeReps(sets: SetDraft[]): string {
 /** Nouveau programme (coach) : nom, niveau, objectif, destinataires et exercices avec leurs séries.
  * Le programme est soumis à la validation de l'admin ; une fois accepté il devient visible des adhérents. */
 export default function CoachProgramNewScreen() {
+  const { t } = useTranslation();
   const { duplicateFrom } = useLocalSearchParams<{ duplicateFrom?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -96,19 +100,19 @@ export default function CoachProgramNewScreen() {
   const handleSubmit = () => {
     setError(null);
     if (exercises.length === 0) {
-      setError('Ajoutez au moins un exercice.');
+      setError(t('coach.ajoutez_au_moins_un_exercice_2'));
       return;
     }
     assignProgram.mutate(
       {
-        name: name.trim() || 'Nouveau programme',
+        name: name.trim() || t('common.nouveau_programme'),
         level,
         goal,
         assignedToId: audience === 'ALL' ? undefined : audience,
         days: [
           {
             dayOfWeek: 1,
-            label: 'Séance complète',
+            label: t('coach.seance_complete'),
             exercises: exercises.map<AssignProgramExerciseInput>((e) => ({
               exerciseId: e.exerciseId,
               sets: e.sets.length,
@@ -124,17 +128,17 @@ export default function CoachProgramNewScreen() {
       },
       {
         onSuccess: () => router.replace(programsRoute as never),
-        onError: (e) => setError(e instanceof ApiError ? e.message : isAdmin ? 'Impossible de publier le programme.' : 'Impossible de soumettre le programme.'),
+        onError: (e) => setError(e instanceof ApiError ? e.message : isAdmin ? t('coach.impossible_de_publier_le_programme') : t('coach.impossible_de_soumettre_le_programme')),
       },
     );
   };
 
   const audienceRows = [
-    { id: 'ALL', label: 'Tous les adhérents', sub: 'Visible par tous les adhérents', icon: 'groups' as const },
+    { id: 'ALL', label: t('coach.tous_les_adherents'), sub: t('coach.visible_par_tous_les_adherents'), icon: 'groups' as const },
     ...(students ?? []).map((s) => ({
       id: s.id,
       label: `${s.firstName} ${s.lastName.charAt(0)}.`,
-      sub: 'Programme personnel',
+      sub: t('coach.programme_personnel'),
       icon: 'person' as const,
     })),
   ];
@@ -144,16 +148,16 @@ export default function CoachProgramNewScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Programmes</Text>
+          <Text style={styles.backText}>{t('common.programmes')}</Text>
         </Pressable>
-        <ScreenTitle title="Nouveau programme" subtitle={isAdmin ? 'Créé par l’admin · publié sans validation.' : 'Sera soumis à validation de l’admin.'} />
+        <ScreenTitle title={t('common.nouveau_programme')} subtitle={isAdmin ? t('coach.cree_par_ladmin_publie_sans') : t('coach.sera_soumis_a_validation_de')} />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-        <TextInput value={name} onChangeText={setName} placeholder="Nom du programme" placeholderTextColor={colors.muted} style={styles.nameInput} />
+        <TextInput value={name} onChangeText={setName} placeholder={t('common.nom_du_programme')} placeholderTextColor={colors.muted} style={styles.nameInput} />
 
         <View>
-          <Text style={styles.label}>Niveau</Text>
+          <Text style={styles.label}>{t('common.niveau')}</Text>
           <View style={styles.pillRow}>
             {LEVELS.map((l) => {
               const active = level === l;
@@ -162,7 +166,7 @@ export default function CoachProgramNewScreen() {
                   {active ? (
                     <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
-                  <Text style={[styles.pillText, active && styles.pillTextActive]}>{l}</Text>
+                  <Text style={[styles.pillText, active && styles.pillTextActive]}>{levelLabel(l)}</Text>
                 </Pressable>
               );
             })}
@@ -170,7 +174,7 @@ export default function CoachProgramNewScreen() {
         </View>
 
         <View>
-          <Text style={styles.label}>Objectif</Text>
+          <Text style={styles.label}>{t('common.objectif')}</Text>
           <View style={styles.goalGrid}>
             {GOALS.map((g) => {
               const active = goal === g.value;
@@ -185,7 +189,7 @@ export default function CoachProgramNewScreen() {
                       <MaterialIcons name={g.icon} size={22} color={colors.primaryInk} />
                     </View>
                   )}
-                  <Text style={styles.goalLabel}>{g.value}</Text>
+                  <Text style={styles.goalLabel}>{goalLabel(g.value)}</Text>
                   <Text style={styles.goalSub}>{g.sub}</Text>
                 </Pressable>
               );
@@ -195,7 +199,7 @@ export default function CoachProgramNewScreen() {
 
         {!isAdmin ? (
         <View>
-          <Text style={styles.label}>Destinataires</Text>
+          <Text style={styles.label}>{t('common.destinataires')}</Text>
           <View style={[styles.audienceCard, cardShadow]}>
             {audienceRows.map((r) => {
               const active = audience === r.id;
@@ -226,9 +230,9 @@ export default function CoachProgramNewScreen() {
           <MaterialIcons name="verified-user" size={22} color={colors.primaryInk} />
           <Text style={styles.noticeText}>
             {isAdmin ? (
-              <>Le programme est <Text style={{ fontFamily: fonts.bodyBold }}>publié immédiatement</Text> et visible par tous les adhérents, sans validation.</>
+              <>{t('coach.notice_admin_a')}<Text style={{ fontFamily: fonts.bodyBold }}>{t('coach.publie_immediatement')}</Text>{t('coach.notice_admin_b')}</>
             ) : (
-              <>Le programme est envoyé à l’admin. Une fois accepté, il devient <Text style={{ fontFamily: fonts.bodyBold }}>visible par {audience === 'ALL' ? 'tous les adhérents' : 'l’adhérent choisi'}</Text>.</>
+              <>{t('coach.notice_coach_a')}<Text style={{ fontFamily: fonts.bodyBold }}>{t('coach.visible_par', { v1: audience === 'ALL' ? t('coach.tous_les_adherents_2') : t('coach.ladherent_choisi') })}</Text>{t('coach.notice_coach_b')}</>
             )}
           </Text>
         </View>
@@ -236,9 +240,9 @@ export default function CoachProgramNewScreen() {
         <View style={[styles.summary, cardShadow]}>
           <Text style={styles.summaryValue}>
             {totalSets}
-            <Text style={styles.summaryUnit}> séries</Text>
+            <Text style={styles.summaryUnit}>{t('common.series_2')}</Text>
           </Text>
-          <Text style={styles.summaryMeta}>{exercises.length} exercice{exercises.length > 1 ? 's' : ''} · ~{estimateMinutes(totalSets)} min</Text>
+          <Text style={styles.summaryMeta}>{t('coach.exercice_min', { length: exercises.length, v2: exercises.length > 1 ? 's' : '', v4: estimateMinutes(totalSets) })}</Text>
         </View>
 
         <View style={{ gap: 12 }}>
@@ -265,7 +269,7 @@ export default function CoachProgramNewScreen() {
             onPress={() => router.push({ pathname: '/(coach)/exercises', params: { pickFor: '0', returnTo: 'builder' } })}
           >
             <MaterialIcons name="add" size={22} color={colors.primaryInk} />
-            <Text style={styles.addExerciseText}>Ajouter un exercice</Text>
+            <Text style={styles.addExerciseText}>{t('common.ajouter_un_exercice')}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -278,7 +282,7 @@ export default function CoachProgramNewScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name={isAdmin ? 'check' : 'send'} size={22} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{assignProgram.isPending ? (isAdmin ? 'Publication…' : 'Envoi…') : isAdmin ? 'Publier le programme' : 'Soumettre à validation'}</Text>
+            <Text style={styles.ctaText}>{assignProgram.isPending ? (isAdmin ? t('common.publication') : t('common.envoi')) : isAdmin ? t('coach.publier_le_programme') : t('coach.soumettre_a_validation')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

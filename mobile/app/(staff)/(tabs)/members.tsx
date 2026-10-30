@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { router } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -13,14 +13,16 @@ import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefres
 import { FilterDropdown, ScreenTitle } from '../../../src/components/ui';
 import { InitialsAvatar, StatusTag, membershipBadge } from '../../../src/components/staff/staffUi';
 import type { MemberSearchResult } from '../../../src/hooks/useStaff';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../src/i18n';
 
 type StatusFilter = 'all' | 'active' | 'expiring' | 'expired' | 'none';
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: 'all', label: 'Tous' },
-  { value: 'active', label: 'Actifs' },
-  { value: 'expiring', label: 'Expirent bientôt' },
-  { value: 'expired', label: 'Expirés' },
-  { value: 'none', label: 'Sans abonnement' },
+  { value: 'all', get label() { return i18n.t('common.tous'); } },
+  { value: 'active', get label() { return i18n.t('staff.actifs'); } },
+  { value: 'expiring', get label() { return i18n.t('staff.expirent_bientot'); } },
+  { value: 'expired', get label() { return i18n.t('staff.expires'); } },
+  { value: 'none', get label() { return i18n.t('staff.sans_abonnement'); } },
 ];
 
 /** Statut d'abonnement d'un adhérent à partir de son dernier abonnement. */
@@ -36,12 +38,18 @@ function membershipState(m: MemberSearchResult): StatusFilter {
 
 /** Adhérents (accueil) : recherche, liste, ouverture de la fiche, création de compte. */
 export default function StaffMembersScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [query, setQuery] = useState('');
-  const [status, setStatus] = useState<StatusFilter>('all');
+  const { status: initialStatus } = useLocalSearchParams<{ status?: StatusFilter }>();
+  const [status, setStatus] = useState<StatusFilter>(initialStatus ?? 'all');
+  // Arrivée depuis un raccourci (ex. carte « Adhérents actifs ») : le filtre suit le paramètre.
+  useEffect(() => {
+    if (initialStatus) setStatus(initialStatus);
+  }, [initialStatus]);
   const [plan, setPlan] = useState<string | null>(null);
   const { data: members, refetch } = useMembers(query.trim());
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
@@ -80,11 +88,11 @@ export default function StaffMembersScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
         <ScreenTitle
-          title="Adhérents"
-          subtitle="Rechercher, consulter, créer un compte"
+          title={t('common.adherents')}
+          subtitle={t('staff.rechercher_consulter_creer_un_compte')}
           right={
             <Pressable
-              accessibilityLabel="Créer un compte"
+              accessibilityLabel={t('common.creer_un_compte')}
               onPress={() => router.push(routes.memberCreate)}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -98,7 +106,7 @@ export default function StaffMembersScreen() {
           <MaterialIcons name="search" size={24} color={colors.muted} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Rechercher un adhérent…"
+            placeholder={t('staff.rechercher_un_adherent')}
             placeholderTextColor={colors.muted}
             value={query}
             onChangeText={setQuery}
@@ -107,7 +115,7 @@ export default function StaffMembersScreen() {
         </View>
         <View style={styles.filterRow}>
           <FilterDropdown
-            title="Statut"
+            title={t('staff.statut')}
             icon="verified-user"
             value={status}
             options={STATUS_FILTERS.map((f) => ({ value: f.value, label: f.label, count: counts[f.value] }))}
@@ -115,18 +123,16 @@ export default function StaffMembersScreen() {
           />
           {plans.length > 1 ? (
             <FilterDropdown<string | null>
-              title="Formule"
+              title={t('staff.formule')}
               icon="card-membership"
               value={activePlan}
-              options={[{ value: null, label: 'Toutes les formules' }, ...plans.map((p) => ({ value: p, label: p }))]}
+              options={[{ value: null, label: t('staff.toutes_les_formules') }, ...plans.map((p) => ({ value: p, label: p }))]}
               onChange={setPlan}
             />
           ) : null}
         </View>
         <View style={styles.resultRow}>
-          <Text style={styles.resultText}>
-            {filtered.length} adhérent{filtered.length > 1 ? 's' : ''}
-          </Text>
+          <Text style={styles.resultText}>{t('staff.adherent', { length: filtered.length, v3: filtered.length > 1 ? 's' : '' })}</Text>
           {status !== 'all' || activePlan ? (
             <Pressable
               onPress={() => {
@@ -137,7 +143,7 @@ export default function StaffMembersScreen() {
               style={styles.reset}
             >
               <MaterialIcons name="close" size={16} color={colors.primaryInk} />
-              <Text style={styles.resetText}>Réinitialiser</Text>
+              <Text style={styles.resetText}>{t('staff.reinitialiser')}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -171,7 +177,7 @@ export default function StaffMembersScreen() {
               </View>
               <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
                 <Text style={styles.name} numberOfLines={1}>{item.firstName} {item.lastName}</Text>
-                <Text style={styles.plan} numberOfLines={1}>{last?.plan.name ?? 'Aucun abonnement'}</Text>
+                <Text style={styles.plan} numberOfLines={1}>{last?.plan.name ?? t('common.aucun_abonnement')}</Text>
                 <View style={styles.contactRow}>
                   <MaterialIcons name={item.phone ? 'call' : 'mail-outline'} size={13} color={colors.muted} />
                   <Text style={styles.meta} numberOfLines={1}>{item.phone ?? item.email ?? '—'}</Text>
@@ -179,7 +185,7 @@ export default function StaffMembersScreen() {
               </View>
               <View style={{ alignItems: 'flex-end', gap: 6 }}>
                 <StatusTag {...badge} />
-                {daysLeft !== null ? <Text style={styles.daysLeft}>{daysLeft} j restants</Text> : null}
+                {daysLeft !== null ? <Text style={styles.daysLeft}>{t('staff.j_restants', { daysLeft })}</Text> : null}
               </View>
             </Pressable>
           );
@@ -187,7 +193,7 @@ export default function StaffMembersScreen() {
         ListEmptyComponent={
           <View style={[styles.empty, cardShadow]}>
             <MaterialIcons name="person-search" size={34} color={colors.primaryInk} />
-            <Text style={styles.emptyText}>Aucun adhérent ne correspond à ces filtres.</Text>
+            <Text style={styles.emptyText}>{t('staff.aucun_adherent_ne_correspond_a')}</Text>
           </View>
         }
       />

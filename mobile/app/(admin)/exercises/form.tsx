@@ -11,16 +11,20 @@ import { SelectField } from '../../../src/components/ui/SelectField';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../../src/components/ui/StickyActionBar';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { useAdminExercise, useAdminExercises, useSaveExercise } from '../../../src/hooks/useAdmin';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../src/i18n';
+import { levelLabel } from '../../../src/i18n/labels';
 
 const LEVELS = ['Débutant', 'Intermédiaire', 'Avancé'];
 const TYPES = [
-  { value: 'STRENGTH', label: 'Force' },
-  { value: 'CARDIO', label: 'Cardio' },
-  { value: 'MOBILITY', label: 'Mobilité' },
+  { value: 'STRENGTH', get label() { return i18n.t('admin.force'); } },
+  { value: 'CARDIO', get label() { return i18n.t('common.cardio'); } },
+  { value: 'MOBILITY', get label() { return i18n.t('admin.mobilite'); } },
 ] as const;
 
 /** Création / modification d'un exercice de la bibliothèque. */
 export default function AdminExerciseFormScreen() {
+  useTranslation();
   const { id, group } = useLocalSearchParams<{ id?: string; group?: string }>();
   const editing = !!id;
   const { colors } = useTheme();
@@ -45,7 +49,7 @@ export default function AdminExerciseFormScreen() {
     setName(existing.name);
     setMuscleGroup(existing.muscleGroup);
     setEquipment(existing.equipment);
-    setLevel(existing.level ?? 'Débutant');
+    setLevel(existing.level ?? i18n.t('admin.debutant'));
     setType(existing.type);
     setInstructions(existing.instructions ?? '');
     setHydrated(true);
@@ -61,7 +65,7 @@ export default function AdminExerciseFormScreen() {
     setError(null);
     save.mutate(
       { id, name: name.trim(), muscleGroup: muscleGroup ?? undefined, equipment: equipment ?? undefined, level, type, instructions: instructions.trim() || undefined },
-      { onSuccess: goBack, onError: () => setError('Impossible d’enregistrer l’exercice. Réessayez.') },
+      { onSuccess: goBack, onError: () => setError(i18n.t('admin.impossible_denregistrer_lexercice_reessayez')) },
     );
   };
 
@@ -70,23 +74,23 @@ export default function AdminExerciseFormScreen() {
       <ScrollView contentContainerStyle={[styles.container, { paddingBottom: STICKY_BAR_SPACE + 30 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Retour</Text>
+          <Text style={styles.backText}>{i18n.t('common.retour')}</Text>
         </Pressable>
-        <ScreenTitle title={editing ? 'Modifier l’exercice' : 'Nouvel exercice'} subtitle="Bibliothèque d’exercices" />
+        <ScreenTitle title={editing ? i18n.t('admin.modifier_lexercice') : i18n.t('admin.nouvel_exercice')} subtitle={i18n.t('admin.bibliotheque_dexercices_2')} />
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-        <TextField label="Nom de l’exercice" value={name} onChangeText={setName} placeholder="Ex. Développé couché" autoCapitalize="sentences" />
+        <TextField label={i18n.t('admin.nom_de_lexercice')} value={name} onChangeText={setName} placeholder={i18n.t('admin.ex_developpe_couche')} autoCapitalize="sentences" />
 
         <SelectField
-          label="Groupe musculaire"
+          label={i18n.t('admin.groupe_musculaire')}
           icon="fitness-center"
-          placeholder="Choisir un groupe"
+          placeholder={i18n.t('admin.choisir_un_groupe')}
           value={muscleGroup}
           options={groups.map((g) => ({ value: g, label: muscleGroupLabel(g) }))}
           onChange={setMuscleGroup}
           create={{
-            label: 'Nouveau groupe musculaire',
-            placeholder: 'Ex. Épaules',
+            label: i18n.t('admin.nouveau_groupe_musculaire'),
+            placeholder: i18n.t('admin.ex_epaules'),
             submit: async (n) => {
               setExtraGroups((cur) => [...cur, n]);
               return n;
@@ -94,15 +98,15 @@ export default function AdminExerciseFormScreen() {
           }}
         />
         <SelectField
-          label="Équipement"
+          label={i18n.t('common.equipement')}
           icon="construction"
-          placeholder="Aucun / poids du corps"
+          placeholder={i18n.t('admin.aucun_poids_du_corps')}
           value={equipment}
-          options={[{ value: null, label: 'Aucun / poids du corps' }, ...equipments.map((e) => ({ value: e, label: e }))]}
+          options={[{ value: null, label: i18n.t('admin.aucun_poids_du_corps') }, ...equipments.map((e) => ({ value: e, label: e }))]}
           onChange={setEquipment}
           create={{
-            label: 'Nouvel équipement',
-            placeholder: 'Ex. Kettlebell',
+            label: i18n.t('admin.nouvel_equipement'),
+            placeholder: i18n.t('admin.ex_kettlebell'),
             submit: async (n) => {
               setExtraEquip((cur) => [...cur, n]);
               return n;
@@ -110,16 +114,16 @@ export default function AdminExerciseFormScreen() {
           }}
         />
 
-        <Text style={styles.label}>Niveau</Text>
+        <Text style={styles.label}>{i18n.t('common.niveau')}</Text>
         <View style={styles.chips}>
           {LEVELS.map((l) => (
             <Pressable key={l} onPress={() => setLevel(l)} style={[styles.chip, level === l && styles.chipOn]}>
-              <Text style={[styles.chipText, level === l && { color: colors.primaryContrast }]}>{l}</Text>
+              <Text style={[styles.chipText, level === l && { color: colors.primaryContrast }]}>{levelLabel(l)}</Text>
             </Pressable>
           ))}
         </View>
 
-        <Text style={styles.label}>Type</Text>
+        <Text style={styles.label}>{i18n.t('admin.type')}</Text>
         <View style={styles.chips}>
           {TYPES.map((t) => (
             <Pressable key={t.value} onPress={() => setType(t.value)} style={[styles.chip, type === t.value && styles.chipOn]}>
@@ -129,15 +133,15 @@ export default function AdminExerciseFormScreen() {
         </View>
 
         <TextField
-          label="Exécution (une étape par ligne)"
+          label={i18n.t('admin.execution_une_etape_par_ligne')}
           value={instructions}
           onChangeText={setInstructions}
-          placeholder={'Allongez-vous sur le banc.\nDescendez la barre jusqu’à la poitrine.\nPoussez sans verrouiller les coudes.'}
+          placeholder={i18n.t('admin.allongez_vous_sur_le_banc')}
           multiline
           style={{ minHeight: 120, textAlignVertical: 'top' }}
         />
       </ScrollView>
-      <StickyActionBar visible label={editing ? 'Enregistrer' : 'Ajouter l’exercice'} loading={save.isPending} disabled={!valid} onPress={submit} />
+      <StickyActionBar visible label={editing ? i18n.t('member.enregistrer') : i18n.t('admin.ajouter_lexercice')} loading={save.isPending} disabled={!valid} onPress={submit} />
     </SafeAreaView>
   );
 }

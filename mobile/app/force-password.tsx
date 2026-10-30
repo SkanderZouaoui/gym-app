@@ -15,6 +15,8 @@ import { rootRouteForRole } from '../src/navigation/roleRoutes';
 import { tokenStorage } from '../src/api/storage';
 import { authApi } from '../src/api/endpoints';
 import { ApiError } from '../src/api/client';
+import { useTranslation } from 'react-i18next';
+import i18n from '../src/i18n';
 
 function strength(pwd: string): { score: number; label: string } {
   let score = 0;
@@ -22,12 +24,12 @@ function strength(pwd: string): { score: number; label: string } {
   if (pwd.length >= 12) score++;
   if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
   if (/\d/.test(pwd) && /[^A-Za-z0-9]|[A-Za-z]/.test(pwd)) score++;
-  const labels = ['Trop court', 'Faible', 'Correct', 'Bon', 'Excellent'];
-  return { score, label: labels[score] };
+  return { score, label: i18n.t(`common.strength_${score}`) };
 }
 
 /** Première connexion avec un mot de passe provisoire : choix obligatoire d'un mot de passe personnel. */
 export default function ForcePasswordScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const user = useSessionStore((s) => s.user);
@@ -62,11 +64,11 @@ export default function ForcePasswordScreen() {
           }
         },
         onError: (e) => {
-          if (!(e instanceof ApiError)) return setError('Connexion impossible. Vérifiez votre réseau puis réessayez.');
-          if (e.code === 'INVALID_PASSWORD') setError('Le mot de passe provisoire est incorrect. Vérifiez celui qui vous a été remis.');
-          else if (e.code === 'PASSWORD_UNCHANGED') setError('Le nouveau mot de passe doit être différent du mot de passe provisoire.');
-          else if (e.status === 400) setError('Le nouveau mot de passe doit contenir au moins 8 caractères.');
-          else setError('Impossible de modifier le mot de passe pour le moment. Réessayez.');
+          if (!(e instanceof ApiError)) return setError(t('common.connexion_impossible_verifiez_votre_reseau'));
+          if (e.code === 'INVALID_PASSWORD') setError(t('common.le_mot_de_passe_provisoire'));
+          else if (e.code === 'PASSWORD_UNCHANGED') setError(t('common.le_nouveau_mot_de_passe'));
+          else if (e.status === 400) setError(t('common.le_nouveau_mot_de_passe_2'));
+          else setError(t('common.impossible_de_modifier_le_mot'));
         },
       },
     );
@@ -88,24 +90,22 @@ export default function ForcePasswordScreen() {
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroIcon}>
               <MaterialIcons name="lock-reset" size={38} color="#FFFFFF" />
             </LinearGradient>
-            <Text style={styles.eyebrow}>PREMIÈRE CONNEXION</Text>
-            <Text style={styles.title}>Bienvenue{user ? `, ${user.firstName}` : ''} !</Text>
-            <Text style={styles.sub}>
-              Pour sécuriser votre compte, remplacez le mot de passe provisoire par un mot de passe que vous seul connaissez.
-            </Text>
+            <Text style={styles.eyebrow}>{t('common.premiere_connexion')}</Text>
+            <Text style={styles.title}>{t('common.bienvenue', { v1: user ? `, ${user.firstName}` : '' })}</Text>
+            <Text style={styles.sub}>{t('common.pour_securiser_votre_compte_remplacez')}</Text>
           </View>
 
           {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
           <View style={[styles.card, cardShadow]}>
-            <TextField label="Mot de passe provisoire" value={current} onChangeText={setCurrent} isPassword autoCapitalize="none" />
+            <TextField label={t('common.mot_de_passe_provisoire')} value={current} onChangeText={setCurrent} isPassword autoCapitalize="none" />
             <TextField
-              label="Nouveau mot de passe"
+              label={t('common.nouveau_mot_de_passe')}
               value={next}
               onChangeText={setNext}
               isPassword
               autoCapitalize="none"
-              error={sameAsCurrent ? 'Doit être différent du mot de passe provisoire' : undefined}
+              error={sameAsCurrent ? t('common.doit_etre_different_du_mot') : undefined}
             />
             {next.length > 0 ? (
               <View style={{ gap: 6 }}>
@@ -114,23 +114,23 @@ export default function ForcePasswordScreen() {
                     <View key={i} style={[styles.bar, { backgroundColor: i < st.score ? barColors[st.score] : colors.surface2 }]} />
                   ))}
                 </View>
-                <Text style={styles.strengthText}>Sécurité : {st.label}</Text>
+                <Text style={styles.strengthText}>{t('common.securite', { label: st.label })}</Text>
               </View>
             ) : null}
             <TextField
-              label="Confirmer le mot de passe"
+              label={t('common.confirmer_le_mot_de_passe')}
               value={confirm}
               onChangeText={setConfirm}
               isPassword
               autoCapitalize="none"
-              error={mismatch ? 'Les mots de passe ne correspondent pas' : undefined}
+              error={mismatch ? t('common.les_mots_de_passe_ne') : undefined}
             />
           </View>
 
           <View style={styles.rules}>
-            <Rule ok={next.length >= 8} text="8 caractères minimum" />
-            <Rule ok={/[A-Z]/.test(next) && /[a-z]/.test(next)} text="Majuscules et minuscules (conseillé)" />
-            <Rule ok={/\d/.test(next)} text="Au moins un chiffre (conseillé)" />
+            <Rule ok={next.length >= 8} text={t('common.8_caracteres_minimum')} />
+            <Rule ok={/[A-Z]/.test(next) && /[a-z]/.test(next)} text={t('common.majuscules_et_minuscules_conseille')} />
+            <Rule ok={/\d/.test(next)} text={t('common.au_moins_un_chiffre_conseille')} />
           </View>
 
           <Pressable
@@ -139,11 +139,11 @@ export default function ForcePasswordScreen() {
             style={({ pressed }) => [styles.ctaShadow, (!valid || changePassword.isPending) && { opacity: 0.5 }, pressed && { transform: [{ scale: 0.98 }] }]}
           >
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
-              <Text style={styles.ctaText}>{changePassword.isPending ? 'Enregistrement…' : 'Enregistrer et continuer'}</Text>
+              <Text style={styles.ctaText}>{changePassword.isPending ? t('common.enregistrement') : t('common.enregistrer_et_continuer')}</Text>
             </LinearGradient>
           </Pressable>
           <Pressable onPress={logout} style={styles.logout}>
-            <Text style={styles.logoutText}>Se déconnecter</Text>
+            <Text style={styles.logoutText}>{t('common.se_deconnecter')}</Text>
           </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>

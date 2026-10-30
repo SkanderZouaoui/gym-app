@@ -16,6 +16,8 @@ import { InitialsAvatar, StatusTag } from '../../src/components/staff/staffUi';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useCoachDetails, useCreateTeamMember, useDeleteTeamMember, resetTeamPassword, useSaveWorkSchedule, useTeam, useTeamStats, useUpdateTeamMember, useWorkSchedule, shiftHours, WEEK_DAYS, type TeamMember, type WorkDay } from '../../src/hooks/useAdmin';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../src/i18n';
 
 function generatePassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
@@ -24,6 +26,7 @@ function generatePassword(): string {
 
 /** Équipe (admin) : comptes accueil et coachs, créés et gérés par l'admin — FitZone Mobile Admin v2. */
 export default function AdminTeamScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: team, refetch } = useTeam();
@@ -58,7 +61,7 @@ export default function AdminTeamScreen() {
   const all = (team ?? []).filter((u) => hasRole(u, 'STAFF') || hasRole(u, 'COACH'));
   const staff = all.filter((u) => filter === 'ALL' || hasRole(u, filter));
   const counts = { ALL: all.length, STAFF: all.filter((u) => hasRole(u, 'STAFF')).length, COACH: all.filter((u) => hasRole(u, 'COACH')).length };
-  const roleLabel = (r: 'STAFF' | 'COACH') => (r === 'COACH' ? 'Coach' : 'Accueil');
+  const roleLabel = (r: 'STAFF' | 'COACH') => (r === 'COACH' ? t('common.coach') : t('common.accueil'));
   const valid = firstName.trim() && lastName.trim() && /\S+@\S+\.\S+/.test(email);
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'));
 
@@ -84,10 +87,10 @@ export default function AdminTeamScreen() {
         onError: (e) =>
           setError(
             e instanceof ApiError && e.code === 'EMAIL_ALREADY_USED'
-              ? 'Cette adresse e-mail est déjà utilisée par un autre compte.'
+              ? t('admin.cette_adresse_e_mail_est')
               : e instanceof ApiError && e.code === 'PHONE_ALREADY_USED'
-                ? 'Ce numéro de téléphone est déjà utilisé par un autre compte.'
-                : 'Impossible de créer le compte. Vérifiez les informations.',
+                ? t('common.ce_numero_de_telephone_est')
+                : t('admin.impossible_de_creer_le_compte'),
           ),
       },
     );
@@ -98,14 +101,14 @@ export default function AdminTeamScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Plus</Text>
+          <Text style={styles.backText}>{t('common.plus')}</Text>
         </Pressable>
         <ScreenTitle
-          title="Équipe"
-          subtitle="Accueil et coachs, comptes gérés par l’admin"
+          title={t('admin.equipe')}
+          subtitle={t('admin.accueil_et_coachs_comptes_geres')}
           right={
             <Pressable
-              accessibilityLabel="Créer un compte"
+              accessibilityLabel={t('common.creer_un_compte')}
               onPress={() => setFormOpen(true)}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -117,9 +120,9 @@ export default function AdminTeamScreen() {
         />
 
         <View style={styles.filterRow}>
-          {([['ALL', 'Tous'], ['STAFF', 'Accueil'], ['COACH', 'Coachs']] as const).map(([k, l]) => (
+          {(['ALL', 'STAFF', 'COACH'] as const).map((k) => (
             <Pressable key={k} onPress={() => setFilter(k)} style={[styles.filterChip, filter === k && styles.filterChipOn]}>
-              <Text style={[styles.filterText, filter === k && { color: colors.primaryContrast }]}>{l} · {counts[k]}</Text>
+              <Text style={[styles.filterText, filter === k && { color: colors.primaryContrast }]}>{t(`admin.team_filter_${k}`)} · {counts[k]}</Text>
             </Pressable>
           ))}
         </View>
@@ -133,13 +136,13 @@ export default function AdminTeamScreen() {
                   <InitialsAvatar first={u.firstName} last={u.lastName} />
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.name} numberOfLines={1}>{u.firstName} {u.lastName}</Text>
-                    <View style={styles.inlineMeta}><MaterialIcons name={hasRole(u, 'COACH') ? 'sports-gymnastics' : 'badge'} size={14} color={colors.primaryInk} /><Text style={styles.meta} numberOfLines={1}>{hasRole(u, 'COACH') ? 'Coach' : 'Accueil'} · {u.email ?? u.phone ?? '—'}</Text></View>
+                    <View style={styles.inlineMeta}><MaterialIcons name={hasRole(u, 'COACH') ? 'sports-gymnastics' : 'badge'} size={14} color={colors.primaryInk} /><Text style={styles.meta} numberOfLines={1}>{hasRole(u, 'COACH') ? t('common.coach') : t('common.accueil')} · {u.email ?? u.phone ?? '—'}</Text></View>
                   </View>
-                  <StatusTag label={active ? 'Actif' : 'Suspendu'} tone={active ? 'success' : 'muted'} />
+                  <StatusTag label={active ? t('home.statusActive') : t('staff.suspendu')} tone={active ? 'success' : 'muted'} />
                   <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
                 </Pressable>
                 <View style={styles.switchRow}>
-                  <Text style={styles.switchLabel}>Compte actif</Text>
+                  <Text style={styles.switchLabel}>{t('common.compte_actif')}</Text>
                   <Switch
                     value={active}
                     onValueChange={(v) => update.mutate({ id: u.id, status: v ? 'ACTIVE' : 'SUSPENDED' })}
@@ -154,7 +157,7 @@ export default function AdminTeamScreen() {
           {staff.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="badge" size={34} color={colors.primaryInk} />
-              <Text style={styles.emptyText}>Aucun compte pour le moment. Créez le premier avec le bouton +.</Text>
+              <Text style={styles.emptyText}>{t('admin.aucun_compte_pour_le_moment')}</Text>
             </View>
           ) : null}
         </View>
@@ -169,19 +172,19 @@ export default function AdminTeamScreen() {
                 <Text style={styles.sheetTitle} numberOfLines={1}>{detail.firstName} {detail.lastName}</Text>
                 <View style={styles.inlineMeta}>
                   <MaterialIcons name={hasRole(detail, 'COACH') ? 'sports-gymnastics' : 'badge'} size={14} color={colors.primaryInk} />
-                  <Text style={styles.meta}>{hasRole(detail, 'COACH') ? 'Coach' : 'Accueil'}</Text>
+                  <Text style={styles.meta}>{hasRole(detail, 'COACH') ? t('common.coach') : t('common.accueil')}</Text>
                 </View>
               </View>
-              <StatusTag label={detail.status === 'ACTIVE' ? 'Actif' : 'Suspendu'} tone={detail.status === 'ACTIVE' ? 'success' : 'muted'} />
+              <StatusTag label={detail.status === 'ACTIVE' ? t('home.statusActive') : t('staff.suspendu')} tone={detail.status === 'ACTIVE' ? 'success' : 'muted'} />
             </View>
             <View style={styles.detailBox}>
               {[
-                { icon: 'mail-outline' as const, k: 'E-mail', v: detail.email ?? '—' },
-                { icon: 'call' as const, k: 'Téléphone', v: detail.phone ?? '—' },
-                { icon: 'event' as const, k: 'Compte créé le', v: new Date(detail.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) },
-                ...(hasRole(detail, 'COACH') && coachInfo?.specialties?.length ? [{ icon: 'fitness-center' as const, k: 'Spécialités', v: coachInfo.specialties.join(', ') }] : []),
-                ...(hasRole(detail, 'COACH') && coachInfo?.yearsExperience != null ? [{ icon: 'workspace-premium' as const, k: 'Expérience', v: `${coachInfo.yearsExperience} an${coachInfo.yearsExperience > 1 ? 's' : ''}` }] : []),
-                ...(hasRole(detail, 'COACH') && coachInfo?.bio ? [{ icon: 'notes' as const, k: 'Présentation', v: coachInfo.bio }] : []),
+                { icon: 'mail-outline' as const, k: t('common.e_mail'), v: detail.email ?? '—' },
+                { icon: 'call' as const, k: t('common.telephone'), v: detail.phone ?? '—' },
+                { icon: 'event' as const, k: t('admin.compte_cree_le'), v: new Date(detail.createdAt).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' }) },
+                ...(hasRole(detail, 'COACH') && coachInfo?.specialties?.length ? [{ icon: 'fitness-center' as const, k: t('common.specialites'), v: coachInfo.specialties.join(', ') }] : []),
+                ...(hasRole(detail, 'COACH') && coachInfo?.yearsExperience != null ? [{ icon: 'workspace-premium' as const, k: t('admin.experience'), v: `${coachInfo.yearsExperience} an${coachInfo.yearsExperience > 1 ? 's' : ''}` }] : []),
+                ...(hasRole(detail, 'COACH') && coachInfo?.bio ? [{ icon: 'notes' as const, k: t('admin.presentation'), v: coachInfo.bio }] : []),
               ].map((r, i, arr) => (
                 <View key={r.k} style={[styles.detailRow, i < arr.length - 1 && styles.detailRowBorder]}>
                   <MaterialIcons name={r.icon} size={20} color={colors.primaryInk} />
@@ -196,18 +199,18 @@ export default function AdminTeamScreen() {
             <Pressable style={styles.scheduleRow} onPress={() => { setDraft(schedule ?? null); setScheduleError(null); setScheduleOpen(true); }}>
               <MaterialIcons name="calendar-month" size={22} color={colors.primaryInk} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.detailValue}>Planning de travail</Text>
+                <Text style={styles.detailValue}>{t('admin.planning_de_travail')}</Text>
                 <Text style={styles.detailKey}>
                   {schedule && schedule.some((d) => d.working)
-                    ? `${schedule.filter((d) => d.working).length} jours · ${Math.round(schedule.reduce((s2, d) => s2 + shiftHours(d), 0) * 10) / 10} h / semaine`
-                    : 'Non défini'}
+                    ? t('admin.jours_h_semaine', { length: schedule.filter((d) => d.working).length, v1: Math.round(schedule.reduce((s2, d) => s2 + shiftHours(d), 0) * 10) / 10 })
+                    : t('admin.non_defini')}
                 </Text>
               </View>
               <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
             </Pressable>
-            <Button label="Plus d’informations" onPress={() => setStatsOpen(true)} />
+            <Button label={t('admin.plus_dinformations')} onPress={() => setStatsOpen(true)} />
             <ResetPasswordButton name={`${detail.firstName} ${detail.lastName}`} email={detail.email} reset={() => resetTeamPassword(detail.id)} />
-            <Button label="Supprimer ce compte" variant="outline" onPress={() => setConfirmDelete(true)} />
+            <Button label={t('admin.supprimer_ce_compte')} variant="outline" onPress={() => setConfirmDelete(true)} />
           </View>
         ) : null}
       </BottomSheet>
@@ -220,8 +223,8 @@ export default function AdminTeamScreen() {
                 <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
               </Pressable>
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={styles.sheetTitle} numberOfLines={1}>Planning · {detail.firstName} {detail.lastName}</Text>
-                <Text style={styles.meta}>Semaine type, répétée chaque semaine</Text>
+                <Text style={styles.sheetTitle} numberOfLines={1}>{t('admin.planning_2', { firstName: detail.firstName, lastName: detail.lastName })}</Text>
+                <Text style={styles.meta}>{t('admin.semaine_type_repetee_chaque_semaine')}</Text>
               </View>
             </View>
             {scheduleError ? <Banner tone="danger" icon="error" text={scheduleError} /> : null}
@@ -229,7 +232,7 @@ export default function AdminTeamScreen() {
               <View key={d.dayOfWeek} style={styles.shiftRow}>
                 <View style={{ width: 84 }}>
                   <Text style={styles.detailValue}>{WEEK_DAYS[d.dayOfWeek]}</Text>
-                  <Text style={[styles.detailKey, { color: d.working ? colors.successInk : colors.muted }]}>{d.working ? `${shiftHours(d)} h` : 'Repos'}</Text>
+                  <Text style={[styles.detailKey, { color: d.working ? colors.successInk : colors.muted }]}>{d.working ? `${shiftHours(d)} h` : t('admin.repos')}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
                   <TimeButton value={d.startTime} disabled={!d.working} onChange={(v) => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek === d.dayOfWeek ? { ...x, startTime: v } : x)))} />
@@ -252,10 +255,10 @@ export default function AdminTeamScreen() {
               onPress={() => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek >= 1 && x.dayOfWeek <= 4 ? { ...cur[0], dayOfWeek: x.dayOfWeek } : x)))}
             >
               <MaterialIcons name="content-copy" size={16} color={colors.primaryInk} />
-              <Text style={styles.copyChipText}>Copier le lundi sur mardi – vendredi</Text>
+              <Text style={styles.copyChipText}>{t('admin.copier_le_lundi_sur_mardi_2')}</Text>
             </Pressable>
             <Button
-              label={saveSchedule.isPending ? 'Enregistrement…' : 'Enregistrer le planning'}
+              label={saveSchedule.isPending ? t('common.enregistrement') : t('admin.enregistrer_le_planning')}
               disabled={!draft || saveSchedule.isPending}
               onPress={() =>
                 detail &&
@@ -264,7 +267,7 @@ export default function AdminTeamScreen() {
                   { id: detail.id, days: draft },
                   {
                     onSuccess: () => setScheduleOpen(false),
-                    onError: (e) => setScheduleError(e instanceof ApiError && e.code === 'SHIFT_END_BEFORE_START' ? 'L’heure de fin doit être après l’heure de début.' : 'Enregistrement impossible. Réessayez.'),
+                    onError: (e) => setScheduleError(e instanceof ApiError && e.code === 'SHIFT_END_BEFORE_START' ? t('admin.lheure_de_fin_doit_etre') : t('admin.enregistrement_impossible_reessayez')),
                   },
                 )
               }
@@ -281,31 +284,31 @@ export default function AdminTeamScreen() {
                 <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
               </Pressable>
               <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={styles.sheetTitle} numberOfLines={1}>Activité · {detail.firstName} {detail.lastName}</Text>
-                <Text style={styles.meta}>{hasRole(detail, 'COACH') ? 'Coach' : 'Accueil'}</Text>
+                <Text style={styles.sheetTitle} numberOfLines={1}>{t('admin.activite_2', { firstName: detail.firstName, lastName: detail.lastName })}</Text>
+                <Text style={styles.meta}>{hasRole(detail, 'COACH') ? t('common.coach') : t('common.accueil')}</Text>
               </View>
             </View>
 
             <View style={styles.filterRow}>
               {[7, 30, 90].map((d) => (
                 <Pressable key={d} onPress={() => setPeriod(d)} style={[styles.filterChip, period === d && styles.filterChipOn]}>
-                  <Text style={[styles.filterText, period === d && { color: colors.primaryContrast }]}>{d} jours</Text>
+                  <Text style={[styles.filterText, period === d && { color: colors.primaryContrast }]}>{t('admin.jours', { d })}</Text>
                 </Pressable>
               ))}
             </View>
 
-            {statsLoading ? <Text style={styles.meta}>Chargement…</Text> : null}
+            {statsLoading ? <Text style={styles.meta}>{t('admin.chargement')}</Text> : null}
 
             {stats?.staff ? (
               <>
-                <Text style={styles.statsGroup}>Accueil</Text>
+                <Text style={styles.statsGroup}>{t('common.accueil')}</Text>
                 <View style={styles.statGrid}>
                   {[
-                    { icon: 'qr-code-scanner' as const, v: String(stats.staff.scans), l: 'Scans', sub: `${stats.staff.scansGranted} validés` },
-                    { icon: 'payments' as const, v: `${Math.round(stats.staff.paymentsTotal).toLocaleString('fr-FR')} DT`, l: 'Encaissé', sub: `${stats.staff.payments} encaissement${stats.staff.payments > 1 ? 's' : ''}` },
-                    { icon: 'person-add' as const, v: String(stats.staff.accountsCreated), l: 'Comptes créés', sub: 'adhérents' },
-                    { icon: 'event-available' as const, v: String(stats.staff.daysWorked), l: 'Jours travaillés', sub: `sur ${period} jours` },
-                    { icon: 'schedule' as const, v: `${stats.staff.hours} h`, l: 'Heures', sub: `${stats.staff.avgHoursPerDay} h / jour` },
+                    { icon: 'qr-code-scanner' as const, v: String(stats.staff.scans), l: t('admin.scans'), sub: t('admin.valides', { scansGranted: stats.staff.scansGranted }) },
+                    { icon: 'payments' as const, v: `${Math.round(stats.staff.paymentsTotal).toLocaleString(dateLocale())} DT`, l: t('common.encaisse'), sub: `${stats.staff.payments} encaissement${stats.staff.payments > 1 ? 's' : ''}` },
+                    { icon: 'person-add' as const, v: String(stats.staff.accountsCreated), l: t('admin.comptes_crees'), sub: t('admin.adherents_2') },
+                    { icon: 'event-available' as const, v: String(stats.staff.daysWorked), l: t('admin.jours_travailles'), sub: t('admin.sur_jours', { period }) },
+                    { icon: 'schedule' as const, v: `${stats.staff.hours} h`, l: t('common.heures'), sub: t('admin.h_jour', { avgHoursPerDay: stats.staff.avgHoursPerDay }) },
                   ].map((c) => (
                     <View key={c.l} style={styles.statCell}>
                       <MaterialIcons name={c.icon} size={20} color={colors.primary} />
@@ -315,19 +318,19 @@ export default function AdminTeamScreen() {
                     </View>
                   ))}
                 </View>
-                <Text style={styles.statNote}>{stats.staff.source === 'planning' ? 'Jours et heures selon le planning de travail défini.' : 'Aucun planning défini : jours et heures estimés d’après l’activité (connexions, scans, encaissements).'}</Text>
+                <Text style={styles.statNote}>{stats.staff.source === 'planning' ? t('admin.jours_et_heures_selon_le') : t('admin.aucun_planning_defini_jours_et')}</Text>
               </>
             ) : null}
 
             {stats?.coach ? (
               <>
-                <Text style={styles.statsGroup}>Coaching</Text>
+                <Text style={styles.statsGroup}>{t('admin.coaching')}</Text>
                 <View style={styles.statGrid}>
                   {[
-                    { icon: 'fitness-center' as const, v: String(stats.coach.sessions), l: 'Cours assurés', sub: `${stats.coach.upcoming} à venir` },
-                    { icon: 'groups' as const, v: String(stats.coach.attendees), l: 'Participants', sub: 'présences validées' },
-                    { icon: 'event-available' as const, v: String(stats.coach.daysWorked), l: 'Jours travaillés', sub: stats.coach.plannedDays != null ? `${stats.coach.plannedDays} prévus au planning` : `sur ${period} jours` },
-                    { icon: 'schedule' as const, v: `${stats.coach.hours} h`, l: 'Heures de cours', sub: stats.coach.plannedHours != null ? `${stats.coach.plannedHours} h prévues` : `${stats.coach.avgHoursPerDay} h / jour` },
+                    { icon: 'fitness-center' as const, v: String(stats.coach.sessions), l: t('admin.cours_assures'), sub: t('admin.a_venir', { upcoming: stats.coach.upcoming }) },
+                    { icon: 'groups' as const, v: String(stats.coach.attendees), l: t('admin.participants'), sub: t('admin.presences_validees') },
+                    { icon: 'event-available' as const, v: String(stats.coach.daysWorked), l: t('admin.jours_travailles'), sub: stats.coach.plannedDays != null ? t('admin.prevus_au_planning', { plannedDays: stats.coach.plannedDays }) : t('admin.sur_jours', { period }) },
+                    { icon: 'schedule' as const, v: `${stats.coach.hours} h`, l: t('admin.heures_de_cours'), sub: stats.coach.plannedHours != null ? t('admin.h_prevues', { plannedHours: stats.coach.plannedHours }) : `${stats.coach.avgHoursPerDay} h / jour` },
                   ].map((c) => (
                     <View key={c.l} style={styles.statCell}>
                       <MaterialIcons name={c.icon} size={20} color={colors.primary} />
@@ -344,14 +347,11 @@ export default function AdminTeamScreen() {
       </BottomSheet>
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
-        <Text style={styles.sheetTitle}>Supprimer {detail?.firstName} {detail?.lastName} ?</Text>
-        <Text style={styles.sheetText}>
-          Le compte sera désactivé et la personne déconnectée immédiatement. Cette action est définitive.
-          {detail && hasRole(detail, 'COACH') ? ' Les cours déjà planifiés resteront sans coach tant que vous ne les réaffectez pas.' : ''}
-        </Text>
+        <Text style={styles.sheetTitle}>{t('admin.supprimer_3', { firstName: detail?.firstName, lastName: detail?.lastName })}</Text>
+        <Text style={styles.sheetText}>{t('admin.le_compte_sera_desactive_et', { v1: detail && hasRole(detail, 'COACH') ? t('admin.les_cours_deja_planifies_resteront') : '' })}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
-            label="Oui, supprimer"
+            label={t('admin.oui_supprimer')}
             variant="danger"
             loading={remove.isPending}
             onPress={() =>
@@ -363,46 +363,46 @@ export default function AdminTeamScreen() {
                 },
                 onError: (e) => {
                   setConfirmDelete(false);
-                  setDeleteError(e instanceof ApiError && e.code === 'CANNOT_DELETE_SELF' ? 'Vous ne pouvez pas supprimer votre propre compte.' : 'La suppression a échoué. Réessayez.');
+                  setDeleteError(e instanceof ApiError && e.code === 'CANNOT_DELETE_SELF' ? t('admin.vous_ne_pouvez_pas_supprimer') : t('admin.la_suppression_a_echoue_reessayez'));
                 },
               })
             }
           />
-          <Button label="Annuler" variant="outline" onPress={() => setConfirmDelete(false)} />
+          <Button label={t('common.annuler')} variant="outline" onPress={() => setConfirmDelete(false)} />
         </View>
       </BottomSheet>
 
       <BottomSheet visible={formOpen} onClose={() => setFormOpen(false)}>
-        <Text style={styles.sheetTitle}>Nouveau compte</Text>
+        <Text style={styles.sheetTitle}>{t('common.nouveau_compte')}</Text>
         <View style={styles.roleRow}>
-          {([['STAFF', 'Accueil', 'badge'], ['COACH', 'Coach', 'sports-gymnastics']] as const).map(([k, l, ic]) => (
+          {([['STAFF', 'badge'], ['COACH', 'sports-gymnastics']] as const).map(([k, ic]) => (
             <Pressable key={k} onPress={() => setRole(k)} style={[styles.roleCard, role === k && styles.roleCardOn]}>
               <MaterialIcons name={ic} size={22} color={role === k ? colors.primaryContrast : colors.primaryInk} />
-              <Text style={[styles.roleText, role === k && { color: colors.primaryContrast }]}>{l}</Text>
+              <Text style={[styles.roleText, role === k && { color: colors.primaryContrast }]}>{t(`admin.role_${k}`)}</Text>
             </Pressable>
           ))}
         </View>
-        <Text style={styles.sheetText}>Un mot de passe provisoire sera généré. Le changement sera exigé à la première connexion.</Text>
+        <Text style={styles.sheetText}>{t('admin.un_mot_de_passe_provisoire')}</Text>
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-        <TextField label="Prénom" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-        <TextField label="Nom" value={lastName} onChangeText={setLastName} autoCapitalize="words" />
-        <TextField label="E-mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-        <TextField label="Téléphone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="Optionnel" />
-        <Button label={create.isPending ? 'Création…' : 'Créer le compte'} onPress={submit} disabled={!valid || create.isPending} />
+        <TextField label={t('common.prenom')} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
+        <TextField label={t('common.nom')} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
+        <TextField label={t('common.e_mail')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
+        <TextField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder={t('common.optionnel')} />
+        <Button label={create.isPending ? t('common.creation') : t('admin.creer_le_compte')} onPress={submit} disabled={!valid || create.isPending} />
       </BottomSheet>
 
       <BottomSheet visible={!!created} onClose={() => setCreated(null)}>
-        <Text style={styles.sheetTitle}>Compte {created ? roleLabel(created.role).toLowerCase() : ''} créé · {created?.name}</Text>
-        <Text style={styles.sheetText}>Communiquez ces accès. Le mot de passe ne sera plus affiché.</Text>
+        <Text style={styles.sheetTitle}>{t('admin.compte_cree', { v1: created ? roleLabel(created.role).toLowerCase() : '', name: created?.name })}</Text>
+        <Text style={styles.sheetText}>{t('admin.communiquez_ces_acces_le_mot')}</Text>
         <View style={styles.credBox}>
-          <Text style={styles.credLabel}>E-mail</Text>
+          <Text style={styles.credLabel}>{t('common.e_mail')}</Text>
           <Text style={styles.credValue}>{created?.email}</Text>
-          <Text style={[styles.credLabel, { marginTop: 10 }]}>Mot de passe provisoire</Text>
+          <Text style={[styles.credLabel, { marginTop: 10 }]}>{t('common.mot_de_passe_provisoire')}</Text>
           <Text style={styles.credPassword} selectable>{created?.password}</Text>
         </View>
         <View style={{ gap: spacing.sm }}>
           <Button
-            label={copied ? 'Copié' : 'Copier le mot de passe'}
+            label={copied ? t('common.copie') : t('common.copier_le_mot_de_passe')}
             variant="outline"
             onPress={async () => {
               if (!created) return;
@@ -412,8 +412,8 @@ export default function AdminTeamScreen() {
             }}
           />
           <Button
-            label="Partager les accès"
-            onPress={() => created && Share.share({ message: `Compte MuscleUP ${roleLabel(created.role).toLowerCase()}\nE-mail : ${created.email}\nMot de passe provisoire : ${created.password}` })}
+            label={t('common.partager_les_acces')}
+            onPress={() => created && Share.share({ message: t('admin.compte_muscleup_e_mail_mot', { v0: roleLabel(created.role).toLowerCase(), email: created.email, password: created.password }) })}
           />
         </View>
       </BottomSheet>

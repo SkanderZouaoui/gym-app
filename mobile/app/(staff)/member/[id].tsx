@@ -13,6 +13,8 @@ import { resetMemberPassword, useMemberDetail, useMemberMemberships, useMemberPa
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { EmptyState } from '../../../src/components/ui';
 import { StatusTag, formatMoney, membershipBadge, METHOD_LABEL } from '../../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../../src/i18n';
 
 const RING = 104;
 const STROKE = 5;
@@ -20,10 +22,11 @@ const R = (RING - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 const fmtDate = (d: string, year = true) =>
-  new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}) });
+  new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}) });
 
 /** Fiche adhérent (accueil) : identité, abonnement en cours, coordonnées, paiements, renouvellement. */
 export default function StaffMemberScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
@@ -46,7 +49,7 @@ export default function StaffMemberScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={{ padding: spacing.lg }}>
-          <EmptyState icon="person-off" title="Adhérent introuvable" text="Cet adhérent n'existe plus." tone="danger" actionLabel="Retour" onAction={goBack} />
+          <EmptyState icon="person-off" title={t('staff.adherent_introuvable')} text={t('staff.cet_adherent_nexiste_plus')} tone="danger" actionLabel={t('common.retour')} onAction={goBack} />
         </View>
       </SafeAreaView>
     );
@@ -63,9 +66,9 @@ export default function StaffMemberScreen() {
   const initials = `${member.firstName[0] ?? ''}${member.lastName[0] ?? ''}`.toUpperCase();
 
   const rows = [
-    { icon: 'call' as const, k: 'Téléphone', v: member.phone ?? '—' },
-    { icon: 'mail-outline' as const, k: 'Email', v: member.email ?? '—' },
-    ...(member.createdAt ? [{ icon: 'event' as const, k: 'Membre depuis', v: fmtDate(member.createdAt) }] : []),
+    { icon: 'call' as const, k: t('common.telephone'), v: member.phone ?? '—' },
+    { icon: 'mail-outline' as const, k: t('common.email'), v: member.email ?? '—' },
+    ...(member.createdAt ? [{ icon: 'event' as const, k: t('staff.membre_depuis'), v: fmtDate(member.createdAt) }] : []),
   ];
 
   return (
@@ -73,7 +76,7 @@ export default function StaffMemberScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Adhérents</Text>
+          <Text style={styles.backText}>{t('common.adherents')}</Text>
         </Pressable>
 
         <View style={styles.identity}>
@@ -102,7 +105,7 @@ export default function StaffMemberScreen() {
             {member.memberCode ? (
               <View style={styles.codeBadge}>
                 <MaterialIcons name="pin" size={13} color={colors.primaryInk} />
-                <Text style={styles.codeText}>Code {member.memberCode.slice(0, 3)} {member.memberCode.slice(3)}</Text>
+                <Text style={styles.codeText}>{t('staff.code', { v1: member.memberCode.slice(0, 3), v3: member.memberCode.slice(3) })}</Text>
               </View>
             ) : null}
           </View>
@@ -110,9 +113,9 @@ export default function StaffMemberScreen() {
 
         <View style={styles.actions}>
           {[
-            { icon: 'call' as const, label: 'Appeler', on: member.phone ? () => Linking.openURL(`tel:${member.phone}`) : undefined },
-            { icon: 'mail-outline' as const, label: 'E-mail', on: member.email ? () => Linking.openURL(`mailto:${member.email}`) : undefined },
-            { icon: 'payments' as const, label: 'Encaisser', on: () => router.push({ pathname: routes.cashSell, params: { memberId: member.id } }) },
+            { icon: 'call' as const, label: t('staff.appeler'), on: member.phone ? () => Linking.openURL(`tel:${member.phone}`) : undefined },
+            { icon: 'mail-outline' as const, label: t('common.e_mail'), on: member.email ? () => Linking.openURL(`mailto:${member.email}`) : undefined },
+            { icon: 'payments' as const, label: t('staff.encaisser'), on: () => router.push({ pathname: routes.cashSell, params: { memberId: member.id } }) },
           ].map((a) => (
             <Pressable
               key={a.label}
@@ -132,16 +135,16 @@ export default function StaffMemberScreen() {
           <View style={styles.heroShadow}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
               <View style={styles.heroDecor} />
-              <Text style={styles.heroKicker}>ABONNEMENT</Text>
+              <Text style={styles.heroKicker}>{t('staff.abonnement')}</Text>
               <Text style={styles.heroTitle}>{current.plan.name}</Text>
               <Text style={styles.heroSub}>{fmtDate(current.startDate, false)} → {fmtDate(current.endDate)}</Text>
               <View style={styles.track}>
                 <View style={[styles.trackFill, { width: `${Math.round(ratio * 100)}%` }]} />
               </View>
               <View style={styles.heroBottom}>
-                <Text style={styles.heroBottomText}>{Math.round(ratio * 100)} % écoulé</Text>
+                <Text style={styles.heroBottomText}>{t('staff.ecoule', { v0: Math.round(ratio * 100) })}</Text>
                 <Text style={[styles.heroBottomText, { fontFamily: fonts.bodyBold }]}>
-                  {current.status === 'ACTIVE' ? `${daysLeft} jour${(daysLeft ?? 0) > 1 ? 's' : ''} restant${(daysLeft ?? 0) > 1 ? 's' : ''}` : 'Expiré'}
+                  {current.status === 'ACTIVE' ? `${daysLeft} jour${(daysLeft ?? 0) > 1 ? 's' : ''} restant${(daysLeft ?? 0) > 1 ? 's' : ''}` : t('staff.expire')}
                 </Text>
               </View>
             </LinearGradient>
@@ -151,14 +154,14 @@ export default function StaffMemberScreen() {
             <View style={styles.noPlanIcon}>
               <MaterialIcons name="card-membership" size={30} color={colors.primaryInk} />
             </View>
-            <Text style={styles.noPlanTitle}>Pas encore d’abonnement</Text>
-            <Text style={styles.noPlanText}>Souscrivez un forfait pour que cet adhérent puisse réserver et pointer aux cours.</Text>
+            <Text style={styles.noPlanTitle}>{t('staff.pas_encore_dabonnement')}</Text>
+            <Text style={styles.noPlanText}>{t('staff.souscrivez_un_forfait_pour_que')}</Text>
             <Pressable
               onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
               style={({ pressed }) => [styles.ctaShadow, { alignSelf: 'stretch' }, pressed && { transform: [{ scale: 0.98 }] }]}
             >
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
-                <Text style={styles.ctaText}>Souscrire un abonnement</Text>
+                <Text style={styles.ctaText}>{t('staff.souscrire_un_abonnement')}</Text>
               </LinearGradient>
             </Pressable>
           </View>
@@ -167,9 +170,9 @@ export default function StaffMemberScreen() {
         {current ? (
         <View style={styles.statsRow}>
           {[
-            { n: String(sorted.length), l: 'Abonnements' },
-            { n: String(memberPayments.length), l: 'Paiements' },
-            { n: formatMoney(paidTotal), l: 'Encaissé' },
+            { n: String(sorted.length), l: t('admin.abonnements') },
+            { n: String(memberPayments.length), l: t('staff.paiements') },
+            { n: formatMoney(paidTotal), l: t('common.encaisse') },
           ].map((s) => (
             <View key={s.l} style={[styles.statCard, cardShadow]}>
               <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>{s.n}</Text>
@@ -180,7 +183,7 @@ export default function StaffMemberScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>Coordonnées</Text>
+          <Text style={styles.sectionTitle}>{t('common.coordonnees')}</Text>
           <View style={[styles.listCard, cardShadow]}>
             {rows.map((r, i) => (
               <View key={r.k} style={[styles.row, i < rows.length - 1 && styles.rowBorder]}>
@@ -197,10 +200,10 @@ export default function StaffMemberScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Paiements</Text>
+          <Text style={styles.sectionTitle}>{t('staff.paiements')}</Text>
           <View style={[styles.listCard, cardShadow]}>
             {memberPayments.length === 0 ? (
-              <Text style={styles.emptyRow}>Aucun paiement enregistré.</Text>
+              <Text style={styles.emptyRow}>{t('staff.aucun_paiement_enregistre')}</Text>
             ) : (
               memberPayments.map((p, i) => (
                 <View key={p.id} style={[styles.row, i < memberPayments.length - 1 && styles.rowBorder]}>
@@ -225,7 +228,7 @@ export default function StaffMemberScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="payments" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>Renouveler l’abonnement</Text>
+            <Text style={styles.ctaText}>{t('staff.renouveler_labonnement')}</Text>
           </LinearGradient>
         </Pressable>
         ) : null}

@@ -7,9 +7,12 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachSessions, type CoachSession } from '../../../src/hooks/useCoachSessions';
 import { EmptyState, Pill, ProgressBar } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../../src/i18n';
 
 /** Mon planning — FitZone App Coach.dc.html, I2. */
 export default function CoachPlanningScreen() {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -34,14 +37,14 @@ export default function CoachPlanningScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Planning</Text>
+        <Text style={styles.title}>{t('common.planning')}</Text>
       </View>
 
       <View style={styles.dayRow}>
         {days.map((d, i) => (
           <Pressable key={d.toISOString()} onPress={() => setSelectedDay(i)} style={[styles.dayCell, i === selectedDay && styles.dayCellActive]}>
             <Text style={[styles.dayLabel, i === selectedDay && styles.dayTextActive]}>
-              {d.toLocaleDateString('fr-FR', { weekday: 'short' })}
+              {d.toLocaleDateString(dateLocale(), { weekday: 'short' })}
             </Text>
             <Text style={[styles.dayNumber, i === selectedDay && styles.dayTextActive]}>{d.getDate()}</Text>
           </Pressable>
@@ -53,13 +56,14 @@ export default function CoachPlanningScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => <SessionRow session={item} />}
-        ListEmptyComponent={<EmptyState icon="event-busy" title="Rien de prévu" text="Aucun cours ce jour-là." tone="muted" />}
+        ListEmptyComponent={<EmptyState icon="event-busy" title={t('coach.rien_de_prevu')} text={t('common.aucun_cours_ce_jour_la')} tone="muted" />}
       />
     </SafeAreaView>
   );
 }
 
 function SessionRow({ session }: { session: CoachSession }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const isFull = session._count.bookings >= session.capacity;
@@ -67,13 +71,13 @@ function SessionRow({ session }: { session: CoachSession }) {
     <Pressable style={styles.card} onPress={() => router.push(`/(coach)/session/${session.id}`)}>
       <View style={styles.cardTop}>
         <Text style={styles.time}>
-          {new Date(session.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(session.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}
         </Text>
         <View style={{ flex: 1 }}>
           <Text style={styles.className}>{session.classType.name}</Text>
           {session.room ? <Text style={styles.meta}>{session.room.name}</Text> : null}
         </View>
-        <Pill label={isFull ? 'Complet' : `${session._count.bookings}/${session.capacity}`} tone={isFull ? 'danger' : 'secondary'} />
+        <Pill label={isFull ? t('common.complet') : `${session._count.bookings}/${session.capacity}`} tone={isFull ? 'danger' : 'secondary'} />
       </View>
       <ProgressBar progress={session.capacity ? session._count.bookings / session.capacity : 0} color={isFull ? colors.danger : colors.primary} />
     </Pressable>

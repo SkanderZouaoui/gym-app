@@ -8,16 +8,19 @@ import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminPlans, useSavePlan } from '../../src/hooks/useAdmin';
 import { Banner, ScreenTitle } from '../../src/components/ui';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 const DURATIONS = [
-  { label: '1 mois', days: 30 },
-  { label: '3 mois', days: 90 },
-  { label: '6 mois', days: 180 },
-  { label: '1 an', days: 365 },
+  { get label() { return i18n.t('admin.1_mois'); }, days: 30 },
+  { get label() { return i18n.t('common.3_mois'); }, days: 90 },
+  { get label() { return i18n.t('admin.6_mois'); }, days: 180 },
+  { get label() { return i18n.t('admin.1_an'); }, days: 365 },
 ];
 
 /** Création / modification d'un forfait d'abonnement. */
 export default function AdminPlanFormScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -64,7 +67,7 @@ export default function AdminPlanFormScreen() {
           isVisibleInApp: visible,
         },
       },
-      { onSuccess: goBack, onError: () => setError('Impossible d’enregistrer le forfait.') },
+      { onSuccess: goBack, onError: () => setError(t('admin.impossible_denregistrer_le_forfait')) },
     );
   };
 
@@ -73,22 +76,22 @@ export default function AdminPlanFormScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Abonnements</Text>
+          <Text style={styles.backText}>{t('admin.abonnements')}</Text>
         </Pressable>
-        <ScreenTitle title={existing ? 'Modifier le forfait' : 'Nouveau forfait'} subtitle="Durée, tarif et visibilité dans l’app" />
+        <ScreenTitle title={existing ? t('admin.modifier_le_forfait') : t('admin.nouveau_forfait')} subtitle={t('admin.duree_tarif_et_visibilite_dans')} />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
         <View>
-          <Text style={styles.label}>Nom</Text>
-          <TextInput value={name} onChangeText={setName} placeholder="Ex. Gym + cours" placeholderTextColor={colors.muted} style={styles.input} />
+          <Text style={styles.label}>{t('common.nom')}</Text>
+          <TextInput value={name} onChangeText={setName} placeholder={t('admin.ex_gym_cours')} placeholderTextColor={colors.muted} style={styles.input} />
         </View>
         <View>
-          <Text style={styles.label}>Description</Text>
+          <Text style={styles.label}>{t('admin.description')}</Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
-            placeholder="Ce que comprend le forfait"
+            placeholder={t('admin.ce_que_comprend_le_forfait')}
             placeholderTextColor={colors.muted}
             multiline
             style={[styles.input, { minHeight: 84, paddingTop: 14, textAlignVertical: 'top' }]}
@@ -96,7 +99,7 @@ export default function AdminPlanFormScreen() {
         </View>
 
         <View>
-          <Text style={styles.label}>Durée</Text>
+          <Text style={styles.label}>{t('common.duree')}</Text>
           <View style={styles.pillRow}>
             {DURATIONS.map((d) => {
               const active = Number(days) === d.days;
@@ -114,32 +117,32 @@ export default function AdminPlanFormScreen() {
 
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Durée (jours)</Text>
+            <Text style={styles.label}>{t('admin.duree_jours')}</Text>
             <TextInput value={days} onChangeText={setDays} keyboardType="number-pad" style={styles.input} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Prix (DT)</Text>
+            <Text style={styles.label}>{t('admin.prix_dt')}</Text>
             <TextInput value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="0" placeholderTextColor={colors.muted} style={styles.input} />
           </View>
         </View>
 
         <View>
-          <Text style={styles.label}>Ce qui est inclus</Text>
-          <TextInput value={includes} onChangeText={setIncludes} placeholder="Ex. Accès libre + cours collectifs" placeholderTextColor={colors.muted} style={styles.input} />
+          <Text style={styles.label}>{t('admin.ce_qui_est_inclus')}</Text>
+          <TextInput value={includes} onChangeText={setIncludes} placeholder={t('admin.ex_acces_libre_cours_collectifs')} placeholderTextColor={colors.muted} style={styles.input} />
         </View>
 
         <View style={[styles.switchCard, cardShadow]}>
           <View style={styles.switchRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.switchTitle}>Visible dans l’app</Text>
-              <Text style={styles.switchSub}>Affiché dans l’écran Abonnement des adhérents</Text>
+              <Text style={styles.switchTitle}>{t('admin.visible_dans_lapp')}</Text>
+              <Text style={styles.switchSub}>{t('admin.affiche_dans_lecran_abonnement_des')}</Text>
             </View>
             <Switch value={visible} onValueChange={setVisible} trackColor={{ true: colors.primary, false: colors.surface2 }} thumbColor="#FFFFFF" ios_backgroundColor={colors.surface2} />
           </View>
           <View style={[styles.switchRow, { borderTopWidth: 1, borderTopColor: colors.border }]}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.switchTitle}>Badge « Populaire »</Text>
-              <Text style={styles.switchSub}>Met le forfait en avant</Text>
+              <Text style={styles.switchTitle}>{t('admin.badge_populaire')}</Text>
+              <Text style={styles.switchSub}>{t('admin.met_le_forfait_en_avant')}</Text>
             </View>
             <Switch value={popular} onValueChange={setPopular} trackColor={{ true: colors.primary, false: colors.surface2 }} thumbColor="#FFFFFF" ios_backgroundColor={colors.surface2} />
           </View>
@@ -154,7 +157,7 @@ export default function AdminPlanFormScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{save.isPending ? 'Enregistrement…' : 'Enregistrer'}</Text>
+            <Text style={styles.ctaText}>{save.isPending ? t('common.enregistrement') : t('member.enregistrer')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

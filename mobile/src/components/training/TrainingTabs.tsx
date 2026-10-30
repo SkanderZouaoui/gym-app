@@ -3,18 +3,21 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 
 export type TrainingTab = 'proposed' | 'programs' | 'history' | 'exercises';
 
 const TABS: { value: TrainingTab; label: string }[] = [
-  { value: 'proposed', label: 'Proposés' },
-  { value: 'programs', label: 'Mes programmes' },
-  { value: 'history', label: 'Historique' },
-  { value: 'exercises', label: 'Exercices' },
+  { value: 'proposed', get label() { return i18n.t('member.proposes'); } },
+  { value: 'programs', get label() { return i18n.t('member.mes_programmes'); } },
+  { value: 'history', get label() { return i18n.t('member.historique'); } },
+  { value: 'exercises', get label() { return i18n.t('common.exercices'); } },
 ];
 
 /** Segments de l'onglet Entraînement (v2) : pastilles défilantes, l'active en dégradé d'accent. */
 export function TrainingTabs({ value, onChange }: { value: TrainingTab; onChange: (tab: TrainingTab) => void }) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (

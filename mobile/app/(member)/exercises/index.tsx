@@ -13,6 +13,7 @@ import { ExerciseListItem } from '../../../src/components/training/ExerciseListI
 import { MuscleGroupPickerSheet } from '../../../src/components/training/MuscleGroupPickerSheet';
 import { GroupedFilterSheet, type FilterGroup } from '../../../src/components/training/GroupedFilterSheet';
 import { EQUIPMENT_CATEGORIES, equipmentOptionsByCategory } from '../../../src/constants/equipment';
+import { useTranslation } from 'react-i18next';
 
 /** Bibliothèque d'exercices — recherche + filtre par groupe musculaire
  * (silhouette corporelle, affichée dès l'accès à la page) et par équipement
@@ -20,6 +21,7 @@ import { EQUIPMENT_CATEGORIES, equipmentOptionsByCategory } from '../../../src/c
  * Si `pickFor` est passé en paramètre, appuyer sur un exercice le renvoie au
  * composeur de programme au lieu d'ouvrir sa fiche détail. */
 export default function ExercisesLibraryScreen() {
+  const { t } = useTranslation();
   const { pickFor, programId, returnTo, dayId } = useLocalSearchParams<{
     pickFor?: string;
     programId?: string;
@@ -63,14 +65,14 @@ export default function ExercisesLibraryScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title="Bibliothèque" fallbackHref="/(member)/(tabs)/training" />
+      <ScreenHeader title={t('common.bibliotheque')} fallbackHref="/(member)/(tabs)/training" />
       <View style={styles.searchRow}>
         <View style={styles.searchWrap}>
           <MaterialIcons name="search" size={20} color={colors.muted} style={styles.searchIcon} />
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Rechercher un exercice"
+            placeholder={t('common.rechercher_un_exercice')}
             placeholderTextColor={colors.muted}
             style={styles.searchInput}
           />
@@ -80,13 +82,13 @@ export default function ExercisesLibraryScreen() {
       <View style={styles.filterRow}>
         <FilterButton
           icon="accessibility-new"
-          label="Muscle"
+          label={t('common.muscle')}
           count={muscleGroup ? 1 : 0}
           onPress={() => setBodyMapVisible(true)}
         />
         <FilterButton
           icon="fitness-center"
-          label="Équipement"
+          label={t('common.equipement')}
           count={equipment.length}
           onPress={() => setEquipmentSheetVisible(true)}
         />
@@ -100,7 +102,7 @@ export default function ExercisesLibraryScreen() {
       />
       <GroupedFilterSheet
         visible={equipmentSheetVisible}
-        title="Filtrer par équipement"
+        title={t('common.filtrer_par_equipement')}
         groups={equipmentFilterGroups}
         selected={equipment}
         onClose={() => setEquipmentSheetVisible(false)}
@@ -131,21 +133,21 @@ export default function ExercisesLibraryScreen() {
             isError ? (
               <EmptyState
                 icon="cloud-off"
-                title="Bibliothèque indisponible"
-                text="Impossible de récupérer les exercices pour le moment. Vérifiez votre connexion."
+                title={t('member.bibliotheque_indisponible')}
+                text={t('member.impossible_de_recuperer_les_exercices')}
                 tone="danger"
-                actionLabel="Réessayer"
+                actionLabel={t('common.reessayer')}
                 onAction={() => refetch()}
               />
             ) : (
-              <EmptyState icon="search-off" title="Aucun résultat" text="Vérifiez l’orthographe ou essayez un autre filtre." tone="muted" />
+              <EmptyState icon="search-off" title={t('common.aucun_resultat')} text={t('member.verifiez_lorthographe_ou_essayez_un')} tone="muted" />
             )
           }
         />
       )}
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

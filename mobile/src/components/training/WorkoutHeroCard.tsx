@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface WorkoutHeroCardProps {
   /** Durée déjà formatée (ex. « 48:00 »). */
@@ -24,6 +25,7 @@ const CIRC = 2 * Math.PI * R;
 /** Carte héro des séances v2 (séance en cours et détail d'historique) : durée en grand chiffre,
  * anneau d'avancement, tuiles volume et séries. */
 export function WorkoutHeroCard({ duration, progress, ringLabel, volume, sets }: WorkoutHeroCardProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -31,7 +33,7 @@ export function WorkoutHeroCard({ duration, progress, ringLabel, volume, sets }:
       <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
         <View style={styles.row}>
           <View>
-            <Text style={styles.kicker}>DURÉE</Text>
+            <Text style={styles.kicker}>{t('member.duree')}</Text>
             <Text style={styles.duration}>{duration}</Text>
           </View>
           <View style={styles.ring}>
@@ -56,11 +58,11 @@ export function WorkoutHeroCard({ duration, progress, ringLabel, volume, sets }:
         </View>
         <View style={styles.tiles}>
           <View style={styles.tile}>
-            <Text style={styles.tileLabel}>Volume</Text>
+            <Text style={styles.tileLabel}>{t('member.volume')}</Text>
             <Text style={styles.tileValue}>{volume}</Text>
           </View>
           <View style={styles.tile}>
-            <Text style={styles.tileLabel}>Séries</Text>
+            <Text style={styles.tileLabel}>{t('common.series')}</Text>
             <Text style={styles.tileValue}>{sets}</Text>
           </View>
         </View>

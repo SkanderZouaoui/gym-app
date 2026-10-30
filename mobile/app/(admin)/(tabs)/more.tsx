@@ -11,42 +11,52 @@ import { useSessionStore } from '../../../src/store/session';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { BottomSheet, ScreenTitle } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../src/i18n';
 
 type Row = { icon: keyof typeof MaterialIcons.glyphMap; title: string; sub: string; href: string };
 
 const SECTIONS: { title: string; rows: Row[] }[] = [
   {
-    title: 'Activité',
-    rows: [{ icon: 'payments', title: 'Encaissements', sub: 'Historique et nouvel encaissement', href: '/(admin)/cash' }],
+    get title() { return i18n.t('admin.activite'); },
+    rows: [{ icon: 'payments', get title() { return i18n.t('common.encaissements'); }, get sub() { return i18n.t('admin.historique_et_nouvel_encaissement'); }, href: '/(admin)/cash' }],
   },
   {
-    title: 'Contenu',
-    rows: [{ icon: 'fitness-center', title: 'Programmes', sub: 'Validation et exercices', href: '/(admin)/programs' }],
+    get title() { return i18n.t('admin.contenu'); },
+    rows: [{ icon: 'fitness-center', get title() { return i18n.t('common.programmes'); }, get sub() { return i18n.t('admin.validation_et_exercices'); }, href: '/(admin)/programs' }],
   },
   {
-    title: 'Communication',
+    get title() { return i18n.t('admin.communication'); },
     rows: [
-      { icon: 'campaign', title: 'Annonces', sub: 'Push et écran d’accueil adhérent', href: '/(admin)/announcements' },
-      { icon: 'notifications', title: 'Notifications', sub: 'Envoyer et programmer', href: '/(admin)/notifications' },
-      { icon: 'notification-important', title: 'Alertes adhérents', sub: 'Bandeaux sur l’accueil de l’app', href: '/(admin)/alerts' },
+      { icon: 'campaign', get title() { return i18n.t('admin.annonces'); }, get sub() { return i18n.t('admin.push_et_ecran_daccueil_adherent'); }, href: '/(admin)/announcements' },
+      { icon: 'notifications', get title() { return i18n.t('common.notifications'); }, get sub() { return i18n.t('admin.envoyer_et_programmer'); }, href: '/(admin)/notifications' },
+      { icon: 'notification-important', get title() { return i18n.t('admin.alertes_adherents'); }, get sub() { return i18n.t('admin.bandeaux_sur_laccueil_de_lapp'); }, href: '/(admin)/alerts' },
+      { icon: 'tune', get title() { return i18n.t('admin.cfg_comms'); }, get sub() { return i18n.t('admin.cfg_comms_sub'); }, href: '/(admin)/settings?section=comms' },
     ],
   },
   {
-    title: 'Gestion de la salle',
+    get title() { return i18n.t('admin.gestion_de_la_salle'); },
     rows: [
-      { icon: 'badge', title: 'Équipe', sub: 'Comptes accueil et coachs', href: '/(admin)/team' },
-      { icon: 'card-membership', title: 'Abonnements', sub: 'Forfaits, tarifs et remises', href: '/(admin)/plans' },
-      { icon: 'tune', title: 'Configuration', sub: 'Horaires, cours, salles et règles', href: '/(admin)/settings' },
+      { icon: 'badge', get title() { return i18n.t('admin.equipe'); }, get sub() { return i18n.t('admin.comptes_accueil_et_coachs'); }, href: '/(admin)/team' },
+      { icon: 'card-membership', get title() { return i18n.t('admin.abonnements'); }, get sub() { return i18n.t('admin.forfaits_tarifs_et_remises'); }, href: '/(admin)/plans' },
+      { icon: 'storefront', get title() { return i18n.t('admin.cfg_venue'); }, get sub() { return i18n.t('admin.cfg_venue_sub'); }, href: '/(admin)/settings?section=venue' },
+      { icon: 'meeting-room', get title() { return i18n.t('admin.cfg_classes'); }, get sub() { return i18n.t('admin.cfg_classes_sub'); }, href: '/(admin)/settings?section=classes' },
+      { icon: 'event-available', get title() { return i18n.t('admin.cfg_booking'); }, get sub() { return i18n.t('admin.cfg_booking_sub'); }, href: '/(admin)/settings?section=booking' },
+      { icon: 'payments', get title() { return i18n.t('admin.cfg_payments'); }, get sub() { return i18n.t('admin.cfg_payments_sub'); }, href: '/(admin)/settings?section=payments' },
     ],
   },
   {
-    title: 'Mon compte',
-    rows: [{ icon: 'person', title: 'Profil et confidentialité', sub: 'Compte, sécurité, données', href: '/(admin)/profile' }],
+    get title() { return i18n.t('admin.mon_compte'); },
+    rows: [
+      { icon: 'person', get title() { return i18n.t('admin.profil_et_confidentialite'); }, get sub() { return i18n.t('admin.compte_securite_donnees'); }, href: '/(admin)/profile' },
+      { icon: 'language', get title() { return i18n.t('admin.cfg_language'); }, get sub() { return i18n.t('admin.cfg_language_sub'); }, href: '/(admin)/settings?section=language' },
+    ],
   },
 ];
 
 /** Plus (admin) : accès aux fonctions d'accueil et d'administration. */
 export default function AdminMoreScreen() {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -65,7 +75,7 @@ export default function AdminMoreScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
-        <ScreenTitle title="Plus" subtitle="Fonctions d’accueil et d’administration" />
+        <ScreenTitle title={t('common.plus')} subtitle={t('admin.fonctions_daccueil_et_dadministration')} />
         {SECTIONS.map((section) => (
           <View key={section.title} style={{ gap: 8 }}>
             <Text style={styles.sectionLabel}>{section.title}</Text>
@@ -91,16 +101,16 @@ export default function AdminMoreScreen() {
         ))}
                 <Pressable style={styles.logout} onPress={() => setLogoutVisible(true)}>
           <MaterialIcons name="logout" size={22} color={colors.dangerInk} />
-          <Text style={styles.logoutText}>Se déconnecter</Text>
+          <Text style={styles.logoutText}>{t('common.se_deconnecter')}</Text>
         </Pressable>
       </ScrollView>
 
       <BottomSheet visible={logoutVisible} onClose={() => setLogoutVisible(false)}>
-        <Text style={styles.sheetTitle}>Se déconnecter ?</Text>
-        <Text style={styles.sheetText}>Vous devrez vous reconnecter pour accéder à l’application.</Text>
+        <Text style={styles.sheetTitle}>{t('common.se_deconnecter_2')}</Text>
+        <Text style={styles.sheetText}>{t('common.vous_devrez_vous_reconnecter_pour')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Se déconnecter" onPress={handleLogout} variant="danger" />
-          <Button label="Annuler" onPress={() => setLogoutVisible(false)} variant="outline" />
+          <Button label={t('common.se_deconnecter')} onPress={handleLogout} variant="danger" />
+          <Button label={t('common.annuler')} onPress={() => setLogoutVisible(false)} variant="outline" />
         </View>
       </BottomSheet>
     </SafeAreaView>

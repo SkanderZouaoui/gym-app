@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export interface SetDraft {
   setNumber: number;
@@ -19,6 +20,7 @@ interface SetRowProps {
 
 /** Ligne d'une série individuelle, éditable (reps + poids propres à cette série). */
 export function SetRow({ set, onChangeReps, onChangeWeight, onRemove }: SetRowProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -27,7 +29,7 @@ export function SetRow({ set, onChangeReps, onChangeWeight, onRemove }: SetRowPr
         <Text style={styles.setBadgeText}>{set.setNumber}</Text>
       </View>
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Répétitions</Text>
+        <Text style={styles.fieldLabel}>{t('member.repetitions_2')}</Text>
         <TextInput
           value={set.reps}
           onChangeText={onChangeReps}
@@ -38,7 +40,7 @@ export function SetRow({ set, onChangeReps, onChangeWeight, onRemove }: SetRowPr
         />
       </View>
       <View style={styles.field}>
-        <Text style={styles.fieldLabel}>Poids (kg)</Text>
+        <Text style={styles.fieldLabel}>{t('member.poids_kg')}</Text>
         <TextInput
           value={set.weightKg}
           onChangeText={onChangeWeight}

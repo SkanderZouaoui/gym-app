@@ -1,4 +1,5 @@
 import { tokenStorage } from './storage';
+import i18n from '../i18n';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 
@@ -22,7 +23,7 @@ let refreshPromise: Promise<void> | null = null;
 
 async function refreshTokens(): Promise<void> {
   const refreshToken = await tokenStorage.getRefreshToken();
-  if (!refreshToken) throw new ApiError('NO_REFRESH_TOKEN', 'Session expirée', 401);
+  if (!refreshToken) throw new ApiError('NO_REFRESH_TOKEN', i18n.t('common.session_expired'), 401);
 
   const res = await fetch(`${BASE_URL}/v1/auth/refresh`, {
     method: 'POST',
@@ -31,7 +32,7 @@ async function refreshTokens(): Promise<void> {
   });
   if (!res.ok) {
     await tokenStorage.clear();
-    throw new ApiError('REFRESH_FAILED', 'Session expirée', 401);
+    throw new ApiError('REFRESH_FAILED', i18n.t('common.session_expired'), 401);
   }
   const data = await res.json();
   await tokenStorage.setTokens(data.accessToken, data.refreshToken);

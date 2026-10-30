@@ -15,36 +15,38 @@ import { usePlans } from '../../src/hooks/usePlans';
 import { useOrganizationConfig } from '../../src/hooks/useAdmin';
 import { METHOD_ICON, METHOD_LABEL, formatMoney } from '../../src/components/staff/staffUi';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 function describeError(e: unknown): { title: string; text: string; field?: 'email' | 'phone' } {
   if (!(e instanceof ApiError)) {
-    return { title: 'Connexion impossible', text: 'Vérifiez votre connexion internet puis réessayez.' };
+    return { title: i18n.t('staff.connexion_impossible'), text: i18n.t('staff.verifiez_votre_connexion_internet_puis') };
   }
   switch (e.code) {
     case 'EMAIL_ALREADY_USED':
       return {
-        title: 'Cette adresse e-mail existe déjà',
-        text: 'Un compte utilise déjà cette adresse. Saisissez une autre adresse, ou retrouvez l’adhérent dans la liste.',
+        title: i18n.t('staff.cette_adresse_e_mail_existe'),
+        text: i18n.t('staff.un_compte_utilise_deja_cette'),
         field: 'email',
       };
     case 'PHONE_ALREADY_USED':
       return {
-        title: 'Ce numéro de téléphone existe déjà',
-        text: 'Un compte utilise déjà ce numéro. Saisissez un autre numéro ou laissez le champ vide.',
+        title: i18n.t('staff.ce_numero_de_telephone_existe'),
+        text: i18n.t('staff.un_compte_utilise_deja_ce'),
         field: 'phone',
       };
     case 'EMAIL_OR_PHONE_ALREADY_USED':
-      return { title: 'Compte déjà existant', text: 'Cet e-mail ou ce téléphone est déjà utilisé par un autre compte.' };
+      return { title: i18n.t('staff.compte_deja_existant'), text: i18n.t('staff.cet_e_mail_ou_ce') };
     case 'FORBIDDEN':
-      return { title: 'Action non autorisée', text: 'Votre profil ne permet pas de créer un compte adhérent.' };
+      return { title: i18n.t('staff.action_non_autorisee'), text: i18n.t('staff.votre_profil_ne_permet_pas') };
   }
   if (e.status === 400) {
-    return { title: 'Informations invalides', text: 'Vérifiez le prénom, le nom, l’e-mail et le téléphone saisis.' };
+    return { title: i18n.t('staff.informations_invalides'), text: i18n.t('staff.verifiez_le_prenom_le_nom') };
   }
   if (e.status >= 500) {
-    return { title: 'Service indisponible', text: 'Le serveur a rencontré un problème. Réessayez dans un instant.' };
+    return { title: i18n.t('staff.service_indisponible'), text: i18n.t('staff.le_serveur_a_rencontre_un') };
   }
-  return { title: 'Création impossible', text: `Le compte n’a pas pu être créé (${e.code}).` };
+  return { title: i18n.t('staff.creation_impossible'), text: i18n.t('staff.le_compte_na_pas_pu', { code: e.code }) };
 }
 
 function planDuration(days: number): string {
@@ -76,6 +78,7 @@ function Section({ icon, title, children }: { icon: keyof typeof MaterialIcons.g
 
 /** Nouveau compte adhérent créé à l'accueil (mot de passe provisoire communiqué sur place). */
 export default function StaffMemberCreateScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -121,9 +124,9 @@ export default function StaffMemberCreateScreen() {
     const code = created.code ?? '';
     const shareText =
       `Bienvenue chez MuscleUP, ${created.name} !\n\n` +
-      `E-mail : ${email.trim()}\nMot de passe provisoire : ${created.password}\n` +
-      (code ? `Code de pointage : ${code.slice(0, 3)} ${code.slice(3)}\n` : '') +
-      `\nPensez à modifier votre mot de passe à la première connexion.`;
+      t('staff.e_mail_mot_de_passe', { v0: email.trim(), password: created.password }) +
+      (code ? t('staff.code_de_pointage_2', { v0: code.slice(0, 3), v1: code.slice(3) }) : '') +
+      t('staff.pensez_a_modifier_votre_mot');
     const copy = async (key: string, value: string) => {
       await Clipboard.setStringAsync(value);
       setCopied(key);
@@ -140,7 +143,7 @@ export default function StaffMemberCreateScreen() {
               <View style={styles.heroDecorB} />
               <View style={styles.successBadge}>
                 <MaterialIcons name="check" size={18} color="#047857" />
-                <Text style={styles.successBadgeText}>COMPTE CRÉÉ</Text>
+                <Text style={styles.successBadgeText}>{t('staff.compte_cree')}</Text>
               </View>
               <View style={styles.successAvatar}>
                 <Text style={styles.successAvatarText}>{initialsDone}</Text>
@@ -152,7 +155,7 @@ export default function StaffMemberCreateScreen() {
 
           <View style={[styles.card, cardShadow]}>
             <View style={styles.credHead}>
-              <Text style={styles.credLabel}>Abonnement encaissé</Text>
+              <Text style={styles.credLabel}>{t('staff.abonnement_encaisse')}</Text>
             </View>
             <View style={styles.recapRow}>
               <View style={{ flex: 1 }}>
@@ -165,11 +168,11 @@ export default function StaffMemberCreateScreen() {
 
           <View style={[styles.card, cardShadow]}>
             <View style={styles.credHead}>
-              <Text style={styles.credLabel}>Code de pointage</Text>
+              <Text style={styles.credLabel}>{t('staff.code_de_pointage')}</Text>
               {code ? (
                 <Pressable onPress={() => copy('code', code)} hitSlop={8} style={styles.copyBtn}>
                   <MaterialIcons name={copied === 'code' ? 'check' : 'content-copy'} size={14} color={colors.primaryInk} />
-                  <Text style={styles.copyText}>{copied === 'code' ? 'Copié' : 'Copier'}</Text>
+                  <Text style={styles.copyText}>{copied === 'code' ? t('common.copie') : t('staff.copier')}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -184,23 +187,23 @@ export default function StaffMemberCreateScreen() {
 
           <View style={[styles.card, cardShadow]}>
             <View style={styles.credHead}>
-              <Text style={styles.credLabel}>Mot de passe provisoire</Text>
+              <Text style={styles.credLabel}>{t('common.mot_de_passe_provisoire')}</Text>
               <Pressable onPress={() => copy('pwd', created.password)} hitSlop={8} style={styles.copyBtn}>
                 <MaterialIcons name={copied === 'pwd' ? 'check' : 'content-copy'} size={14} color={colors.primaryInk} />
-                <Text style={styles.copyText}>{copied === 'pwd' ? 'Copié' : 'Copier'}</Text>
+                <Text style={styles.copyText}>{copied === 'pwd' ? t('common.copie') : t('staff.copier')}</Text>
               </Pressable>
             </View>
             <Text style={styles.password} selectable>{created.password}</Text>
             <View style={styles.warn}>
               <MaterialIcons name="visibility-off" size={16} color={colors.warningInk} />
-              <Text style={styles.warnText}>Affiché une seule fois. L’adhérent pourra le modifier depuis son profil.</Text>
+              <Text style={styles.warnText}>{t('staff.affiche_une_seule_fois_ladherent')}</Text>
             </View>
           </View>
 
           <Pressable onPress={() => Share.share({ message: shareText })} style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
               <MaterialIcons name="ios-share" size={22} color={colors.primaryContrast} />
-              <Text style={styles.ctaText}>Partager les accès</Text>
+              <Text style={styles.ctaText}>{t('common.partager_les_acces')}</Text>
             </LinearGradient>
           </Pressable>
           {created.paymentId ? (
@@ -208,11 +211,11 @@ export default function StaffMemberCreateScreen() {
               onPress={() => router.replace({ pathname: routes.cashReceipt, params: { paymentId: created.paymentId!, fresh: '1' } })}
               style={({ pressed }) => [styles.outlineBtn, pressed && { transform: [{ scale: 0.98 }] }]}
             >
-              <Text style={styles.outlineText}>Voir le reçu</Text>
+              <Text style={styles.outlineText}>{t('staff.voir_le_recu')}</Text>
             </Pressable>
           ) : null}
           <Pressable onPress={() => router.replace(routes.member(created.id))} style={({ pressed }) => [styles.outlineBtn, pressed && { transform: [{ scale: 0.98 }] }]}>
-            <Text style={styles.outlineText}>Voir la fiche adhérent</Text>
+            <Text style={styles.outlineText}>{t('staff.voir_la_fiche_adherent')}</Text>
           </Pressable>
           <Pressable
             onPress={() => {
@@ -225,7 +228,7 @@ export default function StaffMemberCreateScreen() {
             }}
             style={styles.secondaryBtn}
           >
-            <Text style={styles.secondaryText}>Créer un autre compte</Text>
+            <Text style={styles.secondaryText}>{t('staff.creer_un_autre_compte')}</Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
@@ -237,45 +240,45 @@ export default function StaffMemberCreateScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Adhérents</Text>
+          <Text style={styles.backText}>{t('common.adherents')}</Text>
         </Pressable>
-        <ScreenTitle title="Nouveau compte" subtitle="Compte, abonnement et encaissement en une étape" />
+        <ScreenTitle title={t('common.nouveau_compte')} subtitle={t('staff.compte_abonnement_et_encaissement_en')} />
 
         <View style={styles.hero}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
             {initials ? <Text style={styles.avatarText}>{initials}</Text> : <MaterialIcons name="person-add" size={34} color="#FFFFFF" />}
           </LinearGradient>
-          <Text style={styles.heroName}>{`${firstName} ${lastName}`.trim() || 'Nouvel adhérent'}</Text>
-          <Text style={styles.heroHint}>Le code de pointage est attribué automatiquement.</Text>
+          <Text style={styles.heroName}>{`${firstName} ${lastName}`.trim() || t('staff.nouvel_adherent')}</Text>
+          <Text style={styles.heroHint}>{t('staff.le_code_de_pointage_est')}</Text>
         </View>
 
         {error ? <Banner tone="danger" icon="error" title={error.title} text={error.text} /> : null}
 
-        <Section icon="badge" title="Identité">
-          <TextField label="Prénom" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-          <TextField label="Nom" value={lastName} onChangeText={setLastName} autoCapitalize="words" />
+        <Section icon="badge" title={t('common.identite')}>
+          <TextField label={t('common.prenom')} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
+          <TextField label={t('common.nom')} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
         </Section>
 
-        <Section icon="alternate-email" title="Contact">
+        <Section icon="alternate-email" title={t('common.contact')}>
           <TextField
-            label="E-mail"
+            label={t('common.e_mail')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
-            error={error?.field === 'email' ? 'Déjà utilisée' : email.length > 3 && !emailOk ? 'Adresse e-mail invalide' : undefined}
+            error={error?.field === 'email' ? t('staff.deja_utilisee') : email.length > 3 && !emailOk ? t('staff.invalid_email') : undefined}
           />
           <TextField
-            label="Téléphone"
+            label={t('common.telephone')}
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
-            placeholder="Optionnel"
-            error={error?.field === 'phone' ? 'Déjà utilisé' : undefined}
+            placeholder={t('common.optionnel')}
+            error={error?.field === 'phone' ? t('staff.deja_utilise') : undefined}
           />
         </Section>
 
-        <Section icon="card-membership" title="Abonnement">
+        <Section icon="card-membership" title={t('common.abonnement')}>
           <View style={{ gap: 10 }}>
             {(plans ?? []).map((p) => {
               const active = p.id === planId;
@@ -293,7 +296,7 @@ export default function StaffMemberCreateScreen() {
           </View>
         </Section>
 
-        <Section icon="payments" title="Paiement encaissé">
+        <Section icon="payments" title={t('staff.paiement_encaisse')}>
           <View style={styles.methodGrid}>
             {(['CASH', 'OTHER', 'TRANSFER', 'CHECK'] as PaymentMethod[]).filter((m) => orgConfig?.paymentMethods[m] !== false).map((m) => {
               const active = method === m;
@@ -311,9 +314,7 @@ export default function StaffMemberCreateScreen() {
           <View style={styles.sectionIcon}>
             <MaterialIcons name="lock" size={16} color={colors.primaryInk} />
           </View>
-          <Text style={styles.autoText}>
-            Un mot de passe provisoire sécurisé sera généré automatiquement et affiché une seule fois à la création.
-          </Text>
+          <Text style={styles.autoText}>{t('staff.un_mot_de_passe_provisoire')}</Text>
         </View>
       </ScrollView>
 
@@ -325,7 +326,7 @@ export default function StaffMemberCreateScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="point-of-sale" size={22} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{createMember.isPending ? 'Création…' : plan ? `Créer et encaisser ${formatMoney(plan.price)}` : 'Choisir un abonnement'}</Text>
+            <Text style={styles.ctaText}>{createMember.isPending ? t('common.creation') : plan ? t('staff.creer_et_encaisser', { v0: formatMoney(plan.price) }) : t('staff.choisir_un_abonnement')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

@@ -7,8 +7,11 @@ import { useBodyMetrics } from '../../../hooks/useProgress';
 import { useMyWorkouts } from '../../../hooks/useCoaching';
 import { BarHistogram, EmptyState, LineChart } from '../../ui';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
+import { MONTHS_SHORT } from '../../../i18n/labels';
 
-const MONTH_LABELS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+const MONTH_LABELS = MONTHS_SHORT;
 
 function startOfWeek(date: Date) {
   const d = new Date(date);
@@ -19,14 +22,15 @@ function startOfWeek(date: Date) {
 }
 
 const MEASUREMENT_LABELS: Record<string, string> = {
-  waist: 'Tour de taille',
-  bodyFat: 'Masse grasse',
-  arm: 'Tour de bras',
+  get waist() { return i18n.t('member.tour_de_taille'); },
+  get bodyFat() { return i18n.t('member.masse_grasse'); },
+  get arm() { return i18n.t('member.tour_de_bras'); },
 };
 const MEASUREMENT_UNITS: Record<string, string> = { waist: 'cm', bodyFat: '%', arm: 'cm' };
 
 /** Vue "Progression" de l'onglet Entraînement — FitZone App Entraînement.dc.html, F1. */
 export function ProgressView() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: metrics, isLoading, isError, refetch } = useBodyMetrics();
@@ -75,10 +79,10 @@ export function ProgressView() {
     return (
       <EmptyState
         icon="cloud-off"
-        title="Progression indisponible"
-        text="Impossible de récupérer vos mesures pour le moment. Vérifiez votre connexion."
+        title={t('member.progression_indisponible')}
+        text={t('member.impossible_de_recuperer_vos_mesures')}
         tone="danger"
-        actionLabel="Réessayer"
+        actionLabel={t('common.reessayer')}
         onAction={() => refetch()}
       />
     );
@@ -97,12 +101,12 @@ export function ProgressView() {
       <View style={{ gap: spacing.sm }}>
         <EmptyState
           icon="monitor"
-          title="Votre courbe commence ici"
-          text="Ajoutez une première mesure (poids, tour de taille…) pour suivre votre évolution semaine après semaine."
+          title={t('member.votre_courbe_commence_ici')}
+          text={t('member.ajoutez_une_premiere_mesure_poids')}
           tone="primary"
         />
         <Pressable style={styles.addButton} onPress={() => router.push('/(member)/measure')}>
-          <Text style={styles.addButtonText}>Ajouter ma première mesure</Text>
+          <Text style={styles.addButtonText}>{t('member.ajouter_ma_premiere_mesure')}</Text>
         </Pressable>
       </View>
     );
@@ -113,16 +117,14 @@ export function ProgressView() {
       <View style={styles.weightCard}>
         <View style={styles.weightHeaderRow}>
           <View>
-            <Text style={styles.weightValue}>{latest?.weightKg ?? '—'} kg</Text>
+            <Text style={styles.weightValue}>{t('member.kg_5', { v0: latest?.weightKg ?? '—' })}</Text>
             {weightDelta !== null ? (
-              <Text style={[styles.weightDelta, { color: weightDelta <= 0 ? colors.successInk : colors.warningInk }]}>
-                {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)} kg sur la période
-              </Text>
+              <Text style={[styles.weightDelta, { color: weightDelta <= 0 ? colors.successInk : colors.warningInk }]}>{t('member.kg_sur_la_periode', { v1: weightDelta > 0 ? '+' : '', v2: weightDelta.toFixed(1) })}</Text>
             ) : null}
           </View>
           <Pressable style={styles.addMeasureButton} onPress={() => router.push('/(member)/measure')}>
             <MaterialIcons name="add" size={18} color={colors.primaryInk} />
-            <Text style={styles.addMeasureText}>Mesure</Text>
+            <Text style={styles.addMeasureText}>{t('member.mesure')}</Text>
           </Pressable>
         </View>
         {weightSeries.length >= 2 ? (
@@ -152,8 +154,8 @@ export function ProgressView() {
             <Text style={styles.streakBadgeText}>{streak?.streak ?? 0}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.regularityTitle}>{streak?.streak ?? 0} semaine{(streak?.streak ?? 0) > 1 ? 's' : ''} d'affilée</Text>
-            <Text style={styles.regularitySub}>Régularité des 8 dernières semaines</Text>
+            <Text style={styles.regularityTitle}>{t('member.semaine_daffilee', { v0: streak?.streak ?? 0, v2: (streak?.streak ?? 0) > 1 ? 's' : '' })}</Text>
+            <Text style={styles.regularitySub}>{t('member.regularite_des_8_dernieres_semaines')}</Text>
           </View>
         </View>
         {weeklyRegularity.length > 0 ? (
@@ -163,7 +165,7 @@ export function ProgressView() {
 
       <Pressable style={styles.photosLink} onPress={() => router.push('/(member)/photos')}>
         <MaterialIcons name="photo-library" size={18} color={colors.text} />
-        <Text style={styles.photosLinkText}>Mes photos de progression</Text>
+        <Text style={styles.photosLinkText}>{t('member.mes_photos_de_progression')}</Text>
         <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
       </Pressable>
     </View>

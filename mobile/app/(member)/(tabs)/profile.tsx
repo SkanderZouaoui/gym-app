@@ -28,6 +28,9 @@ import {
 import { useMyWorkouts } from '../../../src/hooks/useCoaching';
 import { usePreferencesStore } from '../../../src/store/preferences';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import { dateLocale } from '../../../src/i18n';
+import { LanguageSheet } from '../../../src/components/LanguageSheet';
+import { LANGUAGE_LABELS } from '../../../src/i18n';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
@@ -117,18 +120,18 @@ export default function ProfileScreen() {
     ? (Date.now() - Math.min(...memberships.map((m) => new Date(m.startDate).getTime()))) / (30 * 86_400_000)
     : 0;
   const badges: BadgeInfo[] = [
-    { icon: 'local-fire-department', label: 'Série 4 sem.', unlocked: streakWeeks >= 4 },
-    { icon: 'bolt', label: 'Premier cours', unlocked: totalSessions >= 1 },
-    { icon: 'workspace-premium', label: '3 mois', unlocked: memberMonths >= 3 },
-    { icon: 'emoji-events', label: '50 séances', unlocked: totalSessions >= 50 },
-    { icon: 'diamond', label: '100 séances', unlocked: totalSessions >= 100 },
-    { icon: 'military-tech', label: 'Assidu 90 %', unlocked: assiduity >= 90 },
+    { icon: 'local-fire-department', label: t('member.serie_4_sem'), unlocked: streakWeeks >= 4 },
+    { icon: 'bolt', label: t('member.premier_cours'), unlocked: totalSessions >= 1 },
+    { icon: 'workspace-premium', label: t('common.3_mois'), unlocked: memberMonths >= 3 },
+    { icon: 'emoji-events', label: t('member.50_seances'), unlocked: totalSessions >= 50 },
+    { icon: 'diamond', label: t('member.100_seances'), unlocked: totalSessions >= 100 },
+    { icon: 'military-tech', label: t('member.assidu_90'), unlocked: assiduity >= 90 },
   ];
   const completion =
     [user?.firstName, user?.lastName, user?.email, user?.phone, user?.photoUrl].filter(Boolean).length / 5;
   const memberSince = user && memberships?.length
     ? new Date(Math.min(...memberships.map((m) => new Date(m.startDate).getTime())))
-        .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+        .toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' })
     : undefined;
 
   const handleSwitchToCoach = () => {
@@ -162,8 +165,8 @@ export default function ProfileScreen() {
           <Banner
             tone="warning"
             icon="sync-problem"
-            title="Session hors ligne"
-            text="Vos informations n'ont pas pu être vérifiées en ligne récemment. Certaines données peuvent être obsolètes."
+            title={t('member.session_hors_ligne')}
+            text={t('member.vos_informations_nont_pas_pu')}
           />
         ) : null}
 
@@ -186,32 +189,32 @@ export default function ProfileScreen() {
 
         <ProfileStats
           stats={[
-            { label: 'Séances', value: totalSessions },
-            { label: 'Assiduité', value: assiduity, unit: '%' },
-            { label: 'Série', value: streakWeeks, unit: ' sem.' },
+            { label: t('member.seances'), value: totalSessions },
+            { label: t('member.assiduite'), value: assiduity, unit: '%' },
+            { label: t('member.serie'), value: streakWeeks, unit: ' sem.' },
           ]}
         />
 
         <ProfileActivity weeks={weekCounts} goalDone={monthSessions} goalTarget={GOAL_TARGET} />
 
         <View>
-          <Text style={styles.sectionHeading}>Badges</Text>
+          <Text style={styles.sectionHeading}>{t('member.badges')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <ProfileBadges badges={badges} />
           </ScrollView>
         </View>
 
         <SettingsGroup
-          title="Apparence"
+          title={t('common.apparence')}
           rows={[
             {
               kind: 'segment',
               icon: 'contrast',
-              title: 'Thème',
+              title: t('common.theme'),
               options: [
-                { value: 'light', label: 'Clair' },
-                { value: 'dark', label: 'Sombre' },
-                { value: 'system', label: 'Auto' },
+                { value: 'light', label: t('common.clair') },
+                { value: 'dark', label: t('common.sombre') },
+                { value: 'system', label: t('common.auto') },
               ],
               selected: preference,
               onChange: (v) => setScheme(v as 'light' | 'dark' | 'system'),
@@ -220,21 +223,21 @@ export default function ProfileScreen() {
         />
 
         <SettingsGroup
-          title="Notifications"
+          title={t('common.notifications')}
           rows={[
             {
               kind: 'switch',
               icon: 'notifications-active',
-              title: 'Alerte d’expiration',
-              sub: '7 jours avant l’échéance',
+              title: t('member.alerte_dexpiration'),
+              sub: t('member.7_jours_avant_lecheance'),
               value: prefs.expiryAlert,
               onChange: (v) => prefs.set({ expiryAlert: v }),
             },
             {
               kind: 'switch',
               icon: 'event',
-              title: 'Rappels de cours',
-              sub: '1 heure avant',
+              title: t('member.rappels_de_cours'),
+              sub: t('member.1_heure_avant'),
               value: prefs.classReminder,
               onChange: (v) => prefs.set({ classReminder: v }),
             },
@@ -249,13 +252,13 @@ export default function ProfileScreen() {
         />
 
         <SettingsGroup
-          title="Accessibilité"
+          title={t('member.accessibilite')}
           rows={[
             {
               kind: 'switch',
               icon: 'motion-photos-off',
-              title: 'Réduire les animations',
-              sub: 'Désactive transitions et effets',
+              title: t('member.reduire_les_animations'),
+              sub: t('member.desactive_transitions_et_effets'),
               value: prefs.reduceMotion,
               onChange: (v) => prefs.set({ reduceMotion: v }),
             },
@@ -263,28 +266,28 @@ export default function ProfileScreen() {
         />
 
         <SettingsGroup
-          title="Compte"
+          title={t('common.compte')}
           rows={[
             {
               kind: 'nav',
               icon: 'badge',
-              title: 'Abonnement',
+              title: t('common.abonnement'),
               value: activeMembership?.plan.name ?? t('profile.none'),
               onPress: () => router.push('/(member)/subscription'),
             },
-            { kind: 'nav', icon: 'person', title: 'Informations personnelles', onPress: () => router.push('/(member)/profile-edit') },
-            { kind: 'nav', icon: 'language', title: 'Langue', value: language === 'ar' ? 'العربية' : 'Français', onPress: () => setLanguageVisible(true) },
+            { kind: 'nav', icon: 'person', title: t('member.informations_personnelles'), onPress: () => router.push('/(member)/profile-edit') },
+            { kind: 'nav', icon: 'language', title: t('common.langue'), value: LANGUAGE_LABELS[language], onPress: () => setLanguageVisible(true) },
           ]}
         />
 
         <SettingsGroup
-          title="Plus"
+          title={t('common.plus')}
           rows={[
-            { kind: 'nav', icon: 'event-note', title: 'Mes réservations', onPress: () => router.push('/(member)/reservations') },
+            { kind: 'nav', icon: 'event-note', title: t('member.mes_reservations'), onPress: () => router.push('/(member)/reservations') },
             { kind: 'nav', icon: 'lock-outline', title: t('profile.menuSecurity'), onPress: () => router.push('/(member)/account-security') },
             { kind: 'nav', icon: 'help', title: t('profile.menuHelp'), onPress: () => router.push('/(member)/app-info') },
             ...(hasCoachRole
-              ? [{ kind: 'nav' as const, icon: 'sports' as const, title: 'Utiliser l’app en tant que coach', onPress: handleSwitchToCoach }]
+              ? [{ kind: 'nav' as const, icon: 'sports' as const, title: t('member.utiliser_lapp_en_tant_que'), onPress: handleSwitchToCoach }]
               : []),
           ]}
         />
@@ -295,30 +298,7 @@ export default function ProfileScreen() {
         </Pressable>
       </ScrollView>
 
-      <BottomSheet visible={languageVisible} onClose={() => setLanguageVisible(false)}>
-        <Text style={styles.sheetTitle}>Langue</Text>
-        <View style={styles.languageList}>
-          {([
-            { value: 'fr', label: 'Français' },
-            { value: 'ar', label: 'العربية' },
-          ] as const).map((l) => {
-            const active = language === l.value;
-            return (
-              <Pressable
-                key={l.value}
-                style={[styles.languageRow, active && styles.languageRowActive]}
-                onPress={() => {
-                  setLanguage(l.value);
-                  setLanguageVisible(false);
-                }}
-              >
-                <Text style={[styles.languageText, active && styles.languageTextActive]}>{l.label}</Text>
-                {active ? <MaterialIcons name="check" size={22} color={colors.primaryInk} /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-      </BottomSheet>
+      <LanguageSheet visible={languageVisible} onClose={() => setLanguageVisible(false)} />
 
       <BottomSheet visible={logoutVisible} onClose={() => setLogoutVisible(false)}>
         <Text style={styles.sheetTitle}>{t('profile.logoutConfirmTitle')}</Text>
@@ -330,7 +310,7 @@ export default function ProfileScreen() {
       </BottomSheet>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

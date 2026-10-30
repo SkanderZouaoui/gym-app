@@ -19,8 +19,10 @@ import {
 import { useProgramDetail } from '../../src/hooks/useCoachSessions';
 import { ApiError } from '../../src/api/client';
 import { useExercisePickStore } from '../../src/store/exercisePick';
+import { useTranslation } from 'react-i18next';
+import { WEEKDAYS_SHORT_MON } from '../../src/i18n/labels';
 
-const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+const DAY_LABELS = WEEKDAYS_SHORT_MON;
 
 type DraftExercise = { exerciseId: string; name: string; sets: SetDraft[] };
 type DraftDay = { dayOfWeek: number; label: string; exercises: DraftExercise[] };
@@ -36,6 +38,7 @@ function summarizeReps(sets: SetDraft[]): string {
  * est passé en paramètre). L'adhérent choisit ses jours, ajoute des exercices
  * depuis la bibliothèque et règle chaque série individuellement. */
 export default function ProgramBuilderScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{
     programId?: string;
     pickedExerciseId?: string;
@@ -50,8 +53,8 @@ export default function ProgramBuilderScreen() {
 
   const { data: existingProgram, isLoading: isLoadingExisting } = useProgramDetail(params.programId);
 
-  const [name, setName] = useState('Mon programme');
-  const [days, setDays] = useState<DraftDay[]>([{ dayOfWeek: 0, label: 'Jour 1', exercises: [] }]);
+  const [name, setName] = useState(t('member.default_program_name'));
+  const [days, setDays] = useState<DraftDay[]>([{ dayOfWeek: 0, label: t('common.jour_1'), exercises: [] }]);
   const [activeDay, setActiveDay] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
@@ -127,7 +130,7 @@ export default function ProgramBuilderScreen() {
   }, [pick, params.pickedExerciseId]);
 
   const addDay = () => {
-    setDays((prev) => [...prev, { dayOfWeek: prev.length % 7, label: `Jour ${prev.length + 1}`, exercises: [] }]);
+    setDays((prev) => [...prev, { dayOfWeek: prev.length % 7, label: t('common.jour', { v0: prev.length + 1 }), exercises: [] }]);
     setActiveDay(days.length);
   };
 
@@ -163,7 +166,7 @@ export default function ProgramBuilderScreen() {
   const handleSave = () => {
     setError(null);
     if (days.every((d) => d.exercises.length === 0)) {
-      setError('Ajoutez au moins un exercice avant d’enregistrer.');
+      setError(t('member.ajoutez_au_moins_un_exercice'));
       return;
     }
     const payload: { name: string; days: ProgramDayInput[] } = {
@@ -191,13 +194,13 @@ export default function ProgramBuilderScreen() {
         { id: params.programId!, payload },
         {
           onSuccess: () => router.replace(`/(member)/program/${params.programId}`),
-          onError: (e) => setError(e instanceof ApiError ? e.message : 'Erreur lors de la modification du programme'),
+          onError: (e) => setError(e instanceof ApiError ? e.message : t('member.erreur_lors_de_la_modification')),
         },
       );
     } else {
       createProgram.mutate(payload, {
         onSuccess: () => router.replace('/(member)/(tabs)/training'),
-        onError: (e) => setError(e instanceof ApiError ? e.message : 'Erreur lors de la création du programme'),
+        onError: (e) => setError(e instanceof ApiError ? e.message : t('member.erreur_lors_de_la_creation')),
       });
     }
   };
@@ -217,27 +220,27 @@ export default function ProgramBuilderScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Entraînement</Text>
+          <Text style={styles.backText}>{t('member.entrainement')}</Text>
         </Pressable>
         <ScreenTitle
-          title={isEditing ? 'Modifier le programme' : 'Design de programme'}
-          subtitle="Définissez les exercices, séries, répétitions et charges."
+          title={isEditing ? t('member.modifier_le_programme') : t('member.design_de_programme')}
+          subtitle={t('member.definissez_les_exercices_series_repetitions')}
         />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-        <TextInput value={name} onChangeText={setName} style={styles.nameInput} placeholder="Nom du programme" placeholderTextColor={colors.muted} />
+        <TextInput value={name} onChangeText={setName} style={styles.nameInput} placeholder={t('common.nom_du_programme')} placeholderTextColor={colors.muted} />
 
         <View style={[styles.summary, cardShadow]}>
           <View>
             <Text style={styles.summaryValue}>
               {totalSets}
-              <Text style={styles.summaryUnit}> séries</Text>
+              <Text style={styles.summaryUnit}>{t('common.series_2')}</Text>
             </Text>
-            <Text style={styles.summaryMeta}>{totalExercises} exercice{totalExercises > 1 ? 's' : ''} · ~{estimatedMinutes} min</Text>
+            <Text style={styles.summaryMeta}>{t('member.exercice_min', { totalExercises, v2: totalExercises > 1 ? 's' : '', estimatedMinutes })}</Text>
           </View>
           <View style={styles.summaryTag}>
-            <Text style={styles.summaryTagText}>Perso</Text>
+            <Text style={styles.summaryTagText}>{t('member.perso')}</Text>
           </View>
         </View>
 
@@ -264,7 +267,7 @@ export default function ProgramBuilderScreen() {
 
         <View style={{ gap: 12 }}>
           {current.exercises.length === 0 ? (
-            <EmptyState icon="playlist-add" title="Aucun exercice" text="Ajoutez des exercices depuis la bibliothèque." tone="primary" />
+            <EmptyState icon="playlist-add" title={t('common.aucun_exercice')} text={t('common.ajoutez_des_exercices_depuis_la')} tone="primary" />
           ) : (
             current.exercises.map((ex, i) => (
               <ExerciseEditorCard
@@ -292,7 +295,7 @@ export default function ProgramBuilderScreen() {
             onPress={() => router.push({ pathname: '/(member)/exercises', params: { pickFor: String(activeDay), programId: params.programId, returnTo: 'builder' } })}
           >
             <MaterialIcons name="add" size={22} color={colors.primaryInk} />
-            <Text style={styles.addExerciseText}>Ajouter un exercice</Text>
+            <Text style={styles.addExerciseText}>{t('common.ajouter_un_exercice')}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -306,27 +309,27 @@ export default function ProgramBuilderScreen() {
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButton}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
             <Text style={styles.saveText}>
-              {saving ? 'Enregistrement…' : isEditing ? 'Enregistrer les modifications' : 'Enregistrer le programme'}
+              {saving ? t('common.enregistrement') : isEditing ? t('common.enregistrer_les_modifications') : t('member.enregistrer_le_programme')}
             </Text>
           </LinearGradient>
         </Pressable>
       </View>
 
       <BottomSheet visible={renamingDay} onClose={() => setRenamingDay(false)}>
-        <Text style={styles.sheetTitle}>Nom du jour</Text>
+        <Text style={styles.sheetTitle}>{t('member.nom_du_jour')}</Text>
         <TextInput
           value={dayNameDraft}
           onChangeText={setDayNameDraft}
           style={styles.nameInput}
-          placeholder="Ex. Poussée, Tirage, Jambes…"
+          placeholder={t('member.ex_poussee_tirage_jambes')}
           placeholderTextColor={colors.muted}
           autoFocus
           onSubmitEditing={confirmRenameDay}
           returnKeyType="done"
         />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Enregistrer" onPress={confirmRenameDay} />
-          <Button label="Annuler" onPress={() => setRenamingDay(false)} variant="outline" />
+          <Button label={t('member.enregistrer')} onPress={confirmRenameDay} />
+          <Button label={t('common.annuler')} onPress={() => setRenamingDay(false)} variant="outline" />
         </View>
       </BottomSheet>
     </SafeAreaView>

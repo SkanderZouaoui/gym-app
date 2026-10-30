@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { ProgressBar } from '../ui';
+import { useTranslation } from 'react-i18next';
 
 export type CourseStatusTone = 'success' | 'warning' | 'danger' | 'muted';
 
@@ -32,6 +33,7 @@ interface CourseCardProps {
 export function CourseCard({
   time, duration, name, coach, room, capacity, booked_count, spotsLabel, statusTone, progress, ctaLabel, booked, closed, onPress, onPressCta,
 }: CourseCardProps) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const { styles, toneSoft, toneInk } = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -50,7 +52,7 @@ export function CourseCard({
           <Text style={styles.name} numberOfLines={2}>{name}</Text>
           <View style={styles.metaRow}>
             <MaterialIcons name="sports" size={14} color={colors.muted} />
-            <Text style={styles.meta} numberOfLines={1}>{coach ?? 'Sans coach'}</Text>
+            <Text style={styles.meta} numberOfLines={1}>{coach ?? t('common.sans_coach')}</Text>
             <MaterialIcons name="meeting-room" size={14} color={colors.muted} />
             <Text style={styles.meta} numberOfLines={1}>{room ?? '—'}</Text>
           </View>
@@ -62,8 +64,8 @@ export function CourseCard({
 
       <View style={{ gap: 8 }}>
         <View style={styles.fillRow}>
-          <Text style={styles.fillLabel}>Remplissage</Text>
-          <Text style={styles.fillValue}>{booked_count}/{capacity} inscrits</Text>
+          <Text style={styles.fillLabel}>{t('common.remplissage')}</Text>
+          <Text style={styles.fillValue}>{t('member.inscrits', { booked_count, capacity })}</Text>
         </View>
         <ProgressBar progress={progress} color={progress >= 1 ? colors.danger : progress >= 0.7 ? colors.warning : colors.primary} />
       </View>

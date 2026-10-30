@@ -8,9 +8,12 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachSessions, useManualCheckin, useSessionRoster } from '../../../src/hooks/useCoachSessions';
 import { EmptyState, ProgressBar } from '../../../src/components/ui';
 import { RosterRow } from '../../../src/components/coach/RosterRow';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../../src/i18n';
 
 /** Détail d'un cours + appel — FitZone App Coach.dc.html, I3. */
 export default function CoachSessionDetailScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -37,21 +40,21 @@ export default function CoachSessionDetailScreen() {
       <ScreenHeader title={session.classType.name} fallbackHref="/(coach)" />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.subtitle}>
-          {new Date(session.startsAt).toLocaleString('fr-FR', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
+          {new Date(session.startsAt).toLocaleString(dateLocale(), { weekday: 'long', hour: '2-digit', minute: '2-digit' })}
           {session.room ? ` · ${session.room.name}` : ''}
         </Text>
 
         <View style={styles.progressCard}>
           <View style={styles.progressRow}>
-            <Text style={styles.progressLabel}>Présents</Text>
-            <Text style={styles.progressValue}>{attendedCount} / {confirmed.length} inscrits</Text>
+            <Text style={styles.progressLabel}>{t('coach.presents')}</Text>
+            <Text style={styles.progressValue}>{t('coach.inscrits_2', { attendedCount, length: confirmed.length })}</Text>
           </View>
           <ProgressBar progress={confirmed.length ? attendedCount / confirmed.length : 0} color={colors.success} />
         </View>
 
-        <Text style={styles.sectionTitle}>Inscrits</Text>
+        <Text style={styles.sectionTitle}>{t('coach.inscrits_3')}</Text>
         {confirmed.length === 0 ? (
-          <EmptyState icon="group-off" title="Aucun inscrit" text="Personne n'est encore réservé pour ce cours." tone="muted" />
+          <EmptyState icon="group-off" title={t('coach.aucun_inscrit')} text={t('coach.personne_nest_encore_reserve_pour')} tone="muted" />
         ) : (
           <View style={styles.list}>
             {confirmed.map((entry) => (
@@ -70,7 +73,7 @@ export default function CoachSessionDetailScreen() {
 
         {waitlisted.length > 0 ? (
           <>
-            <Text style={styles.sectionTitle}>Liste d’attente</Text>
+            <Text style={styles.sectionTitle}>{t('common.liste_dattente')}</Text>
             <View style={styles.list}>
               {waitlisted.map((entry) => (
                 <RosterRow

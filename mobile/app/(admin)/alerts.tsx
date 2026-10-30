@@ -9,11 +9,15 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminHomeAlerts, useSaveHomeAlert } from '../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle } from '../../src/components/ui';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../src/i18n';
+import { audienceLabel } from '../../src/i18n/labels';
 
-const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const fmt = (d: string) => new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
 /** Alertes adhérents : bandeaux affichés en haut de l'accueil de l'application (période, audience, niveau). */
 export default function AdminAlertsScreen() {
+  useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: alerts, refetch } = useAdminHomeAlerts();
@@ -23,7 +27,7 @@ export default function AdminAlertsScreen() {
   const today = new Date().toISOString().slice(0, 10);
   const statusOf = (a: { isActive: boolean; startsOn: string; endsOn: string }): 'active' | 'scheduled' | 'ended' | 'off' =>
     !a.isActive ? 'off' : a.endsOn.slice(0, 10) < today ? 'ended' : a.startsOn.slice(0, 10) > today ? 'scheduled' : 'active';
-  const STATUS_LABEL = { active: 'Active', scheduled: 'Programmée', ended: 'Terminée', off: 'Désactivée' } as const;
+  const STATUS_LABEL = { active: i18n.t('admin.active'), scheduled: i18n.t('admin.programmee'), ended: i18n.t('admin.terminee'), off: i18n.t('admin.desactivee') } as const;
   const all = alerts ?? [];
   const counts = {
     all: all.length,
@@ -36,24 +40,24 @@ export default function AdminAlertsScreen() {
 
   const tone = (level: string) =>
     level === 'urgent'
-      ? { bg: colors.dangerSoft, ink: colors.dangerInk, icon: 'error' as const, label: 'Urgent' }
+      ? { bg: colors.dangerSoft, ink: colors.dangerInk, icon: 'error' as const, label: i18n.t('admin.urgent') }
       : level === 'warn'
-        ? { bg: colors.warningSoft, ink: colors.warningInk, icon: 'warning' as const, label: 'Avertissement' }
-        : { bg: colors.primarySoft, ink: colors.primaryInk, icon: 'info' as const, label: 'Information' };
+        ? { bg: colors.warningSoft, ink: colors.warningInk, icon: 'warning' as const, label: i18n.t('admin.avertissement') }
+        : { bg: colors.primarySoft, ink: colors.primaryInk, icon: 'info' as const, label: i18n.t('admin.information') };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Plus</Text>
+          <Text style={styles.backText}>{i18n.t('common.plus')}</Text>
         </Pressable>
         <ScreenTitle
-          title="Alertes adhérents"
-          subtitle="Bandeaux sur l’accueil de l’app"
+          title={i18n.t('admin.alertes_adherents')}
+          subtitle={i18n.t('admin.bandeaux_sur_laccueil_de_lapp')}
           right={
             <Pressable
-              accessibilityLabel="Créer une alerte"
+              accessibilityLabel={i18n.t('admin.creer_une_alerte')}
               onPress={() => router.push('/(admin)/alert-form')}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -65,9 +69,9 @@ export default function AdminAlertsScreen() {
         />
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-          {([['all', 'Toutes'], ['active', 'Actives'], ['scheduled', 'Programmées'], ['ended', 'Terminées']] as const).map(([k, l]) => (
+          {(['all', 'active', 'scheduled', 'ended'] as const).map((k) => (
             <Pressable key={k} onPress={() => setFilter(k)} style={[styles.filterChip, filter === k && styles.filterChipOn]}>
-              <Text style={[styles.filterText, filter === k && { color: colors.primaryContrast }]}>{l} · {counts[k]}</Text>
+              <Text style={[styles.filterText, filter === k && { color: colors.primaryContrast }]}>{i18n.t(`admin.alert_filter_${k}`)} · {counts[k]}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -94,7 +98,7 @@ export default function AdminAlertsScreen() {
                   </View>
                   <View style={styles.whenRow}>
                     <MaterialIcons name="event" size={14} color={colors.primaryInk} />
-                    <Text style={styles.cardMeta}>{fmt(a.startsOn)} → {fmt(a.endsOn)} · {a.audience}</Text>
+                    <Text style={styles.cardMeta}>{fmt(a.startsOn)} → {fmt(a.endsOn)} · {audienceLabel(a.audience)}</Text>
                   </View>
                 </View>
                 <Switch
@@ -110,7 +114,7 @@ export default function AdminAlertsScreen() {
           {shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="notification-important" size={34} color={colors.primaryInk} />
-              <Text style={styles.emptyText}>Aucune alerte dans cette catégorie.</Text>
+              <Text style={styles.emptyText}>{i18n.t('admin.aucune_alerte_dans_cette_categorie')}</Text>
             </View>
           ) : null}
         </View>

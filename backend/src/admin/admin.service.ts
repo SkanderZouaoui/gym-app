@@ -33,7 +33,7 @@ export class AdminService {
     const scheduled = new Set(withShifts.map((w) => w.userId));
     const missingShift = teamUsers.filter((u) => !scheduled.has(u.id));
 
-    const alerts: { key: string; severity: 'warning' | 'danger' | 'info'; title: string; detail: string; route: string }[] = [];
+    const alerts: { key: string; severity: 'warning' | 'danger' | 'info'; title: string; detail: string; route: string; params?: Record<string, string | number> }[] = [];
     if (staffCount === 0) {
       alerts.push({ key: 'no-staff', severity: 'danger', title: 'Aucun compte d’accueil', detail: 'Créez au moins un compte d’accueil pour encaisser et pointer.', route: '/(admin)/team' });
     }
@@ -44,6 +44,7 @@ export class AdminService {
         title: `${missingShift.length} membre${missingShift.length > 1 ? 's' : ''} de l’équipe sans planning`,
         detail: missingShift.slice(0, 3).map((u) => `${u.firstName} ${u.lastName}`).join(', ') + (missingShift.length > 3 ? '…' : ''),
         route: '/(admin)/team',
+        params: { count: missingShift.length, names: missingShift.slice(0, 3).map((u) => `${u.firstName} ${u.lastName}`).join(', ') + (missingShift.length > 3 ? '…' : '') },
       });
     }
     if (plans === 0) {
@@ -67,7 +68,7 @@ export class AdminService {
     if (upcoming === 0) {
       alerts.push({ key: 'no-sessions', severity: 'warning', title: 'Aucun cours programmé cette semaine', detail: 'Les adhérents ne peuvent rien réserver.', route: '/(admin)/(tabs)/planning' });
     } else if (noCoach > 0) {
-      alerts.push({ key: 'sessions-no-coach', severity: 'warning', title: `${noCoach} cours sans coach cette semaine`, detail: 'Affectez un coach depuis le planning.', route: '/(admin)/(tabs)/planning' });
+      alerts.push({ key: 'sessions-no-coach', severity: 'warning', title: `${noCoach} cours sans coach cette semaine`, detail: 'Affectez un coach depuis le planning.', route: '/(admin)/(tabs)/planning', params: { count: noCoach } });
     }
     return alerts;
   }

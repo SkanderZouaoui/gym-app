@@ -13,19 +13,22 @@ import { DateField } from '../../src/components/ui/DateTimeFields';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../src/components/ui/StickyActionBar';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useAnnouncements, useDeleteAnnouncement, useSendAnnouncement, useUpdateAnnouncement, type Announcement } from '../../src/hooks/useAdmin';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../src/i18n';
 
 const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-const fr = (s: string | null) => (s ? new Date(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '…');
+const fr = (s: string | null) => (s ? new Date(s).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '…');
 
-function status(a: Announcement): 'Programmée' | 'Publiée' | 'Terminée' {
+function status(a: Announcement): 'scheduled' | 'published' | 'ended' {
   const today = iso(new Date());
-  if (a.startsOn && a.startsOn.slice(0, 10) > today) return 'Programmée';
-  if (a.endsOn && a.endsOn.slice(0, 10) < today) return 'Terminée';
-  return 'Publiée';
+  if (a.startsOn && a.startsOn.slice(0, 10) > today) return 'scheduled';
+  if (a.endsOn && a.endsOn.slice(0, 10) < today) return 'ended';
+  return 'published';
 }
 
 /** Annonces (admin) : message sur l'accueil adhérent pendant une période, avec push facultatif. */
 export default function AdminAnnouncementsScreen() {
+  useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: announcements, refetch } = useAnnouncements();
@@ -75,11 +78,11 @@ export default function AdminAnnouncementsScreen() {
         { id: editingId, title: title.trim(), body: body.trim(), startsOn, endsOn: endsOn || null },
         {
           onSuccess: () => {
-            setDone('Annonce modifiée.');
+            setDone(i18n.t('admin.annonce_modifiee'));
             setOpen(false);
             resetForm();
           },
-          onError: () => setError('La modification a échoué. Réessayez.'),
+          onError: () => setError(i18n.t('admin.la_modification_a_echoue_reessayez')),
         },
       );
       return;
@@ -88,28 +91,28 @@ export default function AdminAnnouncementsScreen() {
       { title: title.trim(), body: body.trim(), startsOn, endsOn: endsOn || undefined, push },
       {
         onSuccess: (r) => {
-          setDone(push ? `Publiée et envoyée en push à ${r.recipientCount} adhérent(s).` : 'Annonce publiée.');
+          setDone(push ? i18n.t('admin.publiee_et_envoyee_en_push', { recipientCount: r.recipientCount }) : i18n.t('admin.annonce_publiee'));
           setOpen(false);
           resetForm();
         },
-        onError: () => setError('L’annonce n’a pas pu être publiée. Réessayez.'),
+        onError: () => setError(i18n.t('admin.lannonce_na_pas_pu_etre')),
       },
     );
   };
 
   const tag = (s: ReturnType<typeof status>) =>
-    s === 'Publiée' ? { bg: colors.successSoft, fg: colors.successInk } : s === 'Programmée' ? { bg: colors.warningSoft, fg: colors.warningInk } : { bg: colors.surface2, fg: colors.muted };
+    s === 'published' ? { bg: colors.successSoft, fg: colors.successInk } : s === 'scheduled' ? { bg: colors.warningSoft, fg: colors.warningInk } : { bg: colors.surface2, fg: colors.muted };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={[styles.container, open && { paddingBottom: STICKY_BAR_SPACE + 30 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Plus</Text>
+          <Text style={styles.backText}>{i18n.t('common.plus')}</Text>
         </Pressable>
         <ScreenTitle
-          title="Annonces"
-          subtitle="Push + écran d’accueil adhérent"
+          title={i18n.t('admin.annonces')}
+          subtitle={i18n.t('admin.push_ecran_daccueil_adherent')}
           right={
             <Pressable onPress={() => { if (open) resetForm(); setOpen((o) => !o); }} style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}>
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
@@ -124,19 +127,19 @@ export default function AdminAnnouncementsScreen() {
 
         {open ? (
           <View style={[styles.card, cardShadow]}>
-            <TextField label="Titre" value={title} onChangeText={setTitle} placeholder="Ex. Fermeture exceptionnelle" />
-            <TextField label="Message" value={body} onChangeText={setBody} placeholder="Votre message aux adhérents" multiline style={{ minHeight: 80, textAlignVertical: 'top' }} />
+            <TextField label={i18n.t('admin.titre')} value={title} onChangeText={setTitle} placeholder={i18n.t('admin.ex_fermeture_exceptionnelle')} />
+            <TextField label={i18n.t('common.message')} value={body} onChangeText={setBody} placeholder={i18n.t('admin.votre_message_aux_adherents')} multiline style={{ minHeight: 80, textAlignVertical: 'top' }} />
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}><DateField label="Début" value={startsOn} onChange={setStartsOn} /></View>
-              <View style={{ flex: 1 }}><DateField label="Fin (facultatif)" value={endsOn} onChange={setEndsOn} clearable icon="event-available" minimumDate={startsOn ? new Date(startsOn) : undefined} /></View>
+              <View style={{ flex: 1 }}><DateField label={i18n.t('admin.debut')} value={startsOn} onChange={setStartsOn} /></View>
+              <View style={{ flex: 1 }}><DateField label={i18n.t('admin.fin_facultatif')} value={endsOn} onChange={setEndsOn} clearable icon="event-available" minimumDate={startsOn ? new Date(startsOn) : undefined} /></View>
             </View>
             {!editingId ? (
             <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Envoyer une notification push</Text>
+              <Text style={styles.switchLabel}>{i18n.t('admin.envoyer_une_notification_push')}</Text>
               <Switch value={push} onValueChange={setPush} trackColor={{ true: colors.primary, false: colors.surface2 }} thumbColor="#FFFFFF" ios_backgroundColor={colors.surface2} />
             </View>
             ) : (
-              <Text style={styles.editNote}>Les notifications déjà envoyées ne sont pas modifiées.</Text>
+              <Text style={styles.editNote}>{i18n.t('admin.les_notifications_deja_envoyees_ne')}</Text>
             )}
           </View>
         ) : null}
@@ -150,34 +153,34 @@ export default function AdminAnnouncementsScreen() {
                 <View style={styles.itemTop}>
                   <Text style={styles.itemTitle} numberOfLines={1}>{a.title}</Text>
                   <View style={[styles.tag, { backgroundColor: t.bg }]}>
-                    <Text style={[styles.tagText, { color: t.fg }]}>{st}</Text>
+                    <Text style={[styles.tagText, { color: t.fg }]}>{i18n.t(`admin.status_${st}`)}</Text>
                   </View>
                 </View>
                 <Text style={styles.itemBody} numberOfLines={3}>{a.body}</Text>
                 <View style={styles.period}>
                   <MaterialIcons name="event" size={16} color={colors.primaryInk} />
-                  <Text style={[styles.periodText, { flex: 1 }]}>{fr(a.startsOn)} → {fr(a.endsOn)}{a.push ? ' · push envoyé' : ''}</Text>
-                  <Pressable accessibilityLabel="Modifier l'annonce" onPress={() => startEdit(a)} style={styles.iconBtn} hitSlop={6}>
+                  <Text style={[styles.periodText, { flex: 1 }]}>{fr(a.startsOn)} → {fr(a.endsOn)}{a.push ? i18n.t('admin.push_envoye') : ''}</Text>
+                  <Pressable accessibilityLabel={i18n.t('admin.modifier_lannonce')} onPress={() => startEdit(a)} style={styles.iconBtn} hitSlop={6}>
                     <MaterialIcons name="edit" size={18} color={colors.primaryInk} />
                   </Pressable>
-                  <Pressable accessibilityLabel="Supprimer l'annonce" onPress={() => setToDelete(a)} style={[styles.iconBtn, { backgroundColor: colors.dangerSoft }]} hitSlop={6}>
+                  <Pressable accessibilityLabel={i18n.t('admin.supprimer_lannonce')} onPress={() => setToDelete(a)} style={[styles.iconBtn, { backgroundColor: colors.dangerSoft }]} hitSlop={6}>
                     <MaterialIcons name="delete-outline" size={18} color={colors.dangerInk} />
                   </Pressable>
                 </View>
               </View>
             );
           })}
-          {(announcements ?? []).length === 0 ? <Text style={styles.empty}>Aucune annonce pour le moment.</Text> : null}
+          {(announcements ?? []).length === 0 ? <Text style={styles.empty}>{i18n.t('admin.aucune_annonce_pour_le_moment')}</Text> : null}
         </View>
       </ScrollView>
-      <StickyActionBar visible={open} label={editingId ? 'Enregistrer les modifications' : 'Publier'} icon={editingId ? 'check' : 'send'} loading={send.isPending || updateAnn.isPending} disabled={!valid} onPress={publish} />
+      <StickyActionBar visible={open} label={editingId ? i18n.t('common.enregistrer_les_modifications') : i18n.t('admin.publier')} icon={editingId ? 'check' : 'send'} loading={send.isPending || updateAnn.isPending} disabled={!valid} onPress={publish} />
 
       <BottomSheet visible={!!toDelete} onClose={() => setToDelete(null)}>
-        <Text style={styles.sheetTitle}>Supprimer « {toDelete?.title} » ?</Text>
-        <Text style={styles.sheetText}>L’annonce disparaîtra de l’accueil des adhérents. Les notifications déjà envoyées restent dans leur historique.</Text>
+        <Text style={styles.sheetTitle}>{i18n.t('admin.supprimer', { title: toDelete?.title })}</Text>
+        <Text style={styles.sheetText}>{i18n.t('admin.lannonce_disparaitra_de_laccueil_des')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Oui, supprimer" variant="danger" loading={deleteAnn.isPending} onPress={() => toDelete && deleteAnn.mutate(toDelete.id, { onSettled: () => setToDelete(null) })} />
-          <Button label="Annuler" variant="outline" onPress={() => setToDelete(null)} />
+          <Button label={i18n.t('admin.oui_supprimer')} variant="danger" loading={deleteAnn.isPending} onPress={() => toDelete && deleteAnn.mutate(toDelete.id, { onSettled: () => setToDelete(null) })} />
+          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setToDelete(null)} />
         </View>
       </BottomSheet>
     </SafeAreaView>

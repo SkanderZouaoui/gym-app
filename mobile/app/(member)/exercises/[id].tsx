@@ -13,9 +13,11 @@ import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
 
 /** Fiche exercice — FitZone App Entraînement.dc.html, E3. */
 export default function ExerciseDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -59,10 +61,10 @@ export default function ExerciseDetailScreen() {
         <View style={{ padding: spacing.lg }}>
           <EmptyState
             icon="cloud-off"
-            title="Exercice indisponible"
-            text={isError ? 'Impossible de récupérer cet exercice pour le moment. Vérifiez votre connexion.' : 'Cet exercice est introuvable.'}
+            title={t('member.exercice_indisponible')}
+            text={isError ? t('member.impossible_de_recuperer_cet_exercice') : t('member.cet_exercice_est_introuvable')}
             tone="danger"
-            actionLabel={isError ? 'Réessayer' : undefined}
+            actionLabel={isError ? t('common.reessayer') : undefined}
             onAction={isError ? () => refetch() : undefined}
           />
         </View>
@@ -82,7 +84,7 @@ export default function ExerciseDetailScreen() {
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Exercices</Text>
+          <Text style={styles.backText}>{t('common.exercices')}</Text>
         </Pressable>
 
         <View style={styles.hero}>
@@ -96,23 +98,23 @@ export default function ExerciseDetailScreen() {
 
         <ScreenTitle
           title={exercise.name}
-          subtitle={`${groupLabel ?? 'Exercice'} · exercice de la bibliothèque`}
+          subtitle={t('member.exercice_de_la_bibliotheque', { v0: groupLabel ?? t('member.exercise_fallback') })}
         />
 
         <View style={styles.statsRow}>
           <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statLabel}>Mon record</Text>
+            <Text style={styles.statLabel}>{t('member.mon_record')}</Text>
             <Text style={styles.statValue}>{record ? `${record.bestWeight} kg` : '—'}</Text>
           </View>
           <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statLabel}>Dernière séance</Text>
+            <Text style={styles.statLabel}>{t('member.derniere_seance')}</Text>
             <Text style={styles.statValue}>{record ? `${record.lastWeight} kg` : '—'}</Text>
           </View>
         </View>
 
         {groupLabel || parsed.secondaryMuscles.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Muscles sollicités</Text>
+            <Text style={styles.sectionTitle}>{t('common.muscles_sollicites')}</Text>
             <View style={styles.chipsRow}>
               {groupLabel ? (
                 <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.musclePrimary}>
@@ -130,7 +132,7 @@ export default function ExerciseDetailScreen() {
 
         {parsed.steps.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Exécution</Text>
+            <Text style={styles.sectionTitle}>{t('common.execution')}</Text>
             <View style={[styles.stepsCard, cardShadow]}>
               {parsed.steps.map((step, i) => (
                 <View key={i} style={[styles.stepRow, i === parsed.steps.length - 1 && { borderBottomWidth: 0 }]}>
@@ -147,8 +149,8 @@ export default function ExerciseDetailScreen() {
         <View style={styles.tip}>
           <MaterialIcons name="lightbulb-outline" size={22} color={colors.primaryInk} />
           <Text style={styles.tipText}>
-            <Text style={{ fontFamily: fonts.bodyBold }}>Conseil. </Text>
-            Utilisez des pinces et un pareur au-delà de 80 % de votre maximum.
+            <Text style={{ fontFamily: fonts.bodyBold }}>{t('member.conseil')}</Text>
+            {' '}{t('member.tip_text')}
           </Text>
         </View>
 
@@ -158,13 +160,13 @@ export default function ExerciseDetailScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="playlist-add" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>Ajouter à un programme</Text>
+            <Text style={styles.ctaText}>{t('member.ajouter_a_un_programme')}</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

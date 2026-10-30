@@ -4,6 +4,7 @@ import Swipeable, { type SwipeableMethods } from 'react-native-gesture-handler/R
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export type SetRowState = 'done' | 'current' | 'todo';
 
@@ -25,6 +26,7 @@ interface SetTableRowProps {
  * FitZone App Entraînement.dc.html, D3. Glisser vers la gauche révèle la
  * suppression de la série. */
 export function SetTableRow({ setNumber, weightKg, reps, state, error, onChangeWeight, onChangeReps, onValidate, onRemove }: SetTableRowProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const swipeableRef = useRef<SwipeableMethods>(null);
@@ -55,7 +57,7 @@ export function SetTableRow({ setNumber, weightKg, reps, state, error, onChangeW
       <Pressable
         onPress={onValidate}
         disabled={isDone}
-        accessibilityLabel="Valider la série"
+        accessibilityLabel={t('member.valider_la_serie_2')}
         style={[styles.checkbox, isDone && styles.checkboxDone]}
       >
         <MaterialIcons name="check" size={24} color={isDone ? colors.primaryContrast : colors.muted} />

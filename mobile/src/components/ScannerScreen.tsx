@@ -6,6 +6,7 @@ import { Scanner, type ScanSessionOption } from './Scanner';
 import { ScreenTitle } from './ui';
 import { fonts, radii, spacing } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface ScannerScreenProps {
   /** Cours scannables aujourd'hui ; undefined tant qu'ils chargent. */
@@ -17,6 +18,7 @@ interface ScannerScreenProps {
 
 /** Écran de scan commun (accueil, admin, coach) : choisit le cours actif puis affiche le scanner v2. */
 export function ScannerScreen({ sessions, initialSessionId, emptyText }: ScannerScreenProps) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [selected, setSelected] = useState<string | undefined>(initialSessionId);
@@ -36,7 +38,7 @@ export function ScannerScreen({ sessions, initialSessionId, emptyText }: Scanner
         <Scanner sessionId={activeId} sessions={sorted} onSelectSession={setSelected} />
       ) : (
         <View style={styles.container}>
-          <ScreenTitle title="Scanner" subtitle="Valider la présence aux cours collectifs." />
+          <ScreenTitle title={t('common.scanner')} subtitle={t('common.valider_la_presence_aux_cours')} />
           <View style={[styles.empty, cardShadow]}>
             <MaterialIcons name="event-busy" size={36} color={colors.primaryInk} />
             <Text style={styles.emptyText}>{emptyText}</Text>

@@ -14,9 +14,13 @@ import { ApiError } from '../../../src/api/client';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
 import { ImageGallery } from '../../../src/components/adherent/ImageGallery';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../src/i18n';
+import { levelLabel } from '../../../src/i18n/labels';
 
 /** Détail d'un cours — FitZone App Adherent.dc.html, C1. */
 export default function SessionDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -59,7 +63,7 @@ export default function SessionDetailScreen() {
           refetch();
         }
       },
-      onError: (e) => setBookingError(e instanceof ApiError ? traduireErreurReservation(e) : 'Erreur de réservation'),
+      onError: (e) => setBookingError(e instanceof ApiError ? traduireErreurReservation(e) : t('member.erreur_de_reservation')),
     });
   };
 
@@ -72,7 +76,7 @@ export default function SessionDetailScreen() {
   };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.navigate('/(member)/(tabs)/planning'));
-  const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const timeOf = (iso: string) => new Date(iso).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -82,18 +86,18 @@ export default function SessionDetailScreen() {
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Planning</Text>
+          <Text style={styles.backText}>{t('common.planning')}</Text>
         </Pressable>
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
-              <Text style={styles.heroTagText}>Cours collectif</Text>
+              <Text style={styles.heroTagText}>{t('member.cours_collectif')}</Text>
             </View>
             <Text style={styles.heroTitle}>{session.classType.name}</Text>
             <Text style={styles.heroSub}>
-              {new Date(session.startsAt).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              {new Date(session.startsAt).toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
             </Text>
             <Text style={styles.heroTime}>
               {timeOf(session.startsAt)} – {timeOf(session.endsAt)}
@@ -103,58 +107,56 @@ export default function SessionDetailScreen() {
 
         {bookingError ? <Banner tone="danger" icon="error" text={bookingError} /> : null}
         {existingBooking?.status === 'CONFIRMED' ? (
-          <Banner tone="success" icon="check-circle" text="Place réservée · rappel 1 h avant" />
+          <Banner tone="success" icon="check-circle" text={t('member.place_reservee_rappel_1_h')} />
         ) : null}
         {existingBooking?.status === 'WAITLISTED' ? (
           <Banner
             tone="warning"
             icon="hourglass-top"
-            text={`En liste d’attente · ${existingBooking.waitlistPosition ?? '?'}e position`}
+            text={t('member.en_liste_dattente_e_position', { v0: existingBooking.waitlistPosition ?? '?' })}
           />
         ) : null}
 
         <View style={styles.statsRow}>
           <View style={[styles.statCard, cardShadow]}>
             <Text style={styles.statValue}>{session.coach?.user.firstName ?? '—'}</Text>
-            <Text style={styles.statLabel}>Coach</Text>
+            <Text style={styles.statLabel}>{t('common.coach')}</Text>
           </View>
           <View style={[styles.statCard, cardShadow]}>
             <Text style={styles.statValue}>{session.room?.name ?? '—'}</Text>
-            <Text style={styles.statLabel}>Salle</Text>
+            <Text style={styles.statLabel}>{t('common.salle')}</Text>
           </View>
           <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statValue}>{durationMinutes} min</Text>
-            <Text style={styles.statLabel}>Durée</Text>
+            <Text style={styles.statValue}>{t('member.min_2', { durationMinutes })}</Text>
+            <Text style={styles.statLabel}>{t('common.duree')}</Text>
           </View>
         </View>
 
         <View style={[styles.spotsCard, cardShadow]}>
           <View style={styles.spotsRow}>
-            <Text style={styles.spotsLabel}>Places</Text>
+            <Text style={styles.spotsLabel}>{t('member.places')}</Text>
             <View style={[styles.spotsTag, { backgroundColor: isFull ? colors.dangerSoft : spotsLeft <= 3 ? colors.warningSoft : colors.surface2 }]}>
               <Text style={[styles.spotsTagText, { color: isFull ? colors.dangerInk : spotsLeft <= 3 ? colors.warningInk : colors.muted }]}>
-                {isFull ? 'Complet' : `${spotsLeft} dispo.`}
+                {isFull ? t('common.complet') : `${spotsLeft} dispo.`}
               </Text>
             </View>
           </View>
           <ProgressBar progress={progress} color={isFull ? colors.danger : colors.primary} />
-          <Text style={styles.spotsSub}>
-            {session._count.bookings}/{session.capacity} inscrits
-          </Text>
+          <Text style={styles.spotsSub}>{t('member.inscrits', { bookings: session._count.bookings, capacity: session.capacity })}</Text>
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Description du cours</Text>
+          <Text style={styles.sectionTitle}>{t('member.description_du_cours')}</Text>
           <View style={[styles.descriptionCard, cardShadow]}>
             {session.classType.description ? (
               <Text style={styles.description}>{session.classType.description}</Text>
             ) : (
-              <Text style={styles.descriptionEmpty}>Aucune description pour ce cours.</Text>
+              <Text style={styles.descriptionEmpty}>{t('member.aucune_description_pour_ce_cours')}</Text>
             )}
             {session.classType.level ? (
               <View style={styles.levelRow}>
                 <MaterialIcons name="signal-cellular-alt" size={18} color={colors.primaryInk} />
-                <Text style={styles.levelText}>Niveau : {session.classType.level}</Text>
+                <Text style={styles.levelText}>{t('member.niveau', { level: levelLabel(session.classType.level) })}</Text>
               </View>
             ) : null}
           </View>
@@ -162,7 +164,7 @@ export default function SessionDetailScreen() {
 
         {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Galerie</Text>
+            <Text style={styles.sectionTitle}>{t('member.galerie')}</Text>
             <ImageGallery urls={session.classType.galleryUrls} />
           </View>
         ) : null}
@@ -172,7 +174,7 @@ export default function SessionDetailScreen() {
         {hasEnded ? (
           <View style={styles.closed}>
             <MaterialIcons name="event-busy" size={20} color={colors.muted} />
-            <Text style={styles.closedText}>Ce cours est terminé</Text>
+            <Text style={styles.closedText}>{t('member.ce_cours_est_termine')}</Text>
           </View>
         ) : existingBooking?.status === 'CONFIRMED' || existingBooking?.status === 'WAITLISTED' ? (
           <Pressable
@@ -185,14 +187,14 @@ export default function SessionDetailScreen() {
               {cancelBooking.isPending
                 ? '...'
                 : existingBooking.status === 'WAITLISTED'
-                  ? 'Quitter la liste d’attente'
-                  : 'Annuler la réservation'}
+                  ? t('member.quitter_la_liste_dattente')
+                  : t('member.annuler_la_reservation')}
             </Text>
           </Pressable>
         ) : hasStarted ? (
           <View style={styles.closed}>
             <MaterialIcons name="event-busy" size={20} color={colors.muted} />
-            <Text style={styles.closedText}>Réservation fermée : le cours a déjà commencé</Text>
+            <Text style={styles.closedText}>{t('member.reservation_fermee_le_cours_a')}</Text>
           </View>
         ) : (
           <Pressable
@@ -208,7 +210,7 @@ export default function SessionDetailScreen() {
             >
               <MaterialIcons name={isFull ? 'hourglass-top' : 'event-available'} size={22} color={colors.primaryContrast} />
               <Text style={styles.ctaText}>
-                {createBooking.isPending ? '...' : isFull ? 'Rejoindre la liste d’attente' : 'Réserver ma place'}
+                {createBooking.isPending ? '...' : isFull ? t('member.rejoindre_la_liste_dattente') : t('member.reserver_ma_place')}
               </Text>
             </LinearGradient>
           </Pressable>
@@ -217,16 +219,16 @@ export default function SessionDetailScreen() {
 
       <BottomSheet visible={cancelling} onClose={() => setCancelling(false)}>
         <Text style={styles.sheetTitle}>
-          {existingBooking?.status === 'WAITLISTED' ? 'Quitter la liste d’attente ?' : `Annuler ${session.classType.name} ?`}
+          {existingBooking?.status === 'WAITLISTED' ? t('member.quitter_la_liste_dattente_2') : `Annuler ${session.classType.name} ?`}
         </Text>
         <Text style={styles.sheetText}>
           {existingBooking?.status === 'WAITLISTED'
-            ? 'Vous perdrez votre position dans la liste d’attente.'
-            : 'L’annulation est gratuite. Votre place sera proposée à la liste d’attente.'}
+            ? t('member.vous_perdrez_votre_position_dans')
+            : t('member.lannulation_est_gratuite_votre_place')}
         </Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Oui, annuler" onPress={handleCancel} variant="secondary" loading={cancelBooking.isPending} />
-          <Button label="Garder ma place" onPress={() => setCancelling(false)} variant="outline" />
+          <Button label={t('member.oui_annuler')} onPress={handleCancel} variant="secondary" loading={cancelBooking.isPending} />
+          <Button label={t('member.garder_ma_place')} onPress={() => setCancelling(false)} variant="outline" />
         </View>
       </BottomSheet>
 
@@ -238,7 +240,7 @@ export default function SessionDetailScreen() {
       />
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );
@@ -247,15 +249,15 @@ export default function SessionDetailScreen() {
 function traduireErreurReservation(e: ApiError): string {
   switch (e.code) {
     case 'NO_MEMBERSHIP':
-      return "Vous n'avez pas d'abonnement actif. Contactez l'accueil.";
+      return i18n.t('member.vous_navez_pas_dabonnement_actif');
     case 'MEMBERSHIP_EXPIRED':
-      return 'Votre abonnement a expiré.';
+      return i18n.t('member.votre_abonnement_a_expire');
     case 'MEMBERSHIP_SUSPENDED':
-      return 'Votre abonnement est suspendu.';
+      return i18n.t('member.votre_abonnement_est_suspendu');
     case 'SESSION_STARTED':
-      return 'Ce cours a déjà commencé, la réservation est fermée.';
+      return i18n.t('member.ce_cours_a_deja_commence');
     case 'SESSION_FULL':
-      return 'Ce cours est complet.';
+      return i18n.t('member.ce_cours_est_complet');
     default:
       return e.message;
   }

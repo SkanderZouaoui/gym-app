@@ -12,9 +12,12 @@ import { BottomSheet, EmptyState } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { estimateMinutes } from '../../../src/components/coach/programStatus';
+import { useTranslation } from 'react-i18next';
+import { goalLabel, levelLabel } from '../../../src/i18n/labels';
 
 /** Détail d'un programme proposé par un coach : contenu, puis approbation (publication) ou refus avec motif. */
 export default function AdminProgramDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -39,7 +42,7 @@ export default function AdminProgramDetailScreen() {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={{ padding: spacing.lg }}>
-          <EmptyState icon="fitness-center" title="Programme introuvable" text="Ce programme n'existe plus." tone="danger" actionLabel="Retour" onAction={goBack} />
+          <EmptyState icon="fitness-center" title={t('admin.programme_introuvable')} text={t('admin.ce_programme_nexiste_plus')} tone="danger" actionLabel={t('common.retour')} onAction={goBack} />
         </View>
       </SafeAreaView>
     );
@@ -59,18 +62,18 @@ export default function AdminProgramDetailScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Programmes</Text>
+          <Text style={styles.backText}>{t('common.programmes')}</Text>
         </Pressable>
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
-              <Text style={styles.heroTagText}>Par {program.createdBy.firstName} {program.createdBy.lastName}</Text>
+              <Text style={styles.heroTagText}>{t('admin.par', { firstName: program.createdBy.firstName, lastName: program.createdBy.lastName })}</Text>
             </View>
             <Text style={styles.heroTitle}>{program.name}</Text>
             <View style={styles.heroChips}>
-              {[program.level, program.goal].filter(Boolean).map((c) => (
+              {[levelLabel(program.level), goalLabel(program.goal)].filter(Boolean).map((c) => (
                 <View key={c as string} style={styles.heroChip}>
                   <Text style={styles.heroChipText}>{c}</Text>
                 </View>
@@ -83,7 +86,7 @@ export default function AdminProgramDetailScreen() {
           <View style={styles.rejection}>
             <MaterialIcons name="feedback" size={22} color={colors.dangerInk} />
             <Text style={styles.rejectionText}>
-              <Text style={{ fontFamily: fonts.bodyBold }}>Motif du refus. </Text>
+              <Text style={{ fontFamily: fonts.bodyBold }}>{t('common.motif_du_refus')}</Text>
               {program.rejectionNote}
             </Text>
           </View>
@@ -91,9 +94,9 @@ export default function AdminProgramDetailScreen() {
 
         <View style={styles.statsRow}>
           {[
-            { n: String(exercises.length), l: 'Exercices' },
-            { n: String(totalSets), l: 'Séries' },
-            { n: `~${estimateMinutes(totalSets)} min`, l: 'Durée' },
+            { n: String(exercises.length), l: t('common.exercices') },
+            { n: String(totalSets), l: t('common.series') },
+            { n: `~${estimateMinutes(totalSets)} min`, l: t('common.duree') },
           ].map((s) => (
             <View key={s.l} style={[styles.statCard, cardShadow]}>
               <Text style={styles.statValue}>{s.n}</Text>
@@ -104,7 +107,7 @@ export default function AdminProgramDetailScreen() {
 
         {muscles.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Muscles ciblés</Text>
+            <Text style={styles.sectionTitle}>{t('common.muscles_cibles')}</Text>
             <View style={styles.chips}>
               {muscles.map((m) => (
                 <View key={m} style={styles.chip}>
@@ -116,7 +119,7 @@ export default function AdminProgramDetailScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>Exercices</Text>
+          <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
           <View style={{ gap: 10 }}>
             {exercises.map((ex, i) => (
               <Pressable
@@ -133,7 +136,7 @@ export default function AdminProgramDetailScreen() {
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={styles.exerciseSets}>{ex.sets} × {ex.reps}</Text>
-                  <Text style={styles.exerciseMeta}>{ex.setDetails[0]?.weightKg ? `${Number(ex.setDetails[0].weightKg)} kg` : 'Poids du corps'}</Text>
+                  <Text style={styles.exerciseMeta}>{ex.setDetails[0]?.weightKg ? `${Number(ex.setDetails[0].weightKg)} kg` : t('common.poids_du_corps')}</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
               </Pressable>
@@ -150,36 +153,36 @@ export default function AdminProgramDetailScreen() {
             >
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                 <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-                <Text style={styles.ctaText}>{approve.isPending ? 'Publication…' : 'Approuver et publier'}</Text>
+                <Text style={styles.ctaText}>{approve.isPending ? t('common.publication') : t('admin.approuver_et_publier')}</Text>
               </LinearGradient>
             </Pressable>
             <Pressable style={({ pressed }) => [styles.rejectButton, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => setRejecting(true)}>
               <MaterialIcons name="close" size={22} color={colors.dangerInk} />
-              <Text style={styles.rejectText}>Refuser</Text>
+              <Text style={styles.rejectText}>{t('admin.refuser')}</Text>
             </Pressable>
           </View>
         ) : (
           <Pressable style={styles.rejectButton} onPress={goBack}>
             <MaterialIcons name="arrow-back" size={22} color={colors.text} />
-            <Text style={[styles.rejectText, { color: colors.text }]}>Retour aux programmes</Text>
+            <Text style={[styles.rejectText, { color: colors.text }]}>{t('admin.retour_aux_programmes')}</Text>
           </Pressable>
         )}
       </ScrollView>
 
       <BottomSheet visible={rejecting} onClose={() => setRejecting(false)}>
-        <Text style={styles.sheetTitle}>Refuser « {program.name} » ?</Text>
-        <Text style={styles.sheetText}>Le coach verra le motif et pourra dupliquer le programme pour le corriger.</Text>
+        <Text style={styles.sheetTitle}>{t('admin.refuser_2', { name: program.name })}</Text>
+        <Text style={styles.sheetText}>{t('admin.le_coach_verra_le_motif')}</Text>
         <TextInput
           value={note}
           onChangeText={setNote}
-          placeholder="Motif du refus (facultatif)"
+          placeholder={t('admin.motif_du_refus_facultatif')}
           placeholderTextColor={colors.muted}
           multiline
           style={styles.noteInput}
         />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Refuser le programme" onPress={doReject} variant="secondary" loading={reject.isPending} />
-          <Button label="Annuler" onPress={() => setRejecting(false)} variant="outline" />
+          <Button label={t('admin.refuser_le_programme')} onPress={doReject} variant="secondary" loading={reject.isPending} />
+          <Button label={t('common.annuler')} onPress={() => setRejecting(false)} variant="outline" />
         </View>
       </BottomSheet>
     </SafeAreaView>

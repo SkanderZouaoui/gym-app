@@ -5,13 +5,16 @@ import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { BottomSheet } from './BottomSheet';
 import { Button } from '../Button';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../i18n';
+import { WEEKDAYS_NARROW_MON } from '../../i18n/labels';
 
 /**
  * Sélecteurs de date et d'heure 100 % JavaScript : fonctionnent partout (Expo Go compris),
  * sans module natif de sélection.
  */
 
-const WEEK = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+const WEEK = WEEKDAYS_NARROW_MON;
 const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
 export function CalendarSheet({
@@ -39,7 +42,7 @@ export function CalendarSheet({
         <Pressable style={styles.nav} hitSlop={8} onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>
           <MaterialIcons name="chevron-left" size={26} color={colors.text} />
         </Pressable>
-        <Text style={styles.month}>{month.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</Text>
+        <Text style={styles.month}>{month.toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' })}</Text>
         <Pressable style={styles.nav} hitSlop={8} onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}>
           <MaterialIcons name="chevron-right" size={26} color={colors.text} />
         </Pressable>
@@ -71,6 +74,7 @@ export function CalendarSheet({
 export function TimeSheet({
   visible, value, title, onClose, onSelect,
 }: { visible: boolean; value: { h: number; m: number }; title: string; onClose: () => void; onSelect: (v: { h: number; m: number }) => void }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [h, setH] = useState(value.h);
@@ -88,7 +92,7 @@ export function TimeSheet({
     <BottomSheet visible={visible} onClose={onClose} scrollEnabled={false}>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.big}>{pad(h)}:{pad(m)}</Text>
-      <Text style={styles.sub}>Heures</Text>
+      <Text style={styles.sub}>{t('common.heures')}</Text>
       <View style={styles.chipGrid}>
         {Array.from({ length: 24 }, (_, i) => i).map((i) => (
           <Pressable key={i} style={[styles.chip, h === i && styles.chipOn]} onPress={() => setH(i)}>
@@ -96,7 +100,7 @@ export function TimeSheet({
           </Pressable>
         ))}
       </View>
-      <Text style={styles.sub}>Minutes</Text>
+      <Text style={styles.sub}>{t('common.minutes')}</Text>
       <View style={styles.chipGrid}>
         {Array.from({ length: 12 }, (_, i) => i * 5).map((i) => (
           <Pressable key={i} style={[styles.chip, m === i && styles.chipOn]} onPress={() => setM(i)}>
@@ -104,7 +108,7 @@ export function TimeSheet({
           </Pressable>
         ))}
       </View>
-      <Button label="Valider" onPress={() => { onSelect({ h, m }); onClose(); }} />
+      <Button label={t('common.valider')} onPress={() => { onSelect({ h, m }); onClose(); }} />
     </BottomSheet>
   );
 }

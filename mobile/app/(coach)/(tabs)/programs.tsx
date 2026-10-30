@@ -11,18 +11,21 @@ import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefres
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { ScreenTitle } from '../../../src/components/ui';
 import { PROGRAM_STATUS_LABEL } from '../../../src/components/coach/programStatus';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../src/i18n';
 
 type Filter = 'all' | ProgramStatus;
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: 'all', label: 'Tous' },
-  { value: 'APPROVED', label: 'Validés' },
-  { value: 'PENDING', label: 'En validation' },
-  { value: 'REJECTED', label: 'Refusés' },
+  { value: 'all', get label() { return i18n.t('common.tous'); } },
+  { value: 'APPROVED', get label() { return i18n.t('coach.valides'); } },
+  { value: 'PENDING', get label() { return i18n.t('common.en_validation'); } },
+  { value: 'REJECTED', get label() { return i18n.t('common.refuses'); } },
 ];
 
 /** Programmes du coach : statistiques de validation, filtres, liste, création. */
 export default function CoachProgramsScreen() {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -42,11 +45,11 @@ export default function CoachProgramsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenTitle
-          title="Programmes"
-          subtitle="Soumis à validation de l’admin avant activation"
+          title={t('common.programmes')}
+          subtitle={t('coach.soumis_a_validation_de_ladmin')}
           right={
             <Pressable
-              accessibilityLabel="Créer un programme"
+              accessibilityLabel={t('common.creer_un_programme')}
               onPress={() => router.push('/(coach)/program-new')}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -59,9 +62,9 @@ export default function CoachProgramsScreen() {
 
         <View style={styles.statsRow}>
           {[
-            { n: count('APPROVED'), l: 'Validés', color: colors.text },
-            { n: count('PENDING'), l: 'En attente', color: colors.warningInk },
-            { n: count('REJECTED'), l: 'Refusés', color: colors.dangerInk },
+            { n: count('APPROVED'), l: t('coach.valides'), color: colors.text },
+            { n: count('PENDING'), l: t('coach.en_attente'), color: colors.warningInk },
+            { n: count('REJECTED'), l: t('common.refuses'), color: colors.dangerInk },
           ].map((s) => (
             <View key={s.l} style={[styles.statCard, cardShadow]}>
               <Text style={[styles.statValue, { color: s.color }]}>{s.n}</Text>
@@ -96,7 +99,7 @@ export default function CoachProgramsScreen() {
               </LinearGradient>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.cardName} numberOfLines={2}>{p.name}</Text>
-                <Text style={styles.cardMeta}>{[p.level, p.goal].filter(Boolean).join(' · ') || (p.isPublic ? 'Tous les adhérents' : `${p.assignedTo.firstName} ${p.assignedTo.lastName}`)}</Text>
+                <Text style={styles.cardMeta}>{[p.level, p.goal].filter(Boolean).join(' · ') || (p.isPublic ? t('coach.tous_les_adherents') : `${p.assignedTo.firstName} ${p.assignedTo.lastName}`)}</Text>
                 <View style={[styles.badge, p.status === 'PENDING' && styles.badgePending, p.status === 'REJECTED' && styles.badgeRejected, p.status === 'APPROVED' && styles.badgeApproved]}>
                   <Text
                     style={[
@@ -115,7 +118,7 @@ export default function CoachProgramsScreen() {
           ))}
           {shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
-              <Text style={styles.emptyText}>Aucun programme dans cette catégorie.</Text>
+              <Text style={styles.emptyText}>{t('coach.aucun_programme_dans_cette_categorie')}</Text>
             </View>
           ) : null}
         </View>

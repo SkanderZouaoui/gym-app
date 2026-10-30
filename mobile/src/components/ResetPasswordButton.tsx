@@ -6,6 +6,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { Banner, BottomSheet } from './ui';
 import { Button } from './Button';
 import { ApiError } from '../api/client';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   /** Nom de la personne concernée, affiché dans les fenêtres. */
@@ -17,7 +18,9 @@ interface Props {
 }
 
 /** Réinitialisation du mot de passe : confirmation, puis affichage unique du mot de passe provisoire (copier / partager). */
-export function ResetPasswordButton({ name, email, reset, label = 'Réinitialiser le mot de passe' }: Props) {
+export function ResetPasswordButton({ name, email, reset, label }: Props) {
+  const { t } = useTranslation();
+  const buttonLabel = label ?? t('common.reinitialiser_le_mot_de_passe_2');
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [confirm, setConfirm] = useState(false);
@@ -37,10 +40,10 @@ export function ResetPasswordButton({ name, email, reset, label = 'Réinitialise
       setConfirm(false);
       setError(
         e instanceof ApiError && e.code === 'CANNOT_RESET_SELF'
-          ? 'Utilisez « Mot de passe » dans votre profil pour changer le vôtre.'
+          ? t('common.utilisez_mot_de_passe_dans')
           : e instanceof ApiError && e.code === 'RESET_NOT_ALLOWED'
-            ? 'Seul un administrateur peut réinitialiser ce compte.'
-            : 'La réinitialisation a échoué. Réessayez.',
+            ? t('common.seul_un_administrateur_peut_reinitialiser')
+            : t('common.la_reinitialisation_a_echoue_reessayez'),
       );
     } finally {
       setBusy(false);
@@ -50,30 +53,27 @@ export function ResetPasswordButton({ name, email, reset, label = 'Réinitialise
   return (
     <>
       {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-      <Button label={label} variant="outline" onPress={() => { setError(null); setConfirm(true); }} />
+      <Button label={buttonLabel} variant="outline" onPress={() => { setError(null); setConfirm(true); }} />
 
       <BottomSheet visible={confirm} onClose={() => setConfirm(false)}>
-        <Text style={styles.title}>Réinitialiser le mot de passe de {name} ?</Text>
-        <Text style={styles.text}>
-          Un nouveau mot de passe provisoire aléatoire sera généré. L’ancien ne fonctionnera plus, la personne sera déconnectée
-          de ses appareils et devra choisir un mot de passe personnel à sa prochaine connexion.
-        </Text>
+        <Text style={styles.title}>{t('common.reinitialiser_le_mot_de_passe', { name })}</Text>
+        <Text style={styles.text}>{t('common.un_nouveau_mot_de_passe')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Oui, réinitialiser" variant="danger" loading={busy} onPress={run} />
-          <Button label="Annuler" variant="outline" onPress={() => setConfirm(false)} />
+          <Button label={t('common.oui_reinitialiser')} variant="danger" loading={busy} onPress={run} />
+          <Button label={t('common.annuler')} variant="outline" onPress={() => setConfirm(false)} />
         </View>
       </BottomSheet>
 
       <BottomSheet visible={!!result} onClose={() => setResult(null)}>
-        <Text style={styles.title}>Nouveau mot de passe · {name}</Text>
-        <Text style={styles.text}>Communiquez-le à la personne. Il ne sera plus affiché.</Text>
+        <Text style={styles.title}>{t('common.nouveau_mot_de_passe_2', { name })}</Text>
+        <Text style={styles.text}>{t('common.communiquez_le_a_la_personne')}</Text>
         <View style={styles.box}>
-          <Text style={styles.label}>Mot de passe provisoire</Text>
+          <Text style={styles.label}>{t('common.mot_de_passe_provisoire')}</Text>
           <Text style={styles.password} selectable>{result}</Text>
         </View>
         <View style={{ gap: spacing.sm }}>
           <Button
-            label={copied ? 'Copié' : 'Copier le mot de passe'}
+            label={copied ? t('common.copie') : t('common.copier_le_mot_de_passe')}
             variant="outline"
             onPress={async () => {
               if (!result) return;
@@ -83,8 +83,8 @@ export function ResetPasswordButton({ name, email, reset, label = 'Réinitialise
             }}
           />
           <Button
-            label="Partager"
-            onPress={() => result && Share.share({ message: `Mot de passe provisoire MuscleUP${email ? `\nE-mail : ${email}` : ''}\nMot de passe : ${result}\n\nVous devrez le changer à votre première connexion.` })}
+            label={t('common.partager')}
+            onPress={() => result && Share.share({ message: t('common.mot_de_passe_provisoire_muscleup', { v0: email ? t('common.share_email_line', { email }) : '', result }) })}
           />
         </View>
       </BottomSheet>

@@ -9,11 +9,14 @@ import { DateField } from '../../src/components/ui/DateTimeFields';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminHomeAlerts, useDeleteHomeAlert, useSaveHomeAlert, type AdminHomeAlert } from '../../src/hooks/useAdmin';
 import { Banner, ScreenTitle } from '../../src/components/ui';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
+import { audienceLabel } from '../../src/i18n/labels';
 
 const LEVELS: { value: AdminHomeAlert['level']; label: string; icon: keyof typeof MaterialIcons.glyphMap }[] = [
-  { value: 'info', label: 'Information', icon: 'info' },
-  { value: 'warn', label: 'Avertissement', icon: 'warning' },
-  { value: 'urgent', label: 'Urgent', icon: 'error' },
+  { value: 'info', get label() { return i18n.t('admin.information'); }, icon: 'info' },
+  { value: 'warn', get label() { return i18n.t('admin.avertissement'); }, icon: 'warning' },
+  { value: 'urgent', get label() { return i18n.t('admin.urgent'); }, icon: 'error' },
 ];
 const AUDIENCES: AdminHomeAlert['audience'][] = ['Tous', 'Actifs', 'Expirés'];
 
@@ -25,6 +28,7 @@ const toDay = (offset: number) => {
 
 /** Création / modification d'une alerte affichée sur l'accueil des adhérents, avec aperçu. */
 export default function AdminAlertFormScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -68,7 +72,7 @@ export default function AdminAlertFormScreen() {
     setError(null);
     save.mutate(
       { id, data: { title: title.trim(), message: message.trim(), level, audience, startsOn, endsOn, isActive: existing?.isActive ?? true } },
-      { onSuccess: goBack, onError: () => setError('Impossible d’enregistrer l’alerte.') },
+      { onSuccess: goBack, onError: () => setError(t('admin.impossible_denregistrer_lalerte')) },
     );
   };
 
@@ -77,14 +81,14 @@ export default function AdminAlertFormScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Alertes</Text>
+          <Text style={styles.backText}>{t('admin.alertes')}</Text>
         </Pressable>
-        <ScreenTitle title={existing ? 'Modifier l’alerte' : 'Nouvelle alerte'} subtitle="Affichée en haut de l’accueil des adhérents" />
+        <ScreenTitle title={existing ? t('admin.modifier_lalerte') : t('admin.nouvelle_alerte')} subtitle={t('admin.affichee_en_haut_de_laccueil')} />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
         <View>
-          <Text style={styles.label}>Niveau</Text>
+          <Text style={styles.label}>{t('common.niveau')}</Text>
           <View style={styles.pillRow}>
             {LEVELS.map((l) => {
               const active = level === l.value;
@@ -102,15 +106,15 @@ export default function AdminAlertFormScreen() {
         </View>
 
         <View>
-          <Text style={styles.label}>Titre</Text>
-          <TextInput value={title} onChangeText={setTitle} placeholder="Ex. Fermeture exceptionnelle" placeholderTextColor={colors.muted} style={styles.input} />
+          <Text style={styles.label}>{t('admin.titre')}</Text>
+          <TextInput value={title} onChangeText={setTitle} placeholder={t('admin.ex_fermeture_exceptionnelle')} placeholderTextColor={colors.muted} style={styles.input} />
         </View>
         <View>
-          <Text style={styles.label}>Message</Text>
+          <Text style={styles.label}>{t('common.message')}</Text>
           <TextInput
             value={message}
             onChangeText={setMessage}
-            placeholder="Votre message aux adhérents"
+            placeholder={t('admin.votre_message_aux_adherents')}
             placeholderTextColor={colors.muted}
             multiline
             style={[styles.input, { minHeight: 96, paddingTop: 14, textAlignVertical: 'top' }]}
@@ -118,7 +122,7 @@ export default function AdminAlertFormScreen() {
         </View>
 
         <View>
-          <Text style={styles.label}>Audience</Text>
+          <Text style={styles.label}>{t('admin.audience')}</Text>
           <View style={styles.pillRow}>
             {AUDIENCES.map((a) => {
               const active = audience === a;
@@ -127,7 +131,7 @@ export default function AdminAlertFormScreen() {
                   {active ? (
                     <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
-                  <Text style={[styles.pillText, active && styles.pillTextActive]}>{a}</Text>
+                  <Text style={[styles.pillText, active && styles.pillTextActive]}>{audienceLabel(a)}</Text>
                 </Pressable>
               );
             })}
@@ -136,20 +140,20 @@ export default function AdminAlertFormScreen() {
 
         <View style={styles.dates}>
           <View style={{ flex: 1 }}>
-            <DateField label="Début" value={startsOn} onChange={setStartsOn} />
+            <DateField label={t('admin.debut')} value={startsOn} onChange={setStartsOn} />
           </View>
           <View style={{ flex: 1 }}>
-            <DateField label="Fin" value={endsOn} onChange={setEndsOn} minimumDate={startsOn ? new Date(startsOn) : undefined} icon="event-available" />
+            <DateField label={t('admin.fin')} value={endsOn} onChange={setEndsOn} minimumDate={startsOn ? new Date(startsOn) : undefined} icon="event-available" />
           </View>
         </View>
 
         <View>
-          <Text style={styles.previewTitle}>Aperçu sur l’écran adhérent</Text>
+          <Text style={styles.previewTitle}>{t('admin.apercu_sur_lecran_adherent')}</Text>
           <View style={[styles.preview, { backgroundColor: tone.bg }]}>
             <MaterialIcons name={tone.icon} size={24} color={tone.ink} />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.previewHead, { color: tone.ink }]}>{title || 'Titre de l’alerte'}</Text>
-              <Text style={[styles.previewBody, { color: tone.ink }]}>{message || 'Votre message aux adhérents'}</Text>
+              <Text style={[styles.previewHead, { color: tone.ink }]}>{title || t('admin.titre_de_lalerte')}</Text>
+              <Text style={[styles.previewBody, { color: tone.ink }]}>{message || t('admin.votre_message_aux_adherents')}</Text>
             </View>
             <MaterialIcons name="close" size={20} color={tone.ink} />
           </View>
@@ -158,7 +162,7 @@ export default function AdminAlertFormScreen() {
         {existing ? (
           <Pressable style={[styles.delete, cardShadow]} onPress={() => remove.mutate(existing.id, { onSuccess: goBack })}>
             <MaterialIcons name="delete-outline" size={22} color={colors.dangerInk} />
-            <Text style={styles.deleteText}>Supprimer l’alerte</Text>
+            <Text style={styles.deleteText}>{t('admin.supprimer_lalerte')}</Text>
           </Pressable>
         ) : null}
       </ScrollView>
@@ -171,7 +175,7 @@ export default function AdminAlertFormScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{save.isPending ? 'Enregistrement…' : existing ? 'Enregistrer' : 'Publier l’alerte'}</Text>
+            <Text style={styles.ctaText}>{save.isPending ? t('common.enregistrement') : existing ? t('member.enregistrer') : t('admin.publier_lalerte')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

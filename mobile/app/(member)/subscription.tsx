@@ -10,6 +10,8 @@ import { usePlans, type MembershipPlan } from '../../src/hooks/usePlans';
 import { EmptyState, ScreenTitle } from '../../src/components/ui';
 import { MembershipHeroCard } from '../../src/components/adherent/MembershipHeroCard';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../src/i18n';
 
 function durationLabel(days: number): string {
   if (days >= 360) return `${Math.round(days / 365)} an${days >= 730 ? 's' : ''}`;
@@ -19,12 +21,13 @@ function durationLabel(days: number): string {
 
 function periodLabel(start: string, end: string): string {
   const fmt = (d: string, withYear: boolean) =>
-    new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) });
+    new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) });
   return `${fmt(start, false)} → ${fmt(end, true)}`;
 }
 
 /** Abonnement : formule en cours (carte héro) et autres formules proposées par la salle. */
 export default function SubscriptionScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: memberships, refetch: refetchMemberships } = useMyMemberships();
@@ -44,9 +47,9 @@ export default function SubscriptionScreen() {
       <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Profil</Text>
+          <Text style={styles.backText}>{t('common.profil')}</Text>
         </Pressable>
-        <ScreenTitle title="Abonnement" subtitle="Votre formule et les autres packs de la salle" />
+        <ScreenTitle title={t('common.abonnement')} subtitle={t('member.votre_formule_et_les_autres')} />
 
         {active ? (
           <MembershipHeroCard
@@ -61,26 +64,26 @@ export default function SubscriptionScreen() {
               <MaterialIcons name="card-membership" size={26} color={colors.primaryInk} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.noPlanTitle}>{expired ? 'Abonnement expiré' : 'Aucun abonnement'}</Text>
-              <Text style={styles.noPlanText}>Choisissez un pack ci-dessous et souscrivez à l’accueil de la salle.</Text>
+              <Text style={styles.noPlanTitle}>{expired ? t('common.abonnement_expire') : t('common.aucun_abonnement')}</Text>
+              <Text style={styles.noPlanText}>{t('member.choisissez_un_pack_ci_dessous')}</Text>
             </View>
           </View>
         )}
 
         <View>
-          <Text style={styles.sectionTitle}>{active ? 'Autres packs' : 'Nos packs'}</Text>
+          <Text style={styles.sectionTitle}>{active ? t('member.autres_packs') : t('member.nos_packs')}</Text>
           {isError ? (
             <EmptyState
               icon="cloud-off"
-              title="Packs indisponibles"
-              text="Impossible de récupérer les formules pour le moment."
+              title={t('member.packs_indisponibles')}
+              text={t('member.impossible_de_recuperer_les_formules')}
               tone="danger"
-              actionLabel="Réessayer"
+              actionLabel={t('common.reessayer')}
               onAction={() => refetchPlans()}
             />
           ) : !isLoading && otherPlans.length === 0 ? (
             <View style={styles.empty}>
-              <Text style={styles.emptyText}>Aucun autre pack proposé pour le moment.</Text>
+              <Text style={styles.emptyText}>{t('member.aucun_autre_pack_propose_pour')}</Text>
             </View>
           ) : (
             <View style={{ gap: 10 }}>
@@ -93,7 +96,7 @@ export default function SubscriptionScreen() {
 
         <View style={styles.hint}>
           <MaterialIcons name="storefront" size={20} color={colors.primaryInk} />
-          <Text style={styles.hintText}>La souscription et le renouvellement se font à l’accueil de la salle.</Text>
+          <Text style={styles.hintText}>{t('member.la_souscription_et_le_renouvellement')}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -101,6 +104,7 @@ export default function SubscriptionScreen() {
 }
 
 function PlanCard({ plan }: { plan: MembershipPlan }) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -112,7 +116,7 @@ function PlanCard({ plan }: { plan: MembershipPlan }) {
         </View>
         {plan.isPopular ? (
           <View style={styles.popular}>
-            <Text style={styles.popularText}>Populaire</Text>
+            <Text style={styles.popularText}>{t('common.populaire')}</Text>
           </View>
         ) : null}
       </View>
@@ -124,8 +128,8 @@ function PlanCard({ plan }: { plan: MembershipPlan }) {
         </View>
       ) : null}
       <Text style={styles.price}>
-        {Number(plan.price).toLocaleString('fr-FR')}
-        <Text style={styles.priceUnit}> DT</Text>
+        {Number(plan.price).toLocaleString(dateLocale())}
+        <Text style={styles.priceUnit}>{t('member.dt')}</Text>
       </Text>
     </View>
   );

@@ -13,14 +13,17 @@ import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { FilterDropdown, ProgressBar, ScreenTitle } from '../../../src/components/ui';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { StatusTag } from '../../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../src/i18n';
+import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
 
-const WEEKDAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const WEEKDAYS = WEEKDAYS_SHORT_SUN;
 type StatusFilter = 'all' | 'upcoming' | 'full' | 'low';
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: 'all', label: 'Tous' },
-  { value: 'upcoming', label: 'À venir' },
-  { value: 'full', label: 'Complets' },
-  { value: 'low', label: 'Sous-remplis' },
+  { value: 'all', get label() { return i18n.t('common.tous'); } },
+  { value: 'upcoming', get label() { return i18n.t('common.a_venir'); } },
+  { value: 'full', get label() { return i18n.t('staff.complets'); } },
+  { value: 'low', get label() { return i18n.t('staff.sous_remplis'); } },
 ];
 
 function buildDays(count: number) {
@@ -37,15 +40,16 @@ function sessionState(s: ClassSessionSummary, now: number) {
   const start = new Date(s.startsAt).getTime();
   const end = new Date(s.endsAt).getTime();
   const ratio = s._count.bookings / Math.max(1, s.capacity);
-  if (end < now) return { key: 'done' as const, label: 'Terminé', tone: 'muted' as const, ratio };
-  if (start <= now) return { key: 'live' as const, label: 'En cours', tone: 'success' as const, ratio };
-  if (ratio >= 1) return { key: 'full' as const, label: 'Complet', tone: 'danger' as const, ratio };
-  if (ratio >= 0.7) return { key: 'almost' as const, label: 'Presque plein', tone: 'warning' as const, ratio };
-  return { key: 'open' as const, label: 'Places disponibles', tone: 'muted' as const, ratio };
+  if (end < now) return { key: 'done' as const, label: i18n.t('common.termine'), tone: 'muted' as const, ratio };
+  if (start <= now) return { key: 'live' as const, label: i18n.t('common.en_cours'), tone: 'success' as const, ratio };
+  if (ratio >= 1) return { key: 'full' as const, label: i18n.t('common.complet'), tone: 'danger' as const, ratio };
+  if (ratio >= 0.7) return { key: 'almost' as const, label: i18n.t('common.presque_plein'), tone: 'warning' as const, ratio };
+  return { key: 'open' as const, label: i18n.t('staff.places_disponibles'), tone: 'muted' as const, ratio };
 }
 
 /** Planning de la salle (accueil) : jours, filtres (statut, type de cours, coach) et cartes de cours détaillées. */
 export default function StaffPlanningScreen() {
+  useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -93,29 +97,29 @@ export default function StaffPlanningScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenTitle
-          title="Planning"
-          subtitle={`Cours collectifs · ${day.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}`}
+          title={i18n.t('common.planning')}
+          subtitle={i18n.t('staff.cours_collectifs', { v0: day.toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' }) })}
         />
 
         <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
 
         <View style={styles.filters}>
-          <FilterDropdown title="Statut" icon="event-available" value={status} options={STATUS_FILTERS} onChange={setStatus} />
+          <FilterDropdown title={i18n.t('staff.statut')} icon="event-available" value={status} options={STATUS_FILTERS} onChange={setStatus} />
           {types.length > 1 ? (
             <FilterDropdown<string | null>
-              title="Cours"
+              title={i18n.t('common.cours_2')}
               icon="fitness-center"
               value={activeType}
-              options={[{ value: null, label: 'Tous les cours' }, ...types.map((t) => ({ value: t, label: t }))]}
+              options={[{ value: null, label: i18n.t('staff.tous_les_cours') }, ...types.map((t) => ({ value: t, label: t }))]}
               onChange={setType}
             />
           ) : null}
           {coaches.length > 1 ? (
             <FilterDropdown<string | null>
-              title="Coach"
+              title={i18n.t('common.coach')}
               icon="sports"
               value={activeCoach}
-              options={[{ value: null, label: 'Tous les coachs' }, ...coaches.map((c) => ({ value: c, label: c }))]}
+              options={[{ value: null, label: i18n.t('staff.tous_les_coachs') }, ...coaches.map((c) => ({ value: c, label: c }))]}
               onChange={setCoach}
             />
           ) : null}
@@ -123,9 +127,7 @@ export default function StaffPlanningScreen() {
 
         <View style={styles.summary}>
           <MaterialIcons name="event" size={18} color={colors.primaryInk} />
-          <Text style={[styles.summaryText, { flex: 1 }]}>
-            {shown.length} cours · {totalBooked} inscrit{totalBooked > 1 ? 's' : ''}
-          </Text>
+          <Text style={[styles.summaryText, { flex: 1 }]}>{i18n.t('staff.cours_inscrit', { length: shown.length, totalBooked, v5: totalBooked > 1 ? 's' : '' })}</Text>
           {status !== 'all' || activeType || activeCoach ? (
             <Pressable
               onPress={() => {
@@ -137,7 +139,7 @@ export default function StaffPlanningScreen() {
               style={styles.reset}
             >
               <MaterialIcons name="close" size={16} color={colors.primaryInk} />
-              <Text style={styles.resetText}>Réinitialiser</Text>
+              <Text style={styles.resetText}>{i18n.t('staff.reinitialiser')}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -146,7 +148,7 @@ export default function StaffPlanningScreen() {
           {shown.map((s) => {
             const st = sessionState(s, now);
             const minutes = Math.round((new Date(s.endsAt).getTime() - new Date(s.startsAt).getTime()) / 60000);
-            const time = new Date(s.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            const time = new Date(s.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
             return (
               <Pressable
                 key={s.id}
@@ -161,13 +163,13 @@ export default function StaffPlanningScreen() {
                     style={styles.timeBlock}
                   >
                     <Text style={styles.timeText}>{time}</Text>
-                    <Text style={styles.timeSub}>{minutes} min</Text>
+                    <Text style={styles.timeSub}>{i18n.t('staff.min', { minutes })}</Text>
                   </LinearGradient>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.name} numberOfLines={2}>{s.classType.name}</Text>
                     <View style={styles.metaRow}>
                       <MaterialIcons name="sports" size={14} color={colors.muted} />
-                      <Text style={styles.meta} numberOfLines={1}>{s.coach ? `${s.coach.user.firstName} ${s.coach.user.lastName.charAt(0)}.` : 'Sans coach'}</Text>
+                      <Text style={styles.meta} numberOfLines={1}>{s.coach ? `${s.coach.user.firstName} ${s.coach.user.lastName.charAt(0)}.` : i18n.t('common.sans_coach')}</Text>
                       <MaterialIcons name="meeting-room" size={14} color={colors.muted} />
                       <Text style={styles.meta} numberOfLines={1}>{s.room?.name ?? '—'}</Text>
                     </View>
@@ -178,8 +180,8 @@ export default function StaffPlanningScreen() {
                 </View>
                 <View style={styles.fillBlock}>
                   <View style={styles.fillRow}>
-                    <Text style={styles.fillLabel}>Remplissage</Text>
-                    <Text style={styles.fillValue}>{s._count.bookings}/{s.capacity} inscrits</Text>
+                    <Text style={styles.fillLabel}>{i18n.t('common.remplissage')}</Text>
+                    <Text style={styles.fillValue}>{i18n.t('common.inscrits', { bookings: s._count.bookings, capacity: s.capacity })}</Text>
                   </View>
                   <ProgressBar progress={st.ratio} color={st.ratio >= 1 ? colors.danger : st.ratio >= 0.7 ? colors.warning : colors.primary} />
                 </View>
@@ -189,7 +191,7 @@ export default function StaffPlanningScreen() {
           {shown.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
-              <Text style={styles.emptyText}>Aucun cours ne correspond à ces filtres.</Text>
+              <Text style={styles.emptyText}>{i18n.t('staff.aucun_cours_ne_correspond_a')}</Text>
             </View>
           ) : null}
         </View>

@@ -21,11 +21,15 @@ import { StickyActionBar, STICKY_BAR_SPACE } from './ui/StickyActionBar';
 import { Button } from './Button';
 import { rootRouteForRole } from '../navigation/roleRoutes';
 import { useHideTabBarOnScroll } from '../hooks/useHideTabBarOnScroll';
+import { useTranslation } from 'react-i18next';
+import { LanguageSheet } from './LanguageSheet';
+import { LANGUAGE_LABELS } from '../i18n';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
 /** Profil v2 des espaces coach / accueil / admin : identité, spécialités (coach), coordonnées modifiables, sécurité, données du compte. */
 export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow, preference, setScheme } = useTheme();
   const { language, setLanguage } = useLanguage();
@@ -67,12 +71,12 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
     updateProfile.mutate(
       { firstName, lastName: rest.join(' ') || user?.lastName || '', phone: phone.trim() || undefined },
       {
-        onSuccess: () => showToast('Profil enregistré'),
+        onSuccess: () => showToast(t('common.profil_enregistre')),
         onError: (e) =>
           showToast(
             e instanceof ApiError && e.code === 'PHONE_ALREADY_USED'
-              ? 'Ce numéro de téléphone est déjà utilisé par un autre compte.'
-              : 'Impossible d’enregistrer le profil. Réessayez.',
+              ? t('common.ce_numero_de_telephone_est')
+              : t('common.impossible_denregistrer_le_profil_reessayez'),
             false,
           ),
       },
@@ -94,9 +98,9 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   };
 
   const contactRows: { icon: IconName; label: string; value: string; onChange?: (v: string) => void; placeholder: string; keyboardType?: 'default' | 'phone-pad'; verified?: boolean }[] = [
-    { icon: 'badge', label: 'Nom complet', value: fullName, onChange: setFullName, placeholder: 'Nom' },
-    { icon: 'mail-outline', label: 'Email', value: user?.email ?? '', placeholder: 'email@salle.fr', verified: !!user?.email },
-    { icon: 'call', label: 'Téléphone', value: phone, onChange: setPhone, placeholder: '06 00 00 00 00', keyboardType: 'phone-pad' },
+    { icon: 'badge', label: t('common.nom_complet'), value: fullName, onChange: setFullName, placeholder: t('common.nom') },
+    { icon: 'mail-outline', label: t('common.email'), value: user?.email ?? '', placeholder: t('common.email_salle_fr'), verified: !!user?.email },
+    { icon: 'call', label: t('common.telephone'), value: phone, onChange: setPhone, placeholder: '06 00 00 00 00', keyboardType: 'phone-pad' },
   ];
 
   return (
@@ -108,12 +112,12 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
           name={user ? `${user.firstName} ${user.lastName}` : ''}
           subtitle={user?.email ?? undefined}
           completion={[user?.firstName, user?.email, user?.phone, user?.photoKey].filter(Boolean).length / 4}
-          tags={[{ label: roleLabel, tone: 'primary' }, { label: 'Compte actif', tone: 'success' }]}
+          tags={[{ label: roleLabel, tone: 'primary' }, { label: t('common.compte_actif'), tone: 'success' }]}
         />
 
         {workingDays.length > 0 ? (
           <View>
-            <Text style={styles.groupTitle}>Mon planning</Text>
+            <Text style={styles.groupTitle}>{t('common.mon_planning')}</Text>
             <View style={[styles.card, cardShadow, { paddingHorizontal: 16 }]}>
               {workingDays.map((d, i) => (
                 <View key={d.dayOfWeek} style={[styles.navRow, { minHeight: 48 }, i < workingDays.length - 1 && styles.rowBorder]}>
@@ -123,15 +127,13 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
                 </View>
               ))}
             </View>
-            <Text style={styles.hint}>
-              {Math.round(workingDays.reduce((sum, d) => sum + shiftHours(d), 0) * 10) / 10} h par semaine · défini par l’administrateur.
-            </Text>
+            <Text style={styles.hint}>{t('common.h_par_semaine_defini_par', { v1: Math.round(workingDays.reduce((sum, d) => sum + shiftHours(d), 0) * 10) / 10 })}</Text>
           </View>
         ) : null}
 
         {specialties.length > 0 ? (
           <View>
-            <Text style={styles.groupTitle}>Spécialités</Text>
+            <Text style={styles.groupTitle}>{t('common.specialites')}</Text>
             <View style={styles.chips}>
               {specialties.map((s) => (
                 <View key={s} style={styles.chip}>
@@ -143,7 +145,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         ) : null}
 
         <View>
-          <Text style={styles.groupTitle}>Coordonnées</Text>
+          <Text style={styles.groupTitle}>{t('common.coordonnees')}</Text>
           <View style={[styles.card, cardShadow, { padding: 6 }]}>
             {contactRows.map((r, i) => (
               <View key={r.label} style={[styles.contactRow, i < contactRows.length - 1 && styles.rowBorder]}>
@@ -156,7 +158,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
                     {r.verified ? (
                       <View style={styles.verified}>
                         <MaterialIcons name="check" size={12} color={colors.successInk} />
-                        <Text style={styles.verifiedText}>Vérifié</Text>
+                        <Text style={styles.verifiedText}>{t('common.verifie')}</Text>
                       </View>
                     ) : null}
                   </View>
@@ -174,20 +176,20 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
               </View>
             ))}
           </View>
-          <Text style={styles.hint}>Ces informations servent à vous contacter et à sécuriser votre compte.</Text>
+          <Text style={styles.hint}>{t('common.ces_informations_servent_a_vous')}</Text>
         </View>
 
         <SettingsGroup
-          title="Apparence"
+          title={t('common.apparence')}
           rows={[
             {
               kind: 'segment',
               icon: 'contrast',
-              title: 'Thème',
+              title: t('common.theme'),
               options: [
-                { value: 'light', label: 'Clair' },
-                { value: 'dark', label: 'Sombre' },
-                { value: 'system', label: 'Auto' },
+                { value: 'light', label: t('common.clair') },
+                { value: 'dark', label: t('common.sombre') },
+                { value: 'system', label: t('common.auto') },
               ],
               selected: preference,
               onChange: (v) => setScheme(v as 'light' | 'dark' | 'system'),
@@ -196,54 +198,31 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         />
 
         <SettingsGroup
-          title="Compte"
+          title={t('common.compte')}
           rows={[
-            { kind: 'nav', icon: 'language', title: 'Langue', value: language === 'ar' ? 'العربية' : 'Français', onPress: () => setLanguageVisible(true) },
-            { kind: 'nav', icon: 'lock-outline', title: 'Mot de passe', onPress: () => router.push('/(member)/account-security') },
-            ...(hasMemberRole ? [{ kind: 'nav' as const, icon: 'swap-horiz' as const, title: 'Passer en mode adhérent', onPress: handleSwitchToMember }] : []),
-            { kind: 'nav', icon: 'delete-outline', title: 'Supprimer mon compte', onPress: () => router.push('/(member)/account-delete') },
+            { kind: 'nav', icon: 'language', title: t('common.langue'), value: LANGUAGE_LABELS[language], onPress: () => setLanguageVisible(true) },
+            { kind: 'nav', icon: 'lock-outline', title: t('common.mot_de_passe'), onPress: () => router.push('/(member)/account-security') },
+            ...(hasMemberRole ? [{ kind: 'nav' as const, icon: 'swap-horiz' as const, title: t('common.passer_en_mode_adherent'), onPress: handleSwitchToMember }] : []),
+            { kind: 'nav', icon: 'delete-outline', title: t('common.supprimer_mon_compte'), onPress: () => router.push('/(member)/account-delete') },
           ]}
         />
 
         <Pressable style={({ pressed }) => [styles.logout, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => setLogoutVisible(true)}>
           <MaterialIcons name="logout" size={22} color={colors.dangerInk} />
-          <Text style={[styles.logoutText, { color: colors.dangerInk }]}>Se déconnecter</Text>
+          <Text style={[styles.logoutText, { color: colors.dangerInk }]}>{t('common.se_deconnecter')}</Text>
         </Pressable>
       </ScrollView>
 
-      <StickyActionBar visible={dirty} aboveTabBar label="Enregistrer le profil" loading={updateProfile.isPending} onPress={handleSave} />
+      <StickyActionBar visible={dirty} aboveTabBar label={t('common.enregistrer_le_profil')} loading={updateProfile.isPending} onPress={handleSave} />
 
-      <BottomSheet visible={languageVisible} onClose={() => setLanguageVisible(false)}>
-        <Text style={styles.sheetTitle}>Langue</Text>
-        <View style={{ gap: 8, marginTop: 6 }}>
-          {([
-            { value: 'fr', label: 'Français' },
-            { value: 'ar', label: 'العربية' },
-          ] as const).map((l) => {
-            const active = language === l.value;
-            return (
-              <Pressable
-                key={l.value}
-                style={[styles.langRow, active && { backgroundColor: colors.primarySoft, borderColor: colors.primary }]}
-                onPress={() => {
-                  setLanguage(l.value);
-                  setLanguageVisible(false);
-                }}
-              >
-                <Text style={styles.navTitle}>{l.label}</Text>
-                {active ? <MaterialIcons name="check" size={22} color={colors.primaryInk} /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-      </BottomSheet>
+      <LanguageSheet visible={languageVisible} onClose={() => setLanguageVisible(false)} />
 
       <BottomSheet visible={logoutVisible} onClose={() => setLogoutVisible(false)}>
-        <Text style={styles.sheetTitle}>Se déconnecter ?</Text>
-        <Text style={styles.sheetText}>Vous devrez vous reconnecter pour accéder à l’application.</Text>
+        <Text style={styles.sheetTitle}>{t('common.se_deconnecter_2')}</Text>
+        <Text style={styles.sheetText}>{t('common.vous_devrez_vous_reconnecter_pour')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Se déconnecter" onPress={handleLogout} variant="danger" />
-          <Button label="Annuler" onPress={() => setLogoutVisible(false)} variant="outline" />
+          <Button label={t('common.se_deconnecter')} onPress={handleLogout} variant="danger" />
+          <Button label={t('common.annuler')} onPress={() => setLogoutVisible(false)} variant="outline" />
         </View>
       </BottomSheet>
 

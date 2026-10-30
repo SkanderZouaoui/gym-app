@@ -11,22 +11,25 @@ import { muscleIcon, useAdminExercises, useReviewPrograms } from '../../src/hook
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle } from '../../src/components/ui';
 import type { ProgramStatus } from '../../src/hooks/useCoachSessions';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 type Segment = 'PENDING' | 'APPROVED' | 'REJECTED';
 const SEGMENTS: { value: Segment; label: string }[] = [
-  { value: 'PENDING', label: 'À valider' },
-  { value: 'APPROVED', label: 'Publiés' },
-  { value: 'REJECTED', label: 'Refusés' },
+  { value: 'PENDING', get label() { return i18n.t('admin.a_valider'); } },
+  { value: 'APPROVED', get label() { return i18n.t('admin.publies'); } },
+  { value: 'REJECTED', get label() { return i18n.t('common.refuses'); } },
 ];
 
 const BADGE: Record<ProgramStatus, { label: string; icon: keyof typeof MaterialIcons.glyphMap }> = {
-  PENDING: { label: 'À valider', icon: 'hourglass-top' },
-  APPROVED: { label: 'Publié', icon: 'check-circle' },
-  REJECTED: { label: 'Refusé', icon: 'cancel' },
+  PENDING: { get label() { return i18n.t('admin.a_valider'); }, icon: 'hourglass-top' },
+  APPROVED: { get label() { return i18n.t('admin.publie'); }, icon: 'check-circle' },
+  REJECTED: { get label() { return i18n.t('common.refuse'); }, icon: 'cancel' },
 };
 
 /** Programmes (admin) : validation des programmes proposés par les coachs, programmes publiés, bibliothèque. */
 export default function AdminProgramsScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: programs, refetch } = useReviewPrograms();
@@ -48,14 +51,14 @@ export default function AdminProgramsScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Plus</Text>
+          <Text style={styles.backText}>{t('common.plus')}</Text>
         </Pressable>
         <ScreenTitle
-          title="Programmes"
-          subtitle="Validation, publication et bibliothèque"
+          title={t('common.programmes')}
+          subtitle={t('admin.validation_publication_et_bibliotheque')}
           right={
             <Pressable
-              accessibilityLabel="Nouveau programme"
+              accessibilityLabel={t('common.nouveau_programme')}
               onPress={() => router.push('/(admin)/program-new')}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -96,9 +99,7 @@ export default function AdminProgramsScreen() {
                   </LinearGradient>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.cardName} numberOfLines={2}>{p.name}</Text>
-                    <Text style={styles.cardMeta} numberOfLines={1}>
-                      {p.createdBy.firstName} {p.createdBy.lastName} · {sets} séries{p.level ? ` · ${p.level}` : ''}
-                    </Text>
+                    <Text style={styles.cardMeta} numberOfLines={1}>{t('admin.series_2', { firstName: p.createdBy.firstName, lastName: p.createdBy.lastName, sets, v7: p.level ? ` · ${p.level}` : '' })}</Text>
                     <View
                       style={[
                         styles.badge,
@@ -128,13 +129,13 @@ export default function AdminProgramsScreen() {
               <View style={[styles.empty, cardShadow]}>
                 <MaterialIcons name="task-alt" size={34} color={colors.primaryInk} />
                 <Text style={styles.emptyText}>
-                  {segment === 'PENDING' ? 'Aucun programme en attente' : segment === 'APPROVED' ? 'Aucun programme publié' : 'Aucun programme refusé'}
+                  {segment === 'PENDING' ? t('admin.aucun_programme_en_attente') : segment === 'APPROVED' ? t('admin.aucun_programme_publie') : t('admin.aucun_programme_refuse')}
                 </Text>
               </View>
             ) : null}
         </View>
 
-        <Text style={styles.libTitle}>Bibliothèque par groupe musculaire</Text>
+        <Text style={styles.libTitle}>{t('admin.bibliotheque_par_groupe_musculaire')}</Text>
         <Pressable
           style={({ pressed }) => [styles.allRow, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
           onPress={() => router.push('/(admin)/exercises')}
@@ -142,7 +143,7 @@ export default function AdminProgramsScreen() {
           <View style={styles.allIcon}>
             <MaterialIcons name="view-list" size={22} color={colors.primaryInk} />
           </View>
-          <Text style={styles.allText}>Voir tous les exercices</Text>
+          <Text style={styles.allText}>{t('admin.voir_tous_les_exercices')}</Text>
           <View style={styles.countPill}>
             <Text style={styles.countText}>{totalExercises}</Text>
           </View>
@@ -160,12 +161,12 @@ export default function AdminProgramsScreen() {
                 <MaterialIcons name={muscleIcon(name)} size={22} color={colors.primaryInk} />
               </View>
               <Text style={styles.groupName} numberOfLines={1}>{muscleGroupLabel(name)}</Text>
-              <Text style={styles.groupCount}>{count} exercice{count > 1 ? 's' : ''}</Text>
+              <Text style={styles.groupCount}>{t('admin.exercice', { count, v2: count > 1 ? 's' : '' })}</Text>
             </Pressable>
           ))}
         </View>
-        {groups.length === 0 ? <Text style={styles.emptyText}>Aucun exercice dans la bibliothèque.</Text> : null}
-        <Text style={styles.hint}>Touchez une zone pour voir ses exercices</Text>
+        {groups.length === 0 ? <Text style={styles.emptyText}>{t('admin.aucun_exercice_dans_la_bibliotheque')}</Text> : null}
+        <Text style={styles.hint}>{t('admin.touchez_une_zone_pour_voir')}</Text>
       </ScrollView>
     </SafeAreaView>
   );

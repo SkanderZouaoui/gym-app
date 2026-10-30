@@ -6,6 +6,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { fonts, typography } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { Pill, type PillTone } from '../ui';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileHeaderProps {
   initials: string;
@@ -26,6 +27,7 @@ const CIRC = 2 * Math.PI * R;
 
 /** En-tête de Profil v2 : avatar en dégradé dans un anneau de complétion, nom 30 pt, pastilles. */
 export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, completion, tags }: ProfileHeaderProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const pct = Math.round(Math.min(1, Math.max(0, completion)) * 100);
@@ -64,7 +66,7 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, 
       {memberCode ? (
         <View style={styles.codeBadge}>
           <MaterialIcons name="pin" size={14} color={colors.primaryInk} />
-          <Text style={styles.codeLabel}>Code</Text>
+          <Text style={styles.codeLabel}>{t('member.code')}</Text>
           <Text style={styles.codeValue}>{memberCode.slice(0, 3)} {memberCode.slice(3)}</Text>
         </View>
       ) : null}

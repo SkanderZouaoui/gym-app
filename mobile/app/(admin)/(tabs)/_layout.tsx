@@ -1,9 +1,11 @@
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FloatingTabBar, type FloatingTabBarProps } from '../../../src/components/FloatingTabBar';
+import { useTranslation } from 'react-i18next';
 
 /** Barre d'onglets Admin v2 : Pilotage, Planning, Adhérents, Plus + bouton rond de scan QR. */
 export default function AdminTabsLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
@@ -12,32 +14,32 @@ export default function AdminTabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Pilotage',
+          title: t('admin.pilotage'),
           tabBarIcon: ({ color }) => <MaterialIcons name="dashboard" size={24} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="planning"
         options={{
-          title: 'Planning',
+          title: t('common.planning'),
           tabBarIcon: ({ color }) => <MaterialIcons name="calendar-month" size={24} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="members"
         options={{
-          title: 'Adhérents',
+          title: t('common.adherents'),
           tabBarIcon: ({ color }) => <MaterialIcons name="group" size={24} color={color as string} />,
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
-          title: 'Plus',
+          title: t('common.plus'),
           tabBarIcon: ({ color }) => <MaterialIcons name="grid-view" size={24} color={color as string} />,
         }}
       />
-      <Tabs.Screen name="scanner" options={{ title: 'Scanner', tabBarLabel: () => null }} />
+      <Tabs.Screen name="scanner" options={{ title: t('common.scanner'), tabBarLabel: () => null }} />
     </Tabs>
   );
 }

@@ -13,6 +13,7 @@ import { useOrganizationConfig } from '../../src/hooks/useAdmin';
 import { Banner, ScreenTitle } from '../../src/components/ui';
 import { InitialsAvatar, METHOD_ICON, METHOD_LABEL, formatMoney } from '../../src/components/staff/staffUi';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
 
 const METHODS: PaymentMethod[] = ['CASH', 'OTHER', 'TRANSFER', 'CHECK'];
 
@@ -24,6 +25,7 @@ function durationLabel(days: number): string {
 
 /** Encaissement : formule, moyen de paiement, puis création de l'abonnement et enregistrement du paiement. */
 export default function StaffCashSellScreen() {
+  const { t } = useTranslation();
   const routes = useStaffRoutes();
   const { memberId } = useLocalSearchParams<{ memberId: string }>();
   const { colors, cardShadow } = useTheme();
@@ -48,7 +50,7 @@ export default function StaffCashSellScreen() {
       {
         onSuccess: ({ payment }) => router.replace({ pathname: routes.cashReceipt, params: { paymentId: payment.id, fresh: '1' } }),
         onError: (e) =>
-          setError(e instanceof ApiError && e.code === 'STAFF_PAYMENTS_DISABLED' ? 'L’enregistrement des paiements est désactivé pour l’accueil.' : 'Impossible d’enregistrer l’encaissement.'),
+          setError(e instanceof ApiError && e.code === 'STAFF_PAYMENTS_DISABLED' ? t('staff.lenregistrement_des_paiements_est_desactive') : t('staff.impossible_denregistrer_lencaissement')),
       },
     );
   };
@@ -58,9 +60,9 @@ export default function StaffCashSellScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Retour</Text>
+          <Text style={styles.backText}>{t('common.retour')}</Text>
         </Pressable>
-        <ScreenTitle title="Encaissement" subtitle="Inscription sur place" />
+        <ScreenTitle title={t('staff.encaissement_2')} subtitle={t('staff.inscription_sur_place')} />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
@@ -68,17 +70,17 @@ export default function StaffCashSellScreen() {
           <View style={[styles.memberCard, cardShadow]}>
             <InitialsAvatar first={member.firstName} last={member.lastName} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.memberLabel}>Adhérent</Text>
+              <Text style={styles.memberLabel}>{t('staff.adherent_2')}</Text>
               <Text style={styles.memberName}>{member.firstName} {member.lastName}</Text>
             </View>
             <Pressable onPress={() => router.replace(routes.cashSelect)} hitSlop={8}>
-              <Text style={styles.change}>Changer</Text>
+              <Text style={styles.change}>{t('common.changer')}</Text>
             </Pressable>
           </View>
         ) : null}
 
         <View>
-          <Text style={styles.label}>Type d’abonnement</Text>
+          <Text style={styles.label}>{t('staff.type_dabonnement')}</Text>
           <View style={[styles.optionsCard, cardShadow]}>
             {(plans ?? []).map((p) => {
               const active = p.id === planId;
@@ -106,7 +108,7 @@ export default function StaffCashSellScreen() {
         </View>
 
         <View>
-          <Text style={styles.label}>Moyen de paiement</Text>
+          <Text style={styles.label}>{t('staff.moyen_de_paiement')}</Text>
           <View style={styles.methodGrid}>
             {methods.map((m) => {
               const active = method === m;
@@ -137,7 +139,7 @@ export default function StaffCashSellScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="point-of-sale" size={22} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{sell.isPending ? 'Encaissement…' : plan ? `Encaisser ${formatMoney(plan.price)}` : 'Encaisser'}</Text>
+            <Text style={styles.ctaText}>{sell.isPending ? t('staff.encaissement_3') : plan ? t('staff.encaisser_2', { v0: formatMoney(plan.price) }) : t('staff.encaisser')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

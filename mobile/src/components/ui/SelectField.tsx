@@ -4,6 +4,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { BottomSheet } from './BottomSheet';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../i18n';
 
 export interface SelectOption {
   value: string | null;
@@ -32,7 +34,8 @@ interface Props {
 }
 
 /** Champ à liste déroulante (feuille) avec ajout direct d'un nouvel élément. */
-export function SelectField({ label, icon, value, options, placeholder = 'Choisir', onChange, create }: Props) {
+export function SelectField({ label, icon, value, options, placeholder, onChange, create }: Props) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [open, setOpen] = useState(false);
@@ -59,7 +62,7 @@ export function SelectField({ label, icon, value, options, placeholder = 'Choisi
       onChange(id);
       close();
     } catch {
-      setError('Impossible d’ajouter cet élément. Réessayez.');
+      setError(i18n.t('common.impossible_dajouter_cet_element_reessayez'));
     } finally {
       setBusy(false);
     }
@@ -127,10 +130,10 @@ export function SelectField({ label, icon, value, options, placeholder = 'Choisi
                 {error ? <Text style={styles.error}>{error}</Text> : null}
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <Pressable style={[styles.addBtn, styles.addBtnGhost]} onPress={() => setAdding(false)}>
-                    <Text style={[styles.addBtnText, { color: colors.text }]}>Annuler</Text>
+                    <Text style={[styles.addBtnText, { color: colors.text }]}>{i18n.t('common.annuler')}</Text>
                   </Pressable>
                   <Pressable style={[styles.addBtn, (!name.trim() || busy) && { opacity: 0.5 }]} disabled={!name.trim() || busy} onPress={submit}>
-                    <Text style={styles.addBtnText}>{busy ? 'Ajout…' : 'Ajouter et choisir'}</Text>
+                    <Text style={styles.addBtnText}>{busy ? i18n.t('common.ajout') : i18n.t('common.ajouter_et_choisir')}</Text>
                   </Pressable>
                 </View>
               </View>

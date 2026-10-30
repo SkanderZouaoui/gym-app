@@ -6,6 +6,8 @@ import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { BottomSheet } from '../ui';
 import type { ClassSessionSummary } from '../../api/types';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../i18n';
 
 interface Props {
   session: ClassSessionSummary | null;
@@ -16,19 +18,20 @@ interface Props {
 
 /** Étape de confirmation avant de réserver une place (ou de rejoindre la liste d'attente). */
 export function BookingConfirmSheet({ session, pending, onConfirm, onClose }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const start = session ? new Date(session.startsAt) : null;
   const end = session ? new Date(session.endsAt) : null;
   const full = session ? session._count.bookings >= session.capacity : false;
-  const time = (d: Date) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const time = (d: Date) => d.toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
   const rows: { icon: keyof typeof MaterialIcons.glyphMap; label: string }[] =
     session && start && end
       ? [
-          { icon: 'event', label: start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) },
+          { icon: 'event', label: start.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' }) },
           { icon: 'schedule', label: `${time(start)} – ${time(end)}` },
-          { icon: 'sports', label: session.coach ? `${session.coach.user.firstName} ${session.coach.user.lastName}` : 'Sans coach' },
+          { icon: 'sports', label: session.coach ? `${session.coach.user.firstName} ${session.coach.user.lastName}` : t('common.sans_coach') },
           { icon: 'meeting-room', label: session.room?.name ?? '—' },
         ]
       : [];
@@ -42,7 +45,7 @@ export function BookingConfirmSheet({ session, pending, onConfirm, onClose }: Pr
               <MaterialIcons name={full ? 'hourglass-top' : 'event-available'} size={26} color="#FFFFFF" />
             </LinearGradient>
             <View style={{ flex: 1 }}>
-              <Text style={styles.eyebrow}>{full ? 'LISTE D’ATTENTE' : 'CONFIRMER LA RÉSERVATION'}</Text>
+              <Text style={styles.eyebrow}>{full ? t('member.liste_dattente') : t('member.confirmer_la_reservation')}</Text>
               <Text style={styles.title} numberOfLines={2}>{session.classType.name}</Text>
             </View>
           </View>
@@ -58,17 +61,17 @@ export function BookingConfirmSheet({ session, pending, onConfirm, onClose }: Pr
 
           <Text style={styles.note}>
             {full
-              ? 'Ce cours est complet. Vous serez prévenu(e) si une place se libère.'
-              : 'Vous pourrez annuler votre réservation depuis « Mes réservations ».'}
+              ? t('member.ce_cours_est_complet_vous')
+              : t('member.vous_pourrez_annuler_votre_reservation')}
           </Text>
 
           <Pressable onPress={onConfirm} disabled={pending} style={({ pressed }) => [pending && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirm}>
-              <Text style={styles.confirmText}>{pending ? 'Réservation…' : full ? 'Rejoindre la liste d’attente' : 'Confirmer la réservation'}</Text>
+              <Text style={styles.confirmText}>{pending ? t('member.reservation') : full ? t('member.rejoindre_la_liste_dattente') : t('member.confirmer_la_reservation_2')}</Text>
             </LinearGradient>
           </Pressable>
           <Pressable onPress={onClose} style={styles.cancel}>
-            <Text style={styles.cancelText}>Annuler</Text>
+            <Text style={styles.cancelText}>{t('common.annuler')}</Text>
           </Pressable>
         </View>
       ) : null}

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface SetSummary {
   setNumber: number;
@@ -20,6 +21,7 @@ interface ProgramExerciseSummaryProps {
 /** Résumé d'un exercice dans le composeur de programme : chaque série est
  * affichée individuellement (reps + poids), pas de réglage global répété. */
 export function ProgramExerciseSummary({ name, sets, onRemove, onEdit }: ProgramExerciseSummaryProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -33,9 +35,7 @@ export function ProgramExerciseSummary({ name, sets, onRemove, onEdit }: Program
       <View style={styles.setsRow}>
         {sets.map((s) => (
           <View key={s.setNumber} style={styles.setPill}>
-            <Text style={styles.setPillText}>
-              {s.reps ?? '—'} reps{s.weightKg ? ` · ${s.weightKg}kg` : ''}
-            </Text>
+            <Text style={styles.setPillText}>{t('member.reps_3', { v1: s.reps ?? '—', v3: s.weightKg ? t('member.kg_6', { weightKg: s.weightKg }) : '' })}</Text>
           </View>
         ))}
       </View>

@@ -19,8 +19,11 @@ import {
 import { Banner, ScreenTitle, Toast } from '../../src/components/ui';
 import { ApiError } from '../../src/api/client';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 export default function ProfileEditScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user, refetch } = useMe();
@@ -50,7 +53,7 @@ export default function ProfileEditScreen() {
   const pickPhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission refusée', "L'accès à vos photos est nécessaire pour changer votre photo de profil.");
+      Alert.alert(t('member.permission_refusee'), t('member.lacces_a_vos_photos_est'));
       return;
     }
 
@@ -79,7 +82,7 @@ export default function ProfileEditScreen() {
       if (!putResponse.ok) throw new Error('UPLOAD_FAILED');
       await updateProfile.mutateAsync({ photoKey: key });
     } catch {
-      setError("L'envoi de la photo a échoué. Réessayez.");
+      setError(t('member.lenvoi_de_la_photo_a'));
       setLocalPhotoUri(null);
     } finally {
       setUploading(false);
@@ -92,7 +95,7 @@ export default function ProfileEditScreen() {
       { firstName, lastName, phone: phone || undefined },
       {
         onSuccess: () => router.navigate('/(member)/(tabs)/profile'),
-        onError: (e) => setError(e instanceof ApiError && e.code === 'PHONE_ALREADY_USED' ? 'Ce numéro de téléphone est déjà utilisé par un autre compte.' : 'Impossible d’enregistrer vos informations. Réessayez.'),
+        onError: (e) => setError(e instanceof ApiError && e.code === 'PHONE_ALREADY_USED' ? t('common.ce_numero_de_telephone_est') : t('member.impossible_denregistrer_vos_informations_reessayez')),
       },
     );
   };
@@ -103,7 +106,7 @@ export default function ProfileEditScreen() {
       { newEmail: newEmail.trim(), password: emailPassword },
       {
         onSuccess: () => setEmailStep('code'),
-        onError: (e) => setEmailError(e instanceof ApiError ? traduireErreurEmail(e.code) : 'Une erreur est survenue.'),
+        onError: (e) => setEmailError(e instanceof ApiError ? traduireErreurEmail(e.code) : t('member.une_erreur_est_survenue')),
       },
     );
   };
@@ -118,7 +121,7 @@ export default function ProfileEditScreen() {
         setEmailPassword('');
         setEmailCode('');
       },
-      onError: (e) => setEmailError(e instanceof ApiError ? traduireErreurEmail(e.code) : 'Code incorrect.'),
+      onError: (e) => setEmailError(e instanceof ApiError ? traduireErreurEmail(e.code) : i18n.t('common.wrong_code')),
     });
   };
 
@@ -136,9 +139,9 @@ export default function ProfileEditScreen() {
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Profil</Text>
+          <Text style={styles.backText}>{t('common.profil')}</Text>
         </Pressable>
-        <ScreenTitle title="Informations personnelles" subtitle="Votre identité et vos coordonnées" />
+        <ScreenTitle title={t('member.informations_personnelles')} subtitle={t('member.votre_identite_et_vos_coordonnees')} />
 
         <View style={styles.avatarSection}>
           <Pressable onPress={pickPhoto} style={styles.avatarWrap} disabled={uploading}>
@@ -153,29 +156,29 @@ export default function ProfileEditScreen() {
               <MaterialIcons name={uploading ? 'hourglass-top' : 'photo-camera'} size={16} color={colors.primaryContrast} />
             </View>
           </Pressable>
-          <Text style={styles.avatarHint}>{uploading ? 'Envoi en cours…' : 'Changer la photo'}</Text>
+          <Text style={styles.avatarHint}>{uploading ? t('member.envoi_en_cours') : t('member.changer_la_photo')}</Text>
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Identité</Text>
+          <Text style={styles.sectionTitle}>{t('common.identite')}</Text>
           <View style={[styles.card, cardShadow]}>
-            <TextField label="Prénom" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-            <TextField label="Nom" value={lastName} onChangeText={setLastName} autoCapitalize="words" />
+            <TextField label={t('common.prenom')} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
+            <TextField label={t('common.nom')} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
             <TextField
-              label="Téléphone"
+              label={t('common.telephone')}
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
-              placeholder="Optionnel"
+              placeholder={t('common.optionnel')}
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
           </View>
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Adresse e-mail</Text>
+          <Text style={styles.sectionTitle}>{t('member.adresse_e_mail')}</Text>
           <View style={[styles.card, cardShadow]}>
-            {emailSuccess ? <Banner tone="success" icon="check-circle" text="E-mail mis à jour." /> : null}
+            {emailSuccess ? <Banner tone="success" icon="check-circle" text={t('member.e_mail_mis_a_jour')} /> : null}
 
             {emailStep === 'idle' ? (
               <View style={styles.emailRow}>
@@ -184,46 +187,44 @@ export default function ProfileEditScreen() {
                 </View>
                 <Text style={styles.emailValue} numberOfLines={1}>{user?.email}</Text>
                 <Pressable onPress={() => setEmailStep('form')} hitSlop={8}>
-                  <Text style={styles.emailChangeLink}>Changer</Text>
+                  <Text style={styles.emailChangeLink}>{t('common.changer')}</Text>
                 </Pressable>
               </View>
             ) : emailStep === 'form' ? (
               <>
                 {emailError ? <Banner tone="danger" icon="error" text={emailError} /> : null}
-                <Text style={styles.emailHint}>
-                  Un code à usage unique sera envoyé à votre nouvelle adresse pour la confirmer.
-                </Text>
+                <Text style={styles.emailHint}>{t('member.un_code_a_usage_unique')}</Text>
                 <TextField
-                  label="Nouvelle adresse e-mail"
+                  label={t('member.nouvelle_adresse_e_mail')}
                   value={newEmail}
                   onChangeText={setNewEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
                 />
-                <TextField label="Mot de passe actuel" value={emailPassword} onChangeText={setEmailPassword} isPassword />
+                <TextField label={t('member.mot_de_passe_actuel')} value={emailPassword} onChangeText={setEmailPassword} isPassword />
                 <View style={styles.emailButtonRow}>
                   <Button
-                    label="Envoyer le code"
+                    label={t('common.envoyer_le_code')}
                     onPress={handleRequestEmailCode}
                     loading={requestEmailChange.isPending}
                     disabled={!newEmail.trim() || !emailPassword}
                   />
-                  <Button label="Annuler" onPress={() => setEmailStep('idle')} variant="ghost" />
+                  <Button label={t('common.annuler')} onPress={() => setEmailStep('idle')} variant="ghost" />
                 </View>
               </>
             ) : (
               <>
                 {emailError ? <Banner tone="danger" icon="error" text={emailError} /> : null}
-                <Text style={styles.emailHint}>Entrez le code reçu à {newEmail.trim()}.</Text>
-                <TextField label="Code reçu" value={emailCode} onChangeText={setEmailCode} keyboardType="number-pad" maxLength={6} />
+                <Text style={styles.emailHint}>{t('member.entrez_le_code_recu_a', { v1: newEmail.trim() })}</Text>
+                <TextField label={t('common.code_recu')} value={emailCode} onChangeText={setEmailCode} keyboardType="number-pad" maxLength={6} />
                 <View style={styles.emailButtonRow}>
                   <Button
-                    label="Confirmer"
+                    label={t('member.confirmer')}
                     onPress={handleConfirmEmailCode}
                     loading={confirmEmailChange.isPending}
                     disabled={emailCode.trim().length !== 6}
                   />
-                  <Button label="Annuler" onPress={() => setEmailStep('idle')} variant="ghost" />
+                  <Button label={t('common.annuler')} onPress={() => setEmailStep('idle')} variant="ghost" />
                 </View>
               </>
             )}
@@ -233,7 +234,7 @@ export default function ProfileEditScreen() {
 
       <View style={styles.footer}>
         <Button
-          label="Enregistrer"
+          label={t('member.enregistrer')}
           onPress={handleSave}
           loading={updateProfile.isPending}
           disabled={!firstName.trim() || !lastName.trim()}
@@ -241,7 +242,7 @@ export default function ProfileEditScreen() {
       </View>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );
@@ -250,15 +251,15 @@ export default function ProfileEditScreen() {
 function traduireErreurEmail(code: string): string {
   switch (code) {
     case 'INVALID_PASSWORD':
-      return 'Mot de passe incorrect.';
+      return i18n.t('member.mot_de_passe_incorrect');
     case 'EMAIL_ALREADY_USED':
-      return 'Cette adresse e-mail est déjà utilisée.';
+      return i18n.t('member.cette_adresse_e_mail_est');
     case 'OTP_INVALID':
-      return 'Code incorrect.';
+      return i18n.t('common.wrong_code');
     case 'OTP_EXPIRED':
-      return 'Ce code a expiré. Demandez-en un nouveau.';
+      return i18n.t('common.ce_code_a_expire_demandez');
     default:
-      return 'Une erreur est survenue.';
+      return i18n.t('member.une_erreur_est_survenue');
   }
 }
 

@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTabBarStore } from '../../store/tabBar';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   /** Affichée seulement quand il y a quelque chose à enregistrer. */
@@ -20,6 +21,7 @@ interface Props {
 
 /** Barre d'action fixée en bas de l'écran : le bouton d'enregistrement reste visible sans défiler. */
 export function StickyActionBar({ visible, label, loading, disabled, icon = 'check', onPress, aboveTabBar }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const suppress = useTabBarStore((st) => st.suppress);
@@ -37,7 +39,7 @@ export function StickyActionBar({ visible, label, loading, disabled, icon = 'che
       <Pressable onPress={onPress} disabled={off} style={({ pressed }) => [styles.shadow, off && { opacity: 0.55 }, pressed && { transform: [{ scale: 0.98 }] }]}>
         <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
           <MaterialIcons name={icon} size={22} color={colors.primaryContrast} />
-          <Text style={styles.text}>{loading ? 'Enregistrement…' : label}</Text>
+          <Text style={styles.text}>{loading ? t('common.enregistrement') : label}</Text>
         </LinearGradient>
       </Pressable>
     </View>

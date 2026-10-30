@@ -10,6 +10,7 @@ import { useAdminPlans, useOrganizationConfig, useTogglePlanActive, useUpdateOrg
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle } from '../../src/components/ui';
 import { formatMoney } from '../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
 
 function durationLabel(days: number): string {
   if (days >= 360) return `${Math.round(days / 365)} an${days >= 730 ? 's' : ''}`;
@@ -19,6 +20,7 @@ function durationLabel(days: number): string {
 
 /** Abonnements (admin) : forfaits, tarifs, visibilité dans l'app, activation. */
 export default function AdminPlansScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: plans, refetch } = useAdminPlans();
@@ -47,14 +49,14 @@ export default function AdminPlansScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Plus</Text>
+          <Text style={styles.backText}>{t('common.plus')}</Text>
         </Pressable>
         <ScreenTitle
-          title="Abonnements"
-          subtitle="Forfaits, tarifs et visibilité"
+          title={t('admin.abonnements')}
+          subtitle={t('admin.forfaits_tarifs_et_visibilite')}
           right={
             <Pressable
-              accessibilityLabel="Créer un forfait"
+              accessibilityLabel={t('admin.creer_un_forfait')}
               onPress={() => router.push('/(admin)/plan-form')}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
@@ -69,13 +71,11 @@ export default function AdminPlansScreen() {
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTop}>
-              <Text style={styles.heroKicker}>REVENU MENSUEL RÉCURRENT</Text>
+              <Text style={styles.heroKicker}>{t('admin.revenu_mensuel_recurrent')}</Text>
               <MaterialIcons name="trending-up" size={20} color="#FFFFFF" />
             </View>
             <Text style={styles.heroValue} numberOfLines={1} adjustsFontSizeToFit>{formatMoney(Math.round(mrr))}</Text>
-            <Text style={styles.heroSub}>
-              {activePlans.length} forfait{activePlans.length > 1 ? 's' : ''} actif{activePlans.length > 1 ? 's' : ''} · {subscribers} abonné{subscribers > 1 ? 's' : ''}
-            </Text>
+            <Text style={styles.heroSub}>{t('admin.forfait_actif_abonne', { length: activePlans.length, v3: activePlans.length > 1 ? 's' : '', v5: activePlans.length > 1 ? 's' : '', subscribers, v9: subscribers > 1 ? 's' : '' })}</Text>
           </LinearGradient>
         </View>
 
@@ -89,7 +89,7 @@ export default function AdminPlansScreen() {
               <View style={styles.top}>
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.name}>{p.name}</Text>
-                  <Text style={styles.meta}>{durationLabel(p.durationDays)}{p.includesLabel ? ` · ${p.includesLabel}` : ''} · {p.activeSubscribers ?? 0} abonné{(p.activeSubscribers ?? 0) > 1 ? 's' : ''}</Text>
+                  <Text style={styles.meta}>{t('admin.abonne', { v0: durationLabel(p.durationDays), v1: p.includesLabel ? ` · ${p.includesLabel}` : '', v3: p.activeSubscribers ?? 0, v5: (p.activeSubscribers ?? 0) > 1 ? 's' : '' })}</Text>
                 </View>
                 <Switch
                   value={p.isActive}
@@ -104,12 +104,12 @@ export default function AdminPlansScreen() {
                 <View style={styles.tags}>
                   {p.isPopular ? (
                     <View style={[styles.tag, { backgroundColor: colors.primary }]}>
-                      <Text style={[styles.tagText, { color: colors.primaryContrast }]}>Populaire</Text>
+                      <Text style={[styles.tagText, { color: colors.primaryContrast }]}>{t('common.populaire')}</Text>
                     </View>
                   ) : null}
                   <View style={[styles.tag, { backgroundColor: p.isVisibleInApp ? colors.successSoft : colors.surface2 }]}>
                     <Text style={[styles.tagText, { color: p.isVisibleInApp ? colors.successInk : colors.muted }]}>
-                      {p.isVisibleInApp ? 'Visible dans l’app' : 'Masqué'}
+                      {p.isVisibleInApp ? t('admin.visible_dans_lapp') : t('admin.masque')}
                     </Text>
                   </View>
                 </View>
@@ -118,15 +118,15 @@ export default function AdminPlansScreen() {
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>Remises par durée d’engagement</Text>
+        <Text style={styles.sectionTitle}>{t('admin.remises_par_duree_dengagement')}</Text>
         <View style={[styles.card, cardShadow]}>
           {['3', '6', '12'].map((m, i) => (
             <View key={m}>
               {i > 0 ? <View style={styles.sep} /> : null}
               <View style={styles.discRow}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.name}>{m} mois</Text>
-                  <Text style={styles.meta}>Remise sur le tarif mensuel</Text>
+                  <Text style={styles.name}>{t('admin.mois', { m })}</Text>
+                  <Text style={styles.meta}>{t('admin.remise_sur_le_tarif_mensuel')}</Text>
                 </View>
                 <View style={styles.stepper}>
                   <Pressable style={styles.stepBtn} onPress={() => setDiscount(m, (discounts[m] ?? 0) - 1)}>
@@ -145,7 +145,7 @@ export default function AdminPlansScreen() {
             onPress={() => config && saveConfig.mutate({ ...config, discounts }, { onSuccess: () => setDiscountsDirty(false) })}
             style={[styles.saveBtn, (!discountsDirty || saveConfig.isPending) && { opacity: 0.5 }]}
           >
-            <Text style={styles.saveText}>{saveConfig.isPending ? 'Enregistrement…' : discountsDirty ? 'Enregistrer les remises' : 'Remises enregistrées'}</Text>
+            <Text style={styles.saveText}>{saveConfig.isPending ? t('common.enregistrement') : discountsDirty ? t('admin.enregistrer_les_remises') : t('admin.remises_enregistrees')}</Text>
           </Pressable>
         </View>
       </ScrollView>

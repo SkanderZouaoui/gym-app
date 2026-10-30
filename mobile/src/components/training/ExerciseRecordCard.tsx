@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { LineChart } from '../ui';
+import { useTranslation } from 'react-i18next';
 
 interface ExerciseRecordCardProps {
   bestWeight: number;
@@ -14,17 +15,16 @@ interface ExerciseRecordCardProps {
 
 /** Carte "record" avec mini-sparkline — Fiche exercice, FitZone App Entraînement.dc.html, E3. */
 export function ExerciseRecordCard({ bestWeight, bestReps, deltaKg, weeksSpan, series }: ExerciseRecordCardProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.card}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.label}>Mon record</Text>
-        <Text style={styles.value}>{bestWeight} kg × {bestReps}</Text>
+        <Text style={styles.label}>{t('member.mon_record')}</Text>
+        <Text style={styles.value}>{t('member.kg_4', { bestWeight, bestReps })}</Text>
         {deltaKg !== null && weeksSpan !== null ? (
-          <Text style={[styles.delta, { color: deltaKg >= 0 ? colors.successInk : colors.dangerInk }]}>
-            {deltaKg >= 0 ? '+' : ''}{deltaKg} kg en {weeksSpan} semaine{weeksSpan > 1 ? 's' : ''}
-          </Text>
+          <Text style={[styles.delta, { color: deltaKg >= 0 ? colors.successInk : colors.dangerInk }]}>{t('member.kg_en_semaine', { v1: deltaKg >= 0 ? '+' : '', deltaKg, weeksSpan, v6: weeksSpan > 1 ? 's' : '' })}</Text>
         ) : null}
       </View>
       {series.length >= 2 ? (

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../api/client';
 import type { ProgramDetail, ProgramStatus } from './useCoachSessions';
+import { WEEKDAYS_LONG_MON } from '../i18n/labels';
 
 export interface AdminDashboard {
   activeMembers: number;
@@ -655,7 +656,7 @@ export function useMySchedule() {
   return useQuery({ queryKey: ['me', 'schedule'], queryFn: () => apiRequest<WorkDay[]>('/v1/me/schedule') });
 }
 
-export const WEEK_DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+export const WEEK_DAYS = WEEKDAYS_LONG_MON;
 export function shiftHours(d: WorkDay): number {
   if (!d.working) return 0;
   const m = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
@@ -668,6 +669,7 @@ export interface SetupAlert {
   title: string;
   detail: string;
   route: string;
+  params?: Record<string, string | number>;
 }
 /** Éléments de configuration manquants (planning d'équipe, forfaits, salles, coordonnées…). */
 export function useSetupAlerts() {

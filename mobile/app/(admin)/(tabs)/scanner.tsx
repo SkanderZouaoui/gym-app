@@ -1,8 +1,10 @@
 import { useLocalSearchParams } from 'expo-router';
 import { ScannerScreen } from '../../../src/components/ScannerScreen';
 import { useSessions } from '../../../src/hooks/useClasses';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminScannerScreen() {
+  const { t } = useTranslation();
   const params = useLocalSearchParams<{ sessionId?: string }>();
   const { data } = useSessions();
   const today = new Date().toDateString();
@@ -10,5 +12,5 @@ export default function AdminScannerScreen() {
     .filter((s) => new Date(s.startsAt).toDateString() === today)
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
     .map((s) => ({ id: s.id, name: s.classType.name, startsAt: s.startsAt, endsAt: s.endsAt }));
-  return <ScannerScreen sessions={sessions} initialSessionId={params.sessionId} emptyText="Aucun cours aujourd’hui à scanner." />;
+  return <ScannerScreen sessions={sessions} initialSessionId={params.sessionId} emptyText={t('common.aucun_cours_aujourdhui_a_scanner')} />;
 }

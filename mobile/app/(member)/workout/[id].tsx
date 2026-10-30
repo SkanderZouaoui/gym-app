@@ -11,18 +11,22 @@ import { ScreenTitle, Toast } from '../../../src/components/ui';
 import { WorkoutHeroCard } from '../../../src/components/training/WorkoutHeroCard';
 import { formatClock, workoutSeconds } from '../../../src/utils/duration';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../src/i18n';
+import { WEEKDAYS_LONG_SUN } from '../../../src/i18n/labels';
 
 const FEELING_STYLES: Record<string, { label: string; icon: keyof typeof MaterialIcons.glyphMap; color: (c: ColorPalette) => string; bg: (c: ColorPalette) => string }> = {
-  EASY: { label: 'Facile', icon: 'sentiment-very-satisfied', color: (c) => c.successInk, bg: (c) => c.successSoft },
-  OK: { label: 'Correct', icon: 'sentiment-satisfied', color: (c) => c.infoInk, bg: (c) => c.infoSoft },
-  HARD: { label: 'Difficile', icon: 'sentiment-dissatisfied', color: (c) => c.dangerInk, bg: (c) => c.dangerSoft },
+  EASY: { get label() { return i18n.t('member.facile'); }, icon: 'sentiment-very-satisfied', color: (c) => c.successInk, bg: (c) => c.successSoft },
+  OK: { get label() { return i18n.t('member.correct'); }, icon: 'sentiment-satisfied', color: (c) => c.infoInk, bg: (c) => c.infoSoft },
+  HARD: { get label() { return i18n.t('member.difficile'); }, icon: 'sentiment-dissatisfied', color: (c) => c.dangerInk, bg: (c) => c.dangerSoft },
 };
 
-const DAY_LABELS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAY_LABELS = WEEKDAYS_LONG_SUN;
 
 /** Détail d'une séance de l'historique — lecture seule, même mise en page
  * que la séance guidée (session/live) mais sans aucune saisie ni action. */
 export default function WorkoutDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -52,7 +56,7 @@ export default function WorkoutDetailScreen() {
   const feeling = log.feeling ? FEELING_STYLES[log.feeling] : undefined;
   const title = log.program
     ? `${log.program.name}${log.day ? ` · ${log.day.label ?? DAY_LABELS[log.day.dayOfWeek]}` : ''}`
-    : log.sets[0]?.exercise.name ?? 'Séance';
+    : log.sets[0]?.exercise.name ?? t('member.seance');
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -67,35 +71,35 @@ export default function WorkoutDetailScreen() {
             hitSlop={8}
           >
             <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-            <Text style={styles.backText}>Historique</Text>
+            <Text style={styles.backText}>{t('member.historique')}</Text>
           </Pressable>
           <View style={styles.readOnlyPill}>
             <MaterialIcons name="lock" size={14} color={colors.muted} />
-            <Text style={styles.readOnlyPillText}>Lecture seule</Text>
+            <Text style={styles.readOnlyPillText}>{t('member.lecture_seule')}</Text>
           </View>
         </View>
 
         <ScreenTitle
           title={title}
-          subtitle={new Date(log.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          subtitle={new Date(log.date).toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
         />
 
         <WorkoutHeroCard
           duration={workoutSeconds(log) !== null ? formatClock(workoutSeconds(log)!) : '—'}
           progress={1}
           ringLabel="100%"
-          volume={volume > 0 ? `${Math.round(volume).toLocaleString('fr-FR')} kg` : '—'}
+          volume={volume > 0 ? `${Math.round(volume).toLocaleString(dateLocale())} kg` : '—'}
           sets={String(log.sets.length)}
         />
 
         {feeling ? (
           <View style={[styles.feelingBadge, { backgroundColor: feeling.bg(colors) }]}>
             <MaterialIcons name={feeling.icon} size={16} color={feeling.color(colors)} />
-            <Text style={[styles.feelingText, { color: feeling.color(colors) }]}>Ressenti : {feeling.label}</Text>
+            <Text style={[styles.feelingText, { color: feeling.color(colors) }]}>{t('member.ressenti_2', { label: feeling.label })}</Text>
           </View>
         ) : log.feeling ? (
           <View style={[styles.feelingBadge, { backgroundColor: colors.surface2 }]}>
-            <Text style={[styles.feelingText, { color: colors.text }]}>Ressenti : {log.feeling}</Text>
+            <Text style={[styles.feelingText, { color: colors.text }]}>{t('member.ressenti_3', { feeling: log.feeling })}</Text>
           </View>
         ) : null}
 
@@ -107,7 +111,7 @@ export default function WorkoutDetailScreen() {
               </LinearGradient>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.exerciseName} numberOfLines={1}>{exSets[0]?.exercise.name}</Text>
-                <Text style={styles.exerciseMeta}>{exSets.length} série{exSets.length > 1 ? 's' : ''}</Text>
+                <Text style={styles.exerciseMeta}>{t('member.serie_3', { length: exSets.length, v2: exSets.length > 1 ? 's' : '' })}</Text>
               </View>
               <View style={styles.doneTag}>
                 <Text style={styles.doneTagText}>{exSets.length}/{exSets.length}</Text>
@@ -115,9 +119,9 @@ export default function WorkoutDetailScreen() {
             </Pressable>
 
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { width: 34 }]}>SÉRIE</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>KG</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>REPS</Text>
+              <Text style={[styles.tableHeaderText, { width: 34 }]}>{t('member.serie_2')}</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{t('member.kg_2')}</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{t('member.reps')}</Text>
               <View style={{ width: 44 }} />
             </View>
             {exSets.map((st) => (
@@ -135,7 +139,7 @@ export default function WorkoutDetailScreen() {
       </ScrollView>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

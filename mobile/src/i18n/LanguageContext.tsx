@@ -24,7 +24,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     getItem(LANGUAGE_KEY).then((stored) => {
-      if (stored === 'fr' || stored === 'ar') {
+      if (stored === 'fr' || stored === 'en' || stored === 'ar') {
         setLanguageState(stored);
         void i18n.changeLanguage(stored);
       }

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, typography } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { dateLocale } from '../../i18n';
 
 interface NextCourseCardProps {
   className: string;
@@ -19,7 +20,7 @@ export function NextCourseCard({ className, meta, startsAt, countdownText, onPre
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const time = startsAt
-    ? new Date(startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    ? new Date(startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })
     : null;
   const subtitle = [meta, countdownText].filter(Boolean).join(' · ');
   return (

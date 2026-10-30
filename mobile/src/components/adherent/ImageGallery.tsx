@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface ImageGalleryProps {
   urls: string[];
@@ -15,6 +16,7 @@ const TILE_HEIGHT = 150;
 /** Galerie de photos d'un cours : miniatures défilantes, puis visionneuse plein écran
  * (balayage horizontal entre les photos, compteur, bouton de fermeture). */
 export function ImageGallery({ urls }: ImageGalleryProps) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { width, height } = useWindowDimensions();
@@ -37,7 +39,7 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
             key={url}
             onPress={() => open(i)}
             style={({ pressed }) => [styles.tile, cardShadow, pressed && { transform: [{ scale: 0.97 }] }]}
-            accessibilityLabel={`Photo ${i + 1} sur ${urls.length}`}
+            accessibilityLabel={t('member.photo_sur', { v0: i + 1, length: urls.length })}
           >
             <Image source={{ uri: url }} style={styles.tileImage} contentFit="cover" transition={200} />
           </Pressable>
@@ -51,7 +53,7 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
               <View style={styles.counter}>
                 <Text style={styles.counterText}>{current + 1} / {urls.length}</Text>
               </View>
-              <Pressable style={styles.close} onPress={() => setOpenIndex(null)} hitSlop={10} accessibilityLabel="Fermer">
+              <Pressable style={styles.close} onPress={() => setOpenIndex(null)} hitSlop={10} accessibilityLabel={t('member.fermer')}>
                 <MaterialIcons name="close" size={24} color="#FFFFFF" />
               </Pressable>
             </View>

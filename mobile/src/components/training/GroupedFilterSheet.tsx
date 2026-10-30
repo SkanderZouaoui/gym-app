@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { BottomSheet } from '../ui';
 import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export interface FilterOption {
   value: string;
@@ -41,6 +42,7 @@ export function GroupedFilterSheet({
   onApply,
   searchThreshold = 15,
 }: GroupedFilterSheetProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [draft, setDraft] = useState<string[]>(selected);
@@ -85,7 +87,7 @@ export function GroupedFilterSheet({
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
         <Pressable onPress={handleClear}>
-          <Text style={styles.clear}>Effacer</Text>
+          <Text style={styles.clear}>{t('member.effacer')}</Text>
         </Pressable>
       </View>
 
@@ -95,7 +97,7 @@ export function GroupedFilterSheet({
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Rechercher"
+            placeholder={t('member.rechercher')}
             placeholderTextColor={colors.muted}
             style={styles.searchInput}
           />
@@ -123,7 +125,7 @@ export function GroupedFilterSheet({
 
       <Pressable style={styles.applyButton} onPress={handleApply}>
         <Text style={styles.applyButtonText}>
-          {draft.length > 0 ? `Appliquer (${draft.length})` : 'Appliquer'}
+          {draft.length > 0 ? `Appliquer (${draft.length})` : t('member.appliquer')}
         </Text>
       </Pressable>
     </BottomSheet>

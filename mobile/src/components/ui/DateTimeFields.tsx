@@ -4,6 +4,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { CalendarSheet, TimeSheet } from './pickers';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../i18n';
 
 interface Props {
   value: Date;
@@ -18,12 +20,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 /** Champs date et heure (côte à côte) ; sélecteurs JavaScript, sans module natif. */
 export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
 
-  const dateLabel = value.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' });
+  const dateLabel = value.toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'long' });
   const timeLabel = `${pad(value.getHours())}:${pad(value.getMinutes())}`;
 
   return (
@@ -35,7 +38,7 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
               <MaterialIcons name="event" size={20} color={colors.primaryInk} />
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={styles.label}>Date</Text>
+              <Text style={styles.label}>{t('common.date')}</Text>
               <Text style={styles.value} numberOfLines={1}>{dateLabel}</Text>
             </View>
           </Pressable>
@@ -45,7 +48,7 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
             <MaterialIcons name="schedule" size={20} color={colors.primaryInk} />
           </View>
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={styles.label}>Heure</Text>
+            <Text style={styles.label}>{t('common.heure')}</Text>
             <Text style={styles.value}>{timeLabel}</Text>
           </View>
         </Pressable>
@@ -55,7 +58,7 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
         visible={dateOpen}
         value={value}
         minimumDate={minimumDate}
-        title="Choisir la date"
+        title={t('common.choisir_la_date')}
         onClose={() => setDateOpen(false)}
         onSelect={(d) => {
           const next = new Date(value);
@@ -66,7 +69,7 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
       <TimeSheet
         visible={timeOpen}
         value={{ h: value.getHours(), m: value.getMinutes() }}
-        title="Choisir l’heure"
+        title={t('common.choisir_lheure')}
         onClose={() => setTimeOpen(false)}
         onSelect={({ h, m }) => {
           const next = new Date(value);
@@ -80,6 +83,7 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
 
 /** Bouton compact « HH:mm » qui ouvre le sélecteur d'heure (horaires d'ouverture, planning). */
 export function TimeButton({ value, onChange, disabled }: { value: string; onChange: (hhmm: string) => void; disabled?: boolean }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
   const [h, m] = value.split(':').map(Number);
@@ -98,7 +102,7 @@ export function TimeButton({ value, onChange, disabled }: { value: string; onCha
       <TimeSheet
         visible={open}
         value={{ h: h || 0, m: m || 0 }}
-        title="Choisir l’heure"
+        title={t('common.choisir_lheure')}
         onClose={() => setOpen(false)}
         onSelect={(v) => onChange(`${pad(v.h)}:${pad(v.m)}`)}
       />
@@ -116,6 +120,7 @@ const fromIso = (s: string) => {
 export function DateField({
   label, value, onChange, clearable, minimumDate, icon = 'event',
 }: { label: string; value: string; onChange: (iso: string) => void; clearable?: boolean; minimumDate?: Date; icon?: keyof typeof MaterialIcons.glyphMap }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
   return (
@@ -133,7 +138,7 @@ export function DateField({
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted }}>{label}</Text>
           <Text style={{ fontFamily: fonts.bodyBold, fontSize: 15, color: value ? colors.text : colors.muted }} numberOfLines={1}>
-            {value ? fromIso(value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Aucune limite'}
+            {value ? fromIso(value).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : t('common.aucune_limite')}
           </Text>
         </View>
         {clearable && value ? (

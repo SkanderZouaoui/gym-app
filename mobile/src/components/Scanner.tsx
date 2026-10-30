@@ -12,6 +12,8 @@ import { useMembers } from '../hooks/useStaff';
 import { fonts, radii, spacing } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { useManualCheckin, useScan, type ScanOutcome } from '../hooks/useAttendance';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../i18n';
 
 export interface ScanSessionOption {
   id: string;
@@ -33,6 +35,7 @@ const ACCENT = '#A78BFA';
 /** Écran de scan v2 : titre, viseur avec cadre à coins lumineux et ligne de balayage animée,
  * sélecteur de cours, pointage manuel par code de réservation. */
 export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) {
+  useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [permission, requestPermission] = useCameraPermissions();
@@ -106,7 +109,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
     );
   };
 
-  const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const timeOf = (iso: string) => new Date(iso).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
   const corner = (pos: 'tl' | 'tr' | 'bl' | 'br') => {
     const base = { position: 'absolute' as const, width: 44, height: 44, borderColor: ACCENT, borderWidth: 4 };
@@ -123,16 +126,16 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <ScreenTitle
-          title={manualMode ? 'Pointage manuel' : 'Scanner'}
-          subtitle={manualMode ? 'Code à 6 chiffres de l’adhérent, ou recherche par nom.' : 'Valider la présence aux cours collectifs.'}
+          title={manualMode ? i18n.t('common.pointage_manuel') : i18n.t('common.scanner')}
+          subtitle={manualMode ? i18n.t('common.code_a_6_chiffres_de') : i18n.t('common.valider_la_presence_aux_cours')}
         />
 
         {manualMode ? (
           <View style={{ gap: 12 }}>
             <View style={styles.tabs}>
               {([
-                { value: 'code', label: 'Code à 6 chiffres', icon: 'pin' },
-                { value: 'name', label: 'Recherche par nom', icon: 'search' },
+                { value: 'code', label: i18n.t('common.code_a_6_chiffres'), icon: 'pin' },
+                { value: 'name', label: i18n.t('common.recherche_par_nom'), icon: 'search' },
               ] as const).map((t) => {
                 const active = manualTab === t.value;
                 return (
@@ -179,7 +182,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                   <MaterialIcons name="search" size={22} color={colors.muted} />
                   <TextInput
                     style={styles.searchInput}
-                    placeholder="Nom ou prénom de l’adhérent…"
+                    placeholder={i18n.t('common.nom_ou_prenom_de_ladherent')}
                     placeholderTextColor={colors.muted}
                     value={nameQuery}
                     onChangeText={setNameQuery}
@@ -188,9 +191,9 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                   />
                 </View>
                 {nameQuery.trim().length < 2 ? (
-                  <Text style={styles.hint}>Saisissez au moins 2 lettres pour chercher.</Text>
+                  <Text style={styles.hint}>{i18n.t('common.saisissez_au_moins_2_lettres')}</Text>
                 ) : (found ?? []).length === 0 ? (
-                  <Text style={styles.hint}>Aucun adhérent trouvé.</Text>
+                  <Text style={styles.hint}>{i18n.t('common.aucun_adherent_trouve')}</Text>
                 ) : (
                   (found ?? []).slice(0, 8).map((m) => (
                     <Pressable
@@ -202,11 +205,11 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                       <InitialsAvatar first={m.firstName} last={m.lastName} size={40} />
                       <View style={{ flex: 1, minWidth: 0 }}>
                         <Text style={styles.memberName} numberOfLines={1}>{m.firstName} {m.lastName}</Text>
-                        <Text style={styles.memberMeta} numberOfLines={1}>{m.memberships?.[0]?.plan.name ?? 'Aucun abonnement'}</Text>
+                        <Text style={styles.memberMeta} numberOfLines={1}>{m.memberships?.[0]?.plan.name ?? i18n.t('common.aucun_abonnement')}</Text>
                       </View>
                       <View style={styles.checkPill}>
                         <MaterialIcons name="how-to-reg" size={18} color={colors.primaryInk} />
-                        <Text style={styles.checkPillText}>Pointer</Text>
+                        <Text style={styles.checkPillText}>{i18n.t('common.pointer')}</Text>
                       </View>
                     </Pressable>
                   ))
@@ -231,9 +234,9 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
               {permission && !permission.granted ? (
                 <View style={styles.permission}>
                   <MaterialIcons name="photo-camera" size={40} color={ACCENT} />
-                  <Text style={styles.permissionText}>L’accès à la caméra est nécessaire pour scanner les QR de présence.</Text>
+                  <Text style={styles.permissionText}>{i18n.t('common.lacces_a_la_camera_est')}</Text>
                   <Pressable style={styles.permissionButton} onPress={requestPermission}>
-                    <Text style={styles.permissionButtonText}>Autoriser la caméra</Text>
+                    <Text style={styles.permissionButtonText}>{i18n.t('common.autoriser_la_camera')}</Text>
                   </Pressable>
                 </View>
               ) : (
@@ -249,11 +252,11 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                       />
                     </Animated.View>
                   </View>
-                  <Pressable style={styles.torch} onPress={() => setTorch((t) => !t)} accessibilityLabel="Lampe">
+                  <Pressable style={styles.torch} onPress={() => setTorch((t) => !t)} accessibilityLabel={i18n.t('common.lampe')}>
                     <MaterialIcons name={torch ? 'flash-on' : 'flash-off'} size={22} color="#FFFFFF" />
                   </Pressable>
                   <View style={styles.captionWrap}>
-                    <Text style={styles.caption}>Placez le QR de l’adhérent dans le cadre</Text>
+                    <Text style={styles.caption}>{i18n.t('common.placez_le_qr_de_ladherent')}</Text>
                   </View>
                 </>
               )}
@@ -263,7 +266,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
 
         {!manualMode && sessions && sessions.length > 0 ? (
           <View>
-            <Text style={styles.label}>Cours en cours et à venir</Text>
+            <Text style={styles.label}>{i18n.t('common.cours_en_cours_et_a')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
               {sessions.map((s) => {
                 const active = s.id === sessionId;
@@ -275,7 +278,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                     ) : null}
                     <View style={styles.sessionTop}>
                       <View style={[styles.liveDot, { backgroundColor: live ? '#34D399' : active ? 'rgba(255,255,255,0.6)' : colors.muted }]} />
-                      <Text style={[styles.sessionState, active && { color: 'rgba(255,255,255,0.9)' }]}>{live ? 'EN COURS' : 'À VENIR'}</Text>
+                      <Text style={[styles.sessionState, active && { color: 'rgba(255,255,255,0.9)' }]}>{live ? i18n.t('common.en_cours_2') : i18n.t('common.a_venir_2')}</Text>
                     </View>
                     <Text style={[styles.sessionName, active && { color: '#FFFFFF' }]} numberOfLines={1}>{s.name}</Text>
                     <Text style={[styles.sessionTime, active && { color: 'rgba(255,255,255,0.9)' }]}>{timeOf(s.startsAt)} – {timeOf(s.endsAt)}</Text>
@@ -296,19 +299,19 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
             >
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                 <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-                <Text style={styles.ctaText}>{manualCheckin.isPending ? 'Validation…' : 'Valider la présence'}</Text>
+                <Text style={styles.ctaText}>{manualCheckin.isPending ? i18n.t('common.validation') : i18n.t('common.valider_la_presence')}</Text>
               </LinearGradient>
             </Pressable>
             ) : null}
             <Pressable style={styles.secondary} onPress={() => setManualMode(false)}>
               <MaterialIcons name="qr-code-scanner" size={22} color={colors.text} />
-              <Text style={styles.secondaryText}>Revenir au scan</Text>
+              <Text style={styles.secondaryText}>{i18n.t('common.revenir_au_scan')}</Text>
             </Pressable>
           </View>
         ) : (
           <Pressable style={({ pressed }) => [styles.secondary, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => setManualMode(true)}>
             <MaterialIcons name="keyboard" size={22} color={colors.text} />
-            <Text style={styles.secondaryText}>Pointage manuel</Text>
+            <Text style={styles.secondaryText}>{i18n.t('common.pointage_manuel')}</Text>
           </Pressable>
         )}
       </ScrollView>

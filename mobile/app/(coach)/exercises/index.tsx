@@ -12,12 +12,14 @@ import { ExerciseListItem } from '../../../src/components/training/ExerciseListI
 import { MuscleGroupPickerSheet } from '../../../src/components/training/MuscleGroupPickerSheet';
 import { GroupedFilterSheet, type FilterGroup } from '../../../src/components/training/GroupedFilterSheet';
 import { EQUIPMENT_CATEGORIES, equipmentOptionsByCategory } from '../../../src/constants/equipment';
+import { useTranslation } from 'react-i18next';
 
 /** Bibliothèque d'exercices — variante coach : le retour se fait vers le
  * composeur de programme de l'élève sélectionné. Même filtre muscle
  * (silhouette, affichée dès l'accès à la page) et équipement (liste groupée)
  * que la bibliothèque adhérent. */
 export default function CoachExercisesLibraryScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { pickFor, studentId, studentName, returnTo } = useLocalSearchParams<{ pickFor?: string; studentId?: string; studentName?: string; returnTo?: string }>();
@@ -52,7 +54,7 @@ export default function CoachExercisesLibraryScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader
-        title="Bibliothèque"
+        title={t('common.bibliotheque')}
         fallbackHref={`/(coach)/program-builder?studentId=${studentId}&studentName=${studentName}`}
       />
       <View style={styles.searchRow}>
@@ -61,7 +63,7 @@ export default function CoachExercisesLibraryScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Rechercher un exercice"
+            placeholder={t('common.rechercher_un_exercice')}
             placeholderTextColor={colors.muted}
             style={styles.searchInput}
           />
@@ -71,13 +73,13 @@ export default function CoachExercisesLibraryScreen() {
       <View style={styles.filterRow}>
         <FilterButton
           icon="accessibility-new"
-          label="Muscle"
+          label={t('common.muscle')}
           count={muscleGroup ? 1 : 0}
           onPress={() => setBodyMapVisible(true)}
         />
         <FilterButton
           icon="fitness-center"
-          label="Équipement"
+          label={t('common.equipement')}
           count={equipment.length}
           onPress={() => setEquipmentSheetVisible(true)}
         />
@@ -91,7 +93,7 @@ export default function CoachExercisesLibraryScreen() {
       />
       <GroupedFilterSheet
         visible={equipmentSheetVisible}
-        title="Filtrer par équipement"
+        title={t('common.filtrer_par_equipement')}
         groups={equipmentFilterGroups}
         selected={equipment}
         onClose={() => setEquipmentSheetVisible(false)}
@@ -118,7 +120,7 @@ export default function CoachExercisesLibraryScreen() {
             />
           )}
           ListEmptyComponent={
-            <EmptyState icon="search-off" title="Aucun résultat" text="Vérifiez l'orthographe ou essayez un autre filtre." tone="muted" />
+            <EmptyState icon="search-off" title={t('common.aucun_resultat')} text={t('coach.verifiez_lorthographe_ou_essayez_un')} tone="muted" />
           }
         />
       )}

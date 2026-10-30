@@ -11,6 +11,7 @@ import { meApi } from '../../../src/api/endpoints';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useOfflineQrToken } from '../../../src/hooks/useOfflineQrToken';
 import { Avatar, Banner, Pill, ProgressBar, ScreenTitle } from '../../../src/components/ui';
+import { dateLocale } from '../../../src/i18n';
 
 // Repli uniquement : la vraie durée de vie vient de `expiresInSeconds`,
 // renvoyée par le serveur à chaque émission de token (45s — qr-token.service.ts).
@@ -79,7 +80,7 @@ export default function QrScreen() {
             text={
               offlineQr.token
                 ? t('qr.offlineWithFallback', {
-                    time: new Date(offlineQr.expiresAt!).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                    time: new Date(offlineQr.expiresAt!).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' }),
                   })
                 : t('qr.offlineNoFallback')
             }
@@ -129,7 +130,7 @@ export default function QrScreen() {
             <Text style={styles.identityName}>{user?.firstName} {user?.lastName}</Text>
             <Text style={styles.identityMeta}>
               {activeMembership?.plan.name ?? t('home.membershipNone')}
-              {activeMembership ? t('qr.membershipUntil', { date: new Date(activeMembership.endDate).toLocaleDateString('fr-FR') }) : ''}
+              {activeMembership ? t('qr.membershipUntil', { date: new Date(activeMembership.endDate).toLocaleDateString(dateLocale()) }) : ''}
             </Text>
           </View>
           {activeMembership ? <Pill label={t('qr.membershipActive')} tone="success" /> : null}
@@ -144,7 +145,7 @@ export default function QrScreen() {
               <Text style={styles.bookingLabel}>{t('qr.nextCourse')}</Text>
               <Text style={styles.bookingClass}>{nextBooking.session.classType.name}</Text>
               <Text style={styles.bookingMeta}>
-                {new Date(nextBooking.session.startsAt).toLocaleString('fr-FR', {
+                {new Date(nextBooking.session.startsAt).toLocaleString(dateLocale(), {
                   weekday: 'long',
                   hour: '2-digit',
                   minute: '2-digit',

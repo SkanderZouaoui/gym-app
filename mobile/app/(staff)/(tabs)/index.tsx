@@ -14,9 +14,12 @@ import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { Avatar } from '../../../src/components/ui';
 import { useSessionStore } from '../../../src/store/session';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../../src/i18n';
 
 /** Accueil de l'espace staff : chiffres du jour, raccourcis, cours du jour et derniers encaissements. */
 export default function StaffHomeScreen() {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -28,17 +31,17 @@ export default function StaffHomeScreen() {
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetchToday(), refetchPayments()]));
 
   const now = new Date();
-  const dateLabel = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dateLabel = now.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
   const sessions = today?.sessions ?? [];
   const todayPayments = (payments ?? []).filter((p) => new Date(p.recordedAt).toDateString() === now.toDateString());
   const collectedToday = todayPayments.reduce((s, p) => s + Number(p.amount), 0);
   const upcoming = sessions.filter((s) => new Date(s.endsAt).getTime() >= now.getTime());
 
   const actions: { icon: keyof typeof MaterialIcons.glyphMap; label: string; onPress: () => void }[] = [
-    { icon: 'qr-code-scanner', label: 'Scanner un QR', onPress: () => router.push('/(staff)/(tabs)/scanner') },
-    { icon: 'point-of-sale', label: 'Encaisser', onPress: () => router.push(routes.cashSelect) },
-    { icon: 'person-add', label: 'Nouveau compte', onPress: () => router.push(routes.memberCreate) },
-    { icon: 'search', label: 'Chercher un adhérent', onPress: () => router.push(routes.members) },
+    { icon: 'qr-code-scanner', label: t('staff.scanner_un_qr'), onPress: () => router.push('/(staff)/(tabs)/scanner') },
+    { icon: 'point-of-sale', label: t('staff.encaisser'), onPress: () => router.push(routes.cashSelect) },
+    { icon: 'person-add', label: t('common.nouveau_compte'), onPress: () => router.push(routes.memberCreate) },
+    { icon: 'search', label: t('staff.chercher_un_adherent'), onPress: () => router.push(routes.members) },
   ];
 
   return (
@@ -51,7 +54,7 @@ export default function StaffHomeScreen() {
         <View style={styles.header}>
           <Avatar initials={`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'AC'} size={44} background={colors.primarySoft} color={colors.primaryInk} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.hello}>Bonjour,</Text>
+            <Text style={styles.hello}>{t('staff.bonjour')}</Text>
             <Text style={styles.name} numberOfLines={1}>{user?.firstName ?? ''}</Text>
           </View>
         </View>
@@ -61,15 +64,15 @@ export default function StaffHomeScreen() {
             <View style={styles.heroDecor} />
             <Text style={styles.heroKicker}>{dateLabel.toUpperCase()}</Text>
             <Text style={styles.heroValue}>{formatMoney(collectedToday)}</Text>
-            <Text style={styles.heroSub}>{isAdmin ? 'encaissés' : 'encaissés par vous'} aujourd’hui · {todayPayments.length} paiement{todayPayments.length > 1 ? 's' : ''}</Text>
+            <Text style={styles.heroSub}>{t('staff.aujourdhui_paiement', { v0: isAdmin ? t('staff.encaisses') : t('staff.encaisses_par_vous'), length: todayPayments.length, v4: todayPayments.length > 1 ? 's' : '' })}</Text>
             <View style={styles.tiles}>
               <View style={styles.tile}>
                 <Text style={styles.tileValue}>{sessions.length}</Text>
-                <Text style={styles.tileLabel}>Cours du jour</Text>
+                <Text style={styles.tileLabel}>{t('staff.cours_du_jour')}</Text>
               </View>
               <View style={styles.tile}>
                 <Text style={styles.tileValue}>{today?.attendedToday ?? 0}</Text>
-                <Text style={styles.tileLabel}>Présences</Text>
+                <Text style={styles.tileLabel}>{t('staff.presences')}</Text>
               </View>
             </View>
           </LinearGradient>
@@ -91,14 +94,14 @@ export default function StaffHomeScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Cours du jour</Text>
+          <Text style={styles.sectionTitle}>{t('staff.cours_du_jour')}</Text>
           <View style={{ gap: 10 }}>
             {(upcoming.length > 0 ? upcoming : sessions).map((s) => (
               <SessionRow key={s.id} session={s} />
             ))}
             {sessions.length === 0 ? (
               <View style={[styles.empty, cardShadow]}>
-                <Text style={styles.emptyText}>Aucun cours aujourd’hui.</Text>
+                <Text style={styles.emptyText}>{t('staff.aucun_cours_aujourdhui')}</Text>
               </View>
             ) : null}
           </View>
@@ -106,9 +109,9 @@ export default function StaffHomeScreen() {
 
         <View>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>{isAdmin ? 'Derniers encaissements' : 'Mes derniers encaissements'}</Text>
+            <Text style={styles.sectionTitle}>{isAdmin ? t('staff.derniers_encaissements') : t('staff.mes_derniers_encaissements')}</Text>
             <Pressable onPress={() => router.push(routes.cash)} hitSlop={8}>
-              <Text style={styles.link}>Voir tout</Text>
+              <Text style={styles.link}>{t('staff.voir_tout')}</Text>
             </Pressable>
           </View>
           <View style={{ gap: 10 }}>
@@ -131,7 +134,7 @@ export default function StaffHomeScreen() {
             ))}
             {(payments ?? []).length === 0 ? (
               <View style={[styles.empty, cardShadow]}>
-                <Text style={styles.emptyText}>Aucun encaissement pour le moment.</Text>
+                <Text style={styles.emptyText}>{t('staff.aucun_encaissement_pour_le_moment')}</Text>
               </View>
             ) : null}
           </View>
@@ -142,9 +145,10 @@ export default function StaffHomeScreen() {
 }
 
 function SessionRow({ session }: { session: StaffTodaySession }) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const time = new Date(session.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const time = new Date(session.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
   const full = session.fillRate >= 100;
   return (
     <Pressable
@@ -157,12 +161,12 @@ function SessionRow({ session }: { session: StaffTodaySession }) {
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={styles.className} numberOfLines={1}>{session.classTypeName}</Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {[session.coachName, session.room].filter(Boolean).join(' · ') || 'Cours collectif'}
+          {[session.coachName, session.room].filter(Boolean).join(' · ') || t('staff.group_class')}
         </Text>
       </View>
       <View style={{ alignItems: 'flex-end', gap: 4 }}>
         <Text style={styles.fill}>{session.booked}/{session.capacity}</Text>
-        <StatusTag label={full ? 'Complet' : `${session.fillRate} %`} tone={full ? 'danger' : session.fillRate >= 70 ? 'warning' : 'muted'} />
+        <StatusTag label={full ? t('common.complet') : `${session.fillRate} %`} tone={full ? 'danger' : session.fillRate >= 70 ? 'warning' : 'muted'} />
       </View>
     </Pressable>
   );

@@ -12,12 +12,15 @@ import type { Booking } from '../../src/api/types';
 import { BottomSheet, EmptyState, ScreenTitle, Toast } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../src/i18n';
 
 type Tab = 'upcoming' | 'waitlist' | 'past';
 
 /** Mes réservations — v2 : lien retour, grand titre, pastilles À venir / En attente / Passées,
  * cartes à bloc date en dégradé et bouton d'annulation carré. */
 export default function ReservationsScreen() {
+  useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: bookings, refetch } = useMyBookings();
@@ -46,9 +49,9 @@ export default function ReservationsScreen() {
 
   const list = tab === 'upcoming' ? upcoming : tab === 'waitlist' ? waitlist : past;
   const tabs: { value: Tab; label: string }[] = [
-    { value: 'upcoming', label: `À venir (${upcoming.length})` },
-    { value: 'waitlist', label: `En attente (${waitlist.length})` },
-    { value: 'past', label: 'Passées' },
+    { value: 'upcoming', label: i18n.t('member.a_venir', { length: upcoming.length }) },
+    { value: 'waitlist', label: i18n.t('member.en_attente', { length: waitlist.length }) },
+    { value: 'past', label: i18n.t('member.passees') },
   ];
 
   const handleBack = () => {
@@ -66,9 +69,9 @@ export default function ReservationsScreen() {
       <View style={styles.header}>
         <Pressable onPress={handleBack} style={styles.back} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Planning</Text>
+          <Text style={styles.backText}>{i18n.t('common.planning')}</Text>
         </Pressable>
-        <ScreenTitle title="Mes réservations" subtitle={`${upcoming.length} à venir · ${waitlist.length} en attente`} />
+        <ScreenTitle title={i18n.t('member.mes_reservations')} subtitle={i18n.t('member.a_venir_en_attente', { length: upcoming.length, length_: waitlist.length })} />
         <View style={styles.tabs}>
           {tabs.map((t) => {
             const active = t.value === tab;
@@ -90,15 +93,15 @@ export default function ReservationsScreen() {
           const session = item.session;
           const date = session ? new Date(session.startsAt) : null;
           const meta = [
-            date?.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            date?.toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' }),
             session?.coach?.user.firstName,
             session?.room?.name,
           ].filter(Boolean).join(' · ');
           const note =
             tab === 'upcoming' && index === 0
-              ? 'Prochain'
+              ? i18n.t('member.prochain')
               : item.status === 'WAITLISTED' && item.waitlistPosition
-                ? `${item.waitlistPosition}e en liste d’attente`
+                ? i18n.t('member.e_en_liste_dattente', { waitlistPosition: item.waitlistPosition })
                 : tab === 'past'
                   ? STATUS_LABEL[item.status]
                   : null;
@@ -110,7 +113,7 @@ export default function ReservationsScreen() {
               {date ? (
                 <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.dateBlock}>
                   <Text style={styles.dateDay}>
-                    {date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '').toUpperCase()}.
+                    {date.toLocaleDateString(dateLocale(), { weekday: 'short' }).replace('.', '').toUpperCase()}.
                   </Text>
                   <Text style={styles.dateNumber}>{date.getDate()}</Text>
                 </LinearGradient>
@@ -131,16 +134,16 @@ export default function ReservationsScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="event-available"
-            title={tab === 'upcoming' ? 'Aucune réservation à venir' : tab === 'waitlist' ? 'Aucune liste d’attente' : 'Aucune séance passée'}
+            title={tab === 'upcoming' ? i18n.t('member.aucune_reservation_a_venir') : tab === 'waitlist' ? i18n.t('member.aucune_liste_dattente') : i18n.t('member.aucune_seance_passee')}
             text={
               tab === 'upcoming'
-                ? 'Vos prochains cours apparaîtront ici.'
+                ? i18n.t('member.vos_prochains_cours_apparaitront_ici')
                 : tab === 'waitlist'
-                  ? 'Les cours complets que vous rejoignez en attente apparaîtront ici.'
-                  : 'Votre historique apparaîtra après votre premier cours.'
+                  ? i18n.t('member.les_cours_complets_que_vous')
+                  : i18n.t('member.votre_historique_apparaitra_apres_votre')
             }
             tone="primary"
-            actionLabel={tab === 'upcoming' ? 'Explorer le planning' : undefined}
+            actionLabel={tab === 'upcoming' ? i18n.t('member.explorer_le_planning') : undefined}
             onAction={tab === 'upcoming' ? () => router.push('/(member)/(tabs)/planning') : undefined}
           />
         }
@@ -148,30 +151,28 @@ export default function ReservationsScreen() {
 
       <BottomSheet visible={!!cancelTarget} onClose={() => setCancelTarget(null)}>
         <Text style={styles.sheetTitle}>
-          {cancelTarget?.status === 'WAITLISTED' ? 'Quitter la liste d’attente' : `Annuler ${cancelTarget?.session?.classType.name} ?`}
+          {cancelTarget?.status === 'WAITLISTED' ? i18n.t('member.quitter_la_liste_dattente') : `Annuler ${cancelTarget?.session?.classType.name} ?`}
         </Text>
-        <Text style={styles.sheetText}>
-          L’annulation est gratuite. Votre place sera proposée à la liste d’attente.
-        </Text>
+        <Text style={styles.sheetText}>{i18n.t('member.lannulation_est_gratuite_votre_place')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Oui, annuler" onPress={confirmCancel} variant="secondary" loading={cancelBooking.isPending} />
-          <Button label="Garder ma place" onPress={() => setCancelTarget(null)} variant="outline" />
+          <Button label={i18n.t('member.oui_annuler')} onPress={confirmCancel} variant="secondary" loading={cancelBooking.isPending} />
+          <Button label={i18n.t('member.garder_ma_place')} onPress={() => setCancelTarget(null)} variant="outline" />
         </View>
       </BottomSheet>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={i18n.t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );
 }
 
 const STATUS_LABEL: Record<Booking['status'], string> = {
-  CONFIRMED: 'Confirmée',
-  WAITLISTED: 'Liste d’attente',
-  ATTENDED: 'Présente',
-  NO_SHOW: 'Absente',
-  CANCELLED: 'Annulée',
+  get CONFIRMED() { return i18n.t('member.confirmee'); },
+  get WAITLISTED() { return i18n.t('common.liste_dattente'); },
+  get ATTENDED() { return i18n.t('member.presente'); },
+  get NO_SHOW() { return i18n.t('member.absente'); },
+  get CANCELLED() { return i18n.t('member.annulee'); },
 };
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -25,6 +25,11 @@ import { Banner, BottomSheet, ScreenTitle } from '../../src/components/ui';
 import { TimeButton } from '../../src/components/ui/DateTimeFields';
 import { Button } from '../../src/components/Button';
 import { TextField } from '../../src/components/TextField';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
+import { WEEKDAYS_LONG_MON } from '../../src/i18n/labels';
+import { useLanguage } from '../../src/i18n/LanguageContext';
+import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../src/i18n';
 
 function Stepper({
   label, hint, value, unit, min = 0, max = 240, step = 5, onChange,
@@ -32,6 +37,7 @@ function Stepper({
   label: string; hint?: string; value: number; unit: string; min?: number; max?: number; step?: number;
   onChange: (v: number) => void;
 }) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -54,6 +60,7 @@ function Stepper({
 }
 
 function ToggleRow({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -67,16 +74,17 @@ function ToggleRow({ label, hint, value, onChange }: { label: string; hint?: str
   );
 }
 
-const DAY_NAMES = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+const DAY_NAMES = WEEKDAYS_LONG_MON;
 const PAYMENTS: { key: keyof OrganizationConfig['paymentMethods']; label: string; sub: string }[] = [
-  { key: 'CASH', label: 'Espèces', sub: 'Encaissement au comptoir' },
-  { key: 'OTHER', label: 'Carte', sub: 'Terminal de paiement' },
-  { key: 'TRANSFER', label: 'Virement', sub: 'Sur justificatif' },
-  { key: 'CHECK', label: 'Chèque', sub: 'À l’ordre de la salle' },
+  { key: 'CASH', get label() { return i18n.t('common.especes'); }, get sub() { return i18n.t('admin.encaissement_au_comptoir'); } },
+  { key: 'OTHER', get label() { return i18n.t('common.carte'); }, get sub() { return i18n.t('admin.terminal_de_paiement'); } },
+  { key: 'TRANSFER', get label() { return i18n.t('common.virement'); }, get sub() { return i18n.t('admin.sur_justificatif'); } },
+  { key: 'CHECK', get label() { return i18n.t('common.cheque'); }, get sub() { return i18n.t('admin.a_lordre_de_la_salle'); } },
 ];
 
 /** Champ de coordonnée : défini hors de SalleConfig pour garder la même identité (le clavier reste ouvert). */
 function ConfigField({ icon, label, value, onChange, kb }: { icon: keyof typeof MaterialIcons.glyphMap; label: string; value: string; onChange: (v: string) => void; kb?: 'default' | 'phone-pad' | 'email-address' }) {
+  useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -93,7 +101,10 @@ function ConfigField({ icon, label, value, onChange, kb }: { icon: keyof typeof 
 }
 
 /** Réglages de la salle : coordonnées, horaires, paiements, annonces, réservation. */
-function SalleConfig({ cfg, patch }: { cfg: OrganizationConfig; patch: (p: Partial<OrganizationConfig>) => void }) {
+type CfgPart = 'contact' | 'hours' | 'payments' | 'comms' | 'booking';
+
+function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p: Partial<OrganizationConfig>) => void; parts: CfgPart[] }) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const setHour = (i: number, p: Partial<OrganizationConfig['hours'][number]>) =>
@@ -101,18 +112,23 @@ function SalleConfig({ cfg, patch }: { cfg: OrganizationConfig; patch: (p: Parti
 
   return (
     <>
-      <Text style={styles.section}>Coordonnées</Text>
+      {parts.includes('contact') ? (
+        <>
+      <Text style={styles.section}>{t('common.coordonnees')}</Text>
       <View style={[styles.card, cardShadow]}>
-        <ConfigField icon="location-on" label="Adresse" value={cfg.contact.address} onChange={(v) => patch({ contact: { ...cfg.contact, address: v } })} />
+        <ConfigField icon="location-on" label={t('admin.adresse')} value={cfg.contact.address} onChange={(v) => patch({ contact: { ...cfg.contact, address: v } })} />
         <View style={styles.sep} />
-        <ConfigField icon="call" label="Téléphone" value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" />
+        <ConfigField icon="call" label={t('common.telephone')} value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" />
         <View style={styles.sep} />
-        <ConfigField icon="mail" label="Email" value={cfg.contact.email} onChange={(v) => patch({ contact: { ...cfg.contact, email: v } })} kb="email-address" />
+        <ConfigField icon="mail" label={t('common.email')} value={cfg.contact.email} onChange={(v) => patch({ contact: { ...cfg.contact, email: v } })} kb="email-address" />
         <View style={styles.sep} />
-        <ToggleRow label="Visible par les adhérents" hint="Affiché dans l’application" value={cfg.contact.visibleToMembers} onChange={(v) => patch({ contact: { ...cfg.contact, visibleToMembers: v } })} />
+        <ToggleRow label={t('admin.visible_par_les_adherents')} hint={t('admin.affiche_dans_lapplication')} value={cfg.contact.visibleToMembers} onChange={(v) => patch({ contact: { ...cfg.contact, visibleToMembers: v } })} />
       </View>
-
-      <Text style={styles.section}>Horaires d’ouverture</Text>
+        </>
+      ) : null}
+      {parts.includes('hours') ? (
+        <>
+      <Text style={styles.section}>{t('admin.horaires_douverture')}</Text>
       <View style={[styles.card, cardShadow]}>
         {cfg.hours.map((h, i) => (
           <View key={i}>
@@ -120,7 +136,7 @@ function SalleConfig({ cfg, patch }: { cfg: OrganizationConfig; patch: (p: Parti
             <View style={styles.hourRow}>
               <View style={{ width: 86 }}>
                 <Text style={styles.rowTitle}>{DAY_NAMES[i]}</Text>
-                <Text style={[styles.rowHint, { color: h.open ? colors.successInk : colors.muted }]}>{h.open ? 'Ouvert' : 'Fermé'}</Text>
+                <Text style={[styles.rowHint, { color: h.open ? colors.successInk : colors.muted }]}>{h.open ? t('admin.ouvert') : t('admin.ferme')}</Text>
               </View>
               <View style={{ flex: 1 }}><TimeButton value={h.from} disabled={!h.open} onChange={(v) => setHour(i, { from: v })} /></View>
               <Text style={styles.rowHint}>–</Text>
@@ -135,20 +151,13 @@ function SalleConfig({ cfg, patch }: { cfg: OrganizationConfig; patch: (p: Parti
         onPress={() => patch({ hours: cfg.hours.map((h, i) => (i >= 1 && i <= 5 ? { ...cfg.hours[0] } : h)) })}
       >
         <MaterialIcons name="content-copy" size={16} color={colors.primaryInk} />
-        <Text style={styles.addPillText}>Copier le lundi sur mardi – samedi</Text>
+        <Text style={styles.addPillText}>{t('admin.copier_le_lundi_sur_mardi')}</Text>
       </Pressable>
-
-      <Text style={styles.section}>Abonnements</Text>
-      <Pressable style={[styles.card, cardShadow, styles.linkRow]} onPress={() => router.push('/(admin)/plans')}>
-        <MaterialIcons name="card-membership" size={24} color={colors.primaryInk} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.rowTitle}>Forfaits et tarifs</Text>
-          <Text style={styles.rowHint}>Tarifs, visibilité et remises par durée</Text>
-        </View>
-        <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
-      </Pressable>
-
-      <Text style={styles.section}>Moyens de paiement acceptés</Text>
+        </>
+      ) : null}
+      {parts.includes('payments') ? (
+        <>
+      <Text style={styles.section}>{t('admin.moyens_de_paiement_acceptes')}</Text>
       <View style={[styles.card, cardShadow]}>
         {PAYMENTS.map((p, i) => (
           <View key={p.key}>
@@ -166,34 +175,51 @@ function SalleConfig({ cfg, patch }: { cfg: OrganizationConfig; patch: (p: Parti
           </View>
         ))}
       </View>
-
-      <Text style={styles.section}>Alertes et annonces</Text>
+      <Text style={styles.section}>{t('admin.abonnements')}</Text>
+      <Pressable style={[styles.card, cardShadow, styles.linkRow]} onPress={() => router.push('/(admin)/plans')}>
+        <MaterialIcons name="card-membership" size={24} color={colors.primaryInk} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.rowTitle}>{t('admin.forfaits_et_tarifs')}</Text>
+          <Text style={styles.rowHint}>{t('admin.tarifs_visibilite_et_remises_par')}</Text>
+        </View>
+        <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+      </Pressable>
+        </>
+      ) : null}
+      {parts.includes('comms') ? (
+        <>
+      <Text style={styles.section}>{t('admin.alertes_et_annonces')}</Text>
       <View style={[styles.card, cardShadow]}>
-        <Stepper label="Rappel d’expiration" hint="Prévenir avant la fin de l’abonnement" value={cfg.announcements.expiryReminderDays} unit="j" min={1} max={60} step={1} onChange={(v) => patch({ announcements: { ...cfg.announcements, expiryReminderDays: v } })} />
+        <Stepper label={t('admin.rappel_dexpiration')} hint={t('admin.prevenir_avant_la_fin_de')} value={cfg.announcements.expiryReminderDays} unit="j" min={1} max={60} step={1} onChange={(v) => patch({ announcements: { ...cfg.announcements, expiryReminderDays: v } })} />
         <View style={styles.sep} />
         <View style={{ paddingVertical: 14, gap: 4 }}>
-          <Text style={styles.rowTitle}>Format des annonces</Text>
-          <Text style={styles.rowHint}>Affichage sur l’écran d’accueil adhérent</Text>
+          <Text style={styles.rowTitle}>{t('admin.format_des_annonces')}</Text>
+          <Text style={styles.rowHint}>{t('admin.affichage_sur_lecran_daccueil_adherent')}</Text>
           <View style={styles.formatRow}>
             {(['Bandeau', 'Pop-up', 'Encart'] as const).map((f) => (
               <Pressable key={f} onPress={() => patch({ announcements: { ...cfg.announcements, format: f } })} style={[styles.formatChip, cfg.announcements.format === f && styles.formatChipOn]}>
-                <Text style={[styles.formatText, cfg.announcements.format === f && { color: colors.primaryContrast }]}>{f}</Text>
+                <Text style={[styles.formatText, cfg.announcements.format === f && { color: colors.primaryContrast }]}>{t(`admin.format_${f === 'Pop-up' ? 'popup' : f.toLowerCase()}`)}</Text>
               </Pressable>
             ))}
           </View>
         </View>
         <View style={styles.sep} />
-        <ToggleRow label="Notifications push" hint="Annonces et alertes d’expiration" value={cfg.announcements.push} onChange={(v) => patch({ announcements: { ...cfg.announcements, push: v } })} />
+        <ToggleRow label={t('admin.notifications_push')} hint={t('admin.annonces_et_alertes_dexpiration')} value={cfg.announcements.push} onChange={(v) => patch({ announcements: { ...cfg.announcements, push: v } })} />
       </View>
-
-      <Text style={styles.section}>Réservation</Text>
+        </>
+      ) : null}
+      {parts.includes('booking') ? (
+        <>
+      <Text style={styles.section}>{t('admin.reservation')}</Text>
       <View style={[styles.card, cardShadow]}>
-        <Stepper label="Annulation possible" hint="Jusqu’à avant le cours" value={cfg.booking.cancelHoursBefore} unit="h" min={0} max={72} step={1} onChange={(v) => patch({ booking: { ...cfg.booking, cancelHoursBefore: v } })} />
+        <Stepper label={t('admin.annulation_possible')} hint={t('admin.jusqua_avant_le_cours')} value={cfg.booking.cancelHoursBefore} unit="h" min={0} max={72} step={1} onChange={(v) => patch({ booking: { ...cfg.booking, cancelHoursBefore: v } })} />
         <View style={styles.sep} />
-        <Stepper label="Capacité par défaut" hint="Nouveaux cours" value={cfg.booking.defaultCapacity} unit="pl." min={1} max={200} step={1} onChange={(v) => patch({ booking: { ...cfg.booking, defaultCapacity: v } })} />
+        <Stepper label={t('admin.capacite_par_defaut')} hint={t('admin.nouveaux_cours')} value={cfg.booking.defaultCapacity} unit="pl." min={1} max={200} step={1} onChange={(v) => patch({ booking: { ...cfg.booking, defaultCapacity: v } })} />
         <View style={styles.sep} />
-        <ToggleRow label="Liste d’attente" hint="Quand un cours est complet" value={cfg.booking.waitlist} onChange={(v) => patch({ booking: { ...cfg.booking, waitlist: v } })} />
+        <ToggleRow label={t('common.liste_dattente')} hint={t('admin.quand_un_cours_est_complet')} value={cfg.booking.waitlist} onChange={(v) => patch({ booking: { ...cfg.booking, waitlist: v } })} />
       </View>
+        </>
+      ) : null}
     </>
   );
 }
@@ -204,6 +230,7 @@ type CatalogEdit =
 
 /** Types de cours et salles : liste, ajout, modification, suppression. */
 function Catalog() {
+  useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: types } = useAllClassTypes();
@@ -223,7 +250,7 @@ function Catalog() {
   const save = () => {
     if (!edit) return;
     setError(null);
-    const done = { onSuccess: () => setEdit(null), onError: () => setError('Enregistrement impossible. Réessayez.') };
+    const done = { onSuccess: () => setEdit(null), onError: () => setError(i18n.t('admin.enregistrement_impossible_reessayez')) };
     if (edit.kind === 'type') {
       saveType.mutate({ id: edit.id, name: edit.name.trim(), defaultCapacity: Number(edit.capacity), defaultDurationMin: Number(edit.duration) || 45 }, done);
     } else {
@@ -237,13 +264,13 @@ function Catalog() {
     if (confirm.kind === 'type') {
       delType.mutate(confirm.id, {
         ...settle,
-        onSuccess: (r) => setMessage(r.deactivated ? `« ${confirm.name} » est utilisé par des cours : il est désactivé et n’apparaît plus dans les choix.` : `« ${confirm.name} » supprimé.`),
+        onSuccess: (r) => setMessage(r.deactivated ? i18n.t('admin.est_utilise_par_des_cours', { name: confirm.name }) : i18n.t('admin.supprime', { name: confirm.name })),
       });
     } else {
       delRoom.mutate(confirm.id, {
         ...settle,
-        onSuccess: () => setMessage(`« ${confirm.name} » supprimée.`),
-        onError: () => setMessage(`« ${confirm.name} » est utilisée par des cours : elle ne peut pas être supprimée.`),
+        onSuccess: () => setMessage(i18n.t('admin.supprimee', { name: confirm.name })),
+        onError: () => setMessage(i18n.t('admin.est_utilisee_par_des_cours', { name: confirm.name })),
       });
     }
   };
@@ -268,10 +295,10 @@ function Catalog() {
       {message ? <Banner tone="info" icon="info-outline" text={message} /> : null}
 
       <View style={styles.catHead}>
-        <Text style={styles.section}>Types de cours</Text>
+        <Text style={styles.section}>{i18n.t('admin.types_de_cours')}</Text>
         <Pressable style={styles.addPill} onPress={() => setEdit({ kind: 'type', name: '', capacity: '16', duration: '45' })}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
-          <Text style={styles.addPillText}>Ajouter</Text>
+          <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
         </Pressable>
       </View>
       <View style={[styles.card, cardShadow]}>
@@ -280,21 +307,21 @@ function Catalog() {
             {i > 0 ? <View style={styles.sep} /> : null}
             <Row
               title={t.name}
-              sub={`${t.defaultDurationMin} min · ${t.defaultCapacity} places${t.isActive ? '' : ' · désactivé'}`}
+              sub={i18n.t('admin.min_places_2', { defaultDurationMin: t.defaultDurationMin, defaultCapacity: t.defaultCapacity, v2: t.isActive ? '' : i18n.t('admin.desactive_2') })}
               muted={!t.isActive}
               onEdit={() => setEdit({ kind: 'type', id: t.id, name: t.name, capacity: String(t.defaultCapacity), duration: String(t.defaultDurationMin) })}
               onDelete={() => setConfirm({ kind: 'type', id: t.id, name: t.name })}
             />
           </View>
         ))}
-        {(types ?? []).length === 0 ? <Text style={styles.emptyRow}>Aucun type de cours.</Text> : null}
+        {(types ?? []).length === 0 ? <Text style={styles.emptyRow}>{i18n.t('admin.aucun_type_de_cours')}</Text> : null}
       </View>
 
       <View style={styles.catHead}>
-        <Text style={styles.section}>Salles</Text>
+        <Text style={styles.section}>{i18n.t('admin.salles')}</Text>
         <Pressable style={styles.addPill} onPress={() => setEdit({ kind: 'room', name: '', capacity: '20' })}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
-          <Text style={styles.addPillText}>Ajouter</Text>
+          <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
         </Pressable>
       </View>
       <View style={[styles.card, cardShadow]}>
@@ -309,42 +336,42 @@ function Catalog() {
             />
           </View>
         ))}
-        {(rooms ?? []).length === 0 ? <Text style={styles.emptyRow}>Aucune salle.</Text> : null}
+        {(rooms ?? []).length === 0 ? <Text style={styles.emptyRow}>{i18n.t('admin.aucune_salle_2')}</Text> : null}
       </View>
 
       <BottomSheet visible={!!edit} onClose={() => setEdit(null)}>
         <Text style={styles.sheetTitle}>
-          {edit?.id ? 'Modifier' : 'Nouveau'} {edit?.kind === 'type' ? 'type de cours' : 'salle'}
+          {edit?.id ? i18n.t('profile.edit') : i18n.t('home.announcementNew')} {edit?.kind === 'type' ? i18n.t('admin.type_de_cours_2') : 'salle'}
         </Text>
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-        <TextField label="Nom" value={edit?.name ?? ''} onChangeText={(v) => edit && setEdit({ ...edit, name: v })} placeholder={edit?.kind === 'type' ? 'Ex. Cross training' : 'Ex. Studio B'} />
+        <TextField label={i18n.t('common.nom')} value={edit?.name ?? ''} onChangeText={(v) => edit && setEdit({ ...edit, name: v })} placeholder={edit?.kind === 'type' ? i18n.t('admin.ex_cross_training') : i18n.t('admin.ex_studio_b')} />
         <TextField
-          label="Capacité (places)"
+          label={i18n.t('admin.capacite_places')}
           value={edit?.capacity ?? ''}
           onChangeText={(v) => edit && setEdit({ ...edit, capacity: v.replace(/[^0-9]/g, '') })}
           keyboardType="number-pad"
         />
         {edit?.kind === 'type' ? (
           <TextField
-            label="Durée (minutes)"
+            label={i18n.t('admin.duree_minutes')}
             value={edit.duration}
             onChangeText={(v) => setEdit({ ...edit, duration: v.replace(/[^0-9]/g, '') })}
             keyboardType="number-pad"
           />
         ) : null}
-        <Button label={busy ? 'Enregistrement…' : 'Enregistrer'} onPress={save} disabled={!canSave || busy} />
+        <Button label={busy ? i18n.t('common.enregistrement') : i18n.t('member.enregistrer')} onPress={save} disabled={!canSave || busy} />
       </BottomSheet>
 
       <BottomSheet visible={!!confirm} onClose={() => setConfirm(null)}>
-        <Text style={styles.sheetTitle}>Supprimer « {confirm?.name} » ?</Text>
+        <Text style={styles.sheetTitle}>{i18n.t('common.supprimer_2', { name: confirm?.name })}</Text>
         <Text style={styles.sheetText}>
           {confirm?.kind === 'type'
-            ? 'S’il est déjà utilisé par des cours, il sera simplement désactivé.'
-            : 'Une salle utilisée par des cours ne peut pas être supprimée.'}
+            ? i18n.t('admin.sil_est_deja_utilise_par')
+            : i18n.t('admin.une_salle_utilisee_par_des')}
         </Text>
         <View style={{ gap: 8, marginTop: 8 }}>
-          <Button label="Oui, supprimer" variant="secondary" onPress={remove} loading={delType.isPending || delRoom.isPending} />
-          <Button label="Annuler" variant="outline" onPress={() => setConfirm(null)} />
+          <Button label={i18n.t('admin.oui_supprimer')} variant="secondary" onPress={remove} loading={delType.isPending || delRoom.isPending} />
+          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirm(null)} />
         </View>
       </BottomSheet>
     </>
@@ -352,7 +379,24 @@ function Catalog() {
 }
 
 /** Configuration (admin) : période de scan et règles de présence. */
+type Section = 'venue' | 'classes' | 'booking' | 'payments' | 'comms' | 'language';
+
+/** Réglages de la salle, répartis en pages dédiées (paramètre `section`) ; sans paramètre, tout est affiché. */
 export default function AdminSettingsScreen() {
+  const { section } = useLocalSearchParams<{ section?: Section }>();
+  const show = (...names: Section[]) => !section || names.includes(section);
+  const cfgParts: CfgPart[] = !section
+    ? ['contact', 'hours', 'payments', 'comms', 'booking']
+    : section === 'venue'
+      ? ['contact', 'hours']
+      : section === 'payments'
+        ? ['payments']
+        : section === 'comms'
+          ? ['comms']
+          : section === 'booking'
+            ? ['booking']
+            : [];
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data } = useAttendancePolicy();
@@ -409,96 +453,130 @@ export default function AdminSettingsScreen() {
       <ScrollView contentContainerStyle={[styles.container, anyDirty && { paddingBottom: 130 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Plus</Text>
+          <Text style={styles.backText}>{t('common.plus')}</Text>
         </Pressable>
-        <ScreenTitle title="Configuration" subtitle="Cours, salles, période de scan et règles" />
+        <ScreenTitle
+          title={section ? t(`admin.cfg_${section}`) : t('admin.configuration')}
+          subtitle={section ? t(`admin.cfg_${section}_sub`) : t('admin.cours_salles_periode_de_scan')}
+        />
 
-        {cfg ? <SalleConfig cfg={cfg} patch={patchCfg} /> : null}
+        {cfg && cfgParts.length > 0 ? <SalleConfig cfg={cfg} patch={patchCfg} parts={cfgParts} /> : null}
 
-        <Catalog />
+        {show('classes') ? <Catalog /> : null}
 
-        <Text style={styles.section}>Période de scan</Text>
+        {section === 'language' || !section ? <LanguageSection /> : null}
+
+        {show('booking') ? (
+          <>
+        <Text style={styles.section}>{t('admin.periode_de_scan')}</Text>
         <View style={[styles.card, cardShadow]}>
           <Stepper
-            label="Ouverture avant le cours"
-            hint="Le pointage s’ouvre avant le début"
+            label={t('admin.ouverture_avant_le_cours')}
+            hint={t('admin.le_pointage_souvre_avant_le')}
             value={policy.scanOpensMinutesBefore}
             unit="min"
             onChange={(v) => patch({ scanOpensMinutesBefore: v })}
           />
           <View style={styles.sep} />
           <Stepper
-            label="Fermeture après le début"
-            hint="Au-delà, le scan est refusé"
+            label={t('admin.fermeture_apres_le_debut')}
+            hint={t('admin.au_dela_le_scan_est')}
             value={policy.scanClosesMinutesAfterStart}
             unit="min"
             onChange={(v) => patch({ scanClosesMinutesAfterStart: v })}
           />
         </View>
-        <Text style={styles.preview}>
-          Exemple : pour un cours à 18:00, on peut pointer de {clock(18 * 60 - policy.scanOpensMinutesBefore)} à{' '}
-          {clock(18 * 60 + policy.scanClosesMinutesAfterStart)}.
-        </Text>
+        <Text style={styles.preview}>{t('admin.exemple_pour_un_cours_a', { v1: clock(18 * 60 - policy.scanOpensMinutesBefore), v3: ' ', v5: clock(18 * 60 + policy.scanClosesMinutesAfterStart) })}</Text>
 
-        <Text style={styles.section}>Présence</Text>
+        <Text style={styles.section}>{t('admin.presence')}</Text>
         <View style={[styles.card, cardShadow]}>
           <ToggleRow
-            label="Accepter sans réservation"
-            hint="Pointer un adhérent qui n’a pas réservé"
+            label={t('admin.accepter_sans_reservation')}
+            hint={t('admin.pointer_un_adherent_qui_na')}
             value={policy.allowWalkIn}
             onChange={(v) => patch({ allowWalkIn: v })}
           />
           <View style={styles.sep} />
           <Stepper
-            label="Délai avant absence"
-            hint="Après le début, une réservation non pointée devient une absence"
+            label={t('admin.delai_avant_absence')}
+            hint={t('admin.apres_le_debut_une_reservation')}
             value={policy.noShowGraceMinutes}
             unit="min"
             onChange={(v) => patch({ noShowGraceMinutes: v })}
           />
           <View style={styles.sep} />
           <ToggleRow
-            label="L’accueil peut encaisser"
-            hint="Autoriser le personnel d’accueil à enregistrer des paiements"
+            label={t('admin.laccueil_peut_encaisser')}
+            hint={t('admin.autoriser_le_personnel_daccueil_a')}
             value={policy.staffCanRecordPayments}
             onChange={(v) => patch({ staffCanRecordPayments: v })}
           />
         </View>
 
-        <Text style={styles.section}>Pénalité d’absence</Text>
+        <Text style={styles.section}>{t('admin.penalite_dabsence')}</Text>
         <View style={[styles.card, cardShadow]}>
           <ToggleRow
-            label="Bloquer les réservations"
-            hint="Après plusieurs absences, l’adhérent ne peut plus réserver un moment"
+            label={t('admin.bloquer_les_reservations')}
+            hint={t('admin.apres_plusieurs_absences_ladherent_ne')}
             value={policy.noShowPenalty.enabled}
             onChange={(v) => patchPenalty({ enabled: v })}
           />
           {policy.noShowPenalty.enabled ? (
             <>
               <View style={styles.sep} />
-              <Stepper label="Nombre d’absences" value={policy.noShowPenalty.threshold} unit="abs." min={1} max={20} step={1} onChange={(v) => patchPenalty({ threshold: v })} />
+              <Stepper label={t('admin.nombre_dabsences')} value={policy.noShowPenalty.threshold} unit="abs." min={1} max={20} step={1} onChange={(v) => patchPenalty({ threshold: v })} />
               <View style={styles.sep} />
-              <Stepper label="Sur une période de" value={policy.noShowPenalty.windowDays} unit="jours" min={1} max={365} step={5} onChange={(v) => patchPenalty({ windowDays: v })} />
+              <Stepper label={t('admin.sur_une_periode_de')} value={policy.noShowPenalty.windowDays} unit="jours" min={1} max={365} step={5} onChange={(v) => patchPenalty({ windowDays: v })} />
               <View style={styles.sep} />
-              <Stepper label="Blocage pendant" value={policy.noShowPenalty.blockBookingDays} unit="jours" min={1} max={90} step={1} onChange={(v) => patchPenalty({ blockBookingDays: v })} />
+              <Stepper label={t('admin.blocage_pendant')} value={policy.noShowPenalty.blockBookingDays} unit="jours" min={1} max={90} step={1} onChange={(v) => patchPenalty({ blockBookingDays: v })} />
             </>
           ) : null}
         </View>
 
-        {saveError ? <Banner tone="danger" icon="error-outline" title="Enregistrement impossible" text="Vérifiez la connexion (et gardez au moins un moyen de paiement)." /> : null}
-        {saved && !anyDirty ? <Banner tone="success" icon="check-circle-outline" title="Configuration enregistrée" text="Les nouvelles règles s’appliquent immédiatement." /> : null}
+          </>
+        ) : null}
+
+        {saveError ? <Banner tone="danger" icon="error-outline" title={t('admin.enregistrement_impossible')} text={t('admin.verifiez_la_connexion_et_gardez')} /> : null}
+        {saved && !anyDirty ? <Banner tone="success" icon="check-circle-outline" title={t('admin.configuration_enregistree')} text={t('admin.les_nouvelles_regles_sappliquent_immediatement')} /> : null}
       </ScrollView>
 
       {anyDirty ? (
         <View style={styles.stickyBar}>
           <Pressable onPress={save} disabled={saving} style={({ pressed }) => [saving && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.save}>
-              <Text style={styles.saveText}>{saving ? 'Enregistrement…' : 'Enregistrer les modifications'}</Text>
+              <Text style={styles.saveText}>{saving ? t('common.enregistrement') : t('common.enregistrer_les_modifications')}</Text>
             </LinearGradient>
           </Pressable>
         </View>
       ) : null}
     </SafeAreaView>
+  );
+}
+
+/** Langue de l'application : choix immédiat (français, anglais, arabe). */
+function LanguageSection() {
+  const { t } = useTranslation();
+  const { colors, cardShadow } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { language, setLanguage } = useLanguage();
+  return (
+    <>
+      <Text style={styles.section}>{t('common.langue')}</Text>
+      <View style={[styles.card, cardShadow]}>
+        {SUPPORTED_LANGUAGES.map((code, i) => (
+          <View key={code}>
+            {i > 0 ? <View style={styles.sep} /> : null}
+            <Pressable style={styles.row} onPress={() => setLanguage(code)}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>{LANGUAGE_LABELS[code]}</Text>
+              </View>
+              {language === code ? <MaterialIcons name="check-circle" size={24} color={colors.primary} /> : <MaterialIcons name="radio-button-unchecked" size={24} color={colors.muted} />}
+            </Pressable>
+          </View>
+        ))}
+      </View>
+      <Text style={styles.rowHint}>{t('admin.cfg_language_hint')}</Text>
+    </>
   );
 }
 

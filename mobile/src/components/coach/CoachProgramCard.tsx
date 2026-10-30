@@ -4,8 +4,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useProgramDetail } from '../../hooks/useCoachSessions';
+import { WEEKDAYS_SHORT_SUN } from '../../i18n/labels';
 
-const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const DAYS = WEEKDAYS_SHORT_SUN;
 
 /** Carte programme avec détail par exercice, chaque ligne ouvrant la fiche
  * en lecture seule (GIF, instructions, séries). FitZone App Coach.dc.html, L2. */

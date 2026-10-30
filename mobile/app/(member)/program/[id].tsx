@@ -14,11 +14,14 @@ import { BottomSheet, EmptyState, OfflineBanner, Toast } from '../../../src/comp
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import { WEEKDAYS_LONG_SUN } from '../../../src/i18n/labels';
 
-const DAY_LABELS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAY_LABELS = WEEKDAYS_LONG_SUN;
 
 /** Détail du programme — FitZone App Entraînement.dc.html, D2. */
 export default function ProgramDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -45,10 +48,10 @@ export default function ProgramDetailScreen() {
         <View style={{ padding: spacing.lg }}>
           <EmptyState
             icon="cloud-off"
-            title="Programme indisponible"
-            text={isError ? 'Impossible de récupérer ce programme pour le moment. Vérifiez votre connexion.' : 'Ce programme est introuvable.'}
+            title={t('common.programme_indisponible')}
+            text={isError ? t('member.impossible_de_recuperer_ce_programme') : t('common.ce_programme_est_introuvable')}
             tone="danger"
-            actionLabel={isError ? 'Réessayer' : undefined}
+            actionLabel={isError ? t('common.reessayer') : undefined}
             onAction={isError ? () => refetch() : undefined}
           />
         </View>
@@ -89,7 +92,7 @@ export default function ProgramDetailScreen() {
         <View style={styles.topBar}>
           <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
             <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-            <Text style={styles.backText}>Programmes</Text>
+            <Text style={styles.backText}>{t('common.programmes')}</Text>
           </Pressable>
           {isOwn ? (
             <Pressable style={styles.headerActionButton} onPress={() => setMenuOpen(true)} hitSlop={8}>
@@ -102,13 +105,10 @@ export default function ProgramDetailScreen() {
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
-              <Text style={styles.heroTagText}>{isOwn ? 'Perso' : program.isPublic ? 'Proposé' : 'Coach'}</Text>
+              <Text style={styles.heroTagText}>{isOwn ? t('member.perso') : program.isPublic ? t('member.propose') : t('common.coach')}</Text>
             </View>
             <Text style={styles.heroTitle}>{program.name}</Text>
-            <Text style={styles.heroSub}>
-              {program.days.length} séance{program.days.length > 1 ? 's' : ''} par semaine
-              {day ? ` · ${day.label ?? DAY_LABELS[day.dayOfWeek]}` : ''}
-            </Text>
+            <Text style={styles.heroSub}>{t('member.seance_par_semaine', { length: program.days.length, v3: program.days.length > 1 ? 's' : '', v5: day ? ` · ${day.label ?? DAY_LABELS[day.dayOfWeek]}` : '' })}</Text>
           </LinearGradient>
         </View>
 
@@ -130,21 +130,21 @@ export default function ProgramDetailScreen() {
         <View style={styles.statsRow}>
           <View style={[styles.statCard, cardShadow]}>
             <Text style={styles.statValue}>{day?.exercises.length ?? 0}</Text>
-            <Text style={styles.statLabel}>Exercices</Text>
+            <Text style={styles.statLabel}>{t('common.exercices')}</Text>
           </View>
           <View style={[styles.statCard, cardShadow]}>
             <Text style={styles.statValue}>{totalSets}</Text>
-            <Text style={styles.statLabel}>Séries</Text>
+            <Text style={styles.statLabel}>{t('common.series')}</Text>
           </View>
           <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statValue}>~{estimatedMinutes} min</Text>
-            <Text style={styles.statLabel}>Durée</Text>
+            <Text style={styles.statValue}>{t('member.min', { estimatedMinutes })}</Text>
+            <Text style={styles.statLabel}>{t('common.duree')}</Text>
           </View>
         </View>
 
         {muscles.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>Muscles ciblés</Text>
+            <Text style={styles.sectionTitle}>{t('common.muscles_cibles')}</Text>
             <View style={styles.chipsRow}>
               {muscles.map((m) => (
                 <View key={m} style={styles.muscleChip}>
@@ -156,7 +156,7 @@ export default function ProgramDetailScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>Exercices</Text>
+          <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
           <View style={{ gap: 10 }}>
             {day?.exercises.map((ex, i) => {
               const firstSet = ex.setDetails[0];
@@ -182,7 +182,7 @@ export default function ProgramDetailScreen() {
                   </View>
                   <View style={styles.exerciseRight}>
                     <Text style={styles.exerciseSets}>{ex.sets} × {ex.reps}</Text>
-                    <Text style={styles.exerciseMeta}>{firstSet?.weightKg ? `${Number(firstSet.weightKg)} kg` : 'Poids du corps'}</Text>
+                    <Text style={styles.exerciseMeta}>{firstSet?.weightKg ? `${Number(firstSet.weightKg)} kg` : t('common.poids_du_corps')}</Text>
                   </View>
                   <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
                 </Pressable>
@@ -199,7 +199,7 @@ export default function ProgramDetailScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.startButton}>
             <MaterialIcons name="play-arrow" size={24} color={colors.primaryContrast} />
-            <Text style={styles.startButtonText}>Démarrer la séance</Text>
+            <Text style={styles.startButtonText}>{t('member.demarrer_la_seance')}</Text>
           </LinearGradient>
         </Pressable>
       </View>
@@ -213,7 +213,7 @@ export default function ProgramDetailScreen() {
           }}
         >
           <MaterialIcons name="edit" size={20} color={colors.text} />
-          <Text style={styles.menuItemText}>Modifier le programme</Text>
+          <Text style={styles.menuItemText}>{t('member.modifier_le_programme')}</Text>
         </Pressable>
         <Pressable
           style={styles.menuItem}
@@ -223,21 +223,21 @@ export default function ProgramDetailScreen() {
           }}
         >
           <MaterialIcons name="delete-outline" size={20} color={colors.dangerInk} />
-          <Text style={[styles.menuItemText, { color: colors.dangerInk }]}>Supprimer le programme</Text>
+          <Text style={[styles.menuItemText, { color: colors.dangerInk }]}>{t('member.supprimer_le_programme')}</Text>
         </Pressable>
       </BottomSheet>
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
-        <Text style={styles.sheetTitle}>Supprimer « {program.name} » ?</Text>
-        <Text style={styles.sheetText}>Cette action est définitive et supprime tous les jours et exercices de ce programme.</Text>
+        <Text style={styles.sheetTitle}>{t('common.supprimer_2', { name: program.name })}</Text>
+        <Text style={styles.sheetText}>{t('member.cette_action_est_definitive_et')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Supprimer" onPress={handleDelete} variant="secondary" loading={deleteProgram.isPending} />
-          <Button label="Annuler" onPress={() => setConfirmDelete(false)} variant="outline" />
+          <Button label={t('member.supprimer')} onPress={handleDelete} variant="secondary" loading={deleteProgram.isPending} />
+          <Button label={t('common.annuler')} onPress={() => setConfirmDelete(false)} variant="outline" />
         </View>
       </BottomSheet>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

@@ -11,10 +11,12 @@ import { useExercise } from '../../../src/hooks/useCoaching';
 import { Button } from '../../../src/components/Button';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { SetRow, type SetDraft } from '../../../src/components/training/SetRow';
+import { useTranslation } from 'react-i18next';
 
 /** Détail d'un exercice avant assignation à un élève : chaque série se règle
  * individuellement (reps + poids), au lieu d'un réglage unique répété. */
 export default function CoachConfigureExerciseScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { exerciseId, dayIndex, studentId, studentName, initialSets, editingIndex, returnTo } = useLocalSearchParams<{
@@ -82,7 +84,7 @@ export default function CoachConfigureExerciseScreen() {
         <Text style={styles.name}>{exercise.name}</Text>
         {exercise.muscleGroup ? <Text style={styles.muscleGroup}>{exercise.muscleGroup}</Text> : null}
 
-        <Text style={styles.sectionTitle}>Séries</Text>
+        <Text style={styles.sectionTitle}>{t('common.series')}</Text>
         <View style={{ gap: spacing.sm }}>
           {sets.map((set, i) => (
             <SetRow
@@ -97,12 +99,12 @@ export default function CoachConfigureExerciseScreen() {
 
         <Pressable style={styles.addSetButton} onPress={addSet}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
-          <Text style={styles.addSetText}>Ajouter une série</Text>
+          <Text style={styles.addSetText}>{t('common.ajouter_une_serie')}</Text>
         </Pressable>
       </ScrollView>
 
       <View style={styles.footer}>
-        <Button label="Ajouter au programme" onPress={handleConfirm} disabled={sets.length === 0} />
+        <Button label={t('common.ajouter_au_programme')} onPress={handleConfirm} disabled={sets.length === 0} />
       </View>
     </SafeAreaView>
   );

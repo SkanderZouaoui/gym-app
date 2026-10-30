@@ -12,9 +12,12 @@ import { EmptyState, OfflineBanner, SkeletonBlock } from '../../../src/component
 import { CoachStatCard } from '../../../src/components/coach/CoachStatCard';
 import { DayScheduleRow } from '../../../src/components/coach/DayScheduleRow';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../../src/i18n';
 
 /** Accueil Coach — FitZone App Coach.dc.html, I1. */
 export default function CoachTodayScreen() {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -23,7 +26,7 @@ export default function CoachTodayScreen() {
   const { isOnline, lastSyncAt } = useNetworkStatus();
 
   const today = useMemo(() => new Date(), []);
-  const dateLabel = today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dateLabel = today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
 
   const todayEvents = useMemo(() => {
     return (sessions ?? [])
@@ -33,7 +36,7 @@ export default function CoachTodayScreen() {
         id: s.id,
         startsAt: s.startsAt,
         name: s.classType.name,
-        meta: `${s.room?.name ?? ''} · ${s._count.bookings}/${s.capacity} inscrits`.replace(/^ · /, ''),
+        meta: t('coach.inscrits', { v0: s.room?.name ?? '', bookings: s._count.bookings, capacity: s.capacity }).replace(/^ · /, ''),
         isFull: s._count.bookings >= s.capacity,
         onPress: () => router.push(`/(coach)/session/${s.id}`),
       }))
@@ -50,10 +53,10 @@ export default function CoachTodayScreen() {
 
   const countdownLabel = (startsAt: string) => {
     const diffMs = new Date(startsAt).getTime() - now;
-    if (diffMs <= 0) return 'En cours';
+    if (diffMs <= 0) return t('common.en_cours');
     const minutes = Math.round(diffMs / 60_000);
-    if (minutes < 60) return `dans ${minutes} min`;
-    return `dans ${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}`;
+    if (minutes < 60) return t('coach.dans_min', { minutes });
+    return t('coach.dans_h', { v0: Math.floor(minutes / 60), v1: String(minutes % 60).padStart(2, '0') });
   };
 
   if (userLoading || sessionsLoading) {
@@ -78,58 +81,58 @@ export default function CoachTodayScreen() {
       <ScrollView {...tabBarScroll} contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.title}>Bonjour, {user?.firstName}</Text>
-            <Text style={styles.subtitle}>{dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)} · {classCount} cours</Text>
+            <Text style={styles.title}>{t('coach.bonjour', { firstName: user?.firstName })}</Text>
+            <Text style={styles.subtitle}>{t('coach.cours', { v0: dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1), classCount })}</Text>
           </View>
         </View>
 
         {!isOnline ? <OfflineBanner lastSyncAt={lastSyncAt} /> : null}
 
         <View style={styles.statsRow}>
-          <CoachStatCard value={String(totalEnrolled)} label="Inscrits aujourd’hui" tone="secondary" />
-          <CoachStatCard value={String(classCount)} label="Cours" tone="accent" />
+          <CoachStatCard value={String(totalEnrolled)} label={t('coach.inscrits_aujourdhui')} tone="secondary" />
+          <CoachStatCard value={String(classCount)} label={t('common.cours_2')} tone="accent" />
         </View>
 
         {nextEvent ? (
           <Pressable style={styles.nextCard} onPress={nextEvent.onPress}>
             <View style={styles.nextHeaderRow}>
-              <Text style={styles.nextLabel}>PROCHAIN · {countdownLabel(nextEvent.startsAt)}</Text>
+              <Text style={styles.nextLabel}>{t('coach.prochain', { v1: countdownLabel(nextEvent.startsAt) })}</Text>
               {nextEvent.isFull ? (
                 <View style={styles.fullBadge}>
-                  <Text style={styles.fullBadgeText}>Complet</Text>
+                  <Text style={styles.fullBadgeText}>{t('common.complet')}</Text>
                 </View>
               ) : null}
             </View>
             <Text style={styles.nextName}>{nextEvent.name}</Text>
             <Text style={styles.nextMeta}>
-              {new Date(nextEvent.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} · {nextEvent.meta}
+              {new Date(nextEvent.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })} · {nextEvent.meta}
             </Text>
             <View style={styles.nextActions}>
               <Pressable style={styles.rollCallButton} onPress={nextEvent.onPress}>
                 <MaterialIcons name="how-to-reg" size={16} color={colors.primaryContrast} />
-                <Text style={styles.rollCallText}>Faire l’appel</Text>
+                <Text style={styles.rollCallText}>{t('coach.faire_lappel')}</Text>
               </Pressable>
             </View>
           </Pressable>
         ) : null}
 
-        <Text style={styles.sectionTitle}>Ma journée</Text>
+        <Text style={styles.sectionTitle}>{t('coach.ma_journee')}</Text>
         {todayEvents.length === 0 ? (
-          <EmptyState icon="beach-access" title="Journée de repos" text="Aucun cours ni séance aujourd'hui." tone="success" />
+          <EmptyState icon="beach-access" title={t('coach.journee_de_repos')} text={t('coach.aucun_cours_ni_seance_aujourdhui')} tone="success" />
         ) : (
           <View style={styles.dayList}>
             {todayEvents.map((event) => (
               <DayScheduleRow
                 key={event.id}
-                time={new Date(event.startsAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                time={new Date(event.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}
                 name={event.name}
                 meta={event.meta}
                 statusLabel={
                   new Date(event.startsAt).getTime() < now
-                    ? 'Terminé'
+                    ? t('common.termine')
                     : event.id === nextEvent?.id
                       ? countdownLabel(event.startsAt)
-                      : 'À venir'
+                      : t('common.a_venir')
                 }
                 statusTone={new Date(event.startsAt).getTime() < now ? 'muted' : 'primary'}
                 isPast={new Date(event.startsAt).getTime() < now}

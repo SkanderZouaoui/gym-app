@@ -10,11 +10,15 @@ import { BottomSheet } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercise, useDeactivateExercise } from '../../../src/hooks/useAdmin';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../src/i18n';
+import { levelLabel } from '../../../src/i18n/labels';
 
-const TYPE_LABEL = { STRENGTH: 'Force', CARDIO: 'Cardio', MOBILITY: 'Mobilité' } as const;
+const TYPE_LABEL = { get STRENGTH() { return i18n.t('admin.force'); }, get CARDIO() { return i18n.t('common.cardio'); }, get MOBILITY() { return i18n.t('admin.mobilite'); } } as const;
 
 /** Détail d'un exercice de la bibliothèque (admin) : niveau, utilisation, muscles, exécution. */
 export default function AdminExerciseDetailScreen() {
+  useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -41,7 +45,7 @@ export default function AdminExerciseDetailScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Retour</Text>
+          <Text style={styles.backText}>{i18n.t('common.retour')}</Text>
         </Pressable>
 
         <View style={styles.heroShadow}>
@@ -51,36 +55,36 @@ export default function AdminExerciseDetailScreen() {
               <MaterialIcons name={muscleIcon(ex.muscleGroup ?? '')} size={30} color="#FFFFFF" />
             </View>
             <View style={styles.tagRow}>
-              {ex.level ? <View style={styles.tag}><Text style={styles.tagText}>{ex.level}</Text></View> : null}
+              {ex.level ? <View style={styles.tag}><Text style={styles.tagText}>{levelLabel(ex.level)}</Text></View> : null}
               {ex.equipment ? <View style={styles.tag}><Text style={styles.tagText}>{ex.equipment}</Text></View> : null}
-              {!ex.isActive ? <View style={styles.tag}><Text style={styles.tagText}>Désactivé</Text></View> : null}
+              {!ex.isActive ? <View style={styles.tag}><Text style={styles.tagText}>{i18n.t('admin.desactive')}</Text></View> : null}
             </View>
             <Text style={styles.heroTitle}>{ex.name}</Text>
-            <Text style={styles.heroSub}>{ex.muscleGroup ? muscleGroupLabel(ex.muscleGroup) : 'Sans groupe'} · bibliothèque d’exercices</Text>
+            <Text style={styles.heroSub}>{i18n.t('admin.bibliotheque_dexercices', { v0: ex.muscleGroup ? muscleGroupLabel(ex.muscleGroup) : i18n.t('admin.sans_groupe') })}</Text>
           </LinearGradient>
         </View>
 
         <View style={styles.statRow}>
           <View style={[styles.stat, cardShadow]}>
-            <Text style={styles.statLabel}>Niveau</Text>
-            <Text style={styles.statValue}>{ex.level ?? '—'}</Text>
+            <Text style={styles.statLabel}>{i18n.t('common.niveau')}</Text>
+            <Text style={styles.statValue}>{ex.level ? levelLabel(ex.level) : '—'}</Text>
           </View>
           <View style={[styles.stat, cardShadow]}>
-            <Text style={styles.statLabel}>Utilisé dans</Text>
-            <Text style={styles.statValue}>{ex.usedInPrograms ?? 0} programme{(ex.usedInPrograms ?? 0) > 1 ? 's' : ''}</Text>
+            <Text style={styles.statLabel}>{i18n.t('admin.utilise_dans')}</Text>
+            <Text style={styles.statValue}>{i18n.t('admin.programme', { v0: ex.usedInPrograms ?? 0, v2: (ex.usedInPrograms ?? 0) > 1 ? 's' : '' })}</Text>
           </View>
         </View>
 
-        <Text style={styles.section}>Muscles sollicités</Text>
+        <Text style={styles.section}>{i18n.t('common.muscles_sollicites')}</Text>
         <View style={styles.chips}>
           {[ex.muscleGroup ? muscleGroupLabel(ex.muscleGroup) : null, TYPE_LABEL[ex.type]].filter(Boolean).map((m) => (
             <View key={m} style={styles.chip}><Text style={styles.chipText}>{m}</Text></View>
           ))}
         </View>
 
-        <Text style={styles.section}>Exécution</Text>
+        <Text style={styles.section}>{i18n.t('common.execution')}</Text>
         <View style={[styles.card, cardShadow]}>
-          {steps.length === 0 ? <Text style={styles.empty}>Aucune consigne renseignée.</Text> : null}
+          {steps.length === 0 ? <Text style={styles.empty}>{i18n.t('admin.aucune_consigne_renseignee')}</Text> : null}
           {steps.map((t, i) => (
             <View key={i} style={styles.step}>
               <View style={styles.stepNum}><Text style={styles.stepNumText}>{i + 1}</Text></View>
@@ -90,17 +94,17 @@ export default function AdminExerciseDetailScreen() {
         </View>
 
         <View style={{ gap: 10, marginTop: 6 }}>
-          <Button label="Modifier l’exercice" onPress={() => router.push({ pathname: '/(admin)/exercises/form', params: { id: ex.id } })} />
-          {ex.isActive ? <Button label="Désactiver l’exercice" variant="outline" onPress={() => setConfirm(true)} /> : null}
+          <Button label={i18n.t('admin.modifier_lexercice')} onPress={() => router.push({ pathname: '/(admin)/exercises/form', params: { id: ex.id } })} />
+          {ex.isActive ? <Button label={i18n.t('admin.desactiver_lexercice')} variant="outline" onPress={() => setConfirm(true)} /> : null}
         </View>
       </ScrollView>
 
       <BottomSheet visible={confirm} onClose={() => setConfirm(false)}>
-        <Text style={styles.sheetTitle}>Désactiver « {ex.name} » ?</Text>
-        <Text style={styles.sheetText}>Il ne sera plus proposé dans la bibliothèque. Les programmes qui l’utilisent déjà le conservent.</Text>
+        <Text style={styles.sheetTitle}>{i18n.t('admin.desactiver', { name: ex.name })}</Text>
+        <Text style={styles.sheetText}>{i18n.t('admin.il_ne_sera_plus_propose')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label="Oui, désactiver" variant="danger" loading={deactivate.isPending} onPress={() => deactivate.mutate(ex.id, { onSuccess: () => { setConfirm(false); goBack(); } })} />
-          <Button label="Annuler" variant="outline" onPress={() => setConfirm(false)} />
+          <Button label={i18n.t('admin.oui_desactiver')} variant="danger" loading={deactivate.isPending} onPress={() => deactivate.mutate(ex.id, { onSuccess: () => { setConfirm(false); goBack(); } })} />
+          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirm(false)} />
         </View>
       </BottomSheet>
     </SafeAreaView>

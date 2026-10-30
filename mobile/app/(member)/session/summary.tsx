@@ -11,6 +11,8 @@ import { Banner, ScreenTitle } from '../../../src/components/ui';
 import { WorkoutHeroCard } from '../../../src/components/training/WorkoutHeroCard';
 import { clearSessionDraft } from '../../../src/hooks/useSessionDraft';
 import { formatClock } from '../../../src/utils/duration';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../../src/i18n';
 
 interface FinishedSet {
   exerciseId: string;
@@ -25,15 +27,16 @@ const GOLD_DEEP = '#F59E0B';
 const GOLD_INK = '#3A2500';
 
 const FEELINGS = [
-  { value: 'EASY', label: 'Facile' },
-  { value: 'OK', label: 'Correct' },
-  { value: 'HARD', label: 'Difficile' },
+  { value: 'EASY', get label() { return i18n.t('member.facile'); } },
+  { value: 'OK', get label() { return i18n.t('member.correct'); } },
+  { value: 'HARD', get label() { return i18n.t('member.difficile'); } },
 ];
 
 /** Fin de séance : même rendu que le détail d'une séance de l'historique (carte héro, une carte par
  * exercice avec ses séries), avec en plus le ressenti à choisir et l'enregistrement. Une fois la
  * séance enregistrée, retour à l'onglet Entraînement. */
 export default function SessionSummaryScreen() {
+  const { t } = useTranslation();
   const { workoutSets, elapsedSeconds, programId, dayId } = useLocalSearchParams<{
     workoutSets: string;
     elapsedSeconds: string;
@@ -63,7 +66,7 @@ export default function SessionSummaryScreen() {
     return Array.from(groups.entries());
   }, [sets]);
 
-  const nameOf = (exerciseId: string) => exercises?.find((e) => e.id === exerciseId)?.name ?? 'Exercice';
+  const nameOf = (exerciseId: string) => exercises?.find((e) => e.id === exerciseId)?.name ?? i18n.t('member.exercise_fallback');
 
   // Records battus pendant la séance : meilleure charge par exercice, si supérieure à l'historique.
   const records = useMemo(() => {
@@ -103,7 +106,7 @@ export default function SessionSummaryScreen() {
           if (router.canDismiss()) router.dismissAll();
           router.replace('/(member)/(tabs)/training');
         },
-        onError: () => setError('Erreur lors de l’enregistrement de la séance.'),
+        onError: () => setError(t('member.erreur_lors_de_lenregistrement_de')),
       },
     );
   };
@@ -114,13 +117,13 @@ export default function SessionSummaryScreen() {
         <View style={styles.topBar}>
           <View style={styles.pill}>
             <MaterialIcons name="flag" size={14} color={colors.successInk} />
-            <Text style={styles.pillText}>Séance terminée</Text>
+            <Text style={styles.pillText}>{t('member.seance_terminee')}</Text>
           </View>
         </View>
 
         <ScreenTitle
-          title="Récapitulatif"
-          subtitle={new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          title={t('member.recapitulatif')}
+          subtitle={new Date().toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
         />
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
@@ -129,7 +132,7 @@ export default function SessionSummaryScreen() {
           duration={formatClock(totalSeconds)}
           progress={1}
           ringLabel="100%"
-          volume={volume > 0 ? `${Math.round(volume).toLocaleString('fr-FR')} kg` : '—'}
+          volume={volume > 0 ? `${Math.round(volume).toLocaleString(dateLocale())} kg` : '—'}
           sets={String(sets.length)}
         />
 
@@ -142,7 +145,7 @@ export default function SessionSummaryScreen() {
                     <MaterialIcons name="emoji-events" size={18} color={GOLD_INK} />
                   </View>
                   <View style={styles.recordTexts}>
-                    <Text style={styles.recordKicker}>RECORD · {r.weightKg} kg</Text>
+                    <Text style={styles.recordKicker}>{t('member.record_kg', { weightKg: r.weightKg })}</Text>
                     <Text style={styles.recordName}>{nameOf(r.exerciseId)}</Text>
                   </View>
                 </LinearGradient>
@@ -152,7 +155,7 @@ export default function SessionSummaryScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>Ressenti</Text>
+          <Text style={styles.sectionTitle}>{t('member.ressenti')}</Text>
           <View style={styles.feelingRow}>
             {FEELINGS.map((f) => {
               const active = feeling === f.value;
@@ -176,11 +179,11 @@ export default function SessionSummaryScreen() {
               </LinearGradient>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.exerciseName} numberOfLines={1}>{nameOf(exId)}</Text>
-                <Text style={styles.exerciseMeta}>{exSets.length} série{exSets.length > 1 ? 's' : ''}</Text>
+                <Text style={styles.exerciseMeta}>{t('member.serie_3', { length: exSets.length, v2: exSets.length > 1 ? 's' : '' })}</Text>
               </View>
               {recordExerciseIds.has(exId) ? (
                 <View style={styles.recordTag}>
-                  <Text style={styles.recordTagText}>RECORD</Text>
+                  <Text style={styles.recordTagText}>{t('member.record')}</Text>
                 </View>
               ) : (
                 <View style={styles.doneTag}>
@@ -190,9 +193,9 @@ export default function SessionSummaryScreen() {
             </View>
 
             <View style={styles.tableHeader}>
-              <Text style={[styles.tableHeaderText, { width: 34 }]}>SÉRIE</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>KG</Text>
-              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>REPS</Text>
+              <Text style={[styles.tableHeaderText, { width: 34 }]}>{t('member.serie_2')}</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{t('member.kg_2')}</Text>
+              <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{t('member.reps')}</Text>
               <View style={{ width: 44 }} />
             </View>
             {exSets.map((st) => (
@@ -217,7 +220,7 @@ export default function SessionSummaryScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{createWorkout.isPending ? 'Enregistrement…' : 'Enregistrer la séance'}</Text>
+            <Text style={styles.ctaText}>{createWorkout.isPending ? t('common.enregistrement') : t('member.enregistrer_la_seance')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

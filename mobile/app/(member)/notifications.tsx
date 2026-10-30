@@ -12,25 +12,27 @@ import {
   useNotifications,
 } from '../../src/hooks/useProfile';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import i18n, { dateLocale } from '../../src/i18n';
 
 const TYPES: Record<string, { label: string; icon: keyof typeof MaterialIcons.glyphMap; tone: 'primary' | 'success' | 'warning' | 'muted' }> = {
-  CLASS_REMINDER: { label: 'Rappel de cours', icon: 'alarm', tone: 'primary' },
-  WAITLIST_PROMOTED: { label: 'Liste d’attente', icon: 'event-available', tone: 'success' },
-  MEMBERSHIP_EXPIRING: { label: 'Abonnement', icon: 'card-membership', tone: 'warning' },
-  ANNOUNCEMENT: { label: 'Annonce de la salle', icon: 'campaign', tone: 'primary' },
-  ATTENDANCE_CONFIRMED: { label: 'Présence confirmée', icon: 'check-circle', tone: 'success' },
-  MESSAGE: { label: 'Message', icon: 'chat-bubble', tone: 'primary' },
-  CHALLENGE: { label: 'Défi', icon: 'emoji-events', tone: 'warning' },
+  CLASS_REMINDER: { get label() { return i18n.t('member.rappel_de_cours'); }, icon: 'alarm', tone: 'primary' },
+  WAITLIST_PROMOTED: { get label() { return i18n.t('common.liste_dattente'); }, icon: 'event-available', tone: 'success' },
+  MEMBERSHIP_EXPIRING: { get label() { return i18n.t('common.abonnement'); }, icon: 'card-membership', tone: 'warning' },
+  ANNOUNCEMENT: { get label() { return i18n.t('member.annonce_de_la_salle'); }, icon: 'campaign', tone: 'primary' },
+  ATTENDANCE_CONFIRMED: { get label() { return i18n.t('member.presence_confirmee'); }, icon: 'check-circle', tone: 'success' },
+  MESSAGE: { get label() { return i18n.t('common.message'); }, icon: 'chat-bubble', tone: 'primary' },
+  CHALLENGE: { get label() { return i18n.t('member.defi'); }, icon: 'emoji-events', tone: 'warning' },
 };
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60000);
-  if (min < 1) return 'À l’instant';
+  if (min < 1) return i18n.t('member.a_linstant');
   if (min < 60) return `Il y a ${min} min`;
   const h = Math.floor(min / 60);
   if (h < 24) return `Il y a ${h} h`;
-  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+  return new Date(iso).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short' });
 }
 
 function dayGroup(iso: string): string {
@@ -38,13 +40,14 @@ function dayGroup(iso: string): string {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.floor((today.getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / 86400000);
-  if (diffDays <= 0) return 'Aujourd’hui';
-  if (diffDays === 1) return 'Hier';
-  if (diffDays < 7) return 'Cette semaine';
-  return 'Plus ancien';
+  if (diffDays <= 0) return 'today';
+  if (diffDays === 1) return 'yesterday';
+  if (diffDays < 7) return 'week';
+  return 'older';
 }
 
 export default function NotificationsScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: notifications, isLoading, refetch } = useNotifications();
@@ -55,13 +58,13 @@ export default function NotificationsScreen() {
   const unread = notifications?.filter((n) => !n.readAt).length ?? 0;
 
   const groups = useMemo(() => {
-    const order = ['Aujourd’hui', 'Hier', 'Cette semaine', 'Plus ancien'];
+    const order = ['today', 'yesterday', 'week', 'older'];
     const map = new Map<string, NonNullable<typeof notifications>>();
     for (const n of notifications ?? []) {
       const g = dayGroup(n.createdAt);
       map.set(g, [...(map.get(g) ?? []), n]);
     }
-    return order.filter((g) => map.has(g)).map((g) => ({ title: g, items: map.get(g)! }));
+    return order.filter((g) => map.has(g)).map((g) => ({ title: t(`member.group_${g}`), items: map.get(g)! }));
   }, [notifications]);
 
   const toneColors = {
@@ -73,7 +76,7 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title="Notifications" fallbackHref="/(member)/(tabs)/profile" />
+      <ScreenHeader title={t('common.notifications')} fallbackHref="/(member)/(tabs)/profile" />
       <ScrollView
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -84,12 +87,12 @@ export default function NotificationsScreen() {
               <View style={[styles.countBadge, unread === 0 && { backgroundColor: colors.surface2 }]}>
                 <Text style={[styles.countText, unread === 0 && { color: colors.muted }]}>{unread}</Text>
               </View>
-              <Text style={styles.summaryText}>{unread === 0 ? 'Tout est à jour' : unread === 1 ? 'notification non lue' : 'notifications non lues'}</Text>
+              <Text style={styles.summaryText}>{unread === 0 ? t('member.tout_est_a_jour') : unread === 1 ? 'notification non lue' : 'notifications non lues'}</Text>
             </View>
             {unread > 0 ? (
               <Pressable onPress={() => markAllRead.mutate()} style={({ pressed }) => [styles.markAll, pressed && { opacity: 0.7 }]}>
                 <MaterialIcons name="done-all" size={16} color={colors.primaryInk} />
-                <Text style={styles.markAllText}>Tout lire</Text>
+                <Text style={styles.markAllText}>{t('member.tout_lire')}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -135,15 +138,15 @@ export default function NotificationsScreen() {
         ) : (
           <EmptyState
             icon="notifications-none"
-            title="Aucune notification"
-            text="Vos rappels de cours, annonces de la salle et messages apparaîtront ici."
+            title={t('member.aucune_notification')}
+            text={t('member.vos_rappels_de_cours_annonces')}
             tone="muted"
           />
         )}
       </ScrollView>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

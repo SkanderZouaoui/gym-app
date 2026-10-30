@@ -1,3 +1,5 @@
+
+import i18n from '../i18n';
 /** Les 19 valeurs de `Exercise.muscleGroup` (backend, anglais technique, cf.
  * seed-data/exercises.json) mappées vers un libellé FR et une vue (face/dos)
  * pour le sélecteur visuel par silhouette. */
@@ -12,25 +14,25 @@ export interface MuscleGroupInfo {
 }
 
 export const MUSCLE_GROUPS: MuscleGroupInfo[] = [
-  { value: 'abs', label: 'Abdominaux', view: 'front' },
-  { value: 'pectorals', label: 'Pectoraux', view: 'front' },
-  { value: 'delts', label: 'Épaules', view: 'front' },
-  { value: 'biceps', label: 'Biceps', view: 'front' },
-  { value: 'forearms', label: 'Avant-bras', view: 'front' },
-  { value: 'quads', label: 'Quadriceps', view: 'front' },
-  { value: 'adductors', label: 'Adducteurs', view: 'front' },
-  { value: 'abductors', label: 'Abducteurs', view: 'front' },
-  { value: 'serratus anterior', label: 'Dentelés', view: 'front' },
-  { value: 'cardiovascular system', label: 'Cardio', view: 'front' },
-  { value: 'lats', label: 'Grand dorsal', view: 'back' },
-  { value: 'traps', label: 'Trapèzes', view: 'back' },
-  { value: 'upper back', label: 'Haut du dos', view: 'back' },
-  { value: 'triceps', label: 'Triceps', view: 'back' },
-  { value: 'glutes', label: 'Fessiers', view: 'back' },
-  { value: 'hamstrings', label: 'Ischio-jambiers', view: 'back' },
-  { value: 'calves', label: 'Mollets', view: 'back' },
-  { value: 'spine', label: 'Lombaires', view: 'back' },
-  { value: 'levator scapulae', label: 'Releveur de la scapula', view: 'back' },
+  { value: 'abs', get label() { return i18n.t('common.abdominaux'); }, view: 'front' },
+  { value: 'pectorals', get label() { return i18n.t('common.pectoraux'); }, view: 'front' },
+  { value: 'delts', get label() { return i18n.t('common.epaules'); }, view: 'front' },
+  { value: 'biceps', get label() { return i18n.t('common.biceps'); }, view: 'front' },
+  { value: 'forearms', get label() { return i18n.t('common.avant_bras'); }, view: 'front' },
+  { value: 'quads', get label() { return i18n.t('common.quadriceps'); }, view: 'front' },
+  { value: 'adductors', get label() { return i18n.t('common.adducteurs'); }, view: 'front' },
+  { value: 'abductors', get label() { return i18n.t('common.abducteurs'); }, view: 'front' },
+  { value: 'serratus anterior', get label() { return i18n.t('common.denteles'); }, view: 'front' },
+  { value: 'cardiovascular system', get label() { return i18n.t('common.cardio'); }, view: 'front' },
+  { value: 'lats', get label() { return i18n.t('common.grand_dorsal'); }, view: 'back' },
+  { value: 'traps', get label() { return i18n.t('common.trapezes'); }, view: 'back' },
+  { value: 'upper back', get label() { return i18n.t('common.haut_du_dos'); }, view: 'back' },
+  { value: 'triceps', get label() { return i18n.t('common.triceps'); }, view: 'back' },
+  { value: 'glutes', get label() { return i18n.t('common.fessiers'); }, view: 'back' },
+  { value: 'hamstrings', get label() { return i18n.t('common.ischio_jambiers'); }, view: 'back' },
+  { value: 'calves', get label() { return i18n.t('common.mollets'); }, view: 'back' },
+  { value: 'spine', get label() { return i18n.t('common.lombaires'); }, view: 'back' },
+  { value: 'levator scapulae', get label() { return i18n.t('common.releveur_de_la_scapula'); }, view: 'back' },
 ];
 
 export const MUSCLE_GROUP_LABELS: Record<string, string> = Object.fromEntries(

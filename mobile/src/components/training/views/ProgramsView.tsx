@@ -7,12 +7,15 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { useMyPrograms, useProposedPrograms } from '../../../hooks/useCoaching';
 import { EmptyState } from '../../ui';
 import { ProgramCard } from '../ProgramCard';
+import { useTranslation } from 'react-i18next';
+import { WEEKDAYS_LONG_SUN } from '../../../i18n/labels';
 
-const DAY_LABELS_FR = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+const DAY_LABELS_FR = WEEKDAYS_LONG_SUN;
 
 /** Vue « Mes programmes » de l'onglet Entraînement : programme à la une en dégradé, bouton
  * pointillé de création, puis les autres programmes (assignés par le coach ou personnels). */
 export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed' }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const mine = useMyPrograms();
@@ -25,10 +28,10 @@ export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed'
     return (
       <EmptyState
         icon="cloud-off"
-        title="Programmes indisponibles"
-        text="Impossible de récupérer vos programmes pour le moment. Vérifiez votre connexion."
+        title={t('member.programmes_indisponibles')}
+        text={t('member.impossible_de_recuperer_vos_programmes')}
         tone="danger"
-        actionLabel="Réessayer"
+        actionLabel={t('common.reessayer')}
         onAction={() => refetch()}
       />
     );
@@ -46,7 +49,7 @@ export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed'
       onPress={() => router.push('/(member)/program-builder')}
     >
       <MaterialIcons name="add" size={22} color={colors.primaryInk} />
-      <Text style={styles.createButtonText}>Créer un programme</Text>
+      <Text style={styles.createButtonText}>{t('common.creer_un_programme')}</Text>
     </Pressable>
   );
 
@@ -55,7 +58,7 @@ export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed'
       {main ? (
         <ProgramCard
           highlighted
-          kicker={source === 'proposed' ? 'RECOMMANDÉ POUR VOUS' : isOwn(main) ? 'MON PROGRAMME' : 'ASSIGNÉ PAR VOTRE COACH'}
+          kicker={source === 'proposed' ? t('member.recommande_pour_vous') : isOwn(main) ? t('member.mon_programme') : t('member.assigne_par_votre_coach')}
           name={main.name}
           isOwn={isOwn(main)}
           proposed={source === 'proposed'}
@@ -68,8 +71,8 @@ export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed'
       ) : source === 'proposed' ? (
         <EmptyState
           icon="auto-awesome"
-          title="Aucun programme proposé"
-          text="Les programmes validés par la salle apparaîtront ici."
+          title={t('member.aucun_programme_propose')}
+          text={t('member.les_programmes_valides_par_la')}
           tone="primary"
         />
       ) : null}

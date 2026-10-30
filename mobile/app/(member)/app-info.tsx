@@ -8,38 +8,39 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { ScreenTitle } from '../../src/components/ui';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
 const SECTIONS: { icon: IconName; title: string; text: string }[] = [
   {
     icon: 'gavel',
-    title: 'Règlement intérieur',
-    text:
-      'Le respect du matériel, des autres adhérents et des coachs est requis à tout moment dans la salle. L’accès nécessite la présentation du QR d’accès ou du badge à l’accueil. Toute dégradation volontaire du matériel pourra être facturée.',
+    get title() { return i18n.t('member.reglement_interieur'); },
+    get text() { return i18n.t('member.le_respect_du_materiel_des'); },
   },
   {
     icon: 'description',
-    title: 'Mentions légales',
+    get title() { return i18n.t('member.mentions_legales'); },
     text:
       'MuscleUP est un service proposé par votre salle de sport. Les données personnelles collectées sont utilisées uniquement pour la gestion de votre abonnement, de votre présence et des fonctionnalités de l’application (planning, réservations, suivi d’entraînement).',
   },
   {
     icon: 'shield',
-    title: 'Confidentialité',
-    text:
-      'Vos photos de profil et de progression sont privées et ne sont jamais partagées publiquement. Vous pouvez demander la suppression de votre compte à tout moment depuis Profil › Plus › Confidentialité.',
+    get title() { return i18n.t('member.confidentialite'); },
+    get text() { return i18n.t('member.vos_photos_de_profil_et_2'); },
   },
   {
     icon: 'mail-outline',
-    title: 'Contact',
-    text: 'Pour toute question, contactez l’accueil de votre salle ou votre coach.',
+    get title() { return i18n.t('common.contact'); },
+    get text() { return i18n.t('member.pour_toute_question_contactez_laccueil'); },
   },
-  { icon: 'favorite-border', title: 'Crédits', text: 'Données des exercices fournies par RepDB (repdb.co).' },
+  { icon: 'favorite-border', get title() { return i18n.t('member.credits'); }, get text() { return i18n.t('member.donnees_des_exercices_fournies_par'); } },
 ];
 
 /** À propos : identité de l'application, règlement, mentions légales, confidentialité, contact, crédits. */
 export default function AppInfoScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const version = Constants.expoConfig?.version ?? '—';
@@ -51,19 +52,19 @@ export default function AppInfoScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Profil</Text>
+          <Text style={styles.backText}>{t('common.profil')}</Text>
         </Pressable>
-        <ScreenTitle title="À propos" subtitle="Informations sur l’application et votre salle" />
+        <ScreenTitle title={t('member.a_propos')} subtitle={t('member.informations_sur_lapplication_et_votre')} />
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.logo}>
-              <Text style={styles.logoText}>MU</Text>
+              <Text style={styles.logoText}>{t('common.mu')}</Text>
             </View>
-            <Text style={styles.appName}>MuscleUP</Text>
+            <Text style={styles.appName}>{t('member.muscleup')}</Text>
             <View style={styles.versionPill}>
-              <Text style={styles.versionText}>Version {version}</Text>
+              <Text style={styles.versionText}>{t('member.version', { version })}</Text>
             </View>
           </LinearGradient>
         </View>

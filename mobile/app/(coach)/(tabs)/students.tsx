@@ -7,9 +7,11 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachStudents } from '../../../src/hooks/useCoachSessions';
 import { Avatar, EmptyState } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
+import { useTranslation } from 'react-i18next';
 
 /** Élèves — FitZone App Coach.dc.html, L1. */
 export default function CoachStudentsScreen() {
+  const { t } = useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -18,7 +20,7 @@ export default function CoachStudentsScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Élèves</Text>
+        <Text style={styles.title}>{t('coach.eleves')}</Text>
         <Text style={styles.count}>{students?.length ?? 0}</Text>
       </View>
       <FlatList {...tabBarScroll}
@@ -34,8 +36,8 @@ export default function CoachStudentsScreen() {
         ListEmptyComponent={
           <EmptyState
             icon="group"
-            title="Pas encore d'élève suivi"
-            text="Les adhérents apparaissent ici après une séance individuelle ou quand vous leur assignez un programme."
+            title={t('coach.pas_encore_deleve_suivi')}
+            text={t('coach.les_adherents_apparaissent_ici_apres')}
             tone="muted"
           />
         }

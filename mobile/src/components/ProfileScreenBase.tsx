@@ -9,8 +9,10 @@ import { Button } from './Button';
 import { tokenStorage } from '../api/storage';
 import { authApi } from '../api/endpoints';
 import { useSessionStore } from '../store/session';
+import { useTranslation } from 'react-i18next';
 
 export function ProfileScreenBase({ roleLabel }: { roleLabel: string }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user } = useMe();
@@ -29,7 +31,7 @@ export function ProfileScreenBase({ roleLabel }: { roleLabel: string }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.container}>
-        <Text style={styles.title}>Profil</Text>
+        <Text style={styles.title}>{t('common.profil')}</Text>
 
         <View style={styles.card}>
           <View style={styles.avatar}>
@@ -47,10 +49,10 @@ export function ProfileScreenBase({ roleLabel }: { roleLabel: string }) {
         </View>
 
         <View style={styles.card}>
-          <InfoRow label="Rôle" value={roleLabel} styles={styles} />
+          <InfoRow label={t('common.role')} value={roleLabel} styles={styles} />
         </View>
 
-        <Button label="Se déconnecter" onPress={handleLogout} variant="danger" />
+        <Button label={t('common.se_deconnecter')} onPress={handleLogout} variant="danger" />
       </View>
     </SafeAreaView>
   );

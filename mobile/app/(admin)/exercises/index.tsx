@@ -10,9 +10,12 @@ import { ScreenTitle } from '../../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercises } from '../../../src/hooks/useAdmin';
+import { useTranslation } from 'react-i18next';
+import { levelLabel } from '../../../src/i18n/labels';
 
 /** Bibliothèque d'exercices (admin) : tous les exercices ou ceux d'un groupe musculaire, recherche, ajout. */
 export default function AdminExercisesScreen() {
+  const { t } = useTranslation();
   const { group } = useLocalSearchParams<{ group?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -39,14 +42,14 @@ export default function AdminExercisesScreen() {
           <View style={{ gap: spacing.md, marginBottom: 12 }}>
             <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
               <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-              <Text style={styles.backText}>{group ? 'Groupes' : 'Programmes'}</Text>
+              <Text style={styles.backText}>{group ? t('member.groupes') : t('common.programmes')}</Text>
             </Pressable>
             <ScreenTitle
-              title={group ? muscleGroupLabel(group) : 'Tous les exercices'}
+              title={group ? muscleGroupLabel(group) : t('admin.tous_les_exercices')}
               subtitle={`${list.length} exercice${list.length > 1 ? 's' : ''}`}
               right={
                 <Pressable
-                  accessibilityLabel="Ajouter un exercice"
+                  accessibilityLabel={t('common.ajouter_un_exercice')}
                   onPress={() => router.push({ pathname: '/(admin)/exercises/form', params: group ? { group } : {} })}
                   style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
                 >
@@ -58,7 +61,7 @@ export default function AdminExercisesScreen() {
             />
             <View style={styles.searchBox}>
               <MaterialIcons name="search" size={22} color={colors.muted} />
-              <TextInput value={search} onChangeText={setSearch} placeholder="Rechercher un exercice…" placeholderTextColor={colors.muted} style={styles.searchInput} />
+              <TextInput value={search} onChangeText={setSearch} placeholder={t('admin.rechercher_un_exercice')} placeholderTextColor={colors.muted} style={styles.searchInput} />
             </View>
           </View>
         }
@@ -73,7 +76,7 @@ export default function AdminExercisesScreen() {
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={styles.name} numberOfLines={2}>{e.name}</Text>
               <Text style={styles.meta} numberOfLines={1}>
-                {[e.muscleGroup ? muscleGroupLabel(e.muscleGroup) : null, e.equipment, e.level].filter(Boolean).join(' · ') || '—'}{e.isActive ? '' : ' · désactivé'}
+                {[e.muscleGroup ? muscleGroupLabel(e.muscleGroup) : null, e.equipment, e.level ? levelLabel(e.level) : null].filter(Boolean).join(' · ') || '—'}{e.isActive ? '' : t('admin.desactive_2')}
               </Text>
             </View>
             <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
@@ -82,7 +85,7 @@ export default function AdminExercisesScreen() {
         ListEmptyComponent={
           <View style={[styles.empty, cardShadow]}>
             <MaterialIcons name="fitness-center" size={32} color={colors.primaryInk} />
-            <Text style={styles.emptyText}>Aucun exercice. Ajoutez-en un avec le bouton +.</Text>
+            <Text style={styles.emptyText}>{t('admin.aucun_exercice_ajoutez_en_un')}</Text>
           </View>
         }
       />

@@ -11,9 +11,12 @@ import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefres
 import { EmptyState } from '../../../src/components/ui';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { PROGRAM_STATUS_LABEL, estimateMinutes } from '../../../src/components/coach/programStatus';
+import { useTranslation } from 'react-i18next';
+import { goalLabel, levelLabel } from '../../../src/i18n/labels';
 
 /** Détail d'un programme du coach : statut de validation, motif de refus, chiffres clés, exercices. */
 export default function CoachProgramDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -35,10 +38,10 @@ export default function CoachProgramDetailScreen() {
         <View style={{ padding: spacing.lg }}>
           <EmptyState
             icon="cloud-off"
-            title="Programme indisponible"
-            text={isError ? 'Impossible de récupérer ce programme pour le moment.' : 'Ce programme est introuvable.'}
+            title={t('common.programme_indisponible')}
+            text={isError ? t('coach.impossible_de_recuperer_ce_programme') : t('common.ce_programme_est_introuvable')}
             tone="danger"
-            actionLabel="Retour"
+            actionLabel={t('common.retour')}
             onAction={goBack}
           />
         </View>
@@ -55,7 +58,7 @@ export default function CoachProgramDetailScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Programmes</Text>
+          <Text style={styles.backText}>{t('common.programmes')}</Text>
         </Pressable>
 
         <View style={styles.heroShadow}>
@@ -72,7 +75,7 @@ export default function CoachProgramDetailScreen() {
           <View style={styles.rejection}>
             <MaterialIcons name="feedback" size={22} color={colors.dangerInk} />
             <Text style={styles.rejectionText}>
-              <Text style={{ fontFamily: fonts.bodyBold }}>Motif du refus. </Text>
+              <Text style={{ fontFamily: fonts.bodyBold }}>{t('common.motif_du_refus')}</Text>
               {program.rejectionNote}
             </Text>
           </View>
@@ -80,8 +83,8 @@ export default function CoachProgramDetailScreen() {
 
         <View style={styles.infoRow}>
           {[
-            { icon: 'signal-cellular-alt' as const, label: 'Niveau', value: program.level ?? '—' },
-            { icon: 'flag' as const, label: 'Objectif', value: program.goal ?? '—' },
+            { icon: 'signal-cellular-alt' as const, label: t('common.niveau'), value: program.level ? levelLabel(program.level) : '—' },
+            { icon: 'flag' as const, label: t('common.objectif'), value: program.goal ? goalLabel(program.goal) : '—' },
           ].map((c) => (
             <View key={c.label} style={[styles.infoCard, cardShadow]}>
               <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.infoIcon}>
@@ -97,9 +100,9 @@ export default function CoachProgramDetailScreen() {
 
         <View style={styles.statsRow}>
           {[
-            { n: String(exercises.length), l: 'Exercices' },
-            { n: String(totalSets), l: 'Séries' },
-            { n: `~${estimateMinutes(totalSets)} min`, l: 'Durée' },
+            { n: String(exercises.length), l: t('common.exercices') },
+            { n: String(totalSets), l: t('common.series') },
+            { n: `~${estimateMinutes(totalSets)} min`, l: t('common.duree') },
           ].map((s) => (
             <View key={s.l} style={[styles.statCard, cardShadow]}>
               <Text style={styles.statValue}>{s.n}</Text>
@@ -109,7 +112,7 @@ export default function CoachProgramDetailScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Exercices</Text>
+          <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
           <View style={{ gap: 10 }}>
             {exercises.map((ex, i) => {
               const weight = ex.setDetails[0]?.weightKg;
@@ -124,7 +127,7 @@ export default function CoachProgramDetailScreen() {
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={styles.exerciseSets}>{ex.sets} × {ex.reps}</Text>
-                    <Text style={styles.exerciseMeta}>{weight ? `${Number(weight)} kg` : 'Poids du corps'}</Text>
+                    <Text style={styles.exerciseMeta}>{weight ? `${Number(weight)} kg` : t('common.poids_du_corps')}</Text>
                   </View>
                 </View>
               );
@@ -138,7 +141,7 @@ export default function CoachProgramDetailScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="content-copy" size={22} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>Dupliquer comme nouveau programme</Text>
+            <Text style={styles.ctaText}>{t('coach.dupliquer_comme_nouveau_programme')}</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>

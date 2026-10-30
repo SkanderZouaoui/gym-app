@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { Avatar, Pill } from '../ui';
+import { useTranslation } from 'react-i18next';
 
 interface RosterRowProps {
   firstName: string;
@@ -16,6 +17,7 @@ interface RosterRowProps {
 
 /** Ligne de la liste d'appel — FitZone App Coach.dc.html, I3. */
 export function RosterRow({ firstName, lastName, attended, waitlistPosition, onCheckIn, checkingIn }: RosterRowProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -23,10 +25,10 @@ export function RosterRow({ firstName, lastName, attended, waitlistPosition, onC
       <Avatar initials={`${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()} size={40} />
       <View style={{ flex: 1 }}>
         <Text style={styles.name}>{firstName} {lastName}</Text>
-        {waitlistPosition ? <Text style={styles.waitlist}>Liste d’attente · {waitlistPosition}e</Text> : null}
+        {waitlistPosition ? <Text style={styles.waitlist}>{t('common.liste_dattente_e', { waitlistPosition })}</Text> : null}
       </View>
       {attended ? (
-        <Pill label="Présent" tone="success" />
+        <Pill label={t('common.present')} tone="success" />
       ) : (
         <Pressable onPress={onCheckIn} disabled={checkingIn} style={styles.checkButton}>
           <MaterialIcons name="check" size={18} color={colors.successInk} />

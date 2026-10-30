@@ -11,11 +11,14 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { Banner } from '../../src/components/ui';
 import { authApi } from '../../src/api/endpoints';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 type Step = 'email' | 'code';
 
 /** Mot de passe oublié — FitZone App Adherent.dc.html, A5. */
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [step, setStep] = useState<Step>('email');
@@ -33,7 +36,7 @@ export default function ForgotPasswordScreen() {
       await authApi.forgotPassword(email.trim());
       setStep('code');
     } catch {
-      setError('Impossible d’envoyer le code. Réessayez.');
+      setError(t('auth.impossible_denvoyer_le_code_reessayez'));
     } finally {
       setLoading(false);
     }
@@ -46,7 +49,7 @@ export default function ForgotPasswordScreen() {
       await authApi.resetPassword(email.trim(), code.trim(), newPassword);
       setSuccess(true);
     } catch (e) {
-      setError(e instanceof ApiError ? traduireErreur(e.code) : 'Impossible de réinitialiser le mot de passe.');
+      setError(e instanceof ApiError ? traduireErreur(e.code) : t('auth.impossible_de_reinitialiser_le_mot'));
     } finally {
       setLoading(false);
     }
@@ -60,9 +63,9 @@ export default function ForgotPasswordScreen() {
           <View style={[styles.iconCircle, { backgroundColor: colors.successSoft }]}>
             <MaterialIcons name="check-circle" size={34} color={colors.successInk} />
           </View>
-          <Text style={styles.title}>Mot de passe mis à jour</Text>
-          <Text style={styles.subtitle}>Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.</Text>
-          <Button label="Retour à la connexion" onPress={() => router.replace('/(auth)/login')} />
+          <Text style={styles.title}>{t('auth.mot_de_passe_mis_a')}</Text>
+          <Text style={styles.subtitle}>{t('auth.vous_pouvez_maintenant_vous_connecter')}</Text>
+          <Button label={t('auth.retour_a_la_connexion')} onPress={() => router.replace('/(auth)/login')} />
         </View>
       </SafeAreaView>
     );
@@ -76,39 +79,35 @@ export default function ForgotPasswordScreen() {
           <View style={styles.iconCircle}>
             <MaterialIcons name="lock-reset" size={34} color={colors.primaryInk} />
           </View>
-          <Text style={styles.title}>Mot de passe oublié</Text>
+          <Text style={styles.title}>{t('auth.mot_de_passe_oublie')}</Text>
 
           {step === 'email' ? (
             <>
-              <Text style={styles.subtitle}>
-                Saisissez votre e-mail, nous vous envoyons un code à usage unique.
-              </Text>
+              <Text style={styles.subtitle}>{t('auth.saisissez_votre_e_mail_nous')}</Text>
               {error ? <Banner tone="danger" icon="error" text={error} /> : null}
               <TextField
-                label="E-mail"
+                label={t('common.e_mail')}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
-              <Button label="Envoyer le code" onPress={handleRequestCode} loading={loading} disabled={!email.trim()} />
+              <Button label={t('common.envoyer_le_code')} onPress={handleRequestCode} loading={loading} disabled={!email.trim()} />
             </>
           ) : (
             <>
-              <Text style={styles.subtitle}>
-                Entrez le code reçu par e-mail et votre nouveau mot de passe.
-              </Text>
+              <Text style={styles.subtitle}>{t('auth.entrez_le_code_recu_par')}</Text>
               {error ? <Banner tone="danger" icon="error" text={error} /> : null}
               <TextField
-                label="Code reçu"
+                label={t('common.code_recu')}
                 value={code}
                 onChangeText={setCode}
                 keyboardType="number-pad"
                 maxLength={6}
               />
-              <TextField label="Nouveau mot de passe" value={newPassword} onChangeText={setNewPassword} isPassword />
+              <TextField label={t('common.nouveau_mot_de_passe')} value={newPassword} onChangeText={setNewPassword} isPassword />
               <Button
-                label="Réinitialiser le mot de passe"
+                label={t('common.reinitialiser_le_mot_de_passe')}
                 onPress={handleResetPassword}
                 loading={loading}
                 disabled={code.trim().length !== 6 || newPassword.length < 8}
@@ -116,7 +115,7 @@ export default function ForgotPasswordScreen() {
             </>
           )}
 
-          <Button label="Retour à la connexion" onPress={() => router.back()} variant="ghost" />
+          <Button label={t('auth.retour_a_la_connexion')} onPress={() => router.back()} variant="ghost" />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -126,11 +125,11 @@ export default function ForgotPasswordScreen() {
 function traduireErreur(code: string): string {
   switch (code) {
     case 'OTP_INVALID':
-      return 'Code incorrect.';
+      return i18n.t('common.wrong_code');
     case 'OTP_EXPIRED':
-      return 'Ce code a expiré. Demandez-en un nouveau.';
+      return i18n.t('common.ce_code_a_expire_demandez');
     default:
-      return 'Impossible de réinitialiser le mot de passe.';
+      return i18n.t('auth.impossible_de_reinitialiser_le_mot');
   }
 }
 

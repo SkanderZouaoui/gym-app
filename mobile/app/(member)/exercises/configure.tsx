@@ -13,10 +13,12 @@ import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import type { SetDraft } from '../../../src/components/training/SetRow';
 import { ExerciseEditorCard } from '../../../src/components/training/ExerciseEditorCard';
 import { useExercisePickStore } from '../../../src/store/exercisePick';
+import { useTranslation } from 'react-i18next';
 
 /** Détail d'un exercice avant ajout au programme : chaque série se règle
  * individuellement (reps + poids), au lieu d'un réglage unique répété. */
 export default function ConfigureExerciseScreen() {
+  const { t } = useTranslation();
   const { exerciseId, dayIndex, initialSets, editingIndex, programId, returnTo, dayId } = useLocalSearchParams<{
     exerciseId: string;
     dayIndex: string;
@@ -98,11 +100,11 @@ export default function ConfigureExerciseScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Exercices</Text>
+          <Text style={styles.backText}>{t('common.exercices')}</Text>
         </Pressable>
         <ScreenTitle
           title={exercise.name}
-          subtitle={`${exercise.muscleGroup ? muscleGroupLabel(exercise.muscleGroup) : 'Exercice'} · réglez les séries`}
+          subtitle={t('member.reglez_les_series', { v0: exercise.muscleGroup ? muscleGroupLabel(exercise.muscleGroup) : t('member.exercice') })}
         />
 
         <View style={styles.media}>
@@ -126,7 +128,7 @@ export default function ConfigureExerciseScreen() {
         >
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{editingIndex !== undefined ? 'Enregistrer les séries' : 'Ajouter au programme'}</Text>
+            <Text style={styles.ctaText}>{editingIndex !== undefined ? t('member.enregistrer_les_series') : t('common.ajouter_au_programme')}</Text>
           </LinearGradient>
         </Pressable>
       </View>

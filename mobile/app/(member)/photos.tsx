@@ -9,10 +9,13 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useBodyMetrics, useCreateBodyMetric, useUploadProgressPhoto } from '../../src/hooks/useProgress';
 import { Banner, EmptyState, Toast } from '../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '../../src/i18n';
 
 /** Photos de progression — FitZone App Entraînement.dc.html, F3.
  * Privées par défaut : jamais partagées, URLs présignées à courte durée de vie. */
 export default function PhotosScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: metrics, isLoading, refetch } = useBodyMetrics();
@@ -30,7 +33,7 @@ export default function PhotosScreen() {
     setUploadError(null);
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      setUploadError('Autorisez l’accès à vos photos pour en ajouter une.');
+      setUploadError(t('member.autorisez_lacces_a_vos_photos'));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -48,7 +51,7 @@ export default function PhotosScreen() {
       const { key } = await uploadPhoto.mutateAsync({ uri: asset.uri, contentType });
       await createMetric.mutateAsync({ photoKey: key, visibility: 'PRIVATE' });
     } catch {
-      setUploadError('Échec de l’envoi de la photo. Réessayez.');
+      setUploadError(t('member.echec_de_lenvoi_de_la'));
     } finally {
       setUploading(false);
     }
@@ -65,10 +68,10 @@ export default function PhotosScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.header}>
-        <ScreenHeader title="Mes photos" fallbackHref="/(member)/(tabs)/training" />
+        <ScreenHeader title={t('member.mes_photos')} fallbackHref="/(member)/(tabs)/training" />
         <View style={styles.privateBadge}>
           <MaterialIcons name="lock" size={13} color={colors.secondaryInk} />
-          <Text style={styles.privateBadgeText}>Privé</Text>
+          <Text style={styles.privateBadgeText}>{t('member.prive')}</Text>
         </View>
       </View>
 
@@ -76,8 +79,8 @@ export default function PhotosScreen() {
         <Banner
           tone="info"
           icon="shield"
-          title="Visibles par vous uniquement"
-          text="Stockées chiffrées, jamais partagées avec la salle ni votre coach sans votre accord. Supprimables à tout moment."
+          title={t('member.visibles_par_vous_uniquement')}
+          text={t('member.stockees_chiffrees_jamais_partagees_avec')}
         />
 
         {uploadError ? <Banner tone="danger" icon="error" text={uploadError} /> : null}
@@ -85,10 +88,10 @@ export default function PhotosScreen() {
         {photos.length === 0 ? (
           <EmptyState
             icon="add-a-photo"
-            title="Aucune photo"
-            text="Une photo par mois, même lumière et même pose : le meilleur moyen de voir des progrès que la balance ne montre pas."
+            title={t('member.aucune_photo')}
+            text={t('member.une_photo_par_mois_meme')}
             tone="primary"
-            actionLabel={uploading ? 'Envoi…' : 'Prendre une photo'}
+            actionLabel={uploading ? t('common.envoi') : t('member.prendre_une_photo')}
             onAction={uploading ? undefined : handleAddPhoto}
           />
         ) : (
@@ -105,22 +108,22 @@ export default function PhotosScreen() {
                     <View style={styles.compareTile}>
                       <Image source={{ uri: oldest.photoUrl! }} style={styles.compareImage} />
                       <Text style={styles.compareCaption}>
-                        {new Date(oldest.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-                        {oldest.weightKg ? ` · ${oldest.weightKg} kg` : ''}
+                        {new Date(oldest.date).toLocaleDateString(dateLocale(), { day: '2-digit', month: '2-digit' })}
+                        {oldest.weightKg ? t('member.kg', { weightKg: oldest.weightKg }) : ''}
                       </Text>
                     </View>
                     <View style={styles.compareTile}>
                       <Image source={{ uri: newest.photoUrl! }} style={styles.compareImage} />
                       <Text style={[styles.compareCaption, styles.compareCaptionActive]}>
-                        {new Date(newest.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
-                        {newest.weightKg ? ` · ${newest.weightKg} kg` : ''}
+                        {new Date(newest.date).toLocaleDateString(dateLocale(), { day: '2-digit', month: '2-digit' })}
+                        {newest.weightKg ? t('member.kg', { weightKg: newest.weightKg }) : ''}
                       </Text>
                     </View>
                   </View>
                 ) : null}
 
                 <View style={styles.sectionHeaderRow}>
-                  <Text style={styles.sectionLabel}>TOUTES LES PHOTOS</Text>
+                  <Text style={styles.sectionLabel}>{t('member.toutes_les_photos')}</Text>
                   <Pressable onPress={uploading ? undefined : handleAddPhoto} style={styles.addIconButton}>
                     {uploading ? <ActivityIndicator size="small" color={colors.primaryInk} /> : <MaterialIcons name="add" size={18} color={colors.primaryInk} />}
                   </Pressable>
@@ -132,7 +135,7 @@ export default function PhotosScreen() {
                 <Image source={{ uri: item.photoUrl! }} style={styles.thumbImage} />
                 <View style={styles.thumbDateBadge}>
                   <Text style={styles.thumbDateText}>
-                    {new Date(item.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                    {new Date(item.date).toLocaleDateString(dateLocale(), { day: '2-digit', month: '2-digit' })}
                   </Text>
                 </View>
               </View>
@@ -143,7 +146,7 @@ export default function PhotosScreen() {
       </View>
 
       {offlineToastVisible ? (
-        <Toast icon="cloud-off" text="Pas de connexion — impossible d’actualiser" iconColor={colors.warningInk} />
+        <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
     </SafeAreaView>
   );

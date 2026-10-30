@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, router } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../src/components/Button';
 import { TextField } from '../../src/components/TextField';
@@ -14,11 +15,19 @@ import { ApiError } from '../../src/api/client';
 import { pendingPassword } from '../../src/auth/pendingPassword';
 import { rootRouteForRole } from '../../src/navigation/roleRoutes';
 import { Banner } from '../../src/components/ui';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
+import { LanguageSheet } from '../../src/components/LanguageSheet';
+import { useLanguage } from '../../src/i18n/LanguageContext';
+import { LANGUAGE_LABELS } from '../../src/i18n';
 
 /** Écran de connexion — FitZone App Adherent.dc.html, A3. */
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { language } = useLanguage();
+  const [languageOpen, setLanguageOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -64,50 +73,51 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <Pressable style={styles.langButton} onPress={() => setLanguageOpen(true)} hitSlop={8} accessibilityLabel={t('common.langue')}>
+            <MaterialIcons name="language" size={18} color={colors.primaryInk} />
+            <Text style={styles.langText}>{LANGUAGE_LABELS[language]}</Text>
+          </Pressable>
           <View style={styles.header}>
             <View style={styles.logo}>
-              <Text style={styles.logoText}>MU</Text>
+              <Text style={styles.logoText}>{t('common.mu')}</Text>
             </View>
-            <Text style={styles.title}>Bon retour</Text>
-            <Text style={styles.subtitle}>Connectez-vous pour réserver vos cours.</Text>
+            <Text style={styles.title}>{t('auth.bon_retour')}</Text>
+            <Text style={styles.subtitle}>{t('auth.connectez_vous_pour_reserver_vos')}</Text>
           </View>
 
           <View style={styles.form}>
             {error ? <Banner tone="danger" icon="error" text={error} /> : null}
             {offline ? (
-              <Banner tone="warning" icon="wifi-off" text="Pas de connexion. La connexion reprendra dès que le réseau revient." />
+              <Banner tone="warning" icon="wifi-off" text={t('auth.pas_de_connexion_la_connexion')} />
             ) : null}
 
             <TextField
-              label="E-mail"
+              label={t('common.e_mail')}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
-              placeholder="toi@exemple.com"
+              placeholder={t('auth.toi_exemple_com')}
             />
             <TextField
-              label="Mot de passe"
+              label={t('common.mot_de_passe')}
               value={password}
               onChangeText={setPassword}
               isPassword
               placeholder="••••••••"
               error={error ?? undefined}
             />
-            <Link href="/(auth)/forgot-password" style={styles.forgotLink}>
-              Mot de passe oublié ?
-            </Link>
-            <Button label={loading ? 'Connexion…' : 'Se connecter'} onPress={handleLogin} loading={loading} disabled={offline} />
+            <Link href="/(auth)/forgot-password" style={styles.forgotLink}>{t('auth.mot_de_passe_oublie_2')}</Link>
+            <Button label={loading ? t('auth.connexion') : t('auth.se_connecter')} onPress={handleLogin} loading={loading} disabled={offline} />
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Pas encore de compte ?</Text>
-            <Link href="/(auth)/register" style={styles.footerLink}>
-              Créer un compte
-            </Link>
+            <Text style={styles.footerText}>{t('auth.pas_encore_de_compte')}</Text>
+            <Link href="/(auth)/register" style={styles.footerLink}>{t('common.creer_un_compte')}</Link>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <LanguageSheet visible={languageOpen} onClose={() => setLanguageOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -115,16 +125,21 @@ export default function LoginScreen() {
 function traduireErreur(code: string): string {
   switch (code) {
     case 'INVALID_CREDENTIALS':
-      return 'E-mail ou mot de passe incorrect.';
+      return i18n.t('auth.e_mail_ou_mot_de');
     case 'BAD_REQUEST':
-      return 'Vérifiez le format de votre e-mail et votre mot de passe (8 caractères minimum).';
+      return i18n.t('auth.verifiez_le_format_de_votre');
     default:
-      return 'Impossible de se connecter. Réessayez dans quelques instants.';
+      return i18n.t('auth.impossible_de_se_connecter_reessayez');
   }
 }
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
+    langButton: {
+      alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 18,
+      backgroundColor: colors.primarySoft,
+    },
+    langText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center', gap: spacing.xl },
     header: { alignItems: 'flex-start', gap: spacing.sm },

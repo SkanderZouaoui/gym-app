@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import type { SetDraft } from './SetRow';
+import { useTranslation } from 'react-i18next';
 
 interface ExerciseEditorCardProps {
   name: string;
@@ -21,6 +22,7 @@ interface ExerciseEditorCardProps {
 /** Carte d'exercice du composeur de programme v2 : saisie directe des répétitions et de la charge
  * de chaque série, ajout/suppression de série, suppression de l'exercice. */
 export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemoveSet, onRemove, onPressHeader }: ExerciseEditorCardProps) {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
@@ -33,20 +35,20 @@ export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemove
         </LinearGradient>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.name} numberOfLines={1}>{name}</Text>
-          <Text style={styles.meta}>{sets.length} série{sets.length > 1 ? 's' : ''}</Text>
+          <Text style={styles.meta}>{t('member.serie_3', { length: sets.length, v2: sets.length > 1 ? 's' : '' })}</Text>
         </View>
         </Pressable>
         {onRemove ? (
-          <Pressable style={styles.removeButton} onPress={onRemove} accessibilityLabel="Retirer l'exercice">
+          <Pressable style={styles.removeButton} onPress={onRemove} accessibilityLabel={t('member.retirer_lexercice')}>
             <MaterialIcons name="delete-outline" size={20} color={colors.dangerInk} />
           </Pressable>
         ) : null}
       </View>
 
       <View style={styles.gridRow}>
-        <Text style={[styles.colHeader, { width: 34 }]}>SÉRIE</Text>
-        <Text style={[styles.colHeader, { flex: 1, textAlign: 'center' }]}>RÉPÉTITIONS</Text>
-        <Text style={[styles.colHeader, { flex: 1, textAlign: 'center' }]}>CHARGE</Text>
+        <Text style={[styles.colHeader, { width: 34 }]}>{t('member.serie_2')}</Text>
+        <Text style={[styles.colHeader, { flex: 1, textAlign: 'center' }]}>{t('member.repetitions')}</Text>
+        <Text style={[styles.colHeader, { flex: 1, textAlign: 'center' }]}>{t('member.charge')}</Text>
         <View style={{ width: 44 }} />
       </View>
 
@@ -63,9 +65,9 @@ export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemove
                 keyboardType="number-pad"
                 style={styles.input}
                 selectTextOnFocus
-                accessibilityLabel="Répétitions"
+                accessibilityLabel={t('member.repetitions_2')}
               />
-              <Text style={styles.suffix} pointerEvents="none">reps</Text>
+              <Text style={styles.suffix} pointerEvents="none">{t('member.reps_2')}</Text>
             </View>
             <View style={{ flex: 1 }}>
               <TextInput
@@ -74,15 +76,15 @@ export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemove
                 keyboardType="decimal-pad"
                 style={styles.input}
                 selectTextOnFocus
-                accessibilityLabel="Charge en kilos"
+                accessibilityLabel={t('member.charge_en_kilos')}
               />
-              <Text style={styles.suffix} pointerEvents="none">kg</Text>
+              <Text style={styles.suffix} pointerEvents="none">{t('member.kg_3')}</Text>
             </View>
             <Pressable
               style={styles.deleteSet}
               onPress={() => onRemoveSet(i)}
               disabled={sets.length <= 1}
-              accessibilityLabel="Supprimer la série"
+              accessibilityLabel={t('member.supprimer_la_serie')}
             >
               <MaterialIcons name="remove-circle-outline" size={24} color={sets.length <= 1 ? colors.border : colors.dangerInk} />
             </Pressable>
@@ -92,7 +94,7 @@ export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemove
 
       <Pressable style={({ pressed }) => [styles.addSet, pressed && { transform: [{ scale: 0.98 }] }]} onPress={onAddSet}>
         <MaterialIcons name="add" size={20} color={colors.primaryInk} />
-        <Text style={styles.addSetText}>Ajouter une série</Text>
+        <Text style={styles.addSetText}>{t('common.ajouter_une_serie')}</Text>
       </Pressable>
     </View>
   );

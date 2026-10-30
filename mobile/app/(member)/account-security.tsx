@@ -11,8 +11,11 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useChangePassword } from '../../src/hooks/useProfile';
 import { Banner, ScreenTitle } from '../../src/components/ui';
 import { ApiError } from '../../src/api/client';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../src/i18n';
 
 export default function AccountSecurityScreen() {
+  const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const changePassword = useChangePassword();
@@ -38,7 +41,7 @@ export default function AccountSecurityScreen() {
           setNewPassword('');
           setConfirmPassword('');
         },
-        onError: (e) => setError(e instanceof ApiError ? traduireErreur(e.code) : 'Une erreur est survenue.'),
+        onError: (e) => setError(e instanceof ApiError ? traduireErreur(e.code) : t('member.une_erreur_est_survenue')),
       },
     );
   };
@@ -50,52 +53,52 @@ export default function AccountSecurityScreen() {
       <ScrollView contentContainerStyle={[styles.container, touched && { paddingBottom: STICKY_BAR_SPACE + 20 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
-          <Text style={styles.backText}>Profil</Text>
+          <Text style={styles.backText}>{t('common.profil')}</Text>
         </Pressable>
-        <ScreenTitle title="Confidentialité" subtitle="Protégez votre compte et vos données" />
+        <ScreenTitle title={t('member.confidentialite')} subtitle={t('member.protegez_votre_compte_et_vos')} />
 
         <View style={styles.notice}>
           <View style={styles.noticeIcon}>
             <MaterialIcons name="shield" size={22} color={colors.primaryInk} />
           </View>
-          <Text style={styles.noticeText}>Vos photos de profil et de progression restent privées : elles ne sont jamais partagées publiquement.</Text>
+          <Text style={styles.noticeText}>{t('member.vos_photos_de_profil_et')}</Text>
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Mot de passe</Text>
+          <Text style={styles.sectionTitle}>{t('common.mot_de_passe')}</Text>
           <View style={[styles.card, cardShadow]}>
-            {success ? <Banner tone="success" icon="check-circle" text="Mot de passe mis à jour." /> : null}
+            {success ? <Banner tone="success" icon="check-circle" text={t('member.mot_de_passe_mis_a')} /> : null}
             {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-            <TextField label="Mot de passe actuel" value={currentPassword} onChangeText={setCurrentPassword} isPassword />
-            <TextField label="Nouveau mot de passe" value={newPassword} onChangeText={setNewPassword} isPassword />
+            <TextField label={t('member.mot_de_passe_actuel')} value={currentPassword} onChangeText={setCurrentPassword} isPassword />
+            <TextField label={t('common.nouveau_mot_de_passe')} value={newPassword} onChangeText={setNewPassword} isPassword />
             <TextField
-              label="Confirmer le nouveau mot de passe"
+              label={t('member.confirmer_le_nouveau_mot_de')}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               isPassword
-              error={mismatch ? 'Les mots de passe ne correspondent pas.' : undefined}
+              error={mismatch ? t('member.les_mots_de_passe_ne') : undefined}
             />
           </View>
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Données du compte</Text>
+          <Text style={styles.sectionTitle}>{t('member.donnees_du_compte')}</Text>
           <View style={[styles.card, cardShadow, { padding: 0, gap: 0 }]}>
             <Pressable style={styles.dangerRow} onPress={() => router.push('/(member)/account-delete')}>
               <View style={styles.dangerIcon}>
                 <MaterialIcons name="delete-outline" size={22} color={colors.dangerInk} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.dangerTitle}>Supprimer mon compte</Text>
-                <Text style={styles.dangerSub}>Action définitive</Text>
+                <Text style={styles.dangerTitle}>{t('common.supprimer_mon_compte')}</Text>
+                <Text style={styles.dangerSub}>{t('member.action_definitive')}</Text>
               </View>
               <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
             </Pressable>
           </View>
         </View>
       </ScrollView>
-      <StickyActionBar visible={touched} label="Mettre à jour le mot de passe" loading={changePassword.isPending} disabled={!canSubmit} onPress={handleSubmit} />
+      <StickyActionBar visible={touched} label={t('member.mettre_a_jour_le_mot')} loading={changePassword.isPending} disabled={!canSubmit} onPress={handleSubmit} />
     </SafeAreaView>
   );
 }
@@ -103,9 +106,9 @@ export default function AccountSecurityScreen() {
 function traduireErreur(code: string): string {
   switch (code) {
     case 'INVALID_PASSWORD':
-      return 'Mot de passe actuel incorrect.';
+      return i18n.t('member.mot_de_passe_actuel_incorrect');
     default:
-      return 'Une erreur est survenue.';
+      return i18n.t('member.une_erreur_est_survenue');
   }
 }
 
