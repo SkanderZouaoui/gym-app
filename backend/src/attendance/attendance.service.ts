@@ -42,7 +42,24 @@ export class AttendanceService {
 
     return this.prisma.booking.findMany({
       where: { sessionId, status: { in: ['CONFIRMED', 'WAITLISTED', 'ATTENDED'] } },
-      include: { user: { select: { id: true, firstName: true, lastName: true, photoKey: true } } },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            photoKey: true,
+            memberCode: true,
+            phone: true,
+            memberships: {
+              where: { status: 'ACTIVE' },
+              orderBy: { endDate: 'desc' },
+              take: 1,
+              select: { endDate: true, plan: { select: { name: true } } },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: 'asc' },
     });
   }

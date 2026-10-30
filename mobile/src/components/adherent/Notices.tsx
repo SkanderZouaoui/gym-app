@@ -157,9 +157,48 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
  * Alertes et annonces de l'admin pour l'accueil de l'équipe (accueil, coach) : mêmes trois formats
  * (bandeau, encart, pop-up) que côté adhérent, choisis dans la configuration.
  */
-export function RoleNotices() {
+const NEWS_TONES = {
+  info: { ink: '#DDD6FE', pill: { backgroundColor: 'rgba(167,139,250,0.22)', borderColor: 'rgba(167,139,250,0.4)' } },
+  accent: { ink: '#A7F3D0', pill: { backgroundColor: 'rgba(52,211,153,0.2)', borderColor: 'rgba(52,211,153,0.4)' } },
+  danger: { ink: '#FECACA', pill: { backgroundColor: 'rgba(248,113,113,0.22)', borderColor: 'rgba(248,113,113,0.42)' } },
+} as const;
+
+/**
+ * Section « Annonces » de l'accueil : cartes sombres avec pastille de ton, comme sur l'accueil adhérent.
+ * Affichée à la place du bandeau quand le format choisi par l'admin n'est pas « Bandeau ».
+ */
+export function RoleAnnouncements() {
   const { t } = useTranslation();
   const { colors } = useTheme();
+  const { data: display } = useDisplayConfig();
+  const { data: announcements } = useMyAnnouncements();
+  if ((display?.announcementFormat ?? 'Bandeau') === 'Bandeau' || !(announcements ?? []).length) return null;
+  return (
+    <View style={{ gap: spacing.sm }}>
+      <Text style={{ fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text }}>{t('home.announcementsTitle')}</Text>
+      {(announcements ?? []).slice(0, 3).map((a) => {
+        const tone = NEWS_TONES[a.tone ?? 'info'];
+        return (
+          <View key={a.id} style={{ height: 176, borderRadius: 26, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: '#0B0B0F' }}>
+            <LinearGradient colors={[colors.secondary, '#0B0B0F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+            <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.8)']} style={StyleSheet.absoluteFill} />
+            <View style={[{ position: 'absolute', top: 14, left: 14, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1 }, tone.pill]}>
+              <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 11.5, letterSpacing: 0.2, color: tone.ink }}>
+                {a.tone === 'danger' ? t('home.announcementImportant') : a.tone === 'accent' ? t('home.announcementNew') : t('home.announcementInfo')}
+              </Text>
+            </View>
+            <View style={{ padding: 18 }}>
+              <Text style={{ fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.4, color: '#FFFFFF' }} numberOfLines={2}>{a.title}</Text>
+              <Text style={{ fontFamily: fonts.body, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 3 }} numberOfLines={2}>{a.body}</Text>
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+export function RoleNotices() {
   const { data: display } = useDisplayConfig();
   const { data: homeAlerts } = useHomeAlerts();
   const { data: announcements } = useMyAnnouncements();
@@ -182,14 +221,7 @@ export function RoleNotices() {
   return (
     <>
       <NoticeList items={alertsShown} format={alertFormat === 'Pop-up' ? 'Bandeau' : alertFormat} onDismiss={dismiss} />
-      {announcementFormat === 'Bandeau' ? (
-        <NoticeList items={announcementsShown} format="Bandeau" onDismiss={dismiss} />
-      ) : announcementsShown.length > 0 ? (
-        <View style={{ gap: spacing.sm }}>
-          <Text style={{ fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text }}>{t('home.announcementsTitle')}</Text>
-          <NoticeList items={announcementsShown} format="Encart" onDismiss={dismiss} />
-        </View>
-      ) : null}
+      {announcementFormat === 'Bandeau' ? <NoticeList items={announcementsShown} format="Bandeau" onDismiss={dismiss} /> : null}
       <NoticePopups
         items={[...(alertFormat === 'Pop-up' ? allAlerts : []), ...(announcementFormat === 'Pop-up' ? allAnnouncements : [])].filter((n) => !isDismissed(n.id))}
         onDismiss={dismiss}

@@ -16,7 +16,7 @@ import { useSessionStore } from '../../../src/store/session';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../../../src/components/NotificationBell';
-import { RoleNotices } from '../../../src/components/adherent/Notices';
+import { RoleAnnouncements, RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
 
 /** Accueil de l'espace staff : chiffres du jour, raccourcis, cours du jour et derniers encaissements. */
@@ -144,6 +144,8 @@ export default function StaffHomeScreen() {
             ) : null}
           </View>
         </View>
+
+        <RoleAnnouncements />
       </ScrollView>
     </SafeAreaView>
   );

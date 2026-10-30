@@ -6,9 +6,11 @@ export interface CoachSession {
   startsAt: string;
   endsAt: string;
   status: string;
-  classType: { id: string; name: string; description: string | null };
+  classType: { id: string; name: string; description: string | null; level?: string | null };
   room: { name: string } | null;
   _count: { bookings: number };
+  /** Présents pointés (ATTENDED). */
+  attendedCount?: number;
   capacity: number;
 }
 
@@ -27,7 +29,16 @@ export interface RosterEntry {
   waitlistPosition: number | null;
   bookingCode: string;
   attendedAt: string | null;
-  user: { id: string; firstName: string; lastName: string; photoKey: string | null };
+  checkInMethod?: 'QR' | 'MANUAL' | 'WALK_IN' | null;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    photoKey: string | null;
+    memberCode?: string | null;
+    phone?: string | null;
+    memberships?: { endDate: string; plan: { name: string } }[];
+  };
 }
 
 export function useSessionRoster(sessionId: string | undefined) {

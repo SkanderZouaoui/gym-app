@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
-import { ScannerScreen } from '../../src/components/ScannerScreen';
-import { useCoachSessions } from '../../src/hooks/useCoachSessions';
+import { ScannerScreen } from '../../../src/components/ScannerScreen';
+import { useCoachSessions } from '../../../src/hooks/useCoachSessions';
 import { useTranslation } from 'react-i18next';
 
 export default function CoachScannerScreen() {

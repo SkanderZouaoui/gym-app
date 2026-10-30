@@ -22,6 +22,11 @@ export class NotificationsService {
     if (result.count === 0) throw new NotFoundException('NOTIFICATION_NOT_FOUND');
   }
 
+  async remove(userId: string, notificationId: string) {
+    const result = await this.prisma.notification.deleteMany({ where: { id: notificationId, userId } });
+    if (result.count === 0) throw new NotFoundException('NOTIFICATION_NOT_FOUND');
+  }
+
   markAllRead(userId: string) {
     return this.prisma.notification.updateMany({
       where: { userId, readAt: null },

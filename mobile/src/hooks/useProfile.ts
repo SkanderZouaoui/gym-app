@@ -62,6 +62,19 @@ export function useMarkNotificationRead() {
   });
 }
 
+/** Suppression d'une notification (balayage) : retirée de la liste tout de suite. */
+export function useDeleteNotification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['deleteNotification'],
+    mutationFn: (id: string) => apiRequest(`/v1/me/notifications/${id}`, { method: 'DELETE' }),
+    onMutate: (id: string) => {
+      queryClient.setQueryData<NotificationItem[]>(['me', 'notifications'], (old) => old?.filter((n) => n.id !== id));
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
+  });
+}
+
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient();
   return useMutation({

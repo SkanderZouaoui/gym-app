@@ -194,8 +194,9 @@ export class ClassesService {
     return session;
   }
 
-  findSessionsForCoach(coachId: string, from?: string, to?: string) {
-    return this.prisma.classSession.findMany({
+  /** Cours du coach, avec le nombre de présents (pointés) par cours pour l'accueil coach. */
+  async findSessionsForCoach(coachId: string, from?: string, to?: string) {
+    const sessions = await this.prisma.classSession.findMany({
       where: {
         coachId,
         status: { not: 'CANCELLED' },
@@ -215,6 +216,13 @@ export class ClassesService {
       },
       orderBy: { startsAt: 'asc' },
     });
+    const attended = await this.prisma.booking.groupBy({
+      by: ['sessionId'],
+      where: { sessionId: { in: sessions.map((s) => s.id) }, status: 'ATTENDED' },
+      _count: { _all: true },
+    });
+    const byId = new Map(attended.map((g) => [g.sessionId, g._count._all]));
+    return sessions.map((s) => ({ ...s, attendedCount: byId.get(s.id) ?? 0 }));
   }
 
   /** Annulation d'un cours par l'admin (section 10.6) — déclenche l'audit. */

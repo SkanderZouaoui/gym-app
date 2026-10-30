@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
@@ -17,6 +17,11 @@ export class NotificationsController {
   @Patch('me/notifications/read-all')
   markAllRead(@CurrentUser() user: AuthenticatedUser) {
     return this.notificationsService.markAllRead(user.userId);
+  }
+
+  @Delete('me/notifications/:id')
+  remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.notificationsService.remove(user.userId, id);
   }
 
   @Patch('me/notifications/:id/read')
