@@ -28,10 +28,12 @@ interface Props {
   scannerRoute: string;
   /** Fiche adhérent du rôle (route avec `[id]`) : ouverte par un appui sur une ligne des inscrits. Absente pour le coach, qui ne consulte aucune donnée d'adhérent. */
   memberRoute?: string;
+  /** Formulaire de modification du cours (route recevant `id`) : affiche un bouton « Modifier le cours » (admin). */
+  editRoute?: string;
 }
 
 /** Détail d'un cours (coach, accueil) : infos du cours, présence, inscrits avec leur formule et pointage, liste d'attente. */
-export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute }: Props) {
+export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute, editRoute }: Props) {
   const nowMs = useNow();
   const client = useQueryClient();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => client.invalidateQueries());
@@ -148,6 +150,17 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute }:
           </LinearGradient>
         </View>
 
+        {editRoute ? (
+          <Pressable
+            onPress={() => router.push({ pathname: editRoute, params: { id: session.id } } as never)}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.editBtn, pressed && { transform: [{ scale: 0.98 }] }]}
+          >
+            <MaterialIcons name="edit" size={20} color={colors.primaryInk} />
+            <Text style={styles.editText}>{t('admin.modifier_le_cours')}</Text>
+          </Pressable>
+        ) : null}
+
         <View style={styles.infoGrid}>
           {infos.map((i) => (
             <View key={i.label} style={[styles.infoCard, cardShadow]}>
@@ -249,6 +262,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     heroKicker: { flex: 1, fontFamily: fonts.bodyBold, fontSize: 13, color: 'rgba(255,255,255,0.92)' },
     heroName: { fontFamily: fonts.head, fontSize: 32, lineHeight: 36, letterSpacing: -1.2, color: '#fff', marginTop: 4 },
     heroLevel: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: 'rgba(255,255,255,0.9)' },
+    editBtn: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 50, borderRadius: radii.lg,
+      backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.primaryBorder,
+    },
+    editText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
     infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     infoCard: { width: '48.4%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radii.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     infoIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },

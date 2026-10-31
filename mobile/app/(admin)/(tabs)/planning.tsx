@@ -100,7 +100,12 @@ export default function AdminPlanningScreen() {
             const cancelled = s.status === 'CANCELLED';
             const ratio = s._count.bookings / Math.max(1, s.capacity);
             return (
-              <View key={s.id} style={[styles.card, cardShadow, cancelled && { opacity: 0.6 }]}>
+              <Pressable
+                key={s.id}
+                onPress={() => router.push({ pathname: '/(admin)/session/[id]', params: { id: s.id } } as never)}
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.card, cardShadow, cancelled && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.99 }] }]}
+              >
                 <View style={styles.row}>
                   <View style={styles.timeCol}>
                     <Text style={styles.time} numberOfLines={1}>{new Date(s.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}</Text>
@@ -151,7 +156,7 @@ export default function AdminPlanningScreen() {
                     </Pressable>
                   </View>
                 ) : null}
-              </View>
+              </Pressable>
             );
           })}
           {isLoading ? <SkeletonList count={3} height={96} /> : list.length === 0 ? (
