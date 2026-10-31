@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Alert, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from 'react-i18next';
-import { fonts, radii, spacing } from '../theme/tokens';
+import { fonts, radii } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { Banner } from './ui';
 import { useAllClassTypes } from '../hooks/useAdmin';
@@ -16,15 +16,14 @@ const MAX_PER_PICK = 10;
 const MAX_GALLERY = 12;
 
 /**
- * Photos du cours, dans l'écran de création / modification d'un cours (admin). Elles sont rattachées au TYPE de
- * cours sélectionné : tous les cours de ce type les partagent, on ne les importe donc qu'une fois. Import multiple
- * (jusqu'à 10 à la fois) ; les envois et suppressions sont immédiats (le type existe déjà).
+ * Photos d'un type de cours (admin), depuis Paramètres › Cours et salles. Tous les cours de ce type les partagent :
+ * on ne les importe qu'une fois. Import multiple (jusqu'à 10 à la fois) ; envois et suppressions immédiats.
  */
 export function ClassTypeMediaSection({ typeId }: { typeId: string }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { width } = useWindowDimensions();
+  const [width, setWidth] = useState(0);
   const { data: types } = useAllClassTypes();
   const add = useAddClassGalleryImages();
   const remove = useRemoveClassGalleryImage();
@@ -34,7 +33,7 @@ export function ClassTypeMediaSection({ typeId }: { typeId: string }) {
   const urls = type?.galleryUrls ?? [];
   const keys = type?.galleryKeys ?? [];
   const remaining = MAX_GALLERY - keys.length;
-  const tile = Math.floor((width - spacing.lg * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
+  const tile = width > 0 ? Math.floor((width - GAP * (COLUMNS - 1)) / COLUMNS) : 0;
 
   const pickAndUpload = async () => {
     if (!type || add.isPending || remaining <= 0) return;
@@ -75,7 +74,7 @@ export function ClassTypeMediaSection({ typeId }: { typeId: string }) {
   };
 
   return (
-    <View style={styles.wrap}>
+    <View style={styles.wrap} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       <View style={styles.titleRow}>
         <Text style={styles.title}>{t('common.class_media_title')}</Text>
         <Text style={styles.count}>{keys.length}/{MAX_GALLERY}</Text>

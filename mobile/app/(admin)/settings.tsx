@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -14,14 +14,12 @@ import {
   type OrganizationConfig,
   useAdminRooms,
   useAttendancePolicy,
-  useDeleteClassType,
   useDeleteRoom,
-  useSaveClassType,
   useSaveRoom,
   useUpdateAttendancePolicy,
   type AttendancePolicy,
 } from '../../src/hooks/useAdmin';
-import { Banner, BottomSheet, ScreenTitle } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, Toast } from '../../src/components/ui';
 import { TimeButton } from '../../src/components/ui/DateTimeFields';
 import { Button } from '../../src/components/Button';
 import { TextField } from '../../src/components/TextField';
@@ -29,6 +27,8 @@ import { useTranslation } from 'react-i18next';
 import i18n, { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../src/i18n';
 import { WEEKDAYS_LONG_MON } from '../../src/i18n/labels';
 import { useLanguage } from '../../src/i18n/LanguageContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 
 function Stepper({
   label, hint, value, unit, min = 0, max = 240, step = 5, onChange,
@@ -235,71 +235,45 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
   );
 }
 
-type CatalogEdit =
-  | { kind: 'type'; id?: string; name: string; capacity: string; duration: string }
-  | { kind: 'room'; id?: string; name: string; capacity: string };
+type RoomEdit = { id?: string; name: string; capacity: string };
 
-/** Types de cours et salles : liste, ajout, modification, suppression. */
+/** Types de cours et salles : cartes avec photo de couverture. Un type s'ouvre dans son propre écran (infos, activation, photos) ; une salle dans une feuille. */
 function Catalog() {
   useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: types } = useAllClassTypes();
   const { data: rooms } = useAdminRooms();
-  const saveType = useSaveClassType();
   const saveRoom = useSaveRoom();
-  const delType = useDeleteClassType();
   const delRoom = useDeleteRoom();
-  const [edit, setEdit] = useState<CatalogEdit | null>(null);
-  const [confirm, setConfirm] = useState<{ kind: 'type' | 'room'; id: string; name: string } | null>(null);
+  const [room, setRoom] = useState<RoomEdit | null>(null);
+  const [confirmRoom, setConfirmRoom] = useState<{ id: string; name: string } | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const busy = saveType.isPending || saveRoom.isPending;
-  const canSave = !!edit && edit.name.trim().length > 0 && Number(edit.capacity) >= 1;
+  const openType = (id?: string) => router.push({ pathname: '/(admin)/class-type', params: id ? { id } : {} } as never);
+  const canSaveRoom = !!room && room.name.trim().length > 0 && Number(room.capacity) >= 1;
 
-  const save = () => {
-    if (!edit) return;
+  const saveRoomForm = () => {
+    if (!room) return;
     setError(null);
-    const done = { onSuccess: () => setEdit(null), onError: () => setError(i18n.t('admin.enregistrement_impossible_reessayez')) };
-    if (edit.kind === 'type') {
-      saveType.mutate({ id: edit.id, name: edit.name.trim(), defaultCapacity: Number(edit.capacity), defaultDurationMin: Number(edit.duration) || 45 }, done);
-    } else {
-      saveRoom.mutate({ id: edit.id, name: edit.name.trim(), capacity: Number(edit.capacity) }, done);
-    }
+    saveRoom.mutate(
+      { id: room.id, name: room.name.trim(), capacity: Number(room.capacity) },
+      { onSuccess: () => setRoom(null), onError: () => setError(i18n.t('admin.enregistrement_impossible_reessayez')) },
+    );
   };
 
-  const remove = () => {
-    if (!confirm) return;
-    const settle = { onSettled: () => setConfirm(null) };
-    if (confirm.kind === 'type') {
-      delType.mutate(confirm.id, {
-        ...settle,
-        onSuccess: (r) => setMessage(r.deactivated ? i18n.t('admin.est_utilise_par_des_cours', { name: confirm.name }) : i18n.t('admin.supprime', { name: confirm.name })),
-      });
-    } else {
-      delRoom.mutate(confirm.id, {
-        ...settle,
-        onSuccess: () => setMessage(i18n.t('admin.supprimee', { name: confirm.name })),
-        onError: () => setMessage(i18n.t('admin.est_utilisee_par_des_cours', { name: confirm.name })),
-      });
-    }
+  const removeRoom = () => {
+    if (!confirmRoom) return;
+    delRoom.mutate(confirmRoom.id, {
+      onSuccess: () => setMessage(i18n.t('admin.supprimee', { name: confirmRoom.name })),
+      onError: () => setMessage(i18n.t('admin.est_utilisee_par_des_cours', { name: confirmRoom.name })),
+      onSettled: () => {
+        setConfirmRoom(null);
+        setRoom(null);
+      },
+    });
   };
-
-  const Row = ({ title, sub, onEdit, onDelete, muted }: { title: string; sub: string; onEdit: () => void; onDelete: () => void; muted?: boolean }) => (
-    <View style={[styles.row, muted && { opacity: 0.55 }]}>
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.rowTitle} numberOfLines={1}>{title}</Text>
-        <Text style={styles.rowHint}>{sub}</Text>
-      </View>
-      <Pressable onPress={onEdit} hitSlop={8} style={styles.iconBtn}>
-        <MaterialIcons name="edit" size={18} color={colors.primaryInk} />
-      </Pressable>
-      <Pressable onPress={onDelete} hitSlop={8} style={[styles.iconBtn, { backgroundColor: colors.dangerSoft }]}>
-        <MaterialIcons name="delete-outline" size={18} color={colors.dangerInk} />
-      </Pressable>
-    </View>
-  );
 
   return (
     <>
@@ -307,82 +281,115 @@ function Catalog() {
 
       <View style={styles.catHead}>
         <Text style={styles.section}>{i18n.t('admin.types_de_cours')}</Text>
-        <Pressable style={styles.addPill} onPress={() => setEdit({ kind: 'type', name: '', capacity: '16', duration: '45' })}>
+        <Pressable style={styles.addPill} onPress={() => openType()}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
           <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
         </Pressable>
       </View>
-      <View style={[styles.card, cardShadow]}>
-        {(types ?? []).map((t, i) => (
-          <View key={t.id}>
-            {i > 0 ? <View style={styles.sep} /> : null}
-            <Row
-              title={t.name}
-              sub={i18n.t('admin.min_places_2', { defaultDurationMin: t.defaultDurationMin, defaultCapacity: t.defaultCapacity, v2: t.isActive ? '' : i18n.t('admin.desactive_2') })}
-              muted={!t.isActive}
-              onEdit={() => setEdit({ kind: 'type', id: t.id, name: t.name, capacity: String(t.defaultCapacity), duration: String(t.defaultDurationMin) })}
-              onDelete={() => setConfirm({ kind: 'type', id: t.id, name: t.name })}
-            />
-          </View>
-        ))}
+      <View style={{ gap: 10 }}>
+        {(types ?? []).map((tp) => {
+          const cover = tp.galleryUrls?.[0];
+          return (
+            <Pressable
+              key={tp.id}
+              onPress={() => openType(tp.id)}
+              style={({ pressed }) => [styles.typeCard, cardShadow, !tp.isActive && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.99 }] }]}
+              accessibilityRole="button"
+            >
+              <View style={styles.cover}>
+                {cover ? (
+                  <Image source={{ uri: cover }} style={styles.coverImg} />
+                ) : (
+                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.coverImg, styles.coverFallback]}>
+                    <MaterialIcons name="fitness-center" size={26} color="#FFFFFF" />
+                  </LinearGradient>
+                )}
+                {tp.galleryKeys.length > 0 ? (
+                  <View style={styles.coverBadge}>
+                    <MaterialIcons name="photo-library" size={11} color="#FFFFFF" />
+                    <Text style={styles.coverBadgeText}>{tp.galleryKeys.length}</Text>
+                  </View>
+                ) : null}
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.rowTitle} numberOfLines={1}>{tp.name}</Text>
+                <View style={styles.metaRow}>
+                  <View style={styles.metaChip}>
+                    <MaterialIcons name="schedule" size={13} color={colors.primaryInk} />
+                    <Text style={styles.metaText}>{tp.defaultDurationMin} min</Text>
+                  </View>
+                  <View style={styles.metaChip}>
+                    <MaterialIcons name="groups" size={13} color={colors.primaryInk} />
+                    <Text style={styles.metaText}>{tp.defaultCapacity}</Text>
+                  </View>
+                  {!tp.isActive ? (
+                    <View style={[styles.metaChip, { backgroundColor: colors.surface2 }]}>
+                      <Text style={[styles.metaText, { color: colors.muted }]}>{i18n.t('common.class_type_inactive')}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+            </Pressable>
+          );
+        })}
         {(types ?? []).length === 0 ? <Text style={styles.emptyRow}>{i18n.t('admin.aucun_type_de_cours')}</Text> : null}
       </View>
 
       <View style={styles.catHead}>
         <Text style={styles.section}>{i18n.t('admin.salles')}</Text>
-        <Pressable style={styles.addPill} onPress={() => setEdit({ kind: 'room', name: '', capacity: '20' })}>
+        <Pressable style={styles.addPill} onPress={() => setRoom({ name: '', capacity: '20' })}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
           <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
         </Pressable>
       </View>
-      <View style={[styles.card, cardShadow]}>
-        {(rooms ?? []).map((r, i) => (
-          <View key={r.id}>
-            {i > 0 ? <View style={styles.sep} /> : null}
-            <Row
-              title={r.name}
-              sub={`${r.capacity} places`}
-              onEdit={() => setEdit({ kind: 'room', id: r.id, name: r.name, capacity: String(r.capacity) })}
-              onDelete={() => setConfirm({ kind: 'room', id: r.id, name: r.name })}
-            />
-          </View>
+      <View style={{ gap: 10 }}>
+        {(rooms ?? []).map((r) => (
+          <Pressable
+            key={r.id}
+            onPress={() => setRoom({ id: r.id, name: r.name, capacity: String(r.capacity) })}
+            style={({ pressed }) => [styles.typeCard, cardShadow, pressed && { transform: [{ scale: 0.99 }] }]}
+            accessibilityRole="button"
+          >
+            <View style={[styles.cover, styles.roomTile]}>
+              <MaterialIcons name="meeting-room" size={26} color={colors.primaryInk} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.rowTitle} numberOfLines={1}>{r.name}</Text>
+              <View style={styles.metaRow}>
+                <View style={styles.metaChip}>
+                  <MaterialIcons name="groups" size={13} color={colors.primaryInk} />
+                  <Text style={styles.metaText}>{r.capacity} {i18n.t('common.class_type_places')}</Text>
+                </View>
+              </View>
+            </View>
+            <MaterialIcons name="edit" size={18} color={colors.primary} />
+          </Pressable>
         ))}
         {(rooms ?? []).length === 0 ? <Text style={styles.emptyRow}>{i18n.t('admin.aucune_salle_2')}</Text> : null}
       </View>
 
-      <BottomSheet visible={!!edit} onClose={() => setEdit(null)}>
-        <Text style={styles.sheetTitle}>
-          {edit?.id ? i18n.t('profile.edit') : i18n.t('home.announcementNew')} {edit?.kind === 'type' ? i18n.t('admin.type_de_cours_2') : 'salle'}
-        </Text>
+      <BottomSheet visible={!!room} onClose={() => setRoom(null)}>
+        <Text style={styles.sheetTitle}>{room?.id ? i18n.t('common.room_edit') : i18n.t('common.room_new')}</Text>
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-        <TextField label={i18n.t('common.nom')} value={edit?.name ?? ''} onChangeText={(v) => edit && setEdit({ ...edit, name: v })} placeholder={edit?.kind === 'type' ? i18n.t('admin.ex_cross_training') : i18n.t('admin.ex_studio_b')} />
+        <TextField label={i18n.t('common.nom')} icon="meeting-room" value={room?.name ?? ''} onChangeText={(v) => room && setRoom({ ...room, name: v })} placeholder={i18n.t('admin.ex_studio_b')} />
         <TextField
           label={i18n.t('admin.capacite_places')}
-          value={edit?.capacity ?? ''}
-          onChangeText={(v) => edit && setEdit({ ...edit, capacity: v.replace(/[^0-9]/g, '') })}
+          icon="groups"
+          value={room?.capacity ?? ''}
+          onChangeText={(v) => room && setRoom({ ...room, capacity: v.replace(/[^0-9]/g, '') })}
           keyboardType="number-pad"
         />
-        {edit?.kind === 'type' ? (
-          <TextField
-            label={i18n.t('admin.duree_minutes')}
-            value={edit.duration}
-            onChangeText={(v) => setEdit({ ...edit, duration: v.replace(/[^0-9]/g, '') })}
-            keyboardType="number-pad"
-          />
-        ) : null}
-        <Button label={busy ? i18n.t('common.enregistrement') : i18n.t('member.enregistrer')} onPress={save} disabled={!canSave || busy} />
+        <Button label={saveRoom.isPending ? i18n.t('common.enregistrement') : i18n.t('member.enregistrer')} onPress={saveRoomForm} disabled={!canSaveRoom || saveRoom.isPending} />
+        {room?.id ? <Button label={i18n.t('common.room_delete')} variant="outline" onPress={() => setConfirmRoom({ id: room.id!, name: room.name })} /> : null}
       </BottomSheet>
 
-      <BottomSheet visible={!!confirm} onClose={() => setConfirm(null)}>
-        <Text style={styles.sheetTitle}>{i18n.t('common.supprimer_2', { name: confirm?.name })}</Text>
-        <Text style={styles.sheetText}>
-          {confirm?.kind === 'type'
-            ? i18n.t('admin.sil_est_deja_utilise_par')
-            : i18n.t('admin.une_salle_utilisee_par_des')}
-        </Text>
+      <BottomSheet visible={!!confirmRoom} onClose={() => setConfirmRoom(null)}>
+        <Text style={styles.sheetTitle}>{i18n.t('common.supprimer_2', { name: confirmRoom?.name })}</Text>
+        <Text style={styles.sheetText}>{i18n.t('admin.une_salle_utilisee_par_des')}</Text>
         <View style={{ gap: 8, marginTop: 8 }}>
-          <Button label={i18n.t('admin.oui_supprimer')} variant="secondary" onPress={remove} loading={delType.isPending || delRoom.isPending} />
-          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirm(null)} />
+          <Button label={i18n.t('admin.oui_supprimer')} variant="secondary" onPress={removeRoom} loading={delRoom.isPending} />
+          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirmRoom(null)} />
         </View>
       </BottomSheet>
     </>
@@ -442,6 +449,9 @@ export default function AdminSettingsScreen() {
   const patchPenalty = (p: Partial<AttendancePolicy['noShowPenalty']>) =>
     patch({ noShowPenalty: { ...policy.noShowPenalty, ...p } });
 
+  const queryClient = useQueryClient();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
+
   const anyDirty = dirty || cfgDirty;
   const saving = update.isPending || updateOrg.isPending;
   const [saveError, setSaveError] = useState(false);
@@ -461,7 +471,12 @@ export default function AdminSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={[styles.container, anyDirty && { paddingBottom: 130 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+      <ScrollView
+        contentContainerStyle={[styles.container, anyDirty && { paddingBottom: 130 }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>{t('common.plus')}</Text>
@@ -551,6 +566,8 @@ export default function AdminSettingsScreen() {
         {saved && !anyDirty ? <Banner tone="success" icon="check-circle-outline" title={t('admin.configuration_enregistree')} text={t('admin.les_nouvelles_regles_sappliquent_immediatement')} /> : null}
       </ScrollView>
 
+      {offlineToastVisible ? <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} /> : null}
+
       {anyDirty ? (
         <View style={styles.stickyBar}>
           <Pressable onPress={save} disabled={saving} style={({ pressed }) => [saving && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
@@ -627,6 +644,22 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     catHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
     addPill: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: colors.primarySoft },
     addPillText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
+    typeCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 14, padding: 10, paddingEnd: 14,
+      backgroundColor: colors.surface, borderRadius: 20, borderWidth: 1, borderColor: colors.border,
+    },
+    cover: { width: 68, height: 68, borderRadius: 16, overflow: 'hidden', backgroundColor: colors.surface2 },
+    coverImg: { width: '100%', height: '100%' },
+    coverFallback: { alignItems: 'center', justifyContent: 'center' },
+    roomTile: { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+    coverBadge: {
+      position: 'absolute', left: 5, bottom: 5, flexDirection: 'row', alignItems: 'center', gap: 3,
+      paddingHorizontal: 6, height: 20, borderRadius: 10, backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    coverBadgeText: { fontFamily: fonts.bodyBold, fontSize: 11, color: '#FFFFFF' },
+    metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
+    metaChip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, height: 24, borderRadius: 12, backgroundColor: colors.primarySoft },
+    metaText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk },
     iconBtn: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     emptyRow: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, paddingVertical: 16 },
     sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
