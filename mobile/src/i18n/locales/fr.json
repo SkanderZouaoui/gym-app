@@ -300,7 +300,8 @@
     "photo_crop_error": "Recadrage impossible, réessayez.",
     "photo_crop_load_error": "Impossible de charger la photo, réessayez.",
     "class_media_shared_hint": "Communes à tous les cours « {{name}} » : à importer une seule fois.",
-    "class_media_full": "Maximum de photos atteint : supprimez-en une pour en ajouter."
+    "class_media_full": "Maximum de photos atteint : supprimez-en une pour en ajouter.",
+    "photo_crop_reset": "Réinitialiser le cadrage"
   },
   "home": {
     "membershipNone": "Sans abonnement",

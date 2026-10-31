@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Modal, PanResponder, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Image, Modal, PanResponder, Platform, Pressable, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { fonts, spacing } from '../theme/tokens';
@@ -28,6 +28,9 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
   const viewport = Math.min(width - 48, 340);
+  const insets = useSafeAreaInsets();
+  // Dans une modale, SafeAreaView ne reçoit pas les marges : on les applique à la main (barre d'état / encoche, barre de gestes).
+  const topInset = Math.max(insets.top, Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0);
   const styles = useMemo(() => makeStyles(viewport), [viewport]);
 
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
@@ -65,6 +68,7 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
+        onPanResponderTerminationRequest: () => false,
         onPanResponderGrant: () => {
           gesture.current.touches = 0;
         },
@@ -103,6 +107,11 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
     setOffset((o) => ({ x: clamp(o.x, -mx, mx), y: clamp(o.y, -my, my) }));
   };
 
+  const reset = () => {
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+  };
+
   const confirm = () => {
     if (!natural) return;
     // Un point du cadre (relatif à son centre) correspond au pixel natural/2 + (p − offset) / scale de l'image.
@@ -119,13 +128,15 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onCancel} statusBarTranslucent>
-      <SafeAreaView style={styles.screen}>
+      <View style={[styles.screen, { paddingTop: topInset + 8, paddingBottom: Math.max(insets.bottom, 12) }]}>
         <View style={styles.header}>
-          <Pressable onPress={onCancel} hitSlop={10} disabled={saving} accessibilityRole="button" accessibilityLabel={t('common.annuler')}>
+          <Pressable onPress={onCancel} hitSlop={12} disabled={saving} style={styles.iconBtn} accessibilityRole="button" accessibilityLabel={t('common.annuler')}>
             <MaterialIcons name="close" size={26} color="#FFFFFF" />
           </Pressable>
           <Text style={styles.title}>{t('common.photo_crop_title')}</Text>
-          <View style={{ width: 26 }} />
+          <Pressable onPress={reset} hitSlop={12} disabled={!natural || saving} style={[styles.iconBtn, !natural && { opacity: 0.4 }]} accessibilityRole="button" accessibilityLabel={t('common.photo_crop_reset')}>
+            <MaterialIcons name="restart-alt" size={26} color="#FFFFFF" />
+          </Pressable>
         </View>
 
         <View style={styles.body}>
@@ -133,12 +144,14 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
             {natural && imageUri ? (
               <Image
                 source={{ uri: imageUri }}
+                // Taille de base fixe + transformation : on ne redimensionne jamais l'image à taille × zoom (énorme en zoomant).
                 style={{
                   position: 'absolute',
-                  width: natural.w * scale,
-                  height: natural.h * scale,
-                  left: viewport / 2 - (natural.w * scale) / 2 + offset.x,
-                  top: viewport / 2 - (natural.h * scale) / 2 + offset.y,
+                  width: natural.w * base,
+                  height: natural.h * base,
+                  left: viewport / 2 - (natural.w * base) / 2,
+                  top: viewport / 2 - (natural.h * base) / 2,
+                  transform: [{ translateX: offset.x }, { translateY: offset.y }, { scale: zoom }],
                 }}
               />
             ) : loadError ? (
@@ -167,7 +180,7 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
             {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.saveText}>{t('common.photo_crop_save')}</Text>}
           </Pressable>
         </View>
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }
@@ -175,7 +188,8 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
 function makeStyles(viewport: number) {
   return StyleSheet.create({
     screen: { flex: 1, backgroundColor: '#0B0817' },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+    iconBtn: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
     title: { fontFamily: fonts.headBold, fontSize: 17, color: '#FFFFFF' },
     body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.lg },
     viewport: {

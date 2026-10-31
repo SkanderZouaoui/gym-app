@@ -34,7 +34,7 @@ export default function CoachStudentsScreen() {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <Pressable style={styles.row} onPress={() => router.push(`/(coach)/student/${item.id}`)}>
-            <Avatar initials={`${item.firstName[0]}${item.lastName[0]}`.toUpperCase()} />
+            <Avatar initials={`${item.firstName[0]}${item.lastName[0]}`.toUpperCase()} photoUrl={item.photoUrl} />
             <Text style={styles.name}>{item.firstName} {item.lastName}</Text>
           </Pressable>
         )}

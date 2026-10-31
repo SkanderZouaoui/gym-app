@@ -68,7 +68,7 @@ export default function StaffCashSellScreen() {
 
         {member ? (
           <View style={[styles.memberCard, cardShadow]}>
-            <InitialsAvatar first={member.firstName} last={member.lastName} />
+            <InitialsAvatar first={member.firstName} last={member.lastName} photoUrl={member.photoUrl} />
             <View style={{ flex: 1 }}>
               <Text style={styles.memberLabel}>{t('staff.adherent_2')}</Text>
               <Text style={styles.memberName}>{member.firstName} {member.lastName}</Text>

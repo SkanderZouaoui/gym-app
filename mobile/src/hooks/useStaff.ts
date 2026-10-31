@@ -101,7 +101,7 @@ export interface StaffPayment {
     userId: string;
     startDate: string;
     endDate: string;
-    user: { firstName: string; lastName: string };
+    user: { firstName: string; lastName: string; photoUrl?: string | null };
     plan: { name: string };
   };
 }

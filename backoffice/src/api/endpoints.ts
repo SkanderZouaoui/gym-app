@@ -341,7 +341,7 @@ export interface CoachListItem {
   yearsExperience: number | null;
   status: 'ACTIVE' | 'ON_LEAVE' | 'INACTIVE';
   weeklyClasses: number;
-  user: { id: string; firstName: string; lastName: string; email: string | null; phone: string | null };
+  user: { id: string; firstName: string; lastName: string; photoUrl?: string | null; email: string | null; phone: string | null };
 }
 
 export interface CreateCoachInput {

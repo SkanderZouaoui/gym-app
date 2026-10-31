@@ -132,7 +132,7 @@ export default function QrScreen() {
         ) : null}
 
         <View style={styles.identityCard}>
-          <Avatar initials={initials || 'AD'} background={colors.primarySoft} color={colors.primaryInk} />
+          <Avatar initials={initials || 'AD'} background={colors.primarySoft} color={colors.primaryInk} photoUrl={user?.photoUrl} />
           <View style={{ flex: 1 }}>
             <Text style={styles.identityName}>{user?.firstName} {user?.lastName}</Text>
             <Text style={styles.identityMeta}>

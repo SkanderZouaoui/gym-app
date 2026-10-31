@@ -78,6 +78,7 @@ export function TeamDrawer({ item, onClose }: { item: TeamMemberItem | null; onC
       title={item ? `${item.firstName} ${item.lastName}` : 'Nouveau compte équipe'}
       subtitle={item?.email ?? 'Compte interne (Accueil ou Admin)'}
       initials={initials(form.firstName || '?', form.lastName || '?')}
+      photoUrl={item?.photoUrl}
       badge={ROLE_OPTS.find((r) => r.v === form.role)?.l}
       badgeTone={form.role === 'ADMIN' ? 'secondary' : 'info'}
       onClose={onClose}

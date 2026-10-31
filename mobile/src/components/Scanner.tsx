@@ -204,7 +204,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                       onPress={() => checkInMember(m.id)}
                       disabled={manualCheckin.isPending}
                     >
-                      <InitialsAvatar first={m.firstName} last={m.lastName} size={40} />
+                      <InitialsAvatar first={m.firstName} last={m.lastName} size={40} photoUrl={m.photoUrl} />
                       <View style={{ flex: 1, minWidth: 0 }}>
                         <Text style={styles.memberName} numberOfLines={1}>{m.firstName} {m.lastName}</Text>
                         <Text style={styles.memberMeta} numberOfLines={1}>{m.memberships?.[0]?.plan.name ?? i18n.t('common.aucun_abonnement')}</Text>

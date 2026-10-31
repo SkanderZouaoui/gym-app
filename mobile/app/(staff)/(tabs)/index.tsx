@@ -126,7 +126,7 @@ export default function StaffHomeScreen() {
                 style={({ pressed }) => [styles.payCard, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
                 onPress={() => router.push({ pathname: routes.cashReceipt, params: { paymentId: p.id } })}
               >
-                <InitialsAvatar first={p.membership.user.firstName} last={p.membership.user.lastName} />
+                <InitialsAvatar first={p.membership.user.firstName} last={p.membership.user.lastName} photoUrl={p.membership.user.photoUrl} />
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={styles.payName} numberOfLines={1}>{p.membership.user.firstName} {p.membership.user.lastName}</Text>
                   <Text style={styles.payMeta} numberOfLines={1}>{p.membership.plan.name}</Text>

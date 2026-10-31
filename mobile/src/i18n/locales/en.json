@@ -300,7 +300,8 @@
     "photo_crop_error": "Could not crop, please try again.",
     "photo_crop_load_error": "Could not load the photo, please try again.",
     "class_media_shared_hint": "Shared by every “{{name}}” class: import them only once.",
-    "class_media_full": "Photo limit reached: delete one to add another."
+    "class_media_full": "Photo limit reached: delete one to add another.",
+    "photo_crop_reset": "Reset framing"
   },
   "home": {
     "membershipNone": "No membership",

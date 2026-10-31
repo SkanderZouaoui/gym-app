@@ -4,13 +4,10 @@ import { coachesApi, type CoachListItem } from '../api/endpoints'
 import { CoachDrawer } from '../components/CoachDrawer'
 import { Pagination } from '../components/ui/Pagination'
 import { usePagination } from '../lib/usePagination'
+import { UserAvatar } from '../components/ui/UserAvatar'
 
 const STATUS_LABEL: Record<CoachListItem['status'], string> = { ACTIVE: 'Actif', ON_LEAVE: 'En congé', INACTIVE: 'Inactif' }
 const STATUS_TONE: Record<CoachListItem['status'], string> = { ACTIVE: 'success', ON_LEAVE: 'warning', INACTIVE: 'danger' }
-
-function initials(firstName: string, lastName: string) {
-  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()
-}
 
 export function CoachesPage() {
   const { data: coaches } = useQuery({ queryKey: ['coaches'], queryFn: coachesApi.findAll })
@@ -43,9 +40,7 @@ export function CoachesPage() {
             className="flex flex-col gap-3.5 rounded-2xl border border-(--color-border) bg-(--color-surface) p-4.5 text-start hover:border-(--color-border-strong)"
           >
             <div className="flex w-full items-center gap-3">
-              <span className="grid h-12 w-12 flex-none place-items-center rounded-full bg-(--color-secondary) font-head text-[15px] font-bold text-white">
-                {initials(c.user.firstName, c.user.lastName)}
-              </span>
+              <UserAvatar firstName={c.user.firstName} lastName={c.user.lastName} photoUrl={c.user.photoUrl} className="h-12 w-12 text-[15px]" />
               <div className="min-w-0 flex-1">
                 <div className="font-head text-base font-bold">
                   {c.user.firstName} {c.user.lastName}

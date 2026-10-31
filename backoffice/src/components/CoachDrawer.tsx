@@ -67,6 +67,7 @@ export function CoachDrawer({ item, onClose }: { item: CoachListItem | null; onC
       title={item ? `${item.user.firstName} ${item.user.lastName}` : 'Nouveau coach'}
       subtitle={form.specialties || 'Fiche coach'}
       initials={item ? initials(item.user.firstName, item.user.lastName) : undefined}
+      photoUrl={item?.user.photoUrl}
       icon={item ? undefined : 'badge'}
       badge={item ? STATUS_OPTS.find((s) => s.v === form.status)?.l : undefined}
       badgeTone={STATUS_TONE[form.status]}

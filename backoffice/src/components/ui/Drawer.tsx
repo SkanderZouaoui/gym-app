@@ -6,6 +6,7 @@ export function Drawer({
   icon,
   tone = 'primary',
   initials,
+  photoUrl,
   badge,
   badgeTone = 'primary',
   onClose,
@@ -18,6 +19,8 @@ export function Drawer({
   icon?: string
   tone?: string
   initials?: string
+  /** Photo de profil (URL signée) affichée à la place des initiales. */
+  photoUrl?: string | null
   badge?: string
   badgeTone?: string
   onClose: () => void
@@ -34,7 +37,9 @@ export function Drawer({
         className="flex h-full w-full max-w-md flex-col bg-(--color-surface) shadow-xl"
       >
         <div className="flex items-center gap-3 border-b border-(--color-border) px-5 py-4.5">
-          {initials ? (
+          {initials && photoUrl ? (
+            <img src={photoUrl} alt="" className="h-12 w-12 flex-none rounded-full bg-(--color-surface-2) object-cover" />
+          ) : initials ? (
             <span className="grid h-12 w-12 flex-none place-items-center rounded-full bg-(--color-secondary) font-head text-[15px] font-bold text-white">
               {initials}
             </span>

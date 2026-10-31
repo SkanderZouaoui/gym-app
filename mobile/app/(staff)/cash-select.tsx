@@ -57,7 +57,7 @@ export default function StaffCashSelectScreen() {
             style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
             onPress={() => router.replace({ pathname: routes.cashSell, params: { memberId: item.id } })}
           >
-            <InitialsAvatar first={item.firstName} last={item.lastName} />
+            <InitialsAvatar first={item.firstName} last={item.lastName} photoUrl={item.photoUrl} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={styles.name} numberOfLines={1}>{item.firstName} {item.lastName}</Text>
               <Text style={styles.meta} numberOfLines={1}>{item.phone ?? item.email ?? ''}</Text>

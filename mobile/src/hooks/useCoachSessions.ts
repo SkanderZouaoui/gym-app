@@ -35,6 +35,7 @@ export interface RosterEntry {
     firstName: string;
     lastName: string;
     photoKey: string | null;
+    photoUrl?: string | null;
     memberCode?: string | null;
     phone?: string | null;
     memberships?: { endDate: string; plan: { name: string } }[];
@@ -67,6 +68,8 @@ export interface CoachStudent {
   firstName: string;
   lastName: string;
   photoKey: string | null;
+  /** URL signée (durée limitée) de la photo de profil, null si aucune. */
+  photoUrl?: string | null;
 }
 
 export function useCoachStudents() {

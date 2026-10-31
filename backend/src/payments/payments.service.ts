@@ -73,7 +73,7 @@ export class PaymentsService {
         ...(ranged ? { recordedAt: { ...(range?.from ? { gte: range.from } : {}), ...(range?.to ? { lte: range.to } : {}) } } : {}),
       },
       include: {
-        membership: { include: { user: { select: { firstName: true, lastName: true } }, plan: { select: { name: true } } } },
+        membership: { include: { user: { select: { firstName: true, lastName: true, photoKey: true } }, plan: { select: { name: true } } } },
       },
       orderBy: { recordedAt: 'desc' },
       take: ranged ? 2000 : 100,

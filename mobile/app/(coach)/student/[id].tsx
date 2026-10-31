@@ -37,7 +37,7 @@ export default function CoachStudentDetailScreen() {
       <ScrollView
         refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <View style={styles.identityRow}>
-          <Avatar initials={`${student.firstName[0]}${student.lastName[0]}`.toUpperCase()} size={68} background={colors.accent} color={colors.onAccent} />
+          <Avatar initials={`${student.firstName[0]}${student.lastName[0]}`.toUpperCase()} size={68} background={colors.accent} color={colors.onAccent} photoUrl={student.photoUrl} />
           <Text style={styles.name}>{student.firstName} {student.lastName}</Text>
         </View>
 

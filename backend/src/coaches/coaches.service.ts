@@ -12,7 +12,7 @@ const COACH_SELECT = {
   specialties: true,
   yearsExperience: true,
   status: true,
-  user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, status: true } },
+  user: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, status: true, photoKey: true } },
 } as const;
 
 /** Équipe de coachs (back-office "Coachs") — distinct de CoachingModule qui gère

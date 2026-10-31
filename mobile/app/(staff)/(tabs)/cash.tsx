@@ -165,7 +165,7 @@ export default function StaffCashScreen() {
               style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
               onPress={() => router.push({ pathname: routes.cashReceipt, params: { paymentId: p.id } })}
             >
-              <InitialsAvatar first={p.membership.user.firstName} last={p.membership.user.lastName} />
+              <InitialsAvatar first={p.membership.user.firstName} last={p.membership.user.lastName} photoUrl={p.membership.user.photoUrl} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.name} numberOfLines={1}>{p.membership.user.firstName} {p.membership.user.lastName}</Text>
                 <Text style={styles.meta} numberOfLines={1}>

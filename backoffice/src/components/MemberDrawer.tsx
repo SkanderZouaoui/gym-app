@@ -65,6 +65,7 @@ export function MemberDrawer({ item, onClose }: { item: MemberListItem | null; o
       title={item ? `${item.firstName} ${item.lastName}` : 'Nouvel adhérent'}
       subtitle={item?.email ?? 'Fiche adhérent'}
       initials={initials(form.firstName || '?', form.lastName || '?')}
+      photoUrl={item?.photoUrl}
       badge={item ? STATUS_LABEL[form.status] : undefined}
       badgeTone={STATUS_TONE[form.status]}
       onClose={onClose}

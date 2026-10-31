@@ -84,7 +84,7 @@ export default function CoachSessionDetailScreen() {
     const plan = u.memberships?.[0]?.plan.name;
     return (
       <View key={entry.id} style={[styles.person, cardShadow, attended && { borderColor: colors.successSoft }]}>
-        <Avatar initials={`${u.firstName[0] ?? ''}${u.lastName[0] ?? ''}`.toUpperCase()} size={46} background={attended ? colors.successSoft : colors.primarySoft} color={attended ? colors.successInk : colors.primaryInk} />
+        <Avatar initials={`${u.firstName[0] ?? ''}${u.lastName[0] ?? ''}`.toUpperCase()} size={46} background={attended ? colors.successSoft : colors.primarySoft} color={attended ? colors.successInk : colors.primaryInk} photoUrl={u.photoUrl} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.personName} numberOfLines={1}>{u.firstName} {u.lastName}</Text>
           <View style={styles.personMeta}>
