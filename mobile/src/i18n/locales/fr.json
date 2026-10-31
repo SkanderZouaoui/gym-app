@@ -901,7 +901,10 @@
     "alert_format": "Format des alertes",
     "alert_format_hint": "Affichage des alertes sur l’accueil adhérent",
     "recipients_label": "Destinataires",
-    "cours_non_modifiable": "Ce cours a déjà commencé ou est terminé : il ne peut plus être modifié."
+    "cours_non_modifiable": "Ce cours a déjà commencé ou est terminé : il ne peut plus être modifié.",
+    "annuler_le_cours": "Annuler le cours",
+    "annuler_ce_cours": "Annuler ce cours ?",
+    "annuler_cours_en_cours_texte": "Le cours est en cours : il sera annulé et les inscriptions non pointées seront annulées. Les présences déjà enregistrées sont conservées."
   },
   "auth": {
     "mot_de_passe_mis_a": "Mot de passe mis à jour",
