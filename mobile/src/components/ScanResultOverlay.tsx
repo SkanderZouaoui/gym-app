@@ -113,7 +113,7 @@ export function ScanResultOverlay({
             end={{ x: 1, y: 1 }}
             style={styles.primaryBtn}
           >
-            <Text style={styles.primaryText}>{granted ? t('auth.continuer') : t('common.reessayer')}</Text>
+            <Text style={styles.primaryText}>{granted ? t('auth.continuer') : t('common.retour')}</Text>
           </LinearGradient>
         </Pressable>
         {!granted && onManual ? (
