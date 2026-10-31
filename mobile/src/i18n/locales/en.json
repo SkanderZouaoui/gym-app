@@ -907,6 +907,7 @@
     "code_sent_sub": "Code sent to {{email}}. Choose a password you haven’t used before.",
     "reset_action": "Reset",
     "code_expired_hint": "Code expired? Go back to request a new one.",
+    "paste_code": "Paste the code",
     "hero_tagline": "Get over the bar.",
     "hero_steps": "1 PULL · 2 TRANSITION · 3 PUSH"
   },

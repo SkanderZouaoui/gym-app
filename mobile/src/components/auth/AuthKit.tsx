@@ -139,16 +139,18 @@ export function LogoTile() {
 interface AuthFieldProps extends Omit<TextInputProps, 'style'> {
   icon: keyof typeof MaterialIcons.glyphMap;
   secure?: boolean;
+  /** Petit bouton d'action à droite du champ (ex. coller le code). */
+  action?: { icon: keyof typeof MaterialIcons.glyphMap; label: string; onPress: () => void };
   borderColor?: string;
 }
 
 /** Champ arrondi de la refonte : icône, saisie, œil pour les mots de passe. */
-export function AuthField({ icon, secure, borderColor, ...input }: AuthFieldProps) {
+export function AuthField({ icon, secure, borderColor, action, ...input }: AuthFieldProps) {
   const p = useAuthPalette();
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
   return (
-    <View style={{ height: 56, borderRadius: 18, backgroundColor: p.sf, borderWidth: 1.5, borderColor: borderColor ?? p.bd, flexDirection: 'row', alignItems: 'center', gap: 12, paddingStart: 16, paddingEnd: secure ? 8 : 16 }}>
+    <View style={{ height: 56, borderRadius: 18, backgroundColor: p.sf, borderWidth: 1.5, borderColor: borderColor ?? p.bd, flexDirection: 'row', alignItems: 'center', gap: 12, paddingStart: 16, paddingEnd: secure || action ? 8 : 16 }}>
       <MaterialIcons name={icon} size={22} color={p.mu} />
       <TextInput
         {...input}
@@ -157,6 +159,11 @@ export function AuthField({ icon, secure, borderColor, ...input }: AuthFieldProp
         autoCapitalize={input.autoCapitalize ?? 'none'}
         style={{ flex: 1, height: '100%', minWidth: 0, fontFamily: fonts.body, fontSize: 16, color: p.fg }}
       />
+      {action ? (
+        <Pressable onPress={action.onPress} hitSlop={8} accessibilityRole="button" accessibilityLabel={action.label} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: p.prs, alignItems: 'center', justifyContent: 'center' }}>
+          <MaterialIcons name={action.icon} size={22} color={p.accent} />
+        </Pressable>
+      ) : null}
       {secure ? (
         <Pressable onPress={() => setShow((v) => !v)} hitSlop={8} accessibilityLabel={t(show ? 'auth.hide_password' : 'auth.show_password')} style={{ padding: 6 }}>
           <MaterialIcons name={show ? 'visibility-off' : 'visibility'} size={22} color={p.mu} />

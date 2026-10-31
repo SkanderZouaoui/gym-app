@@ -145,25 +145,31 @@ describe('buildOtpMail', () => {
     expect(m.subject).toContain('MuscleUP');
   });
 
-  it('icône « copier » : lien vers la page avec a=copy, images jointes en cid', () => {
-    const m = buildOtpMail({ ...base, landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456&p=r' });
-    expect(m.html).toContain('href="https://api.x.com/v1/auth/open-app#c=123456&amp;p=r&amp;a=copy"');
-    expect(m.html).toContain('cid:muscleup-copy');
-    expect(m.html).toContain('cid:muscleup-hero');
-    expect(m.attachments?.map((a) => a.cid).sort()).toEqual(['muscleup-copy', 'muscleup-hero']);
+  it('thème clair par défaut + règles sombres automatiques (prefers-color-scheme)', () => {
+    const m = buildOtpMail({ ...base, landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456' });
+    expect(m.html).toContain('prefers-color-scheme:dark');
+    expect(m.html).toContain('[data-ogsc]');
+    expect(m.html).toContain('content="light dark"');
+    expect(m.html).toMatch(/<body[^>]*background:#F4F2F8/);
   });
 
-  it('changement d\'e-mail : icône copier mais pas de bouton « ouvrir l\'application »', () => {
-    const m = buildOtpMail({ ...base, purpose: 'EMAIL_CHANGE', landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456&p=e' });
-    expect(m.html).toContain('cid:muscleup-copy');
-    expect(m.html).not.toContain('Ouvrir l&#39;application');
-    expect(m.html).not.toContain('→');
+  it('bouton « ouvrir l\'application » : texte blanc forcé, lien vers la page', () => {
+    const m = buildOtpMail({ ...base, landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456&l=fr' });
+    expect(m.html).toMatch(/<a href="https:\/\/api\.x\.com[^"]*"[^>]*color:#ffffff !important/);
+    expect(m.html).toContain('<font color="#ffffff">');
+  });
+
+  it('plus d\'icône « copier » qui ouvre une page : seul le bouton d\'ouverture existe, et uniquement pour le reset', () => {
+    const url = 'https://api.x.com/v1/auth/open-app#c=123456';
+    expect(buildOtpMail({ ...base, landingUrl: url }).html.match(/<a href/g)).toHaveLength(1);
+    const change = buildOtpMail({ ...base, purpose: 'EMAIL_CHANGE', landingUrl: url });
+    expect(change.html).not.toContain('<a href');
+    expect(change.html).not.toContain('a=copy');
   });
 
   it('sans lien configuré : pas de bouton ni d\'icône copier', () => {
     const m = buildOtpMail(base);
     expect(m.html).not.toContain('<a href');
-    expect(m.html).not.toContain('cid:muscleup-copy');
     expect(m.attachments).toHaveLength(1);
   });
 

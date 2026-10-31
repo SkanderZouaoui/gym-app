@@ -85,11 +85,12 @@ export class OtpService {
       });
   }
 
-  /** Lien https de l'e-mail vers la page qui ouvre l'app / copie le code (code dans le fragment, jamais envoyé au serveur). */
+  /** Lien https de l'e-mail vers la page qui ouvre l'app (repli : copier le code) (code dans le fragment, jamais envoyé au serveur). */
   private landingUrl(email: string, code: string, purpose: OtpPurpose, lang?: string): string | undefined {
+    if (purpose !== 'PASSWORD_RESET') return undefined; // changement d'e-mail : l'utilisateur est déjà dans l'app
     const base = this.config.get<string>('PUBLIC_API_URL')?.replace(/\/+$/, '');
     if (!base) return undefined;
-    const params = new URLSearchParams({ e: email, c: code, p: purpose === 'PASSWORD_RESET' ? 'r' : 'e', ...(lang ? { l: lang } : {}) });
+    const params = new URLSearchParams({ e: email, c: code, ...(lang ? { l: lang } : {}) });
     return `${base}/v1/auth/open-app#${params.toString()}`;
   }
 

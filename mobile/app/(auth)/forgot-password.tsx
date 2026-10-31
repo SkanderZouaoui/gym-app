@@ -7,6 +7,7 @@ import { authApi } from '../../src/api/endpoints';
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import * as Clipboard from 'expo-clipboard';
 import { otpRateLimitMessage } from '../../src/utils/otpErrors';
 
 type Step = 'email' | 'code';
@@ -39,6 +40,16 @@ export default function ForgotPasswordScreen() {
       setError(otpRateLimitMessage(e) ?? t('auth.impossible_denvoyer_le_code_reessayez'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Colle le code à 6 chiffres copié depuis l'e-mail (appui long sur le code), sans quitter l'écran.
+  const pasteCode = async () => {
+    try {
+      const m = /\d{6}/.exec((await Clipboard.getStringAsync()).replace(/\s+/g, ''));
+      if (m) setCode(m[0]);
+    } catch {
+      // presse-papiers indisponible : l'utilisateur peut saisir le code à la main
     }
   };
 
@@ -87,7 +98,7 @@ export default function ForgotPasswordScreen() {
           <Text style={{ fontFamily: fonts.head, fontSize: 26, letterSpacing: -0.8, lineHeight: 28, color: pal.fg, marginTop: 12 }}>{t('common.nouveau_mot_de_passe')}</Text>
           <Text style={{ fontFamily: fonts.body, fontSize: 14, color: pal.mu, marginTop: 6 }}>{t('auth.code_sent_sub', { email: email.trim() })}</Text>
           <View style={{ gap: 10, marginTop: 16 }}>
-            <AuthField icon="pin" value={code} onChangeText={(v) => setCode(v.replace(/[^0-9]/g, ''))} keyboardType="number-pad" maxLength={6} placeholder={t('common.code_recu')} />
+            <AuthField icon="pin" value={code} onChangeText={(v) => setCode(v.replace(/[^0-9]/g, ''))} keyboardType="number-pad" maxLength={6} placeholder={t('common.code_recu')} action={{ icon: 'content-paste', label: t('auth.paste_code'), onPress: pasteCode }} />
             <AuthField icon="lock" secure value={newPassword} onChangeText={setNewPassword} placeholder={t('common.nouveau_mot_de_passe')} />
             <AuthField icon="lock-reset" secure value={confirm} onChangeText={setConfirm} placeholder={t('common.confirmer_le_mot_de_passe')} borderColor={mismatch ? '#EF4444' : match ? '#16A34A' : undefined} />
           </View>

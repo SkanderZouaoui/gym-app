@@ -907,6 +907,7 @@
     "code_sent_sub": "Code envoyé à {{email}}. Choisissez un mot de passe que vous n’avez pas déjà utilisé.",
     "reset_action": "Réinitialiser",
     "code_expired_hint": "Code expiré ? Revenez en arrière pour en demander un nouveau.",
+    "paste_code": "Coller le code",
     "hero_tagline": "Passe au-dessus de la barre.",
     "hero_steps": "1 TRACTION · 2 TRANSITION · 3 POUSSÉE"
   },
