@@ -6,6 +6,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -146,14 +147,17 @@ export function SettingsGroup({ title, rows }: { title: string; rows: SettingsRo
 
 function SettingsRow({ row, last }: { row: SettingsRowDef; last: boolean }) {
   const { colors } = useTheme();
+  const { isRtl } = useLanguage();
+  // Ligne « libellé — valeur » : le libellé garde sa largeur (jamais coupé en deux), c'est la valeur qui se raccourcit.
+  const hasValue = row.kind === 'nav' && !!row.value;
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const body = (
     <>
       <View style={styles.rowIcon}>
         <MaterialIcons name={row.icon} size={22} color={colors.primaryInk} />
       </View>
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.rowTitle}>{row.title}</Text>
+      <View style={hasValue ? { flexShrink: 0, maxWidth: '55%' } : { flex: 1, minWidth: 0 }}>
+        <Text style={styles.rowTitle} numberOfLines={1}>{row.title}</Text>
         {'sub' in row && row.sub ? <Text style={styles.rowSub}>{row.sub}</Text> : null}
       </View>
       {row.kind === 'switch' ? (
@@ -166,7 +170,7 @@ function SettingsRow({ row, last }: { row: SettingsRowDef; last: boolean }) {
         />
       ) : row.kind === 'nav' ? (
         <>
-          {row.value ? <Text style={styles.rowValue}>{row.value}</Text> : null}
+          {row.value ? <Text style={[styles.rowValue, { flex: 1, minWidth: 0, textAlign: isRtl ? 'left' : 'right' }]} numberOfLines={1}>{row.value}</Text> : null}
           <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
         </>
       ) : (
