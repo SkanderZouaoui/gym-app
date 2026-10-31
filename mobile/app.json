@@ -36,7 +36,15 @@
       "expo-status-bar",
       "expo-secure-store",
       "expo-font",
-      ["expo-splash-screen", { "backgroundColor": "#6D28D9", "dark": { "backgroundColor": "#0F0B1E" } }],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#6D28D9",
+          "dark": {
+            "backgroundColor": "#0F0B1E"
+          }
+        }
+      ],
       [
         "expo-camera",
         {
@@ -52,7 +60,8 @@
       ],
       "expo-video",
       "expo-image",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-sharing"
     ],
     "extra": {
       "router": {},

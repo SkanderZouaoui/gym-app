@@ -1394,7 +1394,16 @@
     "goal_last_week": "الأسبوع الماضي",
     "goal_week_count": "{{count}}/{{target}} حصص",
     "goal_weeks_unit": "أسابيع",
-    "goal_this_week_label": "هذا الأسبوع"
+    "goal_this_week_label": "هذا الأسبوع",
+    "galerie_cours": "الحصة",
+    "galerie_salle": "القاعة",
+    "galerie_mosaique": "عرض كفسيفساء",
+    "galerie_carrousel": "عرض كشريط متحرك",
+    "galerie_lecture_auto": "تمرير تلقائي",
+    "galerie_pause": "إيقاف مؤقت",
+    "photo_partager": "مشاركة الصورة أو حفظها",
+    "photo_partage_impossible": "تعذّرت مشاركة هذه الصورة.",
+    "galerie_plus_photos": "+{{count}}"
   },
   "staff": {
     "caisse": "الصندوق",

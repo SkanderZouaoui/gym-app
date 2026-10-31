@@ -13,7 +13,8 @@ import { Banner, BottomSheet, ProgressBar, Toast, DetailSkeleton } from '../../.
 import { ApiError } from '../../../src/api/client';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
-import { ImageGallery } from '../../../src/components/adherent/ImageGallery';
+import { SessionGallery } from '../../../src/components/gallery/SessionGallery';
+import { photosOf } from '../../../src/components/gallery/photos';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { levelLabel } from '../../../src/i18n/labels';
@@ -164,19 +165,12 @@ export default function SessionDetailScreen() {
           </View>
         </View>
 
-        {session.room?.galleryUrls && session.room.galleryUrls.length > 0 ? (
-          <View>
-            <Text style={styles.sectionTitle}>{t('common.salle')} · {session.room.name}</Text>
-            <ImageGallery urls={session.room.galleryUrls} />
-          </View>
-        ) : null}
-
-        {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
-          <View>
-            <Text style={styles.sectionTitle}>{t('member.galerie')}</Text>
-            <ImageGallery urls={session.classType.galleryUrls} />
-          </View>
-        ) : null}
+        <SessionGallery
+          sections={[
+            { id: 'type', label: t('member.galerie_cours'), photos: photosOf(session.classType) },
+            { id: 'room', label: t('member.galerie_salle'), photos: photosOf(session.room) },
+          ]}
+        />
       </ScrollView>
 
       <View style={styles.footer}>

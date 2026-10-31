@@ -1394,7 +1394,16 @@
     "goal_last_week": "Semaine dernière",
     "goal_week_count": "{{count}}/{{target}} séances",
     "goal_weeks_unit": "semaines",
-    "goal_this_week_label": "Cette semaine"
+    "goal_this_week_label": "Cette semaine",
+    "galerie_cours": "Le cours",
+    "galerie_salle": "La salle",
+    "galerie_mosaique": "Afficher en mosaïque",
+    "galerie_carrousel": "Afficher en carrousel",
+    "galerie_lecture_auto": "Défilement automatique",
+    "galerie_pause": "Mettre en pause",
+    "photo_partager": "Partager ou enregistrer la photo",
+    "photo_partage_impossible": "Impossible de partager cette photo.",
+    "galerie_plus_photos": "+{{count}}"
   },
   "staff": {
     "caisse": "Caisse",

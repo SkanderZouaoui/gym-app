@@ -17,7 +17,8 @@ import { useOfflineAwareRefresh } from '../hooks/useOfflineAwareRefresh';
 import { dateLocale } from '../i18n';
 import { levelLabel } from '../i18n/labels';
 import { useNow } from '../hooks/useNow';
-import { ImageGallery } from './adherent/ImageGallery';
+import { SessionGallery } from './gallery/SessionGallery';
+import { photosOf } from './gallery/photos';
 
 type Filter = 'all' | 'present' | 'todo';
 
@@ -182,25 +183,12 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute, e
           </View>
         ) : null}
 
-        {session.room?.galleryUrls && session.room.galleryUrls.length > 0 ? (
-          <View style={{ gap: 8 }}>
-            <View style={styles.sectionHead}>
-              <Text style={styles.section} numberOfLines={1}>{t('common.salle')} · {session.room.name}</Text>
-              <Text style={styles.sectionCount}>{session.room.galleryUrls.length}</Text>
-            </View>
-            <ImageGallery urls={session.room.galleryUrls} />
-          </View>
-        ) : null}
-
-        {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
-          <View style={{ gap: 8 }}>
-            <View style={styles.sectionHead}>
-              <Text style={styles.section}>{t('member.galerie')}</Text>
-              <Text style={styles.sectionCount}>{session.classType.galleryUrls.length}</Text>
-            </View>
-            <ImageGallery urls={session.classType.galleryUrls} />
-          </View>
-        ) : null}
+        <SessionGallery
+          sections={[
+            { id: 'type', label: t('member.galerie_cours'), photos: photosOf(session.classType) },
+            { id: 'room', label: t('member.galerie_salle'), photos: photosOf(session.room) },
+          ]}
+        />
 
         <View style={[styles.card, cardShadow]}>
           <View style={styles.presRow}>

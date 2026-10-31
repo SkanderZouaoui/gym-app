@@ -1394,7 +1394,16 @@
     "goal_last_week": "Last week",
     "goal_week_count": "{{count}}/{{target}} sessions",
     "goal_weeks_unit": "weeks",
-    "goal_this_week_label": "This week"
+    "goal_this_week_label": "This week",
+    "galerie_cours": "The class",
+    "galerie_salle": "The room",
+    "galerie_mosaique": "Show as mosaic",
+    "galerie_carrousel": "Show as carousel",
+    "galerie_lecture_auto": "Auto-scroll",
+    "galerie_pause": "Pause",
+    "photo_partager": "Share or save photo",
+    "photo_partage_impossible": "Couldn't share this photo.",
+    "galerie_plus_photos": "+{{count}}"
   },
   "staff": {
     "caisse": "Cash register",
