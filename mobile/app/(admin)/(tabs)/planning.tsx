@@ -83,6 +83,7 @@ export default function AdminPlanningScreen() {
               now={now}
               onPress={() => router.push({ pathname: '/(admin)/session/[id]', params: { id: s.id } } as never)}
               action={
+                new Date(s.startsAt).getTime() > now ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={i18n.t('admin.modifier_le_cours')}
@@ -92,6 +93,7 @@ export default function AdminPlanningScreen() {
                 >
                   <MaterialIcons name="edit" size={22} color={colors.primaryContrast} />
                 </Pressable>
+                ) : null
               }
             />
           ))}

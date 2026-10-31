@@ -11,6 +11,11 @@ import type { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 /** Nombre maximal de photos dans la galerie d'un type de cours ou d'une salle. */
 export const MAX_TYPE_GALLERY = 12;
 
+/** Un cours passé ou en cours (heure de début atteinte) n'est plus modifiable : horaire, coach, salle, capacité. */
+export function assertSessionEditable(session: { startsAt: Date }, now = Date.now()): void {
+  if (session.startsAt.getTime() <= now) throw new BadRequestException('SESSION_NOT_EDITABLE');
+}
+
 /** Le nouvel ordre doit être une permutation de la galerie actuelle (mêmes clés, sans ajout ni doublon). */
 export function assertSamePermutation(current: string[], next: string[]): void {
   const sameSize = current.length === next.length && new Set(next).size === next.length;
@@ -277,6 +282,7 @@ export class ClassesService {
 
   async updateCapacity(id: string, capacity: number, actorId: string) {
     const session = await this.findSession(id);
+    assertSessionEditable(session);
     const updated = await this.prisma.classSession.update({ where: { id }, data: { capacity } });
 
     await this.prisma.auditLog.create({
@@ -295,6 +301,7 @@ export class ClassesService {
 
   async replaceCoach(id: string, coachId: string | null, actorId: string) {
     const session = await this.findSession(id);
+    assertSessionEditable(session);
     const updated = await this.prisma.classSession.update({ where: { id }, data: { coachId } });
 
     await this.prisma.auditLog.create({
@@ -411,6 +418,7 @@ export class ClassesService {
   /** Modification d'un cours (horaire, type, coach, salle, capacité). */
   async updateSession(id: string, dto: UpdateSessionDto, actorId: string) {
     const session = await this.findSession(id);
+    assertSessionEditable(session);
     const startsAt = dto.startsAt ? new Date(dto.startsAt) : session.startsAt;
     const durationMs = dto.durationMin ? dto.durationMin * 60_000 : session.endsAt.getTime() - session.startsAt.getTime();
     if (dto.classTypeId) await this.findType(dto.classTypeId);

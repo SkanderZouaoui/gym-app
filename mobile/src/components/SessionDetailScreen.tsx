@@ -150,7 +150,7 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute, e
           </LinearGradient>
         </View>
 
-        {editRoute ? (
+        {editRoute && state === 'upcoming' ? (
           <Pressable
             onPress={() => router.push({ pathname: editRoute, params: { id: session.id } } as never)}
             accessibilityRole="button"

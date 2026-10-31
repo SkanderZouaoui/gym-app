@@ -24,6 +24,7 @@ import {
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../src/i18n';
+import { useNow } from '../../src/hooks/useNow';
 
 function defaultStart(): Date {
   const d = new Date();
@@ -35,6 +36,7 @@ function defaultStart(): Date {
 /** Création / édition d'un cours : type, date et heure, coach, salle, capacité. */
 export default function CourseFormScreen() {
   useTranslation();
+  const nowMs = useNow();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const editing = !!id;
   const { colors, cardShadow } = useTheme();
@@ -80,7 +82,9 @@ export default function CourseFormScreen() {
     }
   };
 
-  const valid = !!typeId && capacity >= 1 && duration >= 5;
+  // Un cours passé ou en cours n'est plus modifiable (l'API le refuse aussi) : le formulaire passe en lecture seule.
+  const locked = editing && !!session && new Date(session.startsAt).getTime() <= nowMs;
+  const valid = !!typeId && capacity >= 1 && duration >= 5 && !locked;
   const end = new Date(start.getTime() + duration * 60000);
   const clock = (d: Date) => d.toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
   const typeName = (types ?? []).find((t) => t.id === typeId)?.name;
@@ -97,7 +101,9 @@ export default function CourseFormScreen() {
           setError(
             e instanceof ApiError && e.code === 'CAPACITY_BELOW_BOOKINGS'
               ? i18n.t('admin.la_capacite_ne_peut_pas')
-              : i18n.t('admin.impossible_denregistrer_le_cours_verifiez'),
+              : e instanceof ApiError && e.code === 'SESSION_NOT_EDITABLE'
+                ? i18n.t('admin.cours_non_modifiable')
+                : i18n.t('admin.impossible_denregistrer_le_cours_verifiez'),
           ),
       },
     );
@@ -125,7 +131,9 @@ export default function CourseFormScreen() {
         </View>
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
+        {locked ? <Banner tone="info" icon="lock-outline" text={i18n.t('admin.cours_non_modifiable')} /> : null}
 
+        <View pointerEvents={locked ? 'none' : 'auto'} style={[{ gap: 10 }, locked && { opacity: 0.5 }]}>
         <Text style={styles.section}>{i18n.t('common.cours_2')}</Text>
         <SelectField
           label={i18n.t('admin.type_de_cours')}
@@ -207,7 +215,9 @@ export default function CourseFormScreen() {
           </View>
         </View>
 
-        {editing ? (
+        </View>
+
+        {editing && !locked ? (
           <Pressable onPress={() => setConfirmDelete(true)} style={styles.deleteBtn}>
             <MaterialIcons name="delete" size={22} color={colors.dangerInk} />
             <Text style={styles.deleteText}>{i18n.t('admin.supprimer_le_cours')}</Text>
@@ -215,7 +225,7 @@ export default function CourseFormScreen() {
         ) : null}
       </ScrollView>
 
-      <StickyActionBar visible={!editing || hydrated} label={editing ? i18n.t('member.enregistrer') : i18n.t('admin.creer_le_cours')} loading={save.isPending} disabled={!valid} onPress={submit} />
+      <StickyActionBar visible={(!editing || hydrated) && !locked} label={editing ? i18n.t('member.enregistrer') : i18n.t('admin.creer_le_cours')} loading={save.isPending} disabled={!valid} onPress={submit} />
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
         <Text style={styles.sheetTitle}>{i18n.t('admin.supprimer_ce_cours')}</Text>

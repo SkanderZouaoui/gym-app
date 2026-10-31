@@ -900,7 +900,8 @@
     "key_figures": "أرقام رئيسية",
     "alert_format": "شكل التنبيهات",
     "alert_format_hint": "عرض التنبيهات على الشاشة الرئيسية للأعضاء",
-    "recipients_label": "المستلمون"
+    "recipients_label": "المستلمون",
+    "cours_non_modifiable": "هذه الحصة بدأت بالفعل أو انتهت: لم يعد بالإمكان تعديلها."
   },
   "auth": {
     "mot_de_passe_mis_a": "تم تحديث كلمة المرور",

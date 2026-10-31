@@ -900,7 +900,8 @@
     "key_figures": "Key figures",
     "alert_format": "Alert format",
     "alert_format_hint": "How alerts appear on the member home screen",
-    "recipients_label": "Recipients"
+    "recipients_label": "Recipients",
+    "cours_non_modifiable": "This class has already started or is over: it can no longer be edited."
   },
   "auth": {
     "mot_de_passe_mis_a": "Password updated",
