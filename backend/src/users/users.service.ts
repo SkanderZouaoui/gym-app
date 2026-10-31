@@ -131,7 +131,13 @@ export class UsersService {
     const key = this.storageService.buildKey(`avatars/${userId}`, 'image/jpeg');
     await this.storageService.putObject(key, cropped, 'image/jpeg');
 
-    const user = await this.prisma.user.update({ where: { id: userId }, data: { photoKey: key }, select: PUBLIC_USER_SELECT });
+    let user;
+    try {
+      user = await this.prisma.user.update({ where: { id: userId }, data: { photoKey: key }, select: PUBLIC_USER_SELECT });
+    } catch (err) {
+      await this.storageService.deleteObject(key).catch(() => {}); // pas de fichier orphelin si l'enregistrement échoue
+      throw err;
+    }
     await this.storageService.deleteObject(current.photoKey).catch(() => {});
     return this.withPhotoUrl(user);
   }
@@ -167,6 +173,15 @@ export class UsersService {
         data: { actorId: userId, action: 'SELF_DELETE_ACCOUNT', entity: 'User', entityId: userId },
       }),
     ]);
+    await this.purgePhoto(userId);
+  }
+
+  /** Compte supprimé : la photo de profil n'a plus de raison d'exister — fichier du stockage et référence. */
+  private async purgePhoto(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { photoKey: true } });
+    if (!user?.photoKey) return;
+    await this.prisma.user.update({ where: { id: userId }, data: { photoKey: null } });
+    await this.storageService.deleteObject(user.photoKey).catch(() => {});
   }
 
   /** Étape 1 du changement d'e-mail — vérifie le mot de passe actuel puis
@@ -398,6 +413,7 @@ export class UsersService {
         data: { actorId, action: 'ADMIN_DELETE_MEMBER', entity: 'User', entityId: id },
       }),
     ]);
+    await this.purgePhoto(id);
   }
 
   async suspend(id: string, actorId: string) {

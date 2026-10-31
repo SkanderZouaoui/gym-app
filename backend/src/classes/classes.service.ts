@@ -319,7 +319,7 @@ export class ClassesService {
 
   /** Suppression d'un type de cours : définitive s'il n'est jamais utilisé, sinon désactivation. */
   async deleteType(id: string) {
-    await this.findType(id);
+    const type = await this.findType(id);
     const used =
       (await this.prisma.classSession.count({ where: { classTypeId: id } })) + (await this.prisma.classTemplate.count({ where: { classTypeId: id } }));
     if (used > 0) {
@@ -327,6 +327,7 @@ export class ClassesService {
       return { deleted: false, deactivated: true };
     }
     await this.prisma.classType.delete({ where: { id } });
+    await Promise.all(type.galleryKeys.map((key) => this.storage.deleteObject(key).catch(() => undefined)));
     return { deleted: true, deactivated: false };
   }
 

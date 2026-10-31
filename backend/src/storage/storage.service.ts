@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 
@@ -89,6 +89,18 @@ export class StorageService {
 
   async putObject(key: string, body: Buffer, contentType: string): Promise<void> {
     await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }));
+  }
+
+  /** Liste tous les objets sous un préfixe (pagination comprise). */
+  async listObjects(prefix: string): Promise<{ key: string; lastModified: Date }[]> {
+    const objects: { key: string; lastModified: Date }[] = [];
+    let token: string | undefined;
+    do {
+      const res = await this.client.send(new ListObjectsV2Command({ Bucket: this.bucket, Prefix: prefix, ContinuationToken: token }));
+      for (const o of res.Contents ?? []) if (o.Key && o.LastModified) objects.push({ key: o.Key, lastModified: o.LastModified });
+      token = res.IsTruncated ? res.NextContinuationToken : undefined;
+    } while (token);
+    return objects;
   }
 
   async deleteObject(key: string): Promise<void> {
