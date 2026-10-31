@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Image, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -79,7 +79,9 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
   }, [order, offset, tile]);
 
   const latest = useRef({ tile, offset, keys });
-  latest.current = { tile, offset, keys };
+  useLayoutEffect(() => {
+    latest.current = { tile, offset, keys };
+  });
 
   const resetDrag = () => {
     drag.current = { key: null, start: { x: 0, y: 0 }, captured: false, order: [] };

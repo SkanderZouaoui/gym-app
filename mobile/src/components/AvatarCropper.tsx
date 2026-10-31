@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Modal, PanResponder, Platform, Pressable, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -60,7 +60,9 @@ export function AvatarCropper({ visible, imageUri, saving, onCancel, onConfirm }
 
   // L'état courant est lu depuis une ref par le PanResponder (créé une seule fois).
   const live = useRef({ zoom, offset, natural, base, viewport });
-  live.current = { zoom, offset, natural, base, viewport };
+  useLayoutEffect(() => {
+    live.current = { zoom, offset, natural, base, viewport };
+  });
   const gesture = useRef({ touches: 0, ox: 0, oy: 0, zoom: 1, dx0: 0, dy0: 0, dist0: 0 });
 
   const responder = useMemo(
