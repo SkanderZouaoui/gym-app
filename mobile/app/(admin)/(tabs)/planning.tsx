@@ -7,18 +7,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useSessions } from '../../../src/hooks/useClasses';
-import {
-  useAdminCoaches,
-  useCancelSession,
-  useReplaceSessionCoach,
-  useSetSessionCapacity,
-} from '../../../src/hooks/useAdmin';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
-import { BottomSheet, ProgressBar, ScreenTitle, SkeletonList } from '../../../src/components/ui';
-import { Button } from '../../../src/components/Button';
-import type { ClassSessionSummary } from '../../../src/api/types';
+import { ScreenTitle, SkeletonList } from '../../../src/components/ui';
+import { SessionPlanningCard } from '../../../src/components/staff/SessionPlanningCard';
+import { useNow } from '../../../src/hooks/useNow';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
@@ -35,22 +29,17 @@ function buildDays(count: number) {
   });
 }
 
-/** Planning (admin) : cours du jour, capacité, remplacement de coach, annulation, édition — FitZone Mobile Admin v2. */
+/** Planning (admin) : cours du jour en cartes (comme l'accueil), détail au clic, bouton de modification — FitZone Mobile Admin v2. */
 export default function AdminPlanningScreen() {
   useTranslation();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: sessions, refetch, isLoading } = useSessions();
-  const { data: coaches } = useAdminCoaches();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
-  const setCapacity = useSetSessionCapacity();
-  const replaceCoach = useReplaceSessionCoach();
-  const cancel = useCancelSession();
+  const now = useNow();
   const days = useMemo(() => buildDays(14), []);
   const [selected, setSelected] = useState(0);
-  const [coachFor, setCoachFor] = useState<ClassSessionSummary | null>(null);
-  const [cancelFor, setCancelFor] = useState<ClassSessionSummary | null>(null);
 
   const day = days[selected].date;
   const list = useMemo(
@@ -61,14 +50,6 @@ export default function AdminPlanningScreen() {
     [sessions, day],
   );
   const dayLabel = day.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
-
-  const tag = (s: ClassSessionSummary) => {
-    if (s.status === 'CANCELLED') return { label: i18n.t('admin.annule'), bg: colors.dangerSoft, fg: colors.dangerInk };
-    const left = s.capacity - s._count.bookings;
-    if (left <= 0) return { label: i18n.t('common.complet'), bg: colors.dangerSoft, fg: colors.dangerInk };
-    if (s._count.bookings / Math.max(1, s.capacity) >= 0.7) return { label: i18n.t('common.presque_plein'), bg: colors.warningSoft, fg: colors.warningInk };
-    return { label: `${left} places`, bg: colors.surface2, fg: colors.muted };
-  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -94,71 +75,26 @@ export default function AdminPlanningScreen() {
         />
         <DaySelector days={days} selectedIndex={selected} onSelect={setSelected} />
 
-        <View style={{ gap: 10 }}>
-          {list.map((s) => {
-            const t = tag(s);
-            const cancelled = s.status === 'CANCELLED';
-            const ratio = s._count.bookings / Math.max(1, s.capacity);
-            return (
-              <Pressable
-                key={s.id}
-                onPress={() => router.push({ pathname: '/(admin)/session/[id]', params: { id: s.id } } as never)}
-                accessibilityRole="button"
-                style={({ pressed }) => [styles.card, cardShadow, cancelled && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.99 }] }]}
-              >
-                <View style={styles.row}>
-                  <View style={styles.timeCol}>
-                    <Text style={styles.time} numberOfLines={1}>{new Date(s.startsAt).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}</Text>
-                    <Text style={styles.duration} numberOfLines={1}>{i18n.t('staff.min', { minutes: Math.round((new Date(s.endsAt).getTime() - new Date(s.startsAt).getTime()) / 60000) })}</Text>
-                  </View>
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={styles.name} numberOfLines={1}>{s.classType.name}</Text>
-                    <Text style={styles.meta} numberOfLines={1}>
-                      {s.coach ? `${s.coach.user.firstName} ${s.coach.user.lastName.charAt(0)}.` : i18n.t('common.sans_coach')} · {s.room?.name ?? '—'}
-                    </Text>
-                  </View>
-                  <View style={[styles.tag, { backgroundColor: t.bg }]}>
-                    <Text style={[styles.tagText, { color: t.fg }]}>{t.label}</Text>
-                  </View>
-                  <Pressable
-                    accessibilityLabel={i18n.t('admin.modifier_le_cours')}
-                    onPress={() => router.push({ pathname: '/(admin)/course-form', params: { id: s.id } })}
-                    style={styles.editBtn}
-                  >
-                    <MaterialIcons name="edit" size={20} color={colors.primaryInk} />
-                  </Pressable>
-                </View>
-
-                <View style={{ marginTop: 12 }}>
-                  <ProgressBar progress={ratio} color={ratio >= 1 ? colors.danger : ratio >= 0.7 ? colors.warning : colors.primary} />
-                </View>
-
-                {!cancelled ? (
-                  <View style={styles.actions}>
-                    <View style={styles.stepper}>
-                      <Pressable
-                        accessibilityLabel={i18n.t('admin.moins')}
-                        style={styles.stepBtn}
-                        onPress={() => setCapacity.mutate({ id: s.id, capacity: Math.max(s._count.bookings, 1, s.capacity - 1) })}
-                      >
-                        <MaterialIcons name="remove" size={18} color={colors.text} />
-                      </Pressable>
-                      <Text style={styles.stepText}>{i18n.t('admin.places', { capacity: s.capacity })}</Text>
-                      <Pressable accessibilityLabel={i18n.t('common.plus')} style={styles.stepBtn} onPress={() => setCapacity.mutate({ id: s.id, capacity: s.capacity + 1 })}>
-                        <MaterialIcons name="add" size={18} color={colors.text} />
-                      </Pressable>
-                    </View>
-                    <Pressable style={styles.pill} onPress={() => setCoachFor(s)}>
-                      <Text style={styles.pillText}>{i18n.t('admin.remplacer_coach')}</Text>
-                    </Pressable>
-                    <Pressable style={[styles.pill, styles.pillDanger]} onPress={() => setCancelFor(s)}>
-                      <Text style={[styles.pillText, { color: colors.dangerInk }]}>{i18n.t('common.annuler')}</Text>
-                    </Pressable>
-                  </View>
-                ) : null}
-              </Pressable>
-            );
-          })}
+        <View style={{ gap: 12 }}>
+          {list.map((s) => (
+            <SessionPlanningCard
+              key={s.id}
+              session={s}
+              now={now}
+              onPress={() => router.push({ pathname: '/(admin)/session/[id]', params: { id: s.id } } as never)}
+              action={
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={i18n.t('admin.modifier_le_cours')}
+                  onPress={() => router.push({ pathname: '/(admin)/course-form', params: { id: s.id } })}
+                  hitSlop={6}
+                  style={({ pressed }) => [styles.editBtn, pressed && { transform: [{ scale: 0.92 }] }]}
+                >
+                  <MaterialIcons name="edit" size={22} color={colors.primaryContrast} />
+                </Pressable>
+              }
+            />
+          ))}
           {isLoading ? <SkeletonList count={3} height={96} /> : list.length === 0 ? (
             <View style={[styles.empty, cardShadow]}>
               <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
@@ -168,39 +104,6 @@ export default function AdminPlanningScreen() {
         </View>
       </ScrollView>
 
-      <BottomSheet visible={!!coachFor} onClose={() => setCoachFor(null)}>
-        <Text style={styles.sheetTitle}>{i18n.t('admin.remplacer_le_coach')}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.choisissez_le_nouveau_coach', { name: coachFor?.classType.name })}</Text>
-        <View style={{ gap: 8, marginTop: 6 }}>
-          {(coaches ?? []).map((c) => {
-            const active = coachFor?.coachId === c.userId;
-            return (
-              <Pressable
-                key={c.userId}
-                style={[styles.option, active && styles.optionActive]}
-                onPress={() => coachFor && replaceCoach.mutate({ id: coachFor.id, coachId: c.userId }, { onSuccess: () => setCoachFor(null) })}
-              >
-                <Text style={[styles.optionText, active && { color: colors.primaryContrast }]}>{c.user.firstName} {c.user.lastName}</Text>
-                {active ? <MaterialIcons name="check" size={18} color={colors.primaryContrast} /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-      </BottomSheet>
-
-      <BottomSheet visible={!!cancelFor} onClose={() => setCancelFor(null)}>
-        <Text style={styles.sheetTitle}>{i18n.t('common.annuler_2', { name: cancelFor?.classType.name })}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.les_inscrit_s_seront_prevenus', { v1: cancelFor?._count.bookings ?? 0 })}</Text>
-        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button
-            label={i18n.t('admin.oui_annuler_le_cours')}
-            variant="secondary"
-            loading={cancel.isPending}
-            onPress={() => cancelFor && cancel.mutate(cancelFor.id, { onSettled: () => setCancelFor(null) })}
-          />
-          <Button label={i18n.t('admin.garder_le_cours')} variant="outline" onPress={() => setCancelFor(null)} />
-        </View>
-      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -211,35 +114,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
     addShadow: { borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5, marginBottom: 6 },
     addButton: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
-    card: { padding: 14, backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border },
-    row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    timeCol: { minWidth: 56, flexShrink: 0, gap: 1 },
-    duration: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, color: colors.muted },
-    time: { minWidth: 56, flexShrink: 0, fontFamily: fonts.head, fontSize: 18, color: colors.text },
-    name: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
-    meta: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-    tag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-    tagText: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
-    editBtn: {
-      width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
-      backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border,
-    },
-    actions: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' },
-    stepper: { flexDirection: 'row', alignItems: 'center', height: 44, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
-    stepBtn: { width: 40, height: 44, alignItems: 'center', justifyContent: 'center' },
-    stepText: { minWidth: 62, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 13, color: colors.text },
-    pill: { height: 44, paddingHorizontal: 14, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
-    pillDanger: { backgroundColor: colors.dangerSoft },
-    pillText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
+    editBtn: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
     empty: { padding: 28, alignItems: 'center', gap: 8, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     emptyText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
-    sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
-    option: {
-      height: 52, borderRadius: 14, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border,
-    },
-    optionActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-    optionText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text },
   });
 }
