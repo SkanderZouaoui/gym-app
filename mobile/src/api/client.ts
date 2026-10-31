@@ -8,6 +8,7 @@ export class ApiError extends Error {
     public code: string,
     message: string,
     public status: number,
+    public details?: unknown,
   ) {
     super(message);
   }
@@ -66,7 +67,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!res.ok) {
     const payload = await res.json().catch(() => ({ code: 'UNKNOWN', message: res.statusText }));
-    throw new ApiError(payload.code ?? 'UNKNOWN', payload.message ?? res.statusText, res.status);
+    throw new ApiError(payload.code ?? 'UNKNOWN', payload.message ?? res.statusText, res.status, payload.details);
   }
 
   if (res.status === 204) return undefined as T;

@@ -7,6 +7,7 @@ import { authApi } from '../../src/api/endpoints';
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import { otpRateLimitMessage } from '../../src/utils/otpErrors';
 
 type Step = 'email' | 'code';
 
@@ -29,8 +30,8 @@ export default function ForgotPasswordScreen() {
     try {
       await authApi.forgotPassword(email.trim());
       setStep('code');
-    } catch {
-      setError(t('auth.impossible_denvoyer_le_code_reessayez'));
+    } catch (e) {
+      setError(otpRateLimitMessage(e) ?? t('auth.impossible_denvoyer_le_code_reessayez'));
     } finally {
       setLoading(false);
     }

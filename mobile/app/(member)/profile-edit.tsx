@@ -21,6 +21,7 @@ import { ApiError } from '../../src/api/client';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import { otpRateLimitMessage } from '../../src/utils/otpErrors';
 
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
@@ -106,7 +107,7 @@ export default function ProfileEditScreen() {
       { newEmail: newEmail.trim(), password: emailPassword },
       {
         onSuccess: () => setEmailStep('code'),
-        onError: (e) => setEmailError(e instanceof ApiError ? traduireErreurEmail(e.code) : t('member.une_erreur_est_survenue')),
+        onError: (e) => setEmailError(otpRateLimitMessage(e) ?? (e instanceof ApiError ? traduireErreurEmail(e.code) : t('member.une_erreur_est_survenue'))),
       },
     );
   };

@@ -257,6 +257,7 @@
     "session_expired": "Session expired",
     "share_email_line": "\nEmail: {{email}}",
     "wrong_code": "Incorrect code.",
+    "otp_rate_limited": "Too many code requests. Try again in {{minutes}} min.",
     "qr_not_recognized": "QR code not recognized",
     "enjoy_class": "Enjoy your class!",
     "notice_understood": "Got it",

@@ -23,14 +23,24 @@ export class OtpService {
     private readonly config: ConfigService,
   ) {}
 
-  /** Lève 429 OTP_RATE_LIMITED si OTP_MAX_PER_WINDOW codes ont déjà été générés dans la dernière heure. */
+  /** Lève 429 OTP_RATE_LIMITED (avec `details.retryAfterSeconds`) si OTP_MAX_PER_WINDOW codes
+   * ont déjà été générés dans la dernière heure ; un créneau se libère quand le plus ancien
+   * des OTP_MAX_PER_WINDOW derniers codes sort de la fenêtre. */
   async generateAndStore(userId: string, purpose: OtpPurpose, newEmail?: string) {
-    const recent = await this.prisma.otpCode.count({
+    const recent = await this.prisma.otpCode.findMany({
       where: { userId, purpose, createdAt: { gt: new Date(Date.now() - OTP_WINDOW_MS) } },
+      orderBy: { createdAt: 'desc' },
+      take: OTP_MAX_PER_WINDOW,
+      select: { createdAt: true },
     });
-    if (recent >= OTP_MAX_PER_WINDOW) {
+    if (recent.length >= OTP_MAX_PER_WINDOW) {
+      const unlockAt = recent[OTP_MAX_PER_WINDOW - 1].createdAt.getTime() + OTP_WINDOW_MS;
+      const retryAfterSeconds = Math.max(1, Math.ceil((unlockAt - Date.now()) / 1000));
       this.logger.warn(`Génération de code ${purpose} bloquée (plafond atteint) pour l'utilisateur ${userId}`);
-      throw new HttpException('OTP_RATE_LIMITED', HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        { code: 'OTP_RATE_LIMITED', message: 'OTP_RATE_LIMITED', details: { retryAfterSeconds } },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     const code = String(randomInt(0, 1_000_000)).padStart(6, '0');

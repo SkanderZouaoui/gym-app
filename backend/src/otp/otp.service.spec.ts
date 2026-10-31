@@ -13,7 +13,7 @@ describe('OtpService — envoi du code par e-mail', () => {
 
   beforeEach(() => {
     prisma = {
-      otpCode: { updateMany: vi.fn(), create: vi.fn(), count: vi.fn().mockResolvedValue(0) },
+      otpCode: { updateMany: vi.fn(), create: vi.fn(), findMany: vi.fn().mockResolvedValue([]) },
       user: { findUnique: vi.fn().mockResolvedValue(user) },
     };
     mail = { send: vi.fn().mockResolvedValue(true) };
@@ -56,16 +56,24 @@ describe('OtpService — envoi du code par e-mail', () => {
     expect(logged.join('\n')).not.toContain(code);
   });
 
-  it('bloque la génération (429) une fois le plafond horaire atteint, sans envoyer d\'e-mail', async () => {
-    prisma.otpCode.count.mockResolvedValue(OTP_MAX_PER_WINDOW);
+  const codesCreatedAgo = (...minutes: number[]) => minutes.map((m) => ({ createdAt: new Date(Date.now() - m * 60_000) }));
 
-    await expect(service.generateAndStore('u1', 'PASSWORD_RESET')).rejects.toMatchObject({ status: 429 });
+  it('bloque la génération (429) au plafond, sans e-mail, avec le temps restant avant le prochain code', async () => {
+    // 5 codes créés il y a 5, 20, 30, 40 et 50 min : le 5e (le plus ancien) libère un créneau dans 10 min.
+    prisma.otpCode.findMany.mockResolvedValue(codesCreatedAgo(5, 20, 30, 40, 50));
+
+    const err = await service.generateAndStore('u1', 'PASSWORD_RESET').catch((e) => e);
+    expect(err.getStatus()).toBe(429);
+    expect(err.getResponse()).toMatchObject({ code: 'OTP_RATE_LIMITED' });
+    const retry = err.getResponse().details.retryAfterSeconds;
+    expect(retry).toBeGreaterThan(9 * 60);
+    expect(retry).toBeLessThanOrEqual(10 * 60);
     expect(prisma.otpCode.create).not.toHaveBeenCalled();
     expect(mail.send).not.toHaveBeenCalled();
   });
 
   it('autorise encore un code juste sous le plafond', async () => {
-    prisma.otpCode.count.mockResolvedValue(OTP_MAX_PER_WINDOW - 1);
+    prisma.otpCode.findMany.mockResolvedValue(codesCreatedAgo(5, 20, 30, 40));
     await service.generateAndStore('u1', 'PASSWORD_RESET');
     expect(prisma.otpCode.create).toHaveBeenCalledOnce();
   });
