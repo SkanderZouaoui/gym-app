@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString } from 'class-validator';
 
 export class RequestEmailChangeDto {
   @IsEmail()
@@ -6,4 +6,9 @@ export class RequestEmailChangeDto {
 
   @IsString()
   password!: string;
+
+  /** Langue de l'app, pour traduire l'e-mail. */
+  @IsOptional()
+  @IsIn(['fr', 'en', 'ar'])
+  lang?: string;
 }

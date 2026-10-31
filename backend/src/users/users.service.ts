@@ -158,7 +158,7 @@ export class UsersService {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.newEmail } });
     if (existing) throw new ConflictException('EMAIL_ALREADY_USED');
 
-    await this.otpService.generateAndStore(userId, 'EMAIL_CHANGE', dto.newEmail);
+    await this.otpService.generateAndStore(userId, 'EMAIL_CHANGE', dto.newEmail, dto.lang);
   }
 
   /** Étape 2 — vérifie le code et applique le nouvel e-mail stagé sur l'OTP. */

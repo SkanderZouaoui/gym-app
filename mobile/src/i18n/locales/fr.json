@@ -258,6 +258,7 @@
     "share_email_line": "\nE-mail : {{email}}",
     "wrong_code": "Code incorrect.",
     "otp_rate_limited": "Trop de demandes de code. Réessayez dans {{minutes}} min.",
+    "otp_too_many_attempts": "Trop d'essais incorrects. Demandez un nouveau code.",
     "qr_not_recognized": "QR non reconnu",
     "enjoy_class": "Bon cours !",
     "notice_understood": "Compris",

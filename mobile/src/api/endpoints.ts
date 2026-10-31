@@ -9,6 +9,7 @@ import type {
   TokenPair,
 } from './types';
 import type { AppConfigContent, Role } from '@muscleup/shared';
+import { mailLang } from '../utils/otpErrors';
 
 export const configApi = {
   /** Configuration publiée (branding, accueil, navigation, textes, règles) —
@@ -36,7 +37,7 @@ export const authApi = {
   logout: (refreshToken: string) =>
     apiRequest<void>('/v1/auth/logout', { method: 'POST', body: { refreshToken } }),
   forgotPassword: (email: string) =>
-    apiRequest<void>('/v1/auth/forgot-password', { method: 'POST', body: { email }, auth: false }),
+    apiRequest<void>('/v1/auth/forgot-password', { method: 'POST', body: { email, lang: mailLang() }, auth: false }),
   resetPassword: (email: string, code: string, newPassword: string) =>
     apiRequest<void>('/v1/auth/reset-password', {
       method: 'POST',

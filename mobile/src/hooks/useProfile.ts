@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../api/client';
 import type { MeResponse } from '../api/types';
+import { mailLang } from '../utils/otpErrors';
 
 export interface NotificationItem {
   id: string;
@@ -93,7 +94,7 @@ export function useDeleteAccount() {
 export function useRequestEmailChange() {
   return useMutation({
     mutationFn: (input: { newEmail: string; password: string }) =>
-      apiRequest<void>('/v1/me/email/request-otp', { method: 'POST', body: input }),
+      apiRequest<void>('/v1/me/email/request-otp', { method: 'POST', body: { ...input, lang: mailLang() } }),
   });
 }
 

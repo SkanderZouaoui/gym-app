@@ -50,5 +50,7 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       MAIL_FROM: ${MAIL_FROM:-}
       MAIL_BRAND: ${MAIL_BRAND:-MuscleUP}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-}
+      APP_SCHEME: ${APP_SCHEME:-muscleup}
     ports:
       - "${API_PORT:-3000}:3000"

@@ -258,6 +258,7 @@
     "share_email_line": "\nEmail: {{email}}",
     "wrong_code": "Incorrect code.",
     "otp_rate_limited": "Too many code requests. Try again in {{minutes}} min.",
+    "otp_too_many_attempts": "Too many incorrect attempts. Request a new code.",
     "qr_not_recognized": "QR code not recognized",
     "enjoy_class": "Enjoy your class!",
     "notice_understood": "Got it",

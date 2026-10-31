@@ -178,6 +178,8 @@ model OtpCode {
   userId     String     @map("user_id")
   purpose    OtpPurpose
   codeHash   String     @map("code_hash")
+  /// Essais de saisie déjà consommés ; le code est verrouillé à OTP_MAX_ATTEMPTS.
+  attempts   Int        @default(0)
   newEmail   String?    @map("new_email")
   expiresAt  DateTime   @map("expires_at")
   consumedAt DateTime?  @map("consumed_at")

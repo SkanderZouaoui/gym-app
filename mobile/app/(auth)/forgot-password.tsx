@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { fonts } from '../../src/theme/tokens';
 import { AuthButton, AuthField, AuthScreen, Chip, DoneView, ErrorLine, HeroButton, LogoTile, PasswordRules, passwordChecks, useAuthPalette } from '../../src/components/auth/AuthKit';
@@ -15,9 +15,14 @@ type Step = 'email' | 'code';
 export default function ForgotPasswordScreen() {
   const { t } = useTranslation();
   const pal = useAuthPalette();
-  const [step, setStep] = useState<Step>('email');
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  // Lien profond de l'e-mail (muscleup://forgot-password?email=…&code=…) : préremplit et passe à l'étape du code.
+  const params = useLocalSearchParams<{ email?: string; code?: string }>();
+  const linkedEmail = typeof params.email === 'string' ? params.email : '';
+  const linkedCode = typeof params.code === 'string' && /^\d{6}$/.test(params.code) ? params.code : '';
+  const fromLink = !!linkedEmail && !!linkedCode;
+  const [step, setStep] = useState<Step>(fromLink ? 'code' : 'email');
+  const [email, setEmail] = useState(linkedEmail);
+  const [code, setCode] = useState(linkedCode);
   const [newPassword, setNewPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,6 +110,8 @@ function traduireErreur(code: string): string {
       return i18n.t('common.wrong_code');
     case 'OTP_EXPIRED':
       return i18n.t('common.ce_code_a_expire_demandez');
+    case 'OTP_TOO_MANY_ATTEMPTS':
+      return i18n.t('common.otp_too_many_attempts');
     default:
       return i18n.t('auth.impossible_de_reinitialiser_le_mot');
   }

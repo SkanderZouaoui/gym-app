@@ -258,6 +258,7 @@
     "share_email_line": "\nالبريد الإلكتروني: {{email}}",
     "wrong_code": "الرمز غير صحيح.",
     "otp_rate_limited": "تم تجاوز عدد طلبات الرمز المسموح بها. أعد المحاولة بعد {{minutes}} دقيقة.",
+    "otp_too_many_attempts": "عدد كبير من المحاولات الخاطئة. اطلب رمزًا جديدًا.",
     "qr_not_recognized": "لم يتم التعرف على الرمز",
     "enjoy_class": "حصة موفقة!",
     "notice_understood": "حسنًا",

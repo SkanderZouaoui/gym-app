@@ -10,6 +10,8 @@ const OTP_TTL_MS = 10 * 60 * 1000;
 /** Plafond de codes générés par compte et par usage sur la fenêtre glissante (anti e-mail bombing). */
 export const OTP_MAX_PER_WINDOW = 5;
 export const OTP_WINDOW_MS = 60 * 60 * 1000;
+/** Essais de saisie par code avant verrouillage (il faut alors en redemander un). */
+export const OTP_MAX_ATTEMPTS = 5;
 
 /** Codes à usage unique (6 chiffres) — mot de passe oublié, changement
  * d'e-mail. Le code est envoyé par e-mail (MailService) et n'est jamais loggé. */
@@ -26,7 +28,7 @@ export class OtpService {
   /** Lève 429 OTP_RATE_LIMITED (avec `details.retryAfterSeconds`) si OTP_MAX_PER_WINDOW codes
    * ont déjà été générés dans la dernière heure ; un créneau se libère quand le plus ancien
    * des OTP_MAX_PER_WINDOW derniers codes sort de la fenêtre. */
-  async generateAndStore(userId: string, purpose: OtpPurpose, newEmail?: string) {
+  async generateAndStore(userId: string, purpose: OtpPurpose, newEmail?: string, lang?: string) {
     const recent = await this.prisma.otpCode.findMany({
       where: { userId, purpose, createdAt: { gt: new Date(Date.now() - OTP_WINDOW_MS) } },
       orderBy: { createdAt: 'desc' },
@@ -74,11 +76,21 @@ export class OtpService {
           firstName: user.firstName,
           code,
           brand: this.config.get<string>('MAIL_BRAND') ?? 'MuscleUP',
+          lang,
+          openAppUrl: purpose === 'PASSWORD_RESET' ? this.openAppUrl(to, code, lang) : undefined,
         }),
       )
       .then((sent) => {
         if (!sent) this.logger.error(`Code ${purpose} non délivré pour l'utilisateur ${userId}`);
       });
+  }
+
+  /** Lien https de l'e-mail vers la page qui ouvre l'app (code dans le fragment, jamais envoyé au serveur). */
+  private openAppUrl(email: string, code: string, lang?: string): string | undefined {
+    const base = this.config.get<string>('PUBLIC_API_URL')?.replace(/\/+$/, '');
+    if (!base) return undefined;
+    const params = new URLSearchParams({ e: email, c: code, ...(lang ? { l: lang } : {}) });
+    return `${base}/v1/auth/open-app#${params.toString()}`;
   }
 
   /** Vérifie le code sans le consommer — l'appelant marque `consumedAt`
@@ -90,6 +102,20 @@ export class OtpService {
     });
     if (!otp) throw new UnauthorizedException('OTP_INVALID');
     if (otp.expiresAt < new Date()) throw new UnauthorizedException('OTP_EXPIRED');
+
+    // Chaque saisie consomme un essai (incrément atomique, sûr face aux requêtes parallèles) ;
+    // passé OTP_MAX_ATTEMPTS, le code est verrouillé même si le bon est ensuite saisi.
+    const { count } = await this.prisma.otpCode.updateMany({
+      where: { id: otp.id, attempts: { lt: OTP_MAX_ATTEMPTS } },
+      data: { attempts: { increment: 1 } },
+    });
+    if (count === 0) {
+      this.logger.warn(`Code ${purpose} verrouillé (trop d'essais) pour l'utilisateur ${userId}`);
+      throw new HttpException(
+        { code: 'OTP_TOO_MANY_ATTEMPTS', message: 'OTP_TOO_MANY_ATTEMPTS' },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
     if (otp.codeHash !== this.hashCode(code)) throw new UnauthorizedException('OTP_INVALID');
     return otp;
   }

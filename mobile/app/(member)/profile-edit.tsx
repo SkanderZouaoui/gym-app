@@ -259,6 +259,8 @@ function traduireErreurEmail(code: string): string {
       return i18n.t('common.wrong_code');
     case 'OTP_EXPIRED':
       return i18n.t('common.ce_code_a_expire_demandez');
+    case 'OTP_TOO_MANY_ATTEMPTS':
+      return i18n.t('common.otp_too_many_attempts');
     default:
       return i18n.t('member.une_erreur_est_survenue');
   }

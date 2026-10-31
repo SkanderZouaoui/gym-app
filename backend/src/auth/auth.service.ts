@@ -148,11 +148,11 @@ export class AuthService {
 
   /** Toujours silencieux côté réponse (ne révèle jamais si l'e-mail existe) —
    * section Compte/Profil, mot de passe oublié. */
-  async requestPasswordReset(email: string): Promise<void> {
+  async requestPasswordReset(email: string, lang?: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user || user.status !== 'ACTIVE') return;
     // Plafond atteint : 429 OTP_RATE_LIMITED avec le temps restant (propagé tel quel).
-    await this.otpService.generateAndStore(user.id, 'PASSWORD_RESET');
+    await this.otpService.generateAndStore(user.id, 'PASSWORD_RESET', undefined, lang);
   }
 
   async resetPassword(email: string, code: string, newPassword: string): Promise<void> {
