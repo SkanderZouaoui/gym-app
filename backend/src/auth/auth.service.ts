@@ -3,6 +3,8 @@ import { generateMemberCode } from '../users/member-code.js';
 import {
   ConflictException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -151,7 +153,13 @@ export class AuthService {
   async requestPasswordReset(email: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user || user.status !== 'ACTIVE') return;
-    await this.otpService.generateAndStore(user.id, 'PASSWORD_RESET');
+    try {
+      await this.otpService.generateAndStore(user.id, 'PASSWORD_RESET');
+    } catch (err) {
+      // Plafond de codes atteint : réponse identique (204) pour ne rien révéler sur le compte.
+      if (err instanceof HttpException && err.getStatus() === HttpStatus.TOO_MANY_REQUESTS) return;
+      throw err;
+    }
   }
 
   async resetPassword(email: string, code: string, newPassword: string): Promise<void> {

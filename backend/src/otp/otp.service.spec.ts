@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { OtpService } from './otp.service.js';
+import { OtpService, OTP_MAX_PER_WINDOW } from './otp.service.js';
 import { MailService } from '../mail/mail.service.js';
 
 describe('OtpService — envoi du code par e-mail', () => {
@@ -13,7 +13,7 @@ describe('OtpService — envoi du code par e-mail', () => {
 
   beforeEach(() => {
     prisma = {
-      otpCode: { updateMany: vi.fn(), create: vi.fn() },
+      otpCode: { updateMany: vi.fn(), create: vi.fn(), count: vi.fn().mockResolvedValue(0) },
       user: { findUnique: vi.fn().mockResolvedValue(user) },
     };
     mail = { send: vi.fn().mockResolvedValue(true) };
@@ -54,6 +54,20 @@ describe('OtpService — envoi du code par e-mail', () => {
 
     expect(prisma.otpCode.create.mock.calls[0][0].data.codeHash).not.toContain(code);
     expect(logged.join('\n')).not.toContain(code);
+  });
+
+  it('bloque la génération (429) une fois le plafond horaire atteint, sans envoyer d\'e-mail', async () => {
+    prisma.otpCode.count.mockResolvedValue(OTP_MAX_PER_WINDOW);
+
+    await expect(service.generateAndStore('u1', 'PASSWORD_RESET')).rejects.toMatchObject({ status: 429 });
+    expect(prisma.otpCode.create).not.toHaveBeenCalled();
+    expect(mail.send).not.toHaveBeenCalled();
+  });
+
+  it('autorise encore un code juste sous le plafond', async () => {
+    prisma.otpCode.count.mockResolvedValue(OTP_MAX_PER_WINDOW - 1);
+    await service.generateAndStore('u1', 'PASSWORD_RESET');
+    expect(prisma.otpCode.create).toHaveBeenCalledOnce();
   });
 
   it('ne lève pas si l\'envoi échoue (ne révèle rien à l\'appelant)', async () => {

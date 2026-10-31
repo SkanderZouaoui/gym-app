@@ -1,5 +1,5 @@
 import { randomInt, createHash } from 'node:crypto';
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import type { OtpPurpose } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -7,6 +7,9 @@ import { MailService } from '../mail/mail.service.js';
 import { buildOtpMail } from '../mail/otp-mail.js';
 
 const OTP_TTL_MS = 10 * 60 * 1000;
+/** Plafond de codes générés par compte et par usage sur la fenêtre glissante (anti e-mail bombing). */
+export const OTP_MAX_PER_WINDOW = 5;
+export const OTP_WINDOW_MS = 60 * 60 * 1000;
 
 /** Codes à usage unique (6 chiffres) — mot de passe oublié, changement
  * d'e-mail. Le code est envoyé par e-mail (MailService) et n'est jamais loggé. */
@@ -20,7 +23,16 @@ export class OtpService {
     private readonly config: ConfigService,
   ) {}
 
+  /** Lève 429 OTP_RATE_LIMITED si OTP_MAX_PER_WINDOW codes ont déjà été générés dans la dernière heure. */
   async generateAndStore(userId: string, purpose: OtpPurpose, newEmail?: string) {
+    const recent = await this.prisma.otpCode.count({
+      where: { userId, purpose, createdAt: { gt: new Date(Date.now() - OTP_WINDOW_MS) } },
+    });
+    if (recent >= OTP_MAX_PER_WINDOW) {
+      this.logger.warn(`Génération de code ${purpose} bloquée (plafond atteint) pour l'utilisateur ${userId}`);
+      throw new HttpException('OTP_RATE_LIMITED', HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
 
     await this.prisma.otpCode.updateMany({
