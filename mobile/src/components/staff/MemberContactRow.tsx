@@ -3,10 +3,10 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
-import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { haptics } from '../../utils/haptics';
 
 interface Props {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -36,7 +36,7 @@ export function MemberContactRow({ icon, label, value, href, copyable = false, l
   const copy = async () => {
     if (!hasValue) return;
     await Clipboard.setStringAsync(value!);
-    void Haptics.selectionAsync();
+    void haptics.selection();
     setCopied(true);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setCopied(false), 1600);

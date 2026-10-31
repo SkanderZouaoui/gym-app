@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as Haptics from 'expo-haptics';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
@@ -15,6 +14,7 @@ import { useManualCheckin, useScan, type ScanOutcome } from '../hooks/useAttenda
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../i18n';
 import { useNow } from '../hooks/useNow';
+import { haptics } from '../utils/haptics';
 
 export interface ScanSessionOption {
   id: string;
@@ -67,13 +67,11 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
       { token: data, sessionId },
       {
         onSuccess: (res) => {
-          void Haptics.notificationAsync(
-            res.result === 'GRANTED' ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error,
-          );
+          void (res.result === 'GRANTED' ? haptics.success() : haptics.error());
           setOutcome(res);
         },
         onError: () => {
-          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          void haptics.error();
           setOutcome({ result: 'DENIED', reasonCode: 'TOKEN_INVALID' });
         },
       },

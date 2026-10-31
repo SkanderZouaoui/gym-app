@@ -2,13 +2,13 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Animated, Image, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { Banner } from './ui';
 import { ScrollLockContext } from './ui/KeyboardAwareScreen';
 import { useGalleryMutations } from '../hooks/useGallery';
+import { haptics } from '../utils/haptics';
 
 const COLUMNS = 3;
 const GAP = 10;
@@ -96,7 +96,7 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
     setDraggingKey(key);
     setLiveOrder([...L.keys]);
     setScrollEnabled(false);
-    void Haptics.selectionAsync();
+    void haptics.selection();
   };
 
   /** Relâché sans avoir bougé : le doigt n'a jamais « saisi » la photo, on annule la sélection. */
@@ -157,7 +157,7 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
             next.splice(target, 0, d.key);
             d.order = next;
             setLiveOrder(next);
-            void Haptics.selectionAsync();
+            void haptics.selection();
           }
         },
         onPanResponderRelease: finishDrag,

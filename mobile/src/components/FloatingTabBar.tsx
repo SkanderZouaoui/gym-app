@@ -3,7 +3,6 @@ import { Platform, Pressable, StyleSheet, View, type LayoutChangeEvent } from 'r
 import { MaterialIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -18,6 +17,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { useKeyboardHeight } from '../hooks/useKeyboardHeight';
 import { useTabBarStore } from '../store/tabBar';
 import { usePreferencesStore } from '../store/preferences';
+import { haptics } from '../utils/haptics';
 
 /** Sous-ensemble des props `tabBar` de React Navigation dont on a besoin
  * (React Navigation est embarqué dans expo-router, pas résolvable directement). API SDK 58 : emitter + navigateToTab.. */
@@ -69,7 +69,7 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   const setHidden = useTabBarStore((s) => s.setHidden);
 
   const press = (route: TabBarRoute, focused: boolean) => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    void haptics.light();
     const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
     if (!focused && !event.defaultPrevented) navigateToTab(route.key);
   };
