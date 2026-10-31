@@ -11,7 +11,6 @@ import { ExerciseEditorCard } from '../../src/components/training/ExerciseEditor
 import type { SetDraft } from '../../src/components/training/SetRow';
 import {
   useAssignProgram,
-  useCoachStudents,
   useProgramDetail,
   type AssignProgramExerciseInput,
 } from '../../src/hooks/useCoachSessions';
@@ -39,7 +38,7 @@ function summarizeReps(sets: SetDraft[]): string {
   return new Set(reps).size === 1 ? reps[0] : `${reps[0]}-${reps[reps.length - 1]}`;
 }
 
-/** Nouveau programme (coach) : nom, niveau, objectif, destinataires et exercices avec leurs séries.
+/** Nouveau programme (coach) : nom, niveau, objectif et exercices avec leurs séries.
  * Le programme est soumis à la validation de l'admin ; une fois accepté il devient visible des adhérents. */
 export default function CoachProgramNewScreen() {
   const { t } = useTranslation();
@@ -50,13 +49,11 @@ export default function CoachProgramNewScreen() {
   const [name, setName] = useState('');
   const [level, setLevel] = useState<string>('Débutant');
   const [goal, setGoal] = useState<string>('Perte de poids');
-  const [audience, setAudience] = useState<string>('ALL'); // 'ALL' ou id d'un adhérent
   const [exercises, setExercises] = useState<DraftExercise[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const isAdmin = useSessionStore((st) => st.activeRole === 'ADMIN');
   const assignProgram = useAssignProgram(isAdmin);
-  const { data: students } = useCoachStudents();
   const { data: source } = useProgramDetail(duplicateFrom);
   const pick = useExercisePickStore((s) => s.pick);
   const clearPick = useExercisePickStore((s) => s.clear);
@@ -108,7 +105,6 @@ export default function CoachProgramNewScreen() {
         name: name.trim() || t('common.nouveau_programme'),
         level,
         goal,
-        assignedToId: audience === 'ALL' ? undefined : audience,
         days: [
           {
             dayOfWeek: 1,
@@ -132,16 +128,6 @@ export default function CoachProgramNewScreen() {
       },
     );
   };
-
-  const audienceRows = [
-    { id: 'ALL', label: t('coach.tous_les_adherents'), sub: t('coach.visible_par_tous_les_adherents'), icon: 'groups' as const },
-    ...(students ?? []).map((s) => ({
-      id: s.id,
-      label: `${s.firstName} ${s.lastName.charAt(0)}.`,
-      sub: t('coach.programme_personnel'),
-      icon: 'person' as const,
-    })),
-  ];
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -197,42 +183,13 @@ export default function CoachProgramNewScreen() {
           </View>
         </View>
 
-        {!isAdmin ? (
-        <View>
-          <Text style={styles.label}>{t('common.destinataires')}</Text>
-          <View style={[styles.audienceCard, cardShadow]}>
-            {audienceRows.map((r) => {
-              const active = audience === r.id;
-              return (
-                <Pressable key={r.id} onPress={() => setAudience(r.id)} style={[styles.audienceRow, active && styles.audienceRowActive]}>
-                  {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.audienceTile}>
-                      <MaterialIcons name={r.icon} size={22} color="#FFFFFF" />
-                    </LinearGradient>
-                  ) : (
-                    <View style={[styles.audienceTile, { backgroundColor: colors.surface2 }]}>
-                      <MaterialIcons name={r.icon} size={22} color={colors.primaryInk} />
-                    </View>
-                  )}
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <Text style={styles.audienceLabel}>{r.label}</Text>
-                    <Text style={styles.audienceSub}>{r.sub}</Text>
-                  </View>
-                  <View style={[styles.radio, active && { borderColor: colors.primary }]}>{active ? <View style={styles.radioDot} /> : null}</View>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-        ) : null}
-
         <View style={styles.notice}>
           <MaterialIcons name="verified-user" size={22} color={colors.primaryInk} />
           <Text style={styles.noticeText}>
             {isAdmin ? (
               <>{t('coach.notice_admin_a')}<Text style={{ fontFamily: fonts.bodyBold }}>{t('coach.publie_immediatement')}</Text>{t('coach.notice_admin_b')}</>
             ) : (
-              <>{t('coach.notice_coach_a')}<Text style={{ fontFamily: fonts.bodyBold }}>{t('coach.visible_par', { v1: audience === 'ALL' ? t('coach.tous_les_adherents_2') : t('coach.ladherent_choisi') })}</Text>{t('coach.notice_coach_b')}</>
+              <>{t('coach.notice_coach_a')}<Text style={{ fontFamily: fonts.bodyBold }}>{t('coach.visible_par', { v1: t('coach.tous_les_adherents_2') })}</Text>{t('coach.notice_coach_b')}</>
             )}
           </Text>
         </View>
@@ -316,14 +273,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     goalTile: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
     goalLabel: { fontFamily: fonts.head, fontSize: 15, letterSpacing: -0.3, color: colors.text },
     goalSub: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.muted },
-    audienceCard: { padding: 4, gap: 2, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
-    audienceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 20 },
-    audienceRowActive: { backgroundColor: colors.primarySoft },
-    audienceTile: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-    audienceLabel: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text },
-    audienceSub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-    radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
     notice: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: colors.primarySoft, borderRadius: 20, paddingVertical: 14, paddingHorizontal: 16 },
     noticeText: { flex: 1, fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.primaryInk },
     summary: { padding: 16, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },

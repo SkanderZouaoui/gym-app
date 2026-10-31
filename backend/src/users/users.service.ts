@@ -244,7 +244,7 @@ export class UsersService {
   }
 
   /** Recherche d'adhérent par nom ou téléphone (section 4.3 — Staff). */
-  async search(query: string, limited = false) {
+  async search(query: string, limited = false, skip = 0, take = 50) {
     const members = await this.prisma.user.findMany({
       where: {
         deletedAt: null,
@@ -276,7 +276,8 @@ export class UsersService {
             },
           },
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
-      take: 100,
+      skip,
+      take,
     });
     return this.withPhotoUrls(members);
   }

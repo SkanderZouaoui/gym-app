@@ -60,12 +60,6 @@ export class ProgramsController {
     return this.programsService.findCreatedByCoach(user.userId);
   }
 
-  @Roles(Role.COACH)
-  @Get('coach/students')
-  getStudents(@CurrentUser() user: AuthenticatedUser) {
-    return this.programsService.getStudents(user.userId);
-  }
-
   @Roles(Role.ADMIN)
   @Get('admin/programs')
   findForReview(@Query('status') status?: 'PENDING' | 'APPROVED' | 'REJECTED') {

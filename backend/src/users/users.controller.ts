@@ -14,6 +14,7 @@ import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { RequestEmailChangeDto } from './dto/request-email-change.dto.js';
 import { ConfirmEmailChangeDto } from './dto/confirm-email-change.dto.js';
 import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
+import { page } from '../common/pagination.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
@@ -82,8 +83,13 @@ export class UsersController {
 
   @Roles(Role.STAFF, Role.COACH, Role.ADMIN)
   @Get('members')
-  search(@Query('search') search: string, @CurrentUser() user: AuthenticatedUser) {
-    return this.usersService.search(search ?? '', user.activeRole === Role.COACH);
+  search(
+    @Query('search') search: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+  ) {
+    return this.usersService.search(search ?? '', user.activeRole === Role.COACH, page(skip, 0, 100_000), page(take, 50, 100));
   }
 
   /** Profil limité d'un adhérent inscrit à l'un des cours du coach : nom, abonnement (type) et cours suivis avec ce coach. */

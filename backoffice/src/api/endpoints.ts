@@ -65,8 +65,16 @@ export interface UpdateMemberInput {
 }
 
 export const membersApi = {
-  search: (query: string) =>
-    api.get<MemberListItem[]>('/v1/members', { params: { search: query } }).then((r) => r.data),
+  /** Tous les adhérents correspondants : l'API les sert par pages de 100, la table les pagine ensuite côté client. */
+  search: async (query: string) => {
+    const all: MemberListItem[] = []
+    for (let skip = 0; skip < 5000; skip += 100) {
+      const { data } = await api.get<MemberListItem[]>('/v1/members', { params: { search: query, skip, take: 100 } })
+      all.push(...data)
+      if (data.length < 100) break
+    }
+    return all
+  },
   create: (data: CreateMemberInput) => api.post<MemberListItem>('/v1/members', data).then((r) => r.data),
   update: (id: string, data: UpdateMemberInput) =>
     api.patch<MemberListItem>(`/v1/members/${id}`, data).then((r) => r.data),

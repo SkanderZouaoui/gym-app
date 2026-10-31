@@ -67,7 +67,7 @@ export default function StaffMembersScreen() {
       [],
     ),
   );
-  const { data: members, refetch, isLoading } = useMembers(query.trim());
+  const { data: members, refetch, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useMembers(query.trim());
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const plans = useMemo(
@@ -170,6 +170,9 @@ export default function StaffMembersScreen() {
         sections={sections}
         keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled
+        onEndReachedThreshold={0.5}
+        onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()}
+        ListFooterComponent={isFetchingNextPage ? <SkeletonList count={2} /> : undefined}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderSectionHeader={({ section }) => (

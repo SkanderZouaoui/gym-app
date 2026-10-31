@@ -61,24 +61,6 @@ export function useManualCheckin() {
   });
 }
 
-// --- Élèves suivis par le coach -------------------------------------------
-
-export interface CoachStudent {
-  id: string;
-  firstName: string;
-  lastName: string;
-  photoKey: string | null;
-  /** URL signée (durée limitée) de la photo de profil, null si aucune. */
-  photoUrl?: string | null;
-}
-
-export function useCoachStudents() {
-  return useQuery({
-    queryKey: ['coach', 'students'],
-    queryFn: () => apiRequest<CoachStudent[]>('/v1/coach/students'),
-  });
-}
-
 export type ProgramStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface CoachProgramSummary {
@@ -185,7 +167,6 @@ export function useAssignProgram(asAdmin = false) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'programs'] });
       queryClient.invalidateQueries({ queryKey: ['coach', 'programs'] });
-      queryClient.invalidateQueries({ queryKey: ['coach', 'students'] });
     },
   });
 }

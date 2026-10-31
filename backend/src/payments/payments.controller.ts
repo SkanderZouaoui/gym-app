@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { PaymentsService } from './payments.service.js';
 import { CreatePaymentDto } from './dto/create-payment.dto.js';
+import { page } from '../common/pagination.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
@@ -20,9 +21,9 @@ export class PaymentsController {
 
   @Roles(Role.STAFF, Role.ADMIN)
   @Get('payments')
-  findAll(@CurrentUser() user: AuthenticatedUser, @Query('from') from?: string, @Query('to') to?: string) {
+  findAll(@CurrentUser() user: AuthenticatedUser, @Query('from') from?: string, @Query('to') to?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
     const valid = (v?: string) => (v && !Number.isNaN(Date.parse(v)) ? new Date(v) : undefined);
-    return this.paymentsService.findAll(user.userId, user.activeRole, { from: valid(from), to: valid(to) });
+    return this.paymentsService.findAll(user.userId, user.activeRole, { from: valid(from), to: valid(to) }, page(skip, 0, 1_000_000), page(take, 100, 500));
   }
 
   @Roles(Role.STAFF, Role.ADMIN)

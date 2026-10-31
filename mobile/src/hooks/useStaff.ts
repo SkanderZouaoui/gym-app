@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../api/client';
 
 export interface StaffTodaySession {
@@ -55,12 +56,19 @@ export interface MemberDetail extends MemberSearchResult {
   createdAt?: string;
 }
 
-/** Liste d'adhérents (25 premiers résultats) filtrée par nom, téléphone ou e-mail ; vide = tous. */
+const MEMBERS_PAGE = 50;
+
+/** Liste d'adhérents filtrée par nom, téléphone ou e-mail (vide = tous), chargée par pages de 50 : `fetchNextPage` au défilement. */
 export function useMembers(query: string) {
-  return useQuery({
+  const q = useInfiniteQuery({
     queryKey: ['members', 'list', query],
-    queryFn: () => apiRequest<MemberSearchResult[]>(`/v1/members?search=${encodeURIComponent(query)}`),
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      apiRequest<MemberSearchResult[]>(`/v1/members?search=${encodeURIComponent(query)}&skip=${pageParam}&take=${MEMBERS_PAGE}`),
+    getNextPageParam: (last, all) => (last.length < MEMBERS_PAGE ? undefined : all.length * MEMBERS_PAGE),
   });
+  const data = useMemo(() => q.data?.pages.flat(), [q.data]);
+  return { ...q, data };
 }
 
 export function useMemberDetail(id: string | undefined) {
@@ -106,7 +114,10 @@ export interface StaffPayment {
   };
 }
 
-/** Encaissements de la caisse : les 100 derniers, ou ceux d'une période (`from`/`to` en ISO). */
+const PAYMENTS_PAGE = 500;
+const PAYMENTS_MAX_PAGES = 20;
+
+/** Encaissements de la caisse : les 100 derniers, ou tous ceux d'une période (`from`/`to` en ISO), récupérés page par page. */
 export function usePayments(range?: { from?: string; to?: string }) {
   const qs = new URLSearchParams();
   if (range?.from) qs.set('from', range.from);
@@ -114,7 +125,16 @@ export function usePayments(range?: { from?: string; to?: string }) {
   const q = qs.toString();
   return useQuery({
     queryKey: ['staff', 'payments', range?.from ?? '', range?.to ?? ''],
-    queryFn: () => apiRequest<StaffPayment[]>(`/v1/payments${q ? `?${q}` : ''}`),
+    queryFn: async () => {
+      if (!range?.from && !range?.to) return apiRequest<StaffPayment[]>('/v1/payments');
+      const all: StaffPayment[] = [];
+      for (let i = 0; i < PAYMENTS_MAX_PAGES; i++) {
+        const batch = await apiRequest<StaffPayment[]>(`/v1/payments?${q}&skip=${i * PAYMENTS_PAGE}&take=${PAYMENTS_PAGE}`);
+        all.push(...batch);
+        if (batch.length < PAYMENTS_PAGE) break;
+      }
+      return all;
+    },
   });
 }
 
