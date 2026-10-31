@@ -16,6 +16,7 @@ interface ImageGalleryProps {
 }
 
 const GAP = 12;
+const THUMB = 52;
 const SIDE = spacing.lg; // marge de l'écran : la carte suivante dépasse pour inviter au balayage
 
 /** Une seule photo : pleine largeur ; sinon ~82 % de l'écran pour laisser deviner la suivante. */
@@ -36,6 +37,7 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
   const [scrollX] = useState(() => new Animated.Value(0));
   const lastTick = useRef(0);
   const listRef = useRef<FlatList<string>>(null);
+  const railRef = useRef<FlatList<string>>(null);
   // Images dont le chargement est terminé (réussi ou en échec) : tant qu'elles n'y sont pas, un squelette animé les remplace.
   const [settled, setSettled] = useState<Record<string, 'ok' | 'error'>>({});
   const settle = (url: string, state: 'ok' | 'error') => setSettled((s) => (s[url] === state ? s : { ...s, [url]: state }));
@@ -52,6 +54,11 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
     });
     return () => scrollX.removeListener(id);
   }, [scrollX, interval]);
+
+  // Le rail de miniatures suit la photo affichée dans la visionneuse.
+  useEffect(() => {
+    if (openIndex !== null) railRef.current?.scrollToIndex({ index: current, animated: true, viewPosition: 0.5 });
+  }, [current, openIndex]);
 
   if (urls.length === 0) return null;
 
@@ -88,7 +95,10 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
                 style={({ pressed }) => [styles.tile, cardShadow, { width: tileWidth, height: tileHeight }, pressed && { opacity: 0.92 }]}
                 accessibilityLabel={t('member.photo_sur', { v0: i + 1, length: urls.length })}
               >
-                <Image source={{ uri: url }} style={styles.tileImage} contentFit="cover" transition={300} onLoad={() => settle(url, 'ok')} onError={() => settle(url, 'error')} />
+                {/* L'image est plus large que la carte et glisse à contre-sens du défilement : effet de profondeur. */}
+                <Animated.View style={[styles.parallax, { width: tileWidth * 1.24, left: -tileWidth * 0.12, transform: [{ translateX: scrollX.interpolate({ inputRange: range, outputRange: [-tileWidth * 0.1, 0, tileWidth * 0.1], extrapolate: 'clamp' }) }] }]}>
+                  <Image source={{ uri: url }} style={styles.tileImage} contentFit="cover" transition={300} onLoad={() => settle(url, 'ok')} onError={() => settle(url, 'error')} />
+                </Animated.View>
                 {!settled[url] ? <SkeletonShimmer radius={26} /> : null}
                 {settled[url] === 'error' ? (
                   <View style={styles.errorOverlay}>
@@ -130,6 +140,9 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
 
       <Modal visible={openIndex !== null} animationType="fade" transparent statusBarTranslucent onRequestClose={() => setOpenIndex(null)}>
         <View style={styles.viewer}>
+          {/* Fond : la photo courante, fortement floutée et assombrie. */}
+          <Image source={{ uri: urls[current] }} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={Platform.OS === 'ios' ? 60 : 25} />
+          <View style={styles.viewerVeil} />
           <View style={{ flex: 1, paddingTop: topInset, paddingBottom: insets.bottom }}>
             <View style={styles.viewerTop}>
               <View style={styles.counter}>
@@ -149,9 +162,10 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
               initialScrollIndex={openIndex ?? 0}
               getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
               onMomentumScrollEnd={(e) => setCurrent(Math.round(e.nativeEvent.contentOffset.x / width))}
+              style={{ flexGrow: 0 }}
               renderItem={({ item }) => (
-                <Pressable style={{ width, height: height * 0.75, justifyContent: 'center' }} onPress={() => setOpenIndex(null)}>
-                  <Image source={{ uri: item }} style={{ width, height: height * 0.7 }} contentFit="contain" transition={250} onLoad={() => settle(item, 'ok')} onError={() => settle(item, 'error')} />
+                <Pressable style={{ width, height: height * 0.66, justifyContent: 'center' }} onPress={() => setOpenIndex(null)}>
+                  <Image source={{ uri: item }} style={{ width, height: height * 0.64 }} contentFit="contain" transition={250} onLoad={() => settle(item, 'ok')} onError={() => settle(item, 'error')} />
                   {!settled[item] ? (
                     <View style={styles.viewerSkeleton}>
                       <SkeletonShimmer radius={radii.lg} dark />
@@ -160,6 +174,33 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
                 </Pressable>
               )}
             />
+            {urls.length > 1 ? (
+              <FlatList
+                ref={railRef}
+                data={urls}
+                keyExtractor={(u) => u}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.rail}
+                contentContainerStyle={styles.railContent}
+                getItemLayout={(_, index) => ({ length: THUMB + 10, offset: (THUMB + 10) * index, index })}
+                onScrollToIndexFailed={() => undefined}
+                renderItem={({ item, index }) => (
+                  <Pressable
+                    onPress={() => {
+                      setCurrent(index);
+                      listRef.current?.scrollToIndex({ index, animated: true });
+                      haptics.selection();
+                    }}
+                    style={[styles.thumbBtn, index === current && styles.thumbBtnActive]}
+                    accessibilityLabel={t('member.photo_sur', { v0: index + 1, length: urls.length })}
+                  >
+                    <Image source={{ uri: item }} style={styles.thumbImg} contentFit="cover" />
+                    {index !== current ? <View style={styles.thumbDim} /> : null}
+                  </Pressable>
+                )}
+              />
+            ) : null}
           </View>
         </View>
       </Modal>
@@ -179,10 +220,18 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     expand: { position: 'absolute', bottom: 12, end: 12, width: 32, height: 32, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.25)', alignItems: 'center', justifyContent: 'center' },
     track: { alignSelf: 'center', width: 120, height: 3, borderRadius: 2, backgroundColor: colors.border, overflow: 'hidden', marginTop: 6 },
     thumb: { height: 3, borderRadius: 2, backgroundColor: colors.primary },
+    parallax: { position: 'absolute', top: 0, bottom: 0 },
     tileImage: { width: '100%', height: '100%' },
     errorOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
     viewerSkeleton: { position: 'absolute', alignSelf: 'center', width: '88%', height: '55%', top: '12%' },
-    viewer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)' },
+    viewer: { flex: 1, backgroundColor: '#000' },
+    viewerVeil: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.62)' },
+    rail: { flexGrow: 0, marginTop: 14 },
+    railContent: { paddingHorizontal: 20, gap: 10, alignItems: 'center' },
+    thumbBtn: { width: THUMB, height: THUMB, borderRadius: 14, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent' },
+    thumbBtnActive: { borderColor: '#FFFFFF', transform: [{ scale: 1.08 }] },
+    thumbImg: { width: '100%', height: '100%' },
+    thumbDim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.35)' },
     viewerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8 },
     counter: { backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
     counterText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#FFFFFF' },
