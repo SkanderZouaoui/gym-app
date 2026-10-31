@@ -154,7 +154,8 @@ export default function StaffPlanningScreen() {
               <Pressable
                 key={s.id}
                 style={({ pressed }) => [styles.card, cardShadow, st.key === 'done' && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.98 }] }]}
-                onPress={() => router.push({ pathname: '/(staff)/(tabs)/scanner', params: { sessionId: s.id } })}
+                onPress={() => router.push({ pathname: '/(staff)/session/[id]', params: { id: s.id } } as never)}
+                accessibilityRole="button"
               >
                 <View style={styles.cardTop}>
                   <LinearGradient
@@ -178,6 +179,17 @@ export default function StaffPlanningScreen() {
                       <StatusTag label={st.label} tone={st.tone} />
                     </View>
                   </View>
+                  {st.key !== 'done' ? (
+                    <Pressable
+                      onPress={() => router.push({ pathname: '/(staff)/(tabs)/scanner', params: { sessionId: s.id } })}
+                      hitSlop={6}
+                      style={({ pressed }) => [styles.scanQuick, pressed && { transform: [{ scale: 0.92 }] }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={i18n.t('coach.home_scan')}
+                    >
+                      <MaterialIcons name="qr-code-scanner" size={22} color={colors.primaryContrast} />
+                    </Pressable>
+                  ) : null}
                 </View>
                 <View style={styles.fillBlock}>
                   <View style={styles.fillRow}>
@@ -224,5 +236,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     fillValue: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.text },
     empty: { padding: 28, alignItems: 'center', gap: 8, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     emptyText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, textAlign: 'center' },
+    scanQuick: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
   });
 }

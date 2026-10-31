@@ -144,7 +144,7 @@ export default function SessionDetailScreen() {
             </View>
           </View>
           <ProgressBar progress={progress} color={isFull ? colors.danger : colors.primary} />
-          <Text style={styles.spotsSub}>{t('member.inscrits', { bookings: session._count.bookings, capacity: session.capacity })}</Text>
+          <Text style={styles.spotsSub}>{t('member.inscrits', { booked_count: session._count.bookings, capacity: session.capacity })}</Text>
         </View>
 
         <View>
