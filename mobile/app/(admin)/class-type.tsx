@@ -178,7 +178,7 @@ export default function ClassTypeScreen() {
         </View>
 
         {id ? (
-          <Button label={t('common.class_type_delete')} variant="outline" onPress={() => setConfirmDelete(true)} />
+          <Button label={t('common.class_type_delete')} variant="danger" onPress={() => setConfirmDelete(true)} />
         ) : null}
       </KeyboardAwareScreen>
 
@@ -188,7 +188,7 @@ export default function ClassTypeScreen() {
         <Text style={styles.sheetTitle}>{t('common.supprimer_2', { name: form.name })}</Text>
         <Text style={styles.sheetText}>{t('admin.sil_est_deja_utilise_par')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label={t('admin.oui_supprimer')} variant="secondary" loading={remove.isPending} onPress={doDelete} />
+          <Button label={t('admin.oui_supprimer')} variant="danger" loading={remove.isPending} onPress={doDelete} />
           <Button label={t('common.annuler')} variant="outline" onPress={() => setConfirmDelete(false)} />
         </View>
       </BottomSheet>

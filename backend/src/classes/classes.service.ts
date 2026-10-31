@@ -8,8 +8,14 @@ import type { CreateSessionDto, UpdateSessionDto } from './dto/session-input.dto
 import type { CreateRoomDto, UpdateRoomDto } from './dto/room.dto.js';
 import type { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 
-/** Nombre maximal de photos dans la galerie d'un type de cours. */
+/** Nombre maximal de photos dans la galerie d'un type de cours ou d'une salle. */
 export const MAX_TYPE_GALLERY = 12;
+
+/** Le nouvel ordre doit être une permutation de la galerie actuelle (mêmes clés, sans ajout ni doublon). */
+export function assertSamePermutation(current: string[], next: string[]): void {
+  const sameSize = current.length === next.length && new Set(next).size === next.length;
+  if (!sameSize || !next.every((k) => current.includes(k))) throw new BadRequestException('INVALID_GALLERY_ORDER');
+}
 
 @Injectable()
 export class ClassesService {
@@ -50,6 +56,14 @@ export class ClassesService {
     if (type.galleryKeys.includes(key)) return this.withGalleryUrls(type);
     if (type.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
     const updated = await this.prisma.classType.update({ where: { id }, data: { galleryKeys: { push: key } } });
+    return this.withGalleryUrls(updated);
+  }
+
+  /** Change l'ordre des photos d'un type de cours (la première sert de couverture). */
+  async reorderGallery(id: string, keys: string[]) {
+    const type = await this.findType(id);
+    assertSamePermutation(type.galleryKeys, keys);
+    const updated = await this.prisma.classType.update({ where: { id }, data: { galleryKeys: keys } });
     return this.withGalleryUrls(updated);
   }
 
@@ -182,7 +196,11 @@ export class ClassesService {
   /** Fiche cours pour l'app : la session + les URLs de la galerie du type de cours. */
   async findSessionDetail(id: string) {
     const session = await this.findSession(id);
-    return { ...session, classType: await this.withGalleryUrls(session.classType) };
+    return {
+      ...session,
+      classType: await this.withGalleryUrls(session.classType),
+      room: session.room ? await this.withGalleryUrls(session.room) : null,
+    };
   }
 
   async findSession(id: string) {
@@ -303,12 +321,45 @@ export class ClassesService {
   }
 
   async deleteRoom(id: string) {
-    await this.findRoom(id);
+    const room = await this.findRoom(id);
     const used =
       (await this.prisma.classSession.count({ where: { roomId: id } })) + (await this.prisma.classTemplate.count({ where: { roomId: id } }));
     if (used > 0) throw new BadRequestException('ROOM_IN_USE');
     await this.prisma.room.delete({ where: { id } });
+    await Promise.all(room.galleryKeys.map((key) => this.storage.deleteObject(key).catch(() => undefined)));
     return { deleted: true };
+  }
+
+  // --- Photos des salles ------------------------------------------------------
+
+  async roomGalleryUploadUrl(id: string, contentType: string, sizeBytes: number) {
+    const room = await this.findRoom(id);
+    if (room.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
+    const key = this.storage.buildKey(`rooms/${id}`, contentType);
+    const uploadUrl = await this.storage.getUploadUrl(key, contentType, sizeBytes);
+    return { key, uploadUrl };
+  }
+
+  async addRoomGalleryImage(id: string, key: string) {
+    const room = await this.findRoom(id);
+    this.storage.assertOwnKey(key, `rooms/${id}`);
+    if (room.galleryKeys.includes(key)) return this.withGalleryUrls(room);
+    if (room.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
+    return this.withGalleryUrls(await this.prisma.room.update({ where: { id }, data: { galleryKeys: { push: key } } }));
+  }
+
+  async reorderRoomGallery(id: string, keys: string[]) {
+    const room = await this.findRoom(id);
+    assertSamePermutation(room.galleryKeys, keys);
+    return this.withGalleryUrls(await this.prisma.room.update({ where: { id }, data: { galleryKeys: keys } }));
+  }
+
+  async removeRoomGalleryImage(id: string, key: string) {
+    const room = await this.findRoom(id);
+    if (!room.galleryKeys.includes(key)) return this.withGalleryUrls(room);
+    const updated = await this.prisma.room.update({ where: { id }, data: { galleryKeys: room.galleryKeys.filter((k) => k !== key) } });
+    await this.storage.deleteObject(key).catch(() => undefined);
+    return this.withGalleryUrls(updated);
   }
 
   private async findRoom(id: string) {
@@ -331,8 +382,9 @@ export class ClassesService {
     return { deleted: true, deactivated: false };
   }
 
-  listRooms() {
-    return this.prisma.room.findMany({ orderBy: { name: 'asc' } });
+  async listRooms() {
+    const rooms = await this.prisma.room.findMany({ orderBy: { name: 'asc' } });
+    return Promise.all(rooms.map((r) => this.withGalleryUrls(r)));
   }
 
   /** Création d'un cours ponctuel. */

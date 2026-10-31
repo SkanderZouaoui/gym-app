@@ -164,6 +164,13 @@ export default function SessionDetailScreen() {
           </View>
         </View>
 
+        {session.room?.galleryUrls && session.room.galleryUrls.length > 0 ? (
+          <View>
+            <Text style={styles.sectionTitle}>{t('common.salle')} · {session.room.name}</Text>
+            <ImageGallery urls={session.room.galleryUrls} />
+          </View>
+        ) : null}
+
         {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
           <View>
             <Text style={styles.sectionTitle}>{t('member.galerie')}</Text>

@@ -240,6 +240,9 @@ export interface AdminRoom {
   id: string;
   name: string;
   capacity: number;
+  /** Photos de la salle (ordre d'affichage) et leurs URLs de lecture signées. */
+  galleryKeys: string[];
+  galleryUrls: string[];
 }
 export interface AdminClassType {
   id: string;

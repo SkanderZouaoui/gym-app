@@ -320,7 +320,18 @@
     "class_type_inactive": "Disabled",
     "room_new": "New room",
     "room_edit": "Edit room",
-    "room_delete": "Delete this room"
+    "room_delete": "Delete this room",
+    "room_title": "Room",
+    "room_kicker": "ROOM",
+    "room_created": "Room created: you can now add its photos.",
+    "room_photos_locked": "Save this room first to be able to add photos to it.",
+    "room_media_title": "Room photos",
+    "room_media_hint": "Shown on the page of every class held in “{{name}}”.",
+    "class_media_cover": "Cover",
+    "class_media_move_earlier": "Move earlier",
+    "class_media_move_later": "Move later",
+    "class_media_reorder_hint": "Use the arrows to change the order; the first photo is the cover.",
+    "class_media_reorder_error": "Could not change the order, please try again."
   },
   "home": {
     "membershipNone": "No membership",

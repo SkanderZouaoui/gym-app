@@ -22,7 +22,7 @@ describe('findOrphans', () => {
 });
 
 describe('StorageCleanupService.run', () => {
-  function make(objects: ReturnType<typeof obj>[], refs: { photos?: string[]; gallery?: string[] }) {
+  function make(objects: ReturnType<typeof obj>[], refs: { photos?: string[]; gallery?: string[]; rooms?: string[] }) {
     const storage = {
       listObjects: vi.fn(async (prefix: string) => objects.filter((o) => o.key.startsWith(prefix))),
       deleteObject: vi.fn(async () => undefined),
@@ -30,6 +30,7 @@ describe('StorageCleanupService.run', () => {
     const prisma = {
       user: { findMany: vi.fn(async () => (refs.photos ?? []).map((photoKey) => ({ photoKey }))) },
       classType: { findMany: vi.fn(async () => [{ galleryKeys: refs.gallery ?? [], imageKey: null }]) },
+      room: { findMany: vi.fn(async () => [{ galleryKeys: refs.rooms ?? [] }]) },
       exercise: { findMany: vi.fn(async () => []) },
     };
     return { storage, service: new StorageCleanupService(prisma as never, storage as never) };
@@ -42,6 +43,12 @@ describe('StorageCleanupService.run', () => {
     const res = await service.run({ minAgeHours: 24 });
     expect(res).toMatchObject({ listed: 3, orphans: 1, deleted: 1, aborted: false });
     expect(storage.deleteObject).toHaveBeenCalledExactlyOnceWith('avatars/u1/orphan.jpeg');
+  });
+
+  it('ne supprime pas les photos de salle référencées', async () => {
+    const { storage, service } = make([old('rooms/r1/a.jpeg'), old('rooms/r1/orphan.jpeg')], { rooms: ['rooms/r1/a.jpeg'] });
+    expect(await service.run({ minAgeHours: 24 })).toMatchObject({ orphans: 1, deleted: 1 });
+    expect(storage.deleteObject).toHaveBeenCalledExactlyOnceWith('rooms/r1/orphan.jpeg');
   });
 
   it('simulation : liste sans supprimer', async () => {

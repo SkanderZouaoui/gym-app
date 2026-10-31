@@ -320,7 +320,18 @@
     "class_type_inactive": "Désactivé",
     "room_new": "Nouvelle salle",
     "room_edit": "Modifier la salle",
-    "room_delete": "Supprimer cette salle"
+    "room_delete": "Supprimer cette salle",
+    "room_title": "Salle",
+    "room_kicker": "SALLE",
+    "room_created": "Salle créée : vous pouvez maintenant ajouter ses photos.",
+    "room_photos_locked": "Enregistrez d'abord cette salle pour pouvoir lui ajouter des photos.",
+    "room_media_title": "Photos de la salle",
+    "room_media_hint": "Affichées sur la fiche de chaque cours donné dans « {{name}} ».",
+    "class_media_cover": "Couverture",
+    "class_media_move_earlier": "Déplacer vers le début",
+    "class_media_move_later": "Déplacer vers la fin",
+    "class_media_reorder_hint": "Utilisez les flèches pour changer l'ordre ; la première photo sert de couverture.",
+    "class_media_reorder_error": "Changement d'ordre impossible, réessayez."
   },
   "home": {
     "membershipNone": "Sans abonnement",

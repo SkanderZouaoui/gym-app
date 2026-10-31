@@ -31,6 +31,8 @@ model Room {
   id       String @id @default(uuid())
   name     String
   capacity Int
+  /// Clés de stockage des photos de la salle (ordre d'affichage) ; max 12.
+  galleryKeys String[] @default([]) @map("gallery_keys")
 
   classTemplates ClassTemplate[]
   classSessions  ClassSession[]

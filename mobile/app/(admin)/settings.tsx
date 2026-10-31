@@ -14,15 +14,11 @@ import {
   type OrganizationConfig,
   useAdminRooms,
   useAttendancePolicy,
-  useDeleteRoom,
-  useSaveRoom,
   useUpdateAttendancePolicy,
   type AttendancePolicy,
 } from '../../src/hooks/useAdmin';
-import { Banner, BottomSheet, ScreenTitle, Toast } from '../../src/components/ui';
+import { Banner, ScreenTitle, Toast } from '../../src/components/ui';
 import { TimeButton } from '../../src/components/ui/DateTimeFields';
-import { Button } from '../../src/components/Button';
-import { TextField } from '../../src/components/TextField';
 import { useTranslation } from 'react-i18next';
 import i18n, { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../src/i18n';
 import { WEEKDAYS_LONG_MON } from '../../src/i18n/labels';
@@ -235,8 +231,6 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
   );
 }
 
-type RoomEdit = { id?: string; name: string; capacity: string };
-
 /** Types de cours et salles : cartes avec photo de couverture. Un type s'ouvre dans son propre écran (infos, activation, photos) ; une salle dans une feuille. */
 function Catalog() {
   useTranslation();
@@ -244,41 +238,11 @@ function Catalog() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: types } = useAllClassTypes();
   const { data: rooms } = useAdminRooms();
-  const saveRoom = useSaveRoom();
-  const delRoom = useDeleteRoom();
-  const [room, setRoom] = useState<RoomEdit | null>(null);
-  const [confirmRoom, setConfirmRoom] = useState<{ id: string; name: string } | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const openType = (id?: string) => router.push({ pathname: '/(admin)/class-type', params: id ? { id } : {} } as never);
-  const canSaveRoom = !!room && room.name.trim().length > 0 && Number(room.capacity) >= 1;
-
-  const saveRoomForm = () => {
-    if (!room) return;
-    setError(null);
-    saveRoom.mutate(
-      { id: room.id, name: room.name.trim(), capacity: Number(room.capacity) },
-      { onSuccess: () => setRoom(null), onError: () => setError(i18n.t('admin.enregistrement_impossible_reessayez')) },
-    );
-  };
-
-  const removeRoom = () => {
-    if (!confirmRoom) return;
-    delRoom.mutate(confirmRoom.id, {
-      onSuccess: () => setMessage(i18n.t('admin.supprimee', { name: confirmRoom.name })),
-      onError: () => setMessage(i18n.t('admin.est_utilisee_par_des_cours', { name: confirmRoom.name })),
-      onSettled: () => {
-        setConfirmRoom(null);
-        setRoom(null);
-      },
-    });
-  };
-
+  const openRoom = (id?: string) => router.push({ pathname: '/(admin)/room', params: id ? { id } : {} } as never);
   return (
     <>
-      {message ? <Banner tone="info" icon="info-outline" text={message} /> : null}
-
       <View style={styles.catHead}>
         <Text style={styles.section}>{i18n.t('admin.types_de_cours')}</Text>
         <Pressable style={styles.addPill} onPress={() => openType()}>
@@ -338,60 +302,52 @@ function Catalog() {
 
       <View style={styles.catHead}>
         <Text style={styles.section}>{i18n.t('admin.salles')}</Text>
-        <Pressable style={styles.addPill} onPress={() => setRoom({ name: '', capacity: '20' })}>
+        <Pressable style={styles.addPill} onPress={() => openRoom()}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
           <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
         </Pressable>
       </View>
       <View style={{ gap: 10 }}>
-        {(rooms ?? []).map((r) => (
-          <Pressable
-            key={r.id}
-            onPress={() => setRoom({ id: r.id, name: r.name, capacity: String(r.capacity) })}
-            style={({ pressed }) => [styles.typeCard, cardShadow, pressed && { transform: [{ scale: 0.99 }] }]}
-            accessibilityRole="button"
-          >
-            <View style={[styles.cover, styles.roomTile]}>
-              <MaterialIcons name="meeting-room" size={26} color={colors.primaryInk} />
-            </View>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={styles.rowTitle} numberOfLines={1}>{r.name}</Text>
-              <View style={styles.metaRow}>
-                <View style={styles.metaChip}>
-                  <MaterialIcons name="groups" size={13} color={colors.primaryInk} />
-                  <Text style={styles.metaText}>{r.capacity} {i18n.t('common.class_type_places')}</Text>
+        {(rooms ?? []).map((r) => {
+          const cover = r.galleryUrls?.[0];
+          return (
+            <Pressable
+              key={r.id}
+              onPress={() => openRoom(r.id)}
+              style={({ pressed }) => [styles.typeCard, cardShadow, pressed && { transform: [{ scale: 0.99 }] }]}
+              accessibilityRole="button"
+            >
+              <View style={styles.cover}>
+                {cover ? (
+                  <Image source={{ uri: cover }} style={styles.coverImg} />
+                ) : (
+                  <View style={[styles.coverImg, styles.coverFallback, styles.roomTile]}>
+                    <MaterialIcons name="meeting-room" size={26} color={colors.primaryInk} />
+                  </View>
+                )}
+                {r.galleryKeys.length > 0 ? (
+                  <View style={styles.coverBadge}>
+                    <MaterialIcons name="photo-library" size={11} color="#FFFFFF" />
+                    <Text style={styles.coverBadgeText}>{r.galleryKeys.length}</Text>
+                  </View>
+                ) : null}
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.rowTitle} numberOfLines={1}>{r.name}</Text>
+                <View style={styles.metaRow}>
+                  <View style={styles.metaChip}>
+                    <MaterialIcons name="groups" size={13} color={colors.primaryInk} />
+                    <Text style={styles.metaText}>{r.capacity} {i18n.t('common.class_type_places')}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-            <MaterialIcons name="edit" size={18} color={colors.primary} />
-          </Pressable>
-        ))}
+              <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+            </Pressable>
+          );
+        })}
         {(rooms ?? []).length === 0 ? <Text style={styles.emptyRow}>{i18n.t('admin.aucune_salle_2')}</Text> : null}
       </View>
 
-      <BottomSheet visible={!!room} onClose={() => setRoom(null)}>
-        <Text style={styles.sheetTitle}>{room?.id ? i18n.t('common.room_edit') : i18n.t('common.room_new')}</Text>
-        {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-        <TextField label={i18n.t('common.nom')} icon="meeting-room" value={room?.name ?? ''} onChangeText={(v) => room && setRoom({ ...room, name: v })} placeholder={i18n.t('admin.ex_studio_b')} />
-        <TextField
-          label={i18n.t('admin.capacite_places')}
-          icon="groups"
-          value={room?.capacity ?? ''}
-          onChangeText={(v) => room && setRoom({ ...room, capacity: v.replace(/[^0-9]/g, '') })}
-          keyboardType="number-pad"
-        />
-        <Button label={saveRoom.isPending ? i18n.t('common.enregistrement') : i18n.t('member.enregistrer')} onPress={saveRoomForm} disabled={!canSaveRoom || saveRoom.isPending} />
-        {room?.id ? <Button label={i18n.t('common.room_delete')} variant="outline" onPress={() => setConfirmRoom({ id: room.id!, name: room.name })} /> : null}
-      </BottomSheet>
-
-      <BottomSheet visible={!!confirmRoom} onClose={() => setConfirmRoom(null)}>
-        <Text style={styles.sheetTitle}>{i18n.t('common.supprimer_2', { name: confirmRoom?.name })}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.une_salle_utilisee_par_des')}</Text>
-        <View style={{ gap: 8, marginTop: 8 }}>
-          <Button label={i18n.t('admin.oui_supprimer')} variant="secondary" onPress={removeRoom} loading={delRoom.isPending} />
-          <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirmRoom(null)} />
-        </View>
-      </BottomSheet>
     </>
   );
 }

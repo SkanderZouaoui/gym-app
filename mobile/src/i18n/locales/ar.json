@@ -320,7 +320,18 @@
     "class_type_inactive": "معطّل",
     "room_new": "قاعة جديدة",
     "room_edit": "تعديل القاعة",
-    "room_delete": "حذف هذه القاعة"
+    "room_delete": "حذف هذه القاعة",
+    "room_title": "القاعة",
+    "room_kicker": "قاعة",
+    "room_created": "تم إنشاء القاعة: يمكنك الآن إضافة صورها.",
+    "room_photos_locked": "احفظ هذه القاعة أولًا لتتمكن من إضافة صور إليها.",
+    "room_media_title": "صور القاعة",
+    "room_media_hint": "تظهر في صفحة كل حصة تُقام في «{{name}}».",
+    "class_media_cover": "الغلاف",
+    "class_media_move_earlier": "نقل إلى البداية",
+    "class_media_move_later": "نقل إلى النهاية",
+    "class_media_reorder_hint": "استخدم الأسهم لتغيير الترتيب؛ الصورة الأولى هي الغلاف.",
+    "class_media_reorder_error": "تعذّر تغيير الترتيب، حاول مجددًا."
   },
   "home": {
     "membershipNone": "بدون اشتراك",

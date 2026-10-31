@@ -33,7 +33,7 @@ export interface ClassSessionSummary {
   capacity: number;
   status: string;
   classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[] };
-  room: { id: string; name: string } | null;
+  room: { id: string; name: string; galleryUrls?: string[] } | null;
   coach: { user: { firstName: string; lastName: string } } | null;
   coachId?: string | null;
   roomId?: string | null;

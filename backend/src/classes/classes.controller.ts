@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { CreateRoomDto, UpdateRoomDto } from './dto/room.dto.js';
 import { CreateSessionDto, UpdateSessionDto } from './dto/session-input.dto.js';
 import { ApiTags } from '@nestjs/swagger';
@@ -13,6 +13,8 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
 import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
+import { GalleryKeyDto } from './dto/gallery-key.dto.js';
+import { GalleryOrderDto } from './dto/gallery-order.dto.js';
 
 @ApiTags('classes')
 @Controller('v1')
@@ -132,6 +134,36 @@ export class ClassesController {
   @Patch('admin/rooms/:id')
   updateRoom(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
     return this.classesService.updateRoom(id, dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/rooms/:id/gallery/upload-url')
+  roomGalleryUploadUrl(@Param('id') id: string, @Body() body: RequestUploadUrlDto) {
+    return this.classesService.roomGalleryUploadUrl(id, body.contentType, body.sizeBytes);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('admin/rooms/:id/gallery')
+  addRoomGalleryImage(@Param('id') id: string, @Body() body: GalleryKeyDto) {
+    return this.classesService.addRoomGalleryImage(id, body.key);
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('admin/rooms/:id/gallery/order')
+  reorderRoomGallery(@Param('id') id: string, @Body() body: GalleryOrderDto) {
+    return this.classesService.reorderRoomGallery(id, body.keys);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('admin/rooms/:id/gallery')
+  removeRoomGalleryImage(@Param('id') id: string, @Body() body: GalleryKeyDto) {
+    return this.classesService.removeRoomGalleryImage(id, body.key);
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('admin/class-types/:id/gallery/order')
+  reorderGallery(@Param('id') id: string, @Body() body: GalleryOrderDto) {
+    return this.classesService.reorderGallery(id, body.keys);
   }
 
   @Roles(Role.ADMIN)
