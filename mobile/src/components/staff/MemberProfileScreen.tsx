@@ -13,6 +13,7 @@ import { useOfflineAwareRefresh } from '../../hooks/useOfflineAwareRefresh';
 import { EmptyState, DetailSkeleton } from '../ui';
 import { formatMoney, METHOD_LABEL } from './staffUi';
 import { MemberIdentity } from './MemberIdentity';
+import { MemberContactRow } from './MemberContactRow';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../i18n';
 import { useNow } from '../../hooks/useNow';
@@ -67,9 +68,9 @@ export function MemberProfileScreen({ variant }: Props) {
   const paidTotal = memberPayments.reduce((s, p) => s + Number(p.amount), 0);
 
   const rows = [
-    { icon: 'call' as const, k: t('common.telephone'), v: member.phone ?? '—' },
-    { icon: 'mail-outline' as const, k: t('common.email'), v: member.email ?? '—' },
-    ...(member.createdAt ? [{ icon: 'event' as const, k: t('staff.membre_depuis'), v: fmtDate(member.createdAt) }] : []),
+    { icon: 'call' as const, k: t('common.telephone'), v: member.phone, href: member.phone ? `tel:${member.phone.replace(/\s+/g, '')}` : undefined, copyable: true },
+    { icon: 'mail-outline' as const, k: t('common.email'), v: member.email, href: member.email ? `mailto:${member.email}` : undefined, copyable: true },
+    ...(member.createdAt ? [{ icon: 'event' as const, k: t('staff.membre_depuis'), v: fmtDate(member.createdAt), href: undefined, copyable: false }] : []),
   ];
 
   return (
@@ -169,17 +170,9 @@ export function MemberProfileScreen({ variant }: Props) {
 
         <View>
           <Text style={styles.sectionTitle}>{t('common.coordonnees')}</Text>
-          <View style={[styles.listCard, cardShadow]}>
+          <View style={[styles.contactCard, cardShadow]}>
             {rows.map((r, i) => (
-              <View key={r.k} style={[styles.row, i < rows.length - 1 && styles.rowBorder]}>
-                <View style={styles.rowIcon}>
-                  <MaterialIcons name={r.icon} size={20} color={colors.primaryInk} />
-                </View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={styles.rowKey}>{r.k}</Text>
-                  <Text style={styles.rowValue} numberOfLines={1}>{r.v}</Text>
-                </View>
-              </View>
+              <MemberContactRow key={r.k} icon={r.icon} label={r.k} value={r.v} href={r.href} copyable={r.copyable} last={i === rows.length - 1} />
             ))}
           </View>
         </View>
@@ -263,6 +256,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     statValue: { fontFamily: fonts.head, fontSize: 22, lineHeight: 26, letterSpacing: -0.8, color: colors.text },
     statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted, marginTop: 2 },
     sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10, marginTop: 6 },
+    contactCard: { paddingHorizontal: 14, backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border },
     listCard: { paddingHorizontal: 16, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, paddingVertical: 8 },
     rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },

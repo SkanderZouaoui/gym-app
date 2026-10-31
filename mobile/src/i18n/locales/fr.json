@@ -1526,7 +1526,8 @@
     "period_last": "Mois dernier",
     "period_custom": "Période…",
     "group_class": "Cours collectif",
-    "invalid_email": "Adresse e-mail invalide"
+    "invalid_email": "Adresse e-mail invalide",
+    "non_renseigne": "Non renseigné"
   },
   "equipment": {
     "dumbbell": "Haltères",

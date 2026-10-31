@@ -1526,7 +1526,8 @@
     "period_last": "الشهر الماضي",
     "period_custom": "فترة محددة…",
     "group_class": "حصة جماعية",
-    "invalid_email": "عنوان البريد الإلكتروني غير صالح"
+    "invalid_email": "عنوان البريد الإلكتروني غير صالح",
+    "non_renseigne": "غير مُدخل"
   },
   "equipment": {
     "dumbbell": "دمبلز",

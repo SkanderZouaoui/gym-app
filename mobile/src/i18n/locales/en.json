@@ -1526,7 +1526,8 @@
     "period_last": "Last month",
     "period_custom": "Custom…",
     "group_class": "Group class",
-    "invalid_email": "Invalid email address"
+    "invalid_email": "Invalid email address",
+    "non_renseigne": "Not provided"
   },
   "equipment": {
     "dumbbell": "Dumbbells",
