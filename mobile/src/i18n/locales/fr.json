@@ -1063,7 +1063,8 @@
     "member_status_confirmed": "Inscrit",
     "member_status_no_show": "Absent",
     "member_scope_hint": "Vous ne voyez que les cours suivis avec vous.",
-    "member_not_found": "Cet adhérent n'est inscrit à aucun de vos cours."
+    "member_not_found": "Cet adhérent n'est inscrit à aucun de vos cours.",
+    "member_courses_unit": "cours"
   },
   "member": {
     "lannulation_est_gratuite_votre_place": "L’annulation est gratuite. Votre place sera proposée à la liste d’attente.",

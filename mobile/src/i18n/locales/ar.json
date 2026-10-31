@@ -1063,7 +1063,8 @@
     "member_status_confirmed": "مسجَّل",
     "member_status_no_show": "غائب",
     "member_scope_hint": "ترى فقط الحصص المحجوزة معك.",
-    "member_not_found": "هذا العضو غير مسجَّل في أيٍّ من حصصك."
+    "member_not_found": "هذا العضو غير مسجَّل في أيٍّ من حصصك.",
+    "member_courses_unit": "حصص"
   },
   "member": {
     "lannulation_est_gratuite_votre_place": "الإلغاء مجاني. سيُعرض مكانك على قائمة الانتظار.",

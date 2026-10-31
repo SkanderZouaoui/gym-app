@@ -1063,7 +1063,8 @@
     "member_status_confirmed": "Booked",
     "member_status_no_show": "No-show",
     "member_scope_hint": "You only see the classes taken with you.",
-    "member_not_found": "This member is not booked in any of your classes."
+    "member_not_found": "This member is not booked in any of your classes.",
+    "member_courses_unit": "classes"
   },
   "member": {
     "lannulation_est_gratuite_votre_place": "Cancelling is free. Your spot will be offered to the waiting list.",

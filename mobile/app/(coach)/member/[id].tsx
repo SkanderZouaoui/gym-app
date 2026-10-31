@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,9 +12,13 @@ import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefres
 import { useNow } from '../../../src/hooks/useNow';
 import { Avatar, DetailSkeleton, EmptyState } from '../../../src/components/ui';
 import { StatusTag } from '../../../src/components/staff/staffUi';
+import { Pagination } from '../../../src/components/ui/Pagination';
 import { dateLocale } from '../../../src/i18n';
 
 type Course = CoachMemberView['courses'][number];
+
+/** Cours affichés par page, pour les cours à venir comme pour les cours passés. */
+const PAGE_SIZE = 3;
 
 /**
  * Profil d'un adhérent vu par un coach — volontairement limité : nom, type d'abonnement et cours auxquels il est
@@ -28,6 +32,8 @@ export default function CoachMemberScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data: member, isLoading, isError, refetch } = useCoachMember(id);
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
+  const [upcomingPage, setUpcomingPage] = useState(0);
+  const [pastPage, setPastPage] = useState(0);
 
   if (isLoading) {
     return (
@@ -50,6 +56,10 @@ export default function CoachMemberScreen() {
   const upcoming = member.courses.filter((c) => new Date(c.endsAt).getTime() >= nowMs).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   const past = member.courses.filter((c) => new Date(c.endsAt).getTime() < nowMs).sort((a, b) => b.startsAt.localeCompare(a.startsAt));
   const initials = `${member.firstName[0] ?? ''}${member.lastName[0] ?? ''}`.toUpperCase();
+  const upcomingPages = Math.max(1, Math.ceil(upcoming.length / PAGE_SIZE));
+  const pastPages = Math.max(1, Math.ceil(past.length / PAGE_SIZE));
+  const upcomingCurrent = Math.min(upcomingPage, upcomingPages - 1);
+  const pastCurrent = Math.min(pastPage, pastPages - 1);
 
   const statusTag = (c: Course) => {
     switch (c.status) {
@@ -105,15 +115,17 @@ export default function CoachMemberScreen() {
 
         {upcoming.length > 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={styles.section}>{t('coach.member_upcoming')}</Text>
-            {upcoming.map(courseCard)}
+            <Text style={styles.section}>{t('coach.member_upcoming')} · {upcoming.length}</Text>
+            {upcoming.slice(upcomingCurrent * PAGE_SIZE, (upcomingCurrent + 1) * PAGE_SIZE).map(courseCard)}
+            <Pagination page={upcomingCurrent} pageCount={upcomingPages} pageSize={PAGE_SIZE} total={upcoming.length} onChange={setUpcomingPage} unit={t('coach.member_courses_unit')} />
           </View>
         ) : null}
 
         {past.length > 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={styles.section}>{t('coach.member_past')}</Text>
-            {past.map(courseCard)}
+            <Text style={styles.section}>{t('coach.member_past')} · {past.length}</Text>
+            {past.slice(pastCurrent * PAGE_SIZE, (pastCurrent + 1) * PAGE_SIZE).map(courseCard)}
+            <Pagination page={pastCurrent} pageCount={pastPages} pageSize={PAGE_SIZE} total={past.length} onChange={setPastPage} unit={t('coach.member_courses_unit')} />
           </View>
         ) : null}
 
