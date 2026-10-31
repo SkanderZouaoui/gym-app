@@ -1,3 +1,4 @@
+import { processGalleryImage, readGalleryMeta, thumbKeyOf, toGalleryJson, type GalleryImageMeta } from '../storage/gallery-image.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StorageService } from '../storage/storage.service.js';
@@ -40,9 +41,57 @@ export class ClassesService {
   }
 
   /** Ajoute `galleryUrls` (URLs présignées de lecture, durée limitée) à un type de cours. */
-  async withGalleryUrls<T extends { galleryKeys: string[] }>(type: T) {
+  async withGalleryUrls<T extends { galleryKeys: string[]; galleryMeta?: unknown }>(type: T) {
+    const meta = readGalleryMeta(type.galleryMeta);
     const galleryUrls = await Promise.all(type.galleryKeys.map((key) => this.storage.getReadUrl(key)));
-    return { ...type, galleryUrls };
+    // Miniature (cartes, mosaïque) et aperçu flou : absents des anciennes photos, le client retombe alors sur l'original.
+    const galleryThumbUrls = await Promise.all(
+      type.galleryKeys.map((key, i) => (meta[key] ? this.storage.getReadUrl(thumbKeyOf(key)) : galleryUrls[i])),
+    );
+    const galleryBlurhashes = type.galleryKeys.map((key) => meta[key]?.blurhash ?? null);
+    return { ...type, galleryUrls, galleryThumbUrls, galleryBlurhashes };
+  }
+
+  /** Lit la photo envoyée, vérifie que c'est une image, enregistre sa miniature et renvoie ses métadonnées. */
+  private async prepareGalleryImage(key: string): Promise<GalleryImageMeta> {
+    try {
+      const { thumb, meta } = await processGalleryImage(await this.storage.getObjectBuffer(key));
+      await this.storage.putObject(thumbKeyOf(key), thumb, 'image/webp');
+      return meta;
+    } catch (err) {
+      await this.storage.deleteObject(key).catch(() => undefined);
+      throw err;
+    }
+  }
+
+  private async deleteGalleryFiles(keys: string[]) {
+    await Promise.all(keys.flatMap((k) => [k, thumbKeyOf(k)]).map((k) => this.storage.deleteObject(k).catch(() => undefined)));
+  }
+
+  /** Complète les miniatures et aperçus des photos envoyées avant leur création (rattrapage, voir scripts/backfill-gallery). */
+  async backfillGalleryMeta() {
+    let done = 0;
+    for (const [model, items] of [
+      ['classType', await this.prisma.classType.findMany()],
+      ['room', await this.prisma.room.findMany()],
+    ] as const) {
+      for (const item of items) {
+        const meta = { ...readGalleryMeta(item.galleryMeta) };
+        let changed = false;
+        for (const key of item.galleryKeys) {
+          if (meta[key]) continue;
+          try {
+            meta[key] = await this.prepareGalleryImage(key);
+            changed = true;
+            done++;
+          } catch {
+            // fichier absent ou illisible : on le laisse tel quel
+          }
+        }
+        if (changed) await (this.prisma[model] as typeof this.prisma.room).update({ where: { id: item.id }, data: { galleryMeta: toGalleryJson(meta) } });
+      }
+    }
+    return { processed: done };
   }
 
   /** URL présignée d'envoi d'une photo de galerie (le client envoie directement vers le stockage). */
@@ -60,7 +109,11 @@ export class ClassesService {
     if (!key.startsWith(`class-types/${id}/`)) throw new BadRequestException('INVALID_GALLERY_KEY');
     if (type.galleryKeys.includes(key)) return this.withGalleryUrls(type);
     if (type.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
-    const updated = await this.prisma.classType.update({ where: { id }, data: { galleryKeys: { push: key } } });
+    const meta = await this.prepareGalleryImage(key);
+    const updated = await this.prisma.classType.update({
+      where: { id },
+      data: { galleryKeys: { push: key }, galleryMeta: toGalleryJson({ ...readGalleryMeta(type.galleryMeta), [key]: meta }) },
+    });
     return this.withGalleryUrls(updated);
   }
 
@@ -75,11 +128,12 @@ export class ClassesService {
   async removeGalleryImage(id: string, key: string) {
     const type = await this.findType(id);
     if (!type.galleryKeys.includes(key)) return this.withGalleryUrls(type);
+    const { [key]: _removed, ...meta } = readGalleryMeta(type.galleryMeta);
     const updated = await this.prisma.classType.update({
       where: { id },
-      data: { galleryKeys: type.galleryKeys.filter((k) => k !== key) },
+      data: { galleryKeys: type.galleryKeys.filter((k) => k !== key), galleryMeta: toGalleryJson(meta) },
     });
-    await this.storage.deleteObject(key).catch(() => undefined);
+    await this.deleteGalleryFiles([key]);
     return this.withGalleryUrls(updated);
   }
 
@@ -333,7 +387,7 @@ export class ClassesService {
       (await this.prisma.classSession.count({ where: { roomId: id } })) + (await this.prisma.classTemplate.count({ where: { roomId: id } }));
     if (used > 0) throw new BadRequestException('ROOM_IN_USE');
     await this.prisma.room.delete({ where: { id } });
-    await Promise.all(room.galleryKeys.map((key) => this.storage.deleteObject(key).catch(() => undefined)));
+    await this.deleteGalleryFiles(room.galleryKeys);
     return { deleted: true };
   }
 
@@ -352,7 +406,13 @@ export class ClassesService {
     this.storage.assertOwnKey(key, `rooms/${id}`);
     if (room.galleryKeys.includes(key)) return this.withGalleryUrls(room);
     if (room.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
-    return this.withGalleryUrls(await this.prisma.room.update({ where: { id }, data: { galleryKeys: { push: key } } }));
+    const meta = await this.prepareGalleryImage(key);
+    return this.withGalleryUrls(
+      await this.prisma.room.update({
+        where: { id },
+        data: { galleryKeys: { push: key }, galleryMeta: toGalleryJson({ ...readGalleryMeta(room.galleryMeta), [key]: meta }) },
+      }),
+    );
   }
 
   async reorderRoomGallery(id: string, keys: string[]) {
@@ -364,8 +424,12 @@ export class ClassesService {
   async removeRoomGalleryImage(id: string, key: string) {
     const room = await this.findRoom(id);
     if (!room.galleryKeys.includes(key)) return this.withGalleryUrls(room);
-    const updated = await this.prisma.room.update({ where: { id }, data: { galleryKeys: room.galleryKeys.filter((k) => k !== key) } });
-    await this.storage.deleteObject(key).catch(() => undefined);
+    const { [key]: _removed, ...meta } = readGalleryMeta(room.galleryMeta);
+    const updated = await this.prisma.room.update({
+      where: { id },
+      data: { galleryKeys: room.galleryKeys.filter((k) => k !== key), galleryMeta: toGalleryJson(meta) },
+    });
+    await this.deleteGalleryFiles([key]);
     return this.withGalleryUrls(updated);
   }
 
@@ -385,7 +449,7 @@ export class ClassesService {
       return { deleted: false, deactivated: true };
     }
     await this.prisma.classType.delete({ where: { id } });
-    await Promise.all(type.galleryKeys.map((key) => this.storage.deleteObject(key).catch(() => undefined)));
+    await this.deleteGalleryFiles(type.galleryKeys);
     return { deleted: true, deactivated: false };
   }
 

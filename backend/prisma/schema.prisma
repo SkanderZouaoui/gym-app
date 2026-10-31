@@ -33,6 +33,8 @@ model Room {
   capacity Int
   /// Clés de stockage des photos de la salle (ordre d'affichage) ; max 12.
   galleryKeys String[] @default([]) @map("gallery_keys")
+  /// Miniature + aperçu flou de chaque photo, indexés par clé (voir storage/gallery-image.ts).
+  galleryMeta Json @default("{}") @map("gallery_meta")
 
   classTemplates ClassTemplate[]
   classSessions  ClassSession[]
@@ -287,6 +289,7 @@ model ClassType {
   defaultCapacity Int    @default(16) @map("default_capacity")
   defaultDurationMin Int @default(45) @map("default_duration_min")
   galleryKeys    String[] @default([]) @map("gallery_keys") // clés S3 des photos du cours (galerie de la fiche cours)
+  galleryMeta    Json     @default("{}") @map("gallery_meta") // miniature + aperçu flou par clé
 
   templates ClassTemplate[]
   sessions  ClassSession[]

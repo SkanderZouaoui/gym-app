@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StorageService } from './storage.service.js';
+import { thumbKeyOf, type GalleryMeta } from './gallery-image.js';
 
 /** Dossiers gérés par l'API. `body-metrics/` : anciennes photos de progression (fonctionnalité supprimée), jamais référencées. */
 export const MANAGED_PREFIXES = ['avatars/', 'class-types/', 'rooms/', 'body-metrics/'];
@@ -64,17 +65,23 @@ export class StorageCleanupService {
   private async referencedKeys(): Promise<Set<string>> {
     const [users, types, rooms, exercises] = await Promise.all([
       this.prisma.user.findMany({ where: { photoKey: { not: null } }, select: { photoKey: true } }),
-      this.prisma.classType.findMany({ select: { galleryKeys: true, imageKey: true } }),
-      this.prisma.room.findMany({ select: { galleryKeys: true } }),
+      this.prisma.classType.findMany({ select: { galleryKeys: true, galleryMeta: true, imageKey: true } }),
+      this.prisma.room.findMany({ select: { galleryKeys: true, galleryMeta: true } }),
       this.prisma.exercise.findMany({ where: { mediaKey: { not: null } }, select: { mediaKey: true } }),
     ]);
     const keys = new Set<string>();
     for (const u of users) if (u.photoKey) keys.add(u.photoKey);
+    // Une photo de galerie référence aussi sa miniature (créée avec elle).
+    const addGallery = (galleryKeys: string[], meta: unknown) =>
+      galleryKeys.forEach((k) => {
+        keys.add(k);
+        if ((meta as GalleryMeta | null)?.[k]) keys.add(thumbKeyOf(k));
+      });
     for (const t of types) {
-      t.galleryKeys.forEach((k) => keys.add(k));
+      addGallery(t.galleryKeys, t.galleryMeta);
       if (t.imageKey) keys.add(t.imageKey);
     }
-    for (const r of rooms) r.galleryKeys.forEach((k) => keys.add(k));
+    for (const r of rooms) addGallery(r.galleryKeys, r.galleryMeta);
     for (const e of exercises) if (e.mediaKey) keys.add(e.mediaKey);
     return keys;
   }
