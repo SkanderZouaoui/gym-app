@@ -66,3 +66,23 @@ describe('WorkoutsService — détection de record personnel', () => {
     );
   });
 });
+
+describe('WorkoutsService.findForMemberByCoach — le coach ne voit que ses élèves', () => {
+  const logs = [{ id: 'w1' }];
+  const make = (isStudent: number) => {
+    const prisma = { program: { count: vi.fn().mockResolvedValue(isStudent) }, workoutLog: { findMany: vi.fn().mockResolvedValue(logs) } };
+    return { prisma, service: new WorkoutsService(prisma as never) };
+  };
+
+  it('renvoie les séances d\'un élève (programme assigné par ce coach)', async () => {
+    const { prisma, service } = make(1);
+    expect(await service.findForMemberByCoach('m1', 'c1')).toBe(logs);
+    expect(prisma.program.count).toHaveBeenCalledWith({ where: { createdById: 'c1', assignedToId: 'm1' } });
+  });
+
+  it('renvoie une liste vide pour un adhérent qui n\'est pas son élève, sans lire ses séances', async () => {
+    const { prisma, service } = make(0);
+    expect(await service.findForMemberByCoach('m2', 'c1')).toEqual([]);
+    expect(prisma.workoutLog.findMany).not.toHaveBeenCalled();
+  });
+});

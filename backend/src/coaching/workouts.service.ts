@@ -147,7 +147,10 @@ export class WorkoutsService {
   }
 
   /** Suivi de la progression d'un élève par le coach — nécessite le consentement (section 4.2/13). */
-  findForMemberByCoach(memberId: string) {
+  /** Séances d'un adhérent vues par un coach : uniquement pour ses élèves (adhérents à qui il a assigné un programme). */
+  async findForMemberByCoach(memberId: string, coachId: string) {
+    const isStudent = await this.prisma.program.count({ where: { createdById: coachId, assignedToId: memberId } });
+    if (isStudent === 0) return [];
     return this.prisma.workoutLog.findMany({
       where: { userId: memberId },
       include: { sets: { include: { exercise: true } }, program: true, day: true },

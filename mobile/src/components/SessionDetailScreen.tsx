@@ -26,10 +26,12 @@ interface Props {
   fallbackHref: string;
   /** Écran de scan du rôle (reçoit `sessionId`) : bouton « Scanner » de la carte de présence. */
   scannerRoute: string;
+  /** Profil d'un adhérent du rôle (route avec `[id]`) : ouvert par un appui sur une ligne de la liste des inscrits. */
+  memberRoute: string;
 }
 
 /** Détail d'un cours (coach, accueil) : infos du cours, présence, inscrits avec leur formule et pointage, liste d'attente. */
-export function SessionDetailScreen({ fallbackHref, scannerRoute }: Props) {
+export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute }: Props) {
   const nowMs = useNow();
   const client = useQueryClient();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => client.invalidateQueries());
@@ -91,7 +93,13 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute }: Props) {
     const attended = entry.status === 'ATTENDED';
     const plan = u.memberships?.[0]?.plan.name;
     return (
-      <View key={entry.id} style={[styles.person, cardShadow, attended && { borderColor: colors.successSoft }]}>
+      <Pressable
+        key={entry.id}
+        onPress={() => router.push({ pathname: memberRoute, params: { id: u.id } } as never)}
+        accessibilityRole="button"
+        accessibilityLabel={`${u.firstName} ${u.lastName}`}
+        style={({ pressed }) => [styles.person, cardShadow, attended && { borderColor: colors.successSoft }, pressed && { opacity: 0.85 }]}
+      >
         <Avatar initials={`${u.firstName[0] ?? ''}${u.lastName[0] ?? ''}`.toUpperCase()} size={46} background={attended ? colors.successSoft : colors.primarySoft} color={attended ? colors.successInk : colors.primaryInk} photoUrl={u.photoUrl} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.personName} numberOfLines={1}>{u.firstName} {u.lastName}</Text>
@@ -119,7 +127,7 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute }: Props) {
             <MaterialIcons name="how-to-reg" size={20} color={colors.primaryContrast} />
           </Pressable>
         )}
-      </View>
+      </Pressable>
     );
   };
 

@@ -6,6 +6,7 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachPrograms, useCoachStudents, useStudentWorkouts } from '../../../src/hooks/useCoachSessions';
+import { useMemberDetail } from '../../../src/hooks/useStaff';
 import { Avatar, EmptyState } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { CoachProgramCard } from '../../../src/components/coach/CoachProgramCard';
@@ -26,7 +27,9 @@ export default function CoachStudentDetailScreen() {
   const { data: programs } = useCoachPrograms();
   const { data: workouts } = useStudentWorkouts(id);
 
-  const student = students?.find((s) => s.id === id);
+  // Un adhérent de la liste des inscrits n'est pas forcément un élève suivi : on retombe sur sa fiche membre.
+  const { data: member } = useMemberDetail(id);
+  const student = students?.find((s) => s.id === id) ?? (member ? { id: member.id, firstName: member.firstName, lastName: member.lastName, photoUrl: member.photoUrl } : undefined);
   const studentPrograms = programs?.filter((p) => p.assignedTo.id === id) ?? [];
 
   if (!student) return null;

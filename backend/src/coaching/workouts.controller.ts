@@ -24,7 +24,7 @@ export class WorkoutsController {
 
   @Roles(Role.COACH)
   @Get('coach/students/:memberId/workouts')
-  findForMember(@Param('memberId') memberId: string) {
-    return this.workoutsService.findForMemberByCoach(memberId);
+  findForMember(@Param('memberId') memberId: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.workoutsService.findForMemberByCoach(memberId, user.userId);
   }
 }
