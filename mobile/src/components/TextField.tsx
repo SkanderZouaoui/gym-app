@@ -1,5 +1,6 @@
-import { useContext, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { useContext, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../theme/tokens';
@@ -11,77 +12,93 @@ interface TextFieldProps extends TextInputProps {
   error?: string;
   /** Aide sous le champ (masquée quand une erreur est affichée). */
   hint?: string;
-  /** Pictogramme dans la tuile violette à gauche (même langage que les lignes de coordonnées du profil). */
+  /** Pictogramme dans la tuile violette à gauche. */
   icon?: keyof typeof MaterialIcons.glyphMap;
   /** Affiche un bouton œil pour basculer la visibilité — réservé aux champs mot de passe. */
   isPassword?: boolean;
 }
 
 /**
- * Champ de saisie aux couleurs de l'app : carte arrondie, tuile d'icône en dégradé violet, libellé en petites capitales,
- * bordure et halo violets au focus, erreur en rouge avec pictogramme. Se recale au-dessus du clavier dans un KeyboardAwareScreen.
+ * Champ de saisie aux couleurs de l'app. Se lit clairement comme un champ modifiable : libellé au-dessus, zone de saisie
+ * en creux (fond + bordure), crayon à droite au repos, bouton d'effacement pendant la saisie ; cadenas s'il est en lecture seule.
+ * Toute la zone ouvre le clavier. Bordure et halo violets au focus, rouge en erreur.
  */
-export function TextField({ label, error, hint, icon, style, isPassword, secureTextEntry, onFocus, onBlur, editable, multiline, ...props }: TextFieldProps) {
+export function TextField({ label, error, hint, icon, style, isPassword, secureTextEntry, onFocus, onBlur, editable, multiline, value, onChangeText, ...props }: TextFieldProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef<TextInputInstance>(null);
   const keepVisible = useContext(KeyboardScrollContext);
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const disabled = editable === false;
+  const readOnly = editable === false;
   const hasError = !!error;
+  const hasValue = !!value && value.length > 0;
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.card,
-          multiline && styles.cardMultiline,
-          focused && styles.cardFocused,
-          hasError && styles.cardError,
-          disabled && styles.cardDisabled,
-        ]}
+      <Pressable onPress={() => inputRef.current?.focus()} disabled={readOnly} accessible={false}>
+        <Text style={[styles.label, focused && !hasError && { color: colors.primaryInk }, hasError && { color: colors.dangerInk }]} numberOfLines={1}>
+          {label.toUpperCase()}
+        </Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() => inputRef.current?.focus()}
+        disabled={readOnly}
+        accessible={false}
+        style={[styles.well, multiline && styles.wellMultiline, focused && styles.wellFocused, hasError && styles.wellError, readOnly && styles.wellReadOnly]}
       >
         {icon ? (
           hasError ? (
             <View style={[styles.tile, { backgroundColor: colors.dangerSoft }]}>
-              <MaterialIcons name={icon} size={22} color={colors.dangerInk} />
+              <MaterialIcons name={icon} size={20} color={colors.dangerInk} />
             </View>
           ) : (
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.tile}>
-              <MaterialIcons name={icon} size={22} color="#FFFFFF" />
+            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.tile, readOnly && { opacity: 0.55 }]}>
+              <MaterialIcons name={icon} size={20} color="#FFFFFF" />
             </LinearGradient>
           )
         ) : null}
-        <View style={styles.body}>
-          <Text style={[styles.label, focused && !hasError && { color: colors.primaryInk }, hasError && { color: colors.dangerInk }]} numberOfLines={1}>
-            {label.toUpperCase()}
-          </Text>
-          <TextInput
-            style={[styles.input, multiline && styles.inputMultiline, style]}
-            placeholderTextColor={colors.muted}
-            selectionColor={colors.primary}
-            cursorColor={colors.primary}
-            secureTextEntry={isPassword ? !visible : secureTextEntry}
-            editable={editable}
-            multiline={multiline}
-            onFocus={(e) => {
-              setFocused(true);
-              keepVisible();
-              onFocus?.(e);
-            }}
-            onBlur={(e) => {
-              setFocused(false);
-              onBlur?.(e);
-            }}
-            {...props}
-          />
-        </View>
+
+        <TextInput
+          ref={inputRef}
+          style={[styles.input, multiline && styles.inputMultiline, style]}
+          placeholderTextColor={colors.muted}
+          selectionColor={colors.primary}
+          cursorColor={colors.primary}
+          secureTextEntry={isPassword ? !visible : secureTextEntry}
+          editable={editable}
+          multiline={multiline}
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={(e) => {
+            setFocused(true);
+            keepVisible();
+            onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            onBlur?.(e);
+          }}
+          {...props}
+        />
+
         {isPassword ? (
-          <Pressable style={styles.eyeButton} onPress={() => setVisible((v) => !v)} hitSlop={8} accessibilityRole="button">
+          <Pressable style={styles.action} onPress={() => setVisible((v) => !v)} hitSlop={8} accessibilityRole="button">
             <MaterialIcons name={visible ? 'visibility-off' : 'visibility'} size={22} color={colors.muted} />
           </Pressable>
+        ) : readOnly ? (
+          <MaterialIcons name="lock-outline" size={18} color={colors.muted} />
+        ) : focused && hasValue && !multiline ? (
+          <Pressable style={styles.action} onPress={() => onChangeText?.('')} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('member.effacer')}>
+            <MaterialIcons name="cancel" size={20} color={colors.muted} />
+          </Pressable>
+        ) : !focused && !multiline ? (
+          <MaterialIcons name="edit" size={18} color={colors.primary} style={{ opacity: 0.75 }} />
         ) : null}
-      </View>
+      </Pressable>
+
       {hasError ? (
         <View style={styles.messageRow}>
           <MaterialIcons name="error-outline" size={14} color={colors.dangerInk} />
@@ -96,37 +113,36 @@ export function TextField({ label, error, hint, icon, style, isPassword, secureT
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    container: { gap: 6 },
-    card: {
+    container: { gap: 7 },
+    label: { fontFamily: fonts.bodyBold, fontSize: 11.5, letterSpacing: 0.7, color: colors.muted, paddingHorizontal: 4 },
+    well: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 14,
-      minHeight: 66,
-      paddingVertical: 10,
+      gap: 12,
+      minHeight: 58,
       paddingStart: 10,
-      paddingEnd: 16,
-      borderRadius: 20,
+      paddingEnd: 14,
+      borderRadius: 18,
       borderWidth: 1.5,
       borderColor: colors.border,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.surface2,
     },
-    cardMultiline: { alignItems: 'flex-start' },
-    cardFocused: {
+    wellMultiline: { alignItems: 'flex-start', paddingVertical: 10 },
+    wellFocused: {
       borderColor: colors.primary,
+      backgroundColor: colors.surface,
       shadowColor: colors.primary,
       shadowOpacity: 0.28,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 6 },
       elevation: 5,
     },
-    cardError: { borderColor: colors.danger },
-    cardDisabled: { opacity: 0.6 },
-    tile: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-    body: { flex: 1, minWidth: 0, justifyContent: 'center', paddingStart: 4 },
-    label: { fontFamily: fonts.bodyBold, fontSize: 11.5, letterSpacing: 0.7, color: colors.muted },
-    input: { height: 30, padding: 0, marginTop: 1, fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text },
-    inputMultiline: { height: undefined, minHeight: 72, textAlignVertical: 'top', paddingTop: 4 },
-    eyeButton: { height: 44, justifyContent: 'center' },
+    wellError: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
+    wellReadOnly: { opacity: 0.65 },
+    tile: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+    input: { flex: 1, minWidth: 0, height: 54, padding: 0, paddingStart: 4, fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text },
+    inputMultiline: { height: undefined, minHeight: 84, textAlignVertical: 'top', paddingTop: 6 },
+    action: { height: 44, justifyContent: 'center' },
     messageRow: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 6 },
     error: { flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: colors.dangerInk },
     hint: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted, paddingHorizontal: 6 },
