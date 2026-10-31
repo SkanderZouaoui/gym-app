@@ -184,14 +184,20 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute, e
 
         {session.room?.galleryUrls && session.room.galleryUrls.length > 0 ? (
           <View style={{ gap: 8 }}>
-            <Text style={styles.section}>{t('common.salle')} · {session.room.name}</Text>
+            <View style={styles.sectionHead}>
+              <Text style={styles.section} numberOfLines={1}>{t('common.salle')} · {session.room.name}</Text>
+              <Text style={styles.sectionCount}>{session.room.galleryUrls.length}</Text>
+            </View>
             <ImageGallery urls={session.room.galleryUrls} />
           </View>
         ) : null}
 
         {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
           <View style={{ gap: 8 }}>
-            <Text style={styles.section}>{t('member.galerie')}</Text>
+            <View style={styles.sectionHead}>
+              <Text style={styles.section}>{t('member.galerie')}</Text>
+              <Text style={styles.sectionCount}>{session.classType.galleryUrls.length}</Text>
+            </View>
             <ImageGallery urls={session.classType.galleryUrls} />
           </View>
         ) : null}
