@@ -132,7 +132,7 @@ export default function ProfileEditScreen() {
           <Text style={styles.sectionTitle}>{t('common.identite')}</Text>
           <View style={[styles.card, cardShadow]}>
             <TextField label={t('common.prenom')} icon="person-outline" value={firstName} onChangeText={setFirstName} autoCapitalize="words" autoComplete="given-name" returnKeyType="next" />
-            <TextField label={t('common.nom')} icon="badge" value={lastName} onChangeText={setLastName} autoCapitalize="words" autoComplete="family-name" returnKeyType="next" />
+            <TextField label={t('common.nom')} icon="person-outline" value={lastName} onChangeText={setLastName} autoCapitalize="words" autoComplete="family-name" returnKeyType="next" />
             <TextField
               label={t('common.telephone')}
               icon="call"

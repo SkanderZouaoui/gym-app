@@ -105,7 +105,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   };
 
   const contactRows: { icon: IconName; label: string; value: string; onChange?: (v: string) => void; placeholder: string; keyboardType?: 'default' | 'phone-pad'; verified?: boolean }[] = [
-    { icon: 'badge', label: t('common.nom_complet'), value: fullName, onChange: setFullName, placeholder: t('common.nom') },
+    { icon: 'person-outline', label: t('common.nom_complet'), value: fullName, onChange: setFullName, placeholder: t('common.nom') },
     { icon: 'mail-outline', label: t('common.email'), value: user?.email ?? '', placeholder: t('common.email_salle_fr'), verified: !!user?.email },
     { icon: 'call', label: t('common.telephone'), value: phone, onChange: setPhone, placeholder: '06 00 00 00 00', keyboardType: 'phone-pad' },
   ];
