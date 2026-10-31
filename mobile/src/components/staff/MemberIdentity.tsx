@@ -58,7 +58,7 @@ export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, rati
           </LinearGradient>
         )}
       </View>
-      <Text style={styles.name}>{firstName} {lastName}</Text>
+      <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{firstName} {lastName}</Text>
       <View style={styles.tagRow}>
         <StatusTag label={badge.label} tone={badge.tone} />
         {memberCode ? (
@@ -77,7 +77,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     identity: { alignItems: 'center', gap: 8, paddingBottom: 6 },
     avatar: { position: 'absolute', top: 9, left: 9, right: 9, bottom: 9, borderRadius: 43, alignItems: 'center', justifyContent: 'center' },
     avatarText: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -0.9, color: '#FFFFFF' },
-    name: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text, textAlign: 'center' },
+    name: { alignSelf: 'stretch', fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text, textAlign: 'center' },
     tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
     codeBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 4, height: 26, paddingHorizontal: 10, borderRadius: 13,

@@ -106,16 +106,16 @@ export default function CoachMemberScreen() {
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={styles.identity}>
           <Avatar initials={initials} size={96} background={colors.primarySoft} color={colors.primaryInk} photoUrl={member.photoUrl} />
-          <Text style={styles.name}>{member.firstName} {member.lastName}</Text>
+          <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{member.firstName} {member.lastName}</Text>
           <View style={styles.planPill}>
             <MaterialIcons name="card-membership" size={16} color={member.subscription ? colors.primaryInk : colors.muted} />
-            <Text style={[styles.planText, !member.subscription && { color: colors.muted }]}>{member.subscription ?? t('staff.sans_abonnement')}</Text>
+            <Text style={[styles.planText, !member.subscription && { color: colors.muted }]} numberOfLines={1}>{member.subscription ?? t('staff.sans_abonnement')}</Text>
           </View>
         </View>
 
         {upcoming.length > 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={styles.section}>{t('coach.member_upcoming')} · {upcoming.length}</Text>
+            <Text style={styles.section} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('coach.member_upcoming')} · {upcoming.length}</Text>
             {upcoming.slice(upcomingCurrent * PAGE_SIZE, (upcomingCurrent + 1) * PAGE_SIZE).map(courseCard)}
             <Pagination page={upcomingCurrent} pageCount={upcomingPages} pageSize={PAGE_SIZE} total={upcoming.length} onChange={setUpcomingPage} unit={t('coach.member_courses_unit')} />
           </View>
@@ -123,7 +123,7 @@ export default function CoachMemberScreen() {
 
         {past.length > 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={styles.section}>{t('coach.member_past')} · {past.length}</Text>
+            <Text style={styles.section} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('coach.member_past')} · {past.length}</Text>
             {past.slice(pastCurrent * PAGE_SIZE, (pastCurrent + 1) * PAGE_SIZE).map(courseCard)}
             <Pagination page={pastCurrent} pageCount={pastPages} pageSize={PAGE_SIZE} total={past.length} onChange={setPastPage} unit={t('coach.member_courses_unit')} />
           </View>
@@ -140,9 +140,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { paddingHorizontal: spacing.lg, paddingBottom: 60, gap: spacing.lg },
     identity: { alignItems: 'center', gap: 10, paddingTop: 4 },
-    name: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text, textAlign: 'center' },
+    name: { alignSelf: 'stretch', fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text, textAlign: 'center' },
     planPill: {
-      flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingHorizontal: 14, borderRadius: 16,
+      flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, maxWidth: '100%', paddingHorizontal: 14, borderRadius: 16,
       backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder,
     },
     planText: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.primaryInk },

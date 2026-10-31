@@ -100,7 +100,7 @@ export function MemberProfileScreen() {
               <View style={styles.actionIcon}>
                 <MaterialIcons name={a.icon} size={20} color={colors.primaryInk} />
               </View>
-              <Text style={styles.actionLabel}>{a.label}</Text>
+              <Text style={styles.actionLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{a.label}</Text>
             </Pressable>
           ))}
         </View>
@@ -109,15 +109,15 @@ export function MemberProfileScreen() {
           <View style={styles.heroShadow}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
               <View style={styles.heroDecor} />
-              <Text style={styles.heroKicker}>{t('staff.abonnement')}</Text>
-              <Text style={styles.heroTitle}>{current.plan.name}</Text>
-              <Text style={styles.heroSub}>{fmtDate(current.startDate, false)} → {fmtDate(current.endDate)}</Text>
+              <Text style={styles.heroKicker} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('staff.abonnement')}</Text>
+              <Text style={styles.heroTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{current.plan.name}</Text>
+              <Text style={styles.heroSub} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{fmtDate(current.startDate, false)} → {fmtDate(current.endDate)}</Text>
               <View style={styles.track}>
                 <View style={[styles.trackFill, { width: `${Math.round(ratio * 100)}%` }]} />
               </View>
               <View style={styles.heroBottom}>
-                <Text style={styles.heroBottomText}>{t('staff.ecoule', { v0: Math.round(ratio * 100) })}</Text>
-                <Text style={[styles.heroBottomText, { fontFamily: fonts.bodyBold }]}>
+                <Text style={[styles.heroBottomText, { flexShrink: 1 }]} numberOfLines={1}>{t('staff.ecoule', { v0: Math.round(ratio * 100) })}</Text>
+                <Text style={[styles.heroBottomText, { fontFamily: fonts.bodyBold, flexShrink: 1, textAlign: 'right' }]} numberOfLines={1}>
                   {current.status === 'ACTIVE' ? `${daysLeft} jour${(daysLeft ?? 0) > 1 ? 's' : ''} restant${(daysLeft ?? 0) > 1 ? 's' : ''}` : t('staff.expire')}
                 </Text>
               </View>
@@ -128,7 +128,7 @@ export function MemberProfileScreen() {
             <View style={styles.noPlanIcon}>
               <MaterialIcons name="card-membership" size={30} color={colors.primaryInk} />
             </View>
-            <Text style={styles.noPlanTitle}>{t('staff.pas_encore_dabonnement')}</Text>
+            <Text style={styles.noPlanTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('staff.pas_encore_dabonnement')}</Text>
             <Text style={styles.noPlanText}>{t('staff.souscrivez_un_forfait_pour_que')}</Text>
             <Pressable
               onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
@@ -150,7 +150,7 @@ export function MemberProfileScreen() {
           ].map((s) => (
             <View key={s.l} style={[styles.statCard, cardShadow]}>
               <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>{s.n}</Text>
-              <Text style={styles.statLabel}>{s.l}</Text>
+              <Text style={styles.statLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{s.l}</Text>
             </View>
           ))}
         </View>
@@ -158,7 +158,7 @@ export function MemberProfileScreen() {
 
 
         <View>
-          <Text style={styles.sectionTitle}>{t('common.coordonnees')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('common.coordonnees')}</Text>
           <View style={[styles.contactCard, cardShadow]}>
             {rows.map((r, i) => (
               <MemberContactRow key={r.k} icon={r.icon} label={r.k} value={r.v} href={r.href} copyable={r.copyable} last={i === rows.length - 1} />
@@ -167,7 +167,7 @@ export function MemberProfileScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('staff.paiements')}</Text>
+          <Text style={styles.sectionTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('staff.paiements')}</Text>
           <View style={[styles.listCard, cardShadow]}>
             {memberPayments.length === 0 ? (
               <Text style={styles.emptyRow}>{t('staff.aucun_paiement_enregistre')}</Text>
@@ -176,8 +176,8 @@ export function MemberProfileScreen() {
                 <View key={p.id} style={[styles.row, i < memberPayments.length - 1 && styles.rowBorder]}>
                   <MaterialIcons name="receipt-long" size={22} color={colors.primaryInk} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.rowValue}>{p.planName}</Text>
-                    <Text style={styles.rowKey}>{fmtDate(p.recordedAt)} · {METHOD_LABEL[p.method]}</Text>
+                    <Text style={styles.rowValue} numberOfLines={1}>{p.planName}</Text>
+                    <Text style={styles.rowKey} numberOfLines={1}>{fmtDate(p.recordedAt)} · {METHOD_LABEL[p.method]}</Text>
                   </View>
                   <Text style={styles.amount}>{formatMoney(p.amount)}</Text>
                 </View>
