@@ -34,10 +34,10 @@ export function useUpdateProfile() {
  * progression) — la clé obtenue est ensuite confirmée via useUpdateProfile. */
 export function useRequestAvatarUploadUrl() {
   return useMutation({
-    mutationFn: (contentType: string) =>
+    mutationFn: (input: { contentType: string; sizeBytes: number }) =>
       apiRequest<{ key: string; uploadUrl: string }>('/v1/me/avatar-upload-url', {
         method: 'POST',
-        body: { contentType },
+        body: input,
       }),
   });
 }

@@ -6,12 +6,17 @@ services:
     image: dxflrs/garage:v1.0.1
     environment:
       GARAGE_ALLOW_WORLD_READABLE_SECRETS: "true"
+      # Surchargent les valeurs de dev de garage.toml : à définir en prod (onboard-client.sh les génère).
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:-f2b8a0ece7011d7fe3c1f4b1d8a15f255f846b8bdb82537579740eba9628933d}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN:-muscleupdevadmintoken}
     volumes:
       - ./garage.toml:/etc/garage.toml:ro
       - muscleup_garage_data:/data
     ports:
-      - "${MINIO_API_PORT:-9000}:3900" # API S3
-      - "${MINIO_ADMIN_PORT:-9001}:3903" # API admin (créer buckets/clés)
+      # API S3 : en dev, joignable depuis le téléphone (LAN) ; en prod, MINIO_BIND=127.0.0.1 derrière le reverse proxy TLS.
+      - "${MINIO_BIND:-0.0.0.0}:${MINIO_API_PORT:-9000}:3900"
+      # API admin (buckets/clés) : jamais exposée hors de la machine.
+      - "127.0.0.1:${MINIO_ADMIN_PORT:-9001}:3903"
     healthcheck:
       test: ["CMD", "/garage", "status"]
       interval: 5s

@@ -13,9 +13,6 @@ export interface BodyMetric {
   date: string;
   weightKg: string | null;
   measurements: Record<string, number> | null;
-  photoKey: string | null;
-  /** URL présignée à durée limitée (5 min) — jamais une URL publique permanente. */
-  photoUrl: string | null;
   visibility: 'PRIVATE' | 'SHARED_WITH_COACH';
 }
 
@@ -30,7 +27,6 @@ export interface CreateBodyMetricInput {
   date?: string;
   weightKg?: number;
   measurements?: Record<string, number>;
-  photoKey?: string;
   visibility?: 'PRIVATE' | 'SHARED_WITH_COACH';
 }
 
@@ -49,26 +45,5 @@ export function useDeleteBodyMetric() {
     mutationKey: ['deleteBodyMetric'],
     mutationFn: (id: string) => apiRequest(`/v1/me/body-metrics/${id}`, { method: 'DELETE' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'body-metrics'] }),
-  });
-}
-
-/** Envoie une photo directement vers le stockage objet (URL présignée),
- * sans transiter par notre API — renvoie la clé à enregistrer sur la mesure. */
-export function useUploadProgressPhoto() {
-  return useMutation({
-    mutationFn: async ({ uri, contentType }: { uri: string; contentType: string }) => {
-      const { key, uploadUrl } = await apiRequest<{ key: string; uploadUrl: string }>('/v1/me/photos/upload-url', {
-        method: 'POST',
-        body: { contentType },
-      });
-      const blob = await (await fetch(uri)).blob();
-      const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': contentType },
-        body: blob,
-      });
-      if (!uploadRes.ok) throw new Error('UPLOAD_FAILED');
-      return { key };
-    },
   });
 }

@@ -47,6 +47,8 @@ generate_secret_if_empty "JWT_ACCESS_SECRET"
 generate_secret_if_empty "JWT_REFRESH_SECRET"
 generate_secret_if_empty "QR_KEY_ENCRYPTION_SECRET"
 generate_secret_if_empty "POSTGRES_PASSWORD"
+generate_secret_if_empty "GARAGE_RPC_SECRET"
+generate_secret_if_empty "GARAGE_ADMIN_TOKEN"
 
 echo "== 2. Démarrage de l'infra et de l'API =="
 docker compose -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" -p "muscleup-$CLIENT_NAME" up -d --build

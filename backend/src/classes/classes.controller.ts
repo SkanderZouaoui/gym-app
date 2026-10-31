@@ -12,6 +12,7 @@ import { CancelSessionDto } from './dto/cancel-session.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
+import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
 
 @ApiTags('classes')
 @Controller('v1')
@@ -43,8 +44,8 @@ export class ClassesController {
 
   @Roles(Role.ADMIN)
   @Post('admin/class-types/:id/gallery/upload-url')
-  galleryUploadUrl(@Param('id') id: string, @Body() body: { contentType: string }) {
-    return this.classesService.galleryUploadUrl(id, body.contentType);
+  galleryUploadUrl(@Param('id') id: string, @Body() body: RequestUploadUrlDto) {
+    return this.classesService.galleryUploadUrl(id, body.contentType, body.sizeBytes);
   }
 
   @Roles(Role.ADMIN)

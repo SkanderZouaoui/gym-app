@@ -22,6 +22,7 @@ import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
 import { otpRateLimitMessage } from '../../src/utils/otpErrors';
+import { normalizeImageType, readUploadBlob } from '../../src/utils/upload';
 
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
@@ -71,10 +72,9 @@ export default function ProfileEditScreen() {
     setUploading(true);
     setError(null);
     try {
-      const contentType = asset.mimeType ?? 'image/jpeg';
-      const { key, uploadUrl } = await requestUploadUrl.mutateAsync(contentType);
-      const response = await fetch(asset.uri);
-      const blob = await response.blob();
+      const contentType = normalizeImageType(asset.mimeType);
+      const blob = await readUploadBlob(asset.uri);
+      const { key, uploadUrl } = await requestUploadUrl.mutateAsync({ contentType, sizeBytes: blob.size });
       const putResponse = await fetch(uploadUrl, {
         method: 'PUT',
         headers: { 'Content-Type': contentType },

@@ -1,4 +1,4 @@
-import { IsIn, IsISO8601, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsISO8601, IsNumber, IsObject, IsOptional } from 'class-validator';
 
 export class CreateBodyMetricDto {
   @IsOptional()
@@ -12,10 +12,6 @@ export class CreateBodyMetricDto {
   @IsOptional()
   @IsObject()
   measurements?: Record<string, number>;
-
-  @IsOptional()
-  @IsString()
-  photoKey?: string;
 
   @IsOptional()
   @IsIn(['PRIVATE', 'SHARED_WITH_COACH'])

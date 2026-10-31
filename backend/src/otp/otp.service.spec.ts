@@ -161,10 +161,10 @@ describe('buildOtpMail', () => {
 
   it('plus d\'icône « copier » qui ouvre une page : seul le bouton d\'ouverture existe, et uniquement pour le reset', () => {
     const url = 'https://api.x.com/v1/auth/open-app#c=123456';
-    expect(buildOtpMail({ ...base, landingUrl: url }).html.match(/<a href/g)).toHaveLength(1);
+    expect(buildOtpMail({ ...base, landingUrl: url }).html!.match(/<a href/g)).toHaveLength(1);
     const change = buildOtpMail({ ...base, purpose: 'EMAIL_CHANGE', landingUrl: url });
-    expect(change.html).not.toContain('<a href');
-    expect(change.html).not.toContain('a=copy');
+    expect(change.html!).not.toContain('<a href');
+    expect(change.html!).not.toContain('a=copy');
   });
 
   it('sans lien configuré : pas de bouton ni d\'icône copier', () => {

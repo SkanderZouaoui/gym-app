@@ -32,11 +32,11 @@ export class ClassesService {
   }
 
   /** URL présignée d'envoi d'une photo de galerie (le client envoie directement vers le stockage). */
-  async galleryUploadUrl(id: string, contentType: string) {
+  async galleryUploadUrl(id: string, contentType: string, sizeBytes: number) {
     await this.findType(id);
     if (!/^image\/(jpeg|png|webp)$/.test(contentType)) throw new BadRequestException('INVALID_IMAGE_TYPE');
     const key = this.storage.buildKey(`class-types/${id}`, contentType);
-    const uploadUrl = await this.storage.getUploadUrl(key, contentType);
+    const uploadUrl = await this.storage.getUploadUrl(key, contentType, sizeBytes);
     return { key, uploadUrl };
   }
 

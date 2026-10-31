@@ -581,7 +581,7 @@ model WorkoutSet {
 }
 
 /**
- * Mesures et photos de progression — accès restreint (section 13).
+ * Mesures corporelles — accès restreint (section 13).
  */
 model BodyMetric {
   id           String   @id @default(uuid())
@@ -589,7 +589,6 @@ model BodyMetric {
   date         DateTime @default(now())
   weightKg     Decimal? @map("weight_kg") @db.Decimal(5, 2)
   measurements Json?    @default("{}")
-  photoKey     String?  @map("photo_key")
   visibility   String   @default("PRIVATE") // PRIVATE | SHARED_WITH_COACH
   createdAt    DateTime @default(now()) @map("created_at")
 

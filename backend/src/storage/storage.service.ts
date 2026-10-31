@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 
 const PRESIGN_EXPIRY_SECONDS = 300;
+/** Taille maximale d'un fichier envoyé (octets), signée dans l'URL : le stockage refuse tout autre corps. */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 /** Stockage objet S3-compatible (Garage — voir /minio). Les photos de
  * progression sont privées par défaut : jamais d'URL publique permanente,
@@ -55,8 +57,20 @@ export class StorageService {
     return `${prefix}/${randomUUID()}.${ext}`;
   }
 
-  async getUploadUrl(key: string, contentType: string): Promise<string> {
-    const command = new PutObjectCommand({ Bucket: this.bucket, Key: key, ContentType: contentType });
+  /** La clé doit appartenir à l'appelant (préfixe `…/<id>/`) : sinon un client pourrait rattacher à son
+   * compte, puis lire ou supprimer, l'objet d'un autre. `null`/`undefined` = pas de fichier, accepté. */
+  assertOwnKey(key: string | null | undefined, prefix: string): void {
+    if (key == null) return;
+    if (!key.startsWith(`${prefix}/`) || key.includes('..')) throw new BadRequestException('INVALID_FILE_KEY');
+  }
+
+  /** URL présignée d'envoi : le Content-Length est signé, donc l'envoi doit faire exactement `sizeBytes`
+   * (≤ MAX_UPLOAD_BYTES) ; le stockage rejette (403) tout fichier plus gros que celui annoncé. */
+  async getUploadUrl(key: string, contentType: string, sizeBytes: number): Promise<string> {
+    if (!Number.isInteger(sizeBytes) || sizeBytes <= 0 || sizeBytes > MAX_UPLOAD_BYTES) {
+      throw new BadRequestException('FILE_TOO_LARGE');
+    }
+    const command = new PutObjectCommand({ Bucket: this.bucket, Key: key, ContentType: contentType, ContentLength: sizeBytes });
     return getSignedUrl(this.presignClient, command, { expiresIn: PRESIGN_EXPIRY_SECONDS });
   }
 

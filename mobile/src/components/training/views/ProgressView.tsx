@@ -163,11 +163,6 @@ export function ProgressView() {
         ) : null}
       </View>
 
-      <Pressable style={styles.photosLink} onPress={() => router.push('/(member)/photos')}>
-        <MaterialIcons name="photo-library" size={18} color={colors.text} />
-        <Text style={styles.photosLinkText}>{t('member.mes_photos_de_progression')}</Text>
-        <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
-      </Pressable>
     </View>
   );
 }
@@ -206,10 +201,5 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     regularitySub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
     addButton: { height: 48, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
     addButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
-    photosLink: {
-      flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface,
-      borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md,
-    },
-    photosLinkText: { flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
   });
 }

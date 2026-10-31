@@ -66,7 +66,8 @@ export function ClassTypeDrawer({ item, onClose }: { item: ClassTypeItem | null;
     setUploading(true)
     try {
       for (const file of Array.from(files)) {
-        const { key, uploadUrl } = await classTypesApi.galleryUploadUrl(item.id, file.type)
+        if (file.size > 10 * 1024 * 1024) throw new Error('FILE_TOO_LARGE')
+        const { key, uploadUrl } = await classTypesApi.galleryUploadUrl(item.id, file.type, file.size)
         const res = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
         if (!res.ok) throw new Error('UPLOAD_FAILED')
         const updated = await classTypesApi.addGalleryImage(item.id, key)
@@ -74,7 +75,7 @@ export function ClassTypeDrawer({ item, onClose }: { item: ClassTypeItem | null;
       }
       queryClient.invalidateQueries({ queryKey: ['class-types'] })
     } catch {
-      setGalleryError('Envoi impossible : formats acceptés JPEG, PNG ou WebP.')
+      setGalleryError('Envoi impossible : formats acceptés JPEG, PNG ou WebP, 10 Mo maximum.')
     } finally {
       setUploading(false)
       if (fileInput.current) fileInput.current.value = ''

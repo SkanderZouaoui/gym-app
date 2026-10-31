@@ -45,7 +45,7 @@ export class UsersController {
 
   @Post('me/avatar-upload-url')
   requestAvatarUploadUrl(@Body() dto: RequestUploadUrlDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.usersService.requestAvatarUploadUrl(user.userId, dto.contentType);
+    return this.usersService.requestAvatarUploadUrl(user.userId, dto.contentType, dto.sizeBytes);
   }
 
   @Delete('me')

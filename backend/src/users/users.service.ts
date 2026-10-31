@@ -91,6 +91,7 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
+    this.storageService.assertOwnKey(dto.photoKey, `avatars/${userId}`);
     if (dto.phone) {
       const taken = await this.prisma.user.findFirst({ where: { phone: dto.phone, id: { not: userId } }, select: { id: true } });
       if (taken) throw new ConflictException('PHONE_ALREADY_USED');
@@ -116,9 +117,9 @@ export class UsersService {
   /** URL présignée pour que le téléphone envoie directement sa nouvelle photo
    * de profil vers le stockage objet — même mécanisme que les photos de
    * progression (section body-metrics), clé confirmée via `PATCH /v1/me`. */
-  async requestAvatarUploadUrl(userId: string, contentType: string) {
+  async requestAvatarUploadUrl(userId: string, contentType: string, sizeBytes: number) {
     const key = this.storageService.buildKey(`avatars/${userId}`, contentType);
-    const uploadUrl = await this.storageService.getUploadUrl(key, contentType);
+    const uploadUrl = await this.storageService.getUploadUrl(key, contentType, sizeBytes);
     return { key, uploadUrl };
   }
 

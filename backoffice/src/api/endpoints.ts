@@ -429,9 +429,9 @@ export const classTypesApi = {
   create: (data: CreateClassTypeInput) => api.post<ClassTypeItem>('/v1/admin/class-types', data).then((r) => r.data),
   update: (id: string, data: Partial<CreateClassTypeInput>) =>
     api.patch<ClassTypeItem>(`/v1/admin/class-types/${id}`, data).then((r) => r.data),
-  galleryUploadUrl: (id: string, contentType: string) =>
+  galleryUploadUrl: (id: string, contentType: string, sizeBytes: number) =>
     api
-      .post<{ key: string; uploadUrl: string }>(`/v1/admin/class-types/${id}/gallery/upload-url`, { contentType })
+      .post<{ key: string; uploadUrl: string }>(`/v1/admin/class-types/${id}/gallery/upload-url`, { contentType, sizeBytes })
       .then((r) => r.data),
   addGalleryImage: (id: string, key: string) =>
     api.post<ClassTypeItem>(`/v1/admin/class-types/${id}/gallery`, { key }).then((r) => r.data),
