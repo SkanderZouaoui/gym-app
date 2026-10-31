@@ -3,7 +3,9 @@ import { S3Client, DeleteObjectCommand, PutObjectCommand, GetObjectCommand, List
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 
-const PRESIGN_EXPIRY_SECONDS = 300;
+const UPLOAD_EXPIRY_SECONDS = 300;
+// Les URLs de lecture restent valides plus longtemps : une liste ouverte longtemps ne doit pas perdre ses images.
+const READ_EXPIRY_SECONDS = 3600;
 /** Taille maximale d'un fichier envoyé (octets), signée dans l'URL : le stockage refuse tout autre corps. */
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
@@ -71,12 +73,12 @@ export class StorageService {
       throw new BadRequestException('FILE_TOO_LARGE');
     }
     const command = new PutObjectCommand({ Bucket: this.bucket, Key: key, ContentType: contentType, ContentLength: sizeBytes });
-    return getSignedUrl(this.presignClient, command, { expiresIn: PRESIGN_EXPIRY_SECONDS });
+    return getSignedUrl(this.presignClient, command, { expiresIn: UPLOAD_EXPIRY_SECONDS });
   }
 
   async getReadUrl(key: string): Promise<string> {
     const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-    return getSignedUrl(this.presignClient, command, { expiresIn: PRESIGN_EXPIRY_SECONDS });
+    return getSignedUrl(this.presignClient, command, { expiresIn: READ_EXPIRY_SECONDS });
   }
 
   /** Lit un objet en mémoire (serveur → stockage) ; refuse les objets plus gros que MAX_UPLOAD_BYTES. */

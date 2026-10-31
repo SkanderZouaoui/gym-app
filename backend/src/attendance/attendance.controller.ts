@@ -46,38 +46,44 @@ export class AttendanceController {
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Get('sessions/:id/roster')
-  getRoster(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+  async getRoster(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    await this.attendanceService.assertCanManage(user, [id]);
     // Le coach ne voit que le nom des inscrits à son cours (pas leurs coordonnées ni leur abonnement).
     return this.attendanceService.getRoster(id, user.activeRole === Role.COACH);
   }
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Post('attendance/scan')
-  scan(@Body() dto: ScanDto, @CurrentUser() user: AuthenticatedUser) {
+  async scan(@Body() dto: ScanDto, @CurrentUser() user: AuthenticatedUser) {
+    await this.attendanceService.assertCanManage(user, [dto.sessionId]);
     return this.attendanceService.scan(dto.token, dto.sessionId, user.userId);
   }
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Post('attendance/manual')
-  manualCheckin(@Body() dto: ManualCheckinDto, @CurrentUser() user: AuthenticatedUser) {
+  async manualCheckin(@Body() dto: ManualCheckinDto, @CurrentUser() user: AuthenticatedUser) {
+    await this.attendanceService.assertCanManage(user, [dto.sessionId]);
     return this.attendanceService.manualCheckin(dto, user.userId);
   }
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Patch('attendance/:bookingId/cancel')
-  cancelAttendance(@Param('bookingId') bookingId: string, @CurrentUser() user: AuthenticatedUser) {
+  async cancelAttendance(@Param('bookingId') bookingId: string, @CurrentUser() user: AuthenticatedUser) {
+    await this.attendanceService.assertCanManageBooking(user, bookingId);
     return this.attendanceService.cancelAttendance(bookingId, user.userId);
   }
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Post('attendance/walk-in')
-  walkIn(@Body() dto: WalkInDto, @CurrentUser() user: AuthenticatedUser) {
+  async walkIn(@Body() dto: WalkInDto, @CurrentUser() user: AuthenticatedUser) {
+    await this.attendanceService.assertCanManage(user, [dto.sessionId]);
     return this.attendanceService.walkIn(dto, user.userId);
   }
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Post('attendance/sync')
-  sync(@Body() dto: SyncDto, @CurrentUser() user: AuthenticatedUser) {
+  async sync(@Body() dto: SyncDto, @CurrentUser() user: AuthenticatedUser) {
+    await this.attendanceService.assertCanManage(user, dto.scans.map((s) => s.sessionId));
     return this.attendanceService.sync(dto, user.userId);
   }
 

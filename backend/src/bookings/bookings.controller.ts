@@ -29,7 +29,7 @@ export class BookingsController {
   }
 
   /** Inscrire un adhérent au nom de celui-ci (section 4.2/4.3). */
-  @Roles(Role.STAFF, Role.ADMIN, Role.COACH)
+  @Roles(Role.STAFF, Role.ADMIN)
   @Post('bookings/on-behalf')
   createOnBehalf(@Body() dto: CreateBookingOnBehalfDto) {
     return this.bookingsService.createOnBehalf(dto.userId, dto.sessionId);

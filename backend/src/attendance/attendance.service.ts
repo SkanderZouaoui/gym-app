@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { AccessReasonCode } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -36,6 +36,21 @@ export class AttendanceService {
   }
 
   /** Inscrits du jour pour un cours — mis en cache côté app pour le mode hors ligne (section 6.6). */
+  /** Un coach n'agit que sur ses propres cours ; staff et admin sur tous. */
+  async assertCanManage(user: { userId: string; activeRole: string }, sessionIds: string[]) {
+    if (user.activeRole !== 'COACH') return;
+    const ids = [...new Set(sessionIds)];
+    const owned = await this.prisma.classSession.count({ where: { id: { in: ids }, coachId: user.userId } });
+    if (owned !== ids.length) throw new ForbiddenException('NOT_YOUR_SESSION');
+  }
+
+  async assertCanManageBooking(user: { userId: string; activeRole: string }, bookingId: string) {
+    if (user.activeRole !== 'COACH') return;
+    const booking = await this.prisma.booking.findUnique({ where: { id: bookingId }, select: { sessionId: true } });
+    if (!booking) throw new NotFoundException('BOOKING_NOT_FOUND');
+    await this.assertCanManage(user, [booking.sessionId]);
+  }
+
   async getRoster(sessionId: string, limited = false) {
     const session = await this.prisma.classSession.findUnique({ where: { id: sessionId } });
     if (!session) throw new NotFoundException('SESSION_NOT_FOUND');
