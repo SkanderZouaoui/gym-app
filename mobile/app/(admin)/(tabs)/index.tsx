@@ -1,6 +1,6 @@
 import { useMemo, useState , useCallback } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -113,7 +113,6 @@ export default function AdminDashboardScreen() {
     { key: 'cash', icon: 'point-of-sale', label: i18n.t('admin.shortcut_cash'), route: '/(admin)/cash-select' },
     { key: 'member', icon: 'person-add', label: i18n.t('admin.shortcut_member'), route: '/(admin)/member-create' },
     { key: 'class', icon: 'add-circle-outline', label: i18n.t('admin.shortcut_class'), route: '/(admin)/course-form' },
-    { key: 'class-media', icon: 'photo-library', label: i18n.t('common.class_media_title'), route: '/(admin)/class-media' },
     { key: 'announce', icon: 'campaign', label: i18n.t('admin.shortcut_announce'), route: '/(admin)/announcements' },
     { key: 'programs', icon: 'fitness-center', label: i18n.t('admin.shortcut_programs'), route: '/(admin)/programs', badge: pendingPrograms || undefined },
     { key: 'scan', icon: 'qr-code-scanner', label: i18n.t('common.scanner'), route: '/(admin)/(tabs)/scanner' },
@@ -180,7 +179,7 @@ export default function AdminDashboardScreen() {
           </View>
           <NotificationBell onPress={() => router.push('/(admin)/inbox')} />
           <Pressable onPress={() => router.push('/(admin)/profile')} style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials}</Text>
+            {user?.photoUrl ? <Image source={{ uri: user.photoUrl }} style={styles.avatarImage} /> : <Text style={styles.avatarText}>{initials}</Text>}
           </Pressable>
         </View>
 
@@ -516,6 +515,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     date: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
     title: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -0.7, color: colors.text },
     avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+    avatarImage: { width: 44, height: 44, borderRadius: 22 },
     avatarText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
     heroShadow: { borderRadius: 28, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8, marginTop: 4 },
     hero: { borderRadius: 28, padding: 22, overflow: 'hidden' },

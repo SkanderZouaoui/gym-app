@@ -24,6 +24,7 @@ import {
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../src/i18n';
+import { ClassTypeMediaSection } from '../../src/components/ClassTypeMediaSection';
 
 function defaultStart(): Date {
   const d = new Date();
@@ -141,6 +142,8 @@ export default function CourseFormScreen() {
             submit: async (name, cap) => (await saveType.mutateAsync({ name, defaultCapacity: cap || 16 })).id,
           }}
         />
+
+        {typeId ? <ClassTypeMediaSection typeId={typeId} /> : null}
 
         <Text style={styles.section}>{i18n.t('admin.horaire')}</Text>
         <DateTimeFields value={start} onChange={setStart} minimumDate={editing ? undefined : new Date()} />

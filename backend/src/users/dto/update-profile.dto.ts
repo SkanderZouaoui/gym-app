@@ -15,7 +15,8 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString()
-  photoKey?: string;
+  /** Clé de la nouvelle photo ; `null` supprime la photo de profil. */
+  photoKey?: string | null;
 
   @IsOptional()
   @IsObject()

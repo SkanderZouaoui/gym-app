@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -97,9 +97,13 @@ export default function StaffMemberScreen() {
                 strokeDashoffset={CIRC * (1 - ratio)}
               />
             </Svg>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
-            </LinearGradient>
+            {member.photoUrl ? (
+              <Image source={{ uri: member.photoUrl }} style={[styles.avatar, { backgroundColor: colors.surface2 }]} />
+            ) : (
+              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </LinearGradient>
+            )}
           </View>
           <Text style={styles.name}>{member.firstName} {member.lastName}</Text>
           <View style={styles.tagRow}>

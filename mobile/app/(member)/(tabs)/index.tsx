@@ -145,6 +145,7 @@ export default function HomeScreen() {
           greeting={greetingParts(config, language).label}
           firstName={user?.firstName}
           lastName={user?.lastName}
+          photoUrl={user?.photoUrl}
           hasUnreadNotification={unreadCount > 0}
           onPressNotifications={() => router.push('/(member)/notifications')}
         />

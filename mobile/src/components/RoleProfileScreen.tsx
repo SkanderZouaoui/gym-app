@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSheet } from './LanguageSheet';
 import { LANGUAGE_LABELS } from '../i18n';
 import { useProfilePhoto } from '../hooks/useProfilePhoto';
+import { useOfflineAwareRefresh } from '../hooks/useOfflineAwareRefresh';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -35,9 +36,10 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const { colors, cardShadow, preference, setScheme } = useTheme();
   const { language } = useLanguage();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user } = useMe();
+  const { data: user, refetch: refetchMe } = useMe();
   const updateProfile = useUpdateProfile();
-  const { data: mySchedule } = useMySchedule();
+  const { data: mySchedule, refetch: refetchSchedule } = useMySchedule();
+  const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetchMe(), refetchSchedule()]));
   const workingDays = (mySchedule ?? []).filter((d) => d.working);
   const roles = useSessionStore((s) => s.roles);
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
@@ -65,13 +67,10 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
     setToast({ text, ok });
     setTimeout(() => setToast(null), 2500);
   };
-  const { pickPhoto, uploading: photoUploading, localPhotoUri } = useProfilePhoto({
+  const { onPressAvatar, uploading: photoUploading, localPhotoUri, controls: photoControls } = useProfilePhoto({
     onSuccess: () => showToast(t('common.profil_enregistre')),
     onError: (message) => showToast(message, false),
   });
-  const activeRole = useSessionStore((s) => s.activeRole);
-  // Seul l'admin modifie les cours (types, médias) : l'entrée n'existe que dans son profil.
-  const canManageClassMedia = activeRole === 'ADMIN';
 
   const handleSave = () => {
     const [firstName, ...rest] = fullName.trim().split(/\s+/);
@@ -113,12 +112,12 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView {...tabBarScroll} contentContainerStyle={[styles.container, dirty && { paddingBottom: STICKY_BAR_SPACE + 40 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+      <ScrollView {...tabBarScroll} contentContainerStyle={[styles.container, dirty && { paddingBottom: STICKY_BAR_SPACE + 40 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <ProfileHeader
           initials={initials}
           photoUrl={user?.photoUrl}
           localPhotoUri={localPhotoUri}
-          onEditPhoto={pickPhoto}
+          onEditPhoto={onPressAvatar}
           photoUploading={photoUploading}
           name={user ? `${user.firstName} ${user.lastName}` : ''}
           subtitle={user?.email ?? undefined}
@@ -190,21 +189,6 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
           <Text style={styles.hint}>{t('common.ces_informations_servent_a_vous')}</Text>
         </View>
 
-        {canManageClassMedia ? (
-          <SettingsGroup
-            title={t('common.class_media_title')}
-            rows={[
-              {
-                kind: 'nav',
-                icon: 'photo-library',
-                title: t('common.class_media_title'),
-                sub: t('common.class_media_subtitle'),
-                onPress: () => router.push('/(admin)/class-media' as never),
-              },
-            ]}
-          />
-        ) : null}
-
         <SettingsGroup
           title={t('common.apparence')}
           rows={[
@@ -241,6 +225,8 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
 
       <StickyActionBar visible={dirty} aboveTabBar label={t('common.enregistrer_le_profil')} loading={updateProfile.isPending} onPress={handleSave} />
 
+      {photoControls}
+
       <LanguageSheet visible={languageVisible} onClose={() => setLanguageVisible(false)} />
 
       <BottomSheet visible={logoutVisible} onClose={() => setLogoutVisible(false)}>
@@ -252,6 +238,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         </View>
       </BottomSheet>
 
+      {offlineToastVisible ? <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} /> : null}
       {toast ? <Toast icon={toast.ok ? 'check-circle' : 'error'} text={toast.text} iconColor={toast.ok ? colors.success : colors.danger} /> : null}
     </SafeAreaView>
   );

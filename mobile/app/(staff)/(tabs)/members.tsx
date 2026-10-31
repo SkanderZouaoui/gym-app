@@ -189,7 +189,7 @@ export default function StaffMembersScreen() {
               onPress={() => router.push(routes.member(item.id))}
             >
               <View style={[styles.ring, { borderColor: ring }]}>
-                <InitialsAvatar first={item.firstName} last={item.lastName} size={42} />
+                <InitialsAvatar first={item.firstName} last={item.lastName} size={42} photoUrl={item.photoUrl} />
               </View>
               <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
                 <Text style={styles.name} numberOfLines={1}>{item.firstName} {item.lastName}</Text>

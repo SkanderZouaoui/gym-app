@@ -39,7 +39,7 @@ export default function ProfileEditScreen() {
   const [lastName, setLastName] = useState(user?.lastName ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [error, setError] = useState<string | null>(null);
-  const { pickPhoto, uploading, localPhotoUri } = useProfilePhoto({ onError: setError, onSuccess: () => setError(null) });
+  const { onPressAvatar, uploading, localPhotoUri, controls: photoControls } = useProfilePhoto({ onError: setError, onSuccess: () => setError(null) });
 
   const [emailStep, setEmailStep] = useState<'idle' | 'form' | 'code'>('idle');
   const [newEmail, setNewEmail] = useState('');
@@ -103,7 +103,7 @@ export default function ProfileEditScreen() {
         <ScreenTitle title={t('member.informations_personnelles')} subtitle={t('member.votre_identite_et_vos_coordonnees')} />
 
         <View style={styles.avatarSection}>
-          <Pressable onPress={pickPhoto} style={styles.avatarWrap} disabled={uploading}>
+          <Pressable onPress={onPressAvatar} style={styles.avatarWrap} disabled={uploading}>
             {displayedPhoto ? (
               <Image source={{ uri: displayedPhoto }} style={styles.avatarImage} />
             ) : (
@@ -203,6 +203,7 @@ export default function ProfileEditScreen() {
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
+      {photoControls}
     </SafeAreaView>
   );
 }

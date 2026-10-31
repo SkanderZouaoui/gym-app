@@ -16,6 +16,8 @@ import type { UpdateMemberDto } from './dto/update-member.dto.js';
 import type { AssignRoleDto } from './dto/assign-role.dto.js';
 import type { UpdateProfileDto } from './dto/update-profile.dto.js';
 import type { RequestEmailChangeDto } from './dto/request-email-change.dto.js';
+import { cropAvatarImage } from '../storage/avatar-image.js';
+import type { CropAvatarDto } from './dto/crop-avatar.dto.js';
 
 const PUBLIC_USER_SELECT = {
   id: true,
@@ -44,6 +46,11 @@ export class UsersService {
 
   private async withPhotoUrl<T extends { photoKey: string | null }>(user: T) {
     return { ...user, photoUrl: user.photoKey ? await this.storageService.getReadUrl(user.photoKey) : null };
+  }
+
+  /** Listes (adhérents, équipe) : chaque élément reçoit une URL de lecture signée de sa photo de profil, ou null. */
+  private withPhotoUrls<T extends { photoKey: string | null }>(users: T[]) {
+    return Promise.all(users.map((u) => this.withPhotoUrl(u)));
   }
 
   async findMe(userId: string) {
@@ -111,6 +118,21 @@ export class UsersService {
       await this.storageService.deleteObject(previous.photoKey).catch(() => {});
     }
 
+    return this.withPhotoUrl(user);
+  }
+
+  /** Recadre la photo de profil actuelle (zone en fractions de l'image) : l'API relit l'image stockée, la recadre en
+   * carré 512×512 JPEG, la remplace sous une nouvelle clé et supprime l'ancienne. */
+  async cropAvatar(userId: string, rect: CropAvatarDto) {
+    const current = await this.prisma.user.findUnique({ where: { id: userId }, select: { photoKey: true } });
+    if (!current?.photoKey) throw new BadRequestException('NO_PHOTO');
+
+    const cropped = await cropAvatarImage(await this.storageService.getObjectBuffer(current.photoKey), rect);
+    const key = this.storageService.buildKey(`avatars/${userId}`, 'image/jpeg');
+    await this.storageService.putObject(key, cropped, 'image/jpeg');
+
+    const user = await this.prisma.user.update({ where: { id: userId }, data: { photoKey: key }, select: PUBLIC_USER_SELECT });
+    await this.storageService.deleteObject(current.photoKey).catch(() => {});
     return this.withPhotoUrl(user);
   }
 
@@ -208,7 +230,7 @@ export class UsersService {
 
   /** Recherche d'adhérent par nom ou téléphone (section 4.3 — Staff). */
   async search(query: string) {
-    return this.prisma.user.findMany({
+    const members = await this.prisma.user.findMany({
       where: {
         deletedAt: null,
         // Liste des adhérents : ni l'équipe d'accueil ni les admins (comptes gérés dans « Équipe »).
@@ -233,12 +255,18 @@ export class UsersService {
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
       take: 100,
     });
+    return this.withPhotoUrls(members);
   }
 
   async findOne(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id }, select: PUBLIC_USER_SELECT });
     if (!user) throw new NotFoundException('USER_NOT_FOUND');
     return user;
+  }
+
+  /** Fiche adhérent affichée par le staff/admin : avec l'URL signée de la photo (jamais utilisée dans l'audit). */
+  async findOneWithPhoto(id: string) {
+    return this.withPhotoUrl(await this.findOne(id));
   }
 
   /** Création d'un adhérent par un admin/staff. Avec `planId`, le compte, l'abonnement et
@@ -399,12 +427,13 @@ export class UsersService {
   }
 
   /** Comptes internes (Staff + Admin) — back-office → Équipe. */
-  findAllTeam() {
-    return this.prisma.user.findMany({
+  async findAllTeam() {
+    const team = await this.prisma.user.findMany({
       where: { deletedAt: null, roles: { some: { role: { in: [Role.STAFF, Role.COACH, Role.ADMIN] } } } },
       select: PUBLIC_USER_SELECT,
       orderBy: { firstName: 'asc' },
     });
+    return this.withPhotoUrls(team);
   }
 
   /**

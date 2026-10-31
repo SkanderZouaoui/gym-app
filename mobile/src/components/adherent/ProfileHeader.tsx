@@ -39,7 +39,13 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, 
   const pct = Math.round(Math.min(1, Math.max(0, completion)) * 100);
   return (
     <View style={styles.wrap}>
-      <View style={styles.ringBox}>
+      <Pressable
+        style={styles.ringBox}
+        onPress={onEditPhoto}
+        disabled={!onEditPhoto || photoUploading}
+        accessibilityRole={onEditPhoto ? 'button' : undefined}
+        accessibilityLabel={onEditPhoto ? t('member.changer_la_photo') : undefined}
+      >
         <Svg width={SIZE} height={SIZE} style={[StyleSheet.absoluteFill, { transform: [{ rotate: '-90deg' }] }]}>
           <Circle cx={SIZE / 2} cy={SIZE / 2} r={R} stroke={colors.surface2} strokeWidth={STROKE} fill="none" />
           <Circle
@@ -64,21 +70,14 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, 
           )}
         </View>
         {onEditPhoto ? (
-          <Pressable
-            onPress={onEditPhoto}
-            disabled={photoUploading}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={t('member.changer_la_photo')}
-            style={({ pressed }) => [styles.editBadge, pressed && { transform: [{ scale: 0.94 }] }]}
-          >
+          <View style={styles.editBadge} pointerEvents="none">
             {photoUploading ? <ActivityIndicator size="small" color={colors.primaryContrast} /> : <MaterialIcons name="photo-camera" size={18} color={colors.primaryContrast} />}
-          </Pressable>
+          </View>
         ) : null}
         <View style={styles.pct}>
           <Text style={styles.pctText}>{pct}%</Text>
         </View>
-      </View>
+      </Pressable>
       <Text style={styles.name}>{name}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       {memberCode ? (

@@ -373,6 +373,8 @@ export interface TeamMember {
   id: string;
   firstName: string;
   lastName: string;
+  /** URL signée (durée limitée) de la photo de profil, null si aucune. */
+  photoUrl?: string | null;
   email: string | null;
   phone: string | null;
   status: 'ACTIVE' | 'SUSPENDED' | string;

@@ -34,6 +34,8 @@ export interface MemberSearchResult {
   email: string | null;
   status: string;
   memberCode?: string | null;
+  /** URL signée (durée limitée) de la photo de profil, null si l'adhérent n'en a pas. */
+  photoUrl?: string | null;
   /** Dernier abonnement (le plus récent), absent si l'adhérent n'en a jamais eu. */
   memberships?: { status: 'ACTIVE' | 'EXPIRED' | 'SUSPENDED' | 'CANCELLED'; endDate: string; plan: { name: string } }[];
 }

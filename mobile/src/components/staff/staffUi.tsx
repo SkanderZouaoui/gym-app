@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
@@ -7,11 +7,16 @@ import type { PaymentMethod } from '../../hooks/useStaff';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../i18n';
 
-/** Pastille ronde à initiales (dégradé d'accent). */
-export function InitialsAvatar({ first, last, size = 44 }: { first: string; last: string; size?: number }) {
+/** Pastille ronde : photo de profil si l'adhérent/l'équipier en a une, sinon initiales (dégradé d'accent). */
+export function InitialsAvatar({ first, last, size = 44, photoUrl }: { first: string; last: string; size?: number; photoUrl?: string | null }) {
   useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => StyleSheet.create({ box: { alignItems: 'center', justifyContent: 'center' }, text: { fontFamily: fonts.bodyBold, color: '#FFFFFF' } }), []);
+  // URL signée expirée ou illisible : on retombe sur les initiales.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  if (photoUrl && failedUrl !== photoUrl) {
+    return <Image source={{ uri: photoUrl }} onError={() => setFailedUrl(photoUrl)} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.surface2 }} accessibilityIgnoresInvertColors />;
+  }
   return (
     <LinearGradient
       colors={[colors.primary, colors.primaryPressed]}

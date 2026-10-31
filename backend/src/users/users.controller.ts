@@ -17,6 +17,8 @@ import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
+import { Throttle } from '@nestjs/throttler';
+import { CropAvatarDto } from './dto/crop-avatar.dto.js';
 
 @ApiTags('users')
 @Controller('v1')
@@ -41,6 +43,13 @@ export class UsersController {
   @Post('me/onboarding')
   completeOnboarding(@CurrentUser() user: AuthenticatedUser, @Body() dto: CompleteOnboardingDto) {
     return this.usersService.completeOnboarding(user.userId, dto);
+  }
+
+  /** Recadre la photo de profil actuelle ; traitement d'image : limité à 10 appels par minute. */
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('me/avatar/crop')
+  cropAvatar(@CurrentUser() user: AuthenticatedUser, @Body() dto: CropAvatarDto) {
+    return this.usersService.cropAvatar(user.userId, dto);
   }
 
   @Post('me/avatar-upload-url')
@@ -80,7 +89,7 @@ export class UsersController {
   @Roles(Role.STAFF, Role.COACH, Role.ADMIN)
   @Get('members/:id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.usersService.findOneWithPhoto(id);
   }
 
   @Roles(Role.STAFF, Role.ADMIN)

@@ -5,13 +5,10 @@ import { teamApi, type TeamMemberItem } from '../api/endpoints'
 import { Pagination } from '../components/ui/Pagination'
 import { usePagination } from '../lib/usePagination'
 import { TeamDrawer } from '../components/TeamDrawer'
+import { UserAvatar } from '../components/ui/UserAvatar'
 
 const STATUS_TONE: Record<string, string> = { ACTIVE: 'success', SUSPENDED: 'danger' }
 const STATUS_LABEL: Record<string, string> = { ACTIVE: 'Actif', SUSPENDED: 'Suspendu' }
-
-function initials(firstName: string, lastName: string) {
-  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()
-}
 
 function roleLabel(roles: { role: Role }[]) {
   return roles.some((r) => r.role === 'ADMIN') ? 'Admin' : 'Accueil'
@@ -80,9 +77,7 @@ export function TeamPage() {
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-(--color-secondary-soft) text-xs font-bold text-(--color-secondary-ink)">
-                      {initials(t.firstName, t.lastName)}
-                    </span>
+                    <UserAvatar firstName={t.firstName} lastName={t.lastName} photoUrl={t.photoUrl} />
                     <span className="font-semibold">
                       {t.firstName} {t.lastName}
                     </span>

@@ -8,6 +8,9 @@ import type { CreateSessionDto, UpdateSessionDto } from './dto/session-input.dto
 import type { CreateRoomDto, UpdateRoomDto } from './dto/room.dto.js';
 import type { GenerateSessionsDto } from './dto/generate-sessions.dto.js';
 
+/** Nombre maximal de photos dans la galerie d'un type de cours. */
+export const MAX_TYPE_GALLERY = 12;
+
 @Injectable()
 export class ClassesService {
   constructor(
@@ -33,7 +36,8 @@ export class ClassesService {
 
   /** URL présignée d'envoi d'une photo de galerie (le client envoie directement vers le stockage). */
   async galleryUploadUrl(id: string, contentType: string, sizeBytes: number) {
-    await this.findType(id);
+    const type = await this.findType(id);
+    if (type.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
     if (!/^image\/(jpeg|png|webp)$/.test(contentType)) throw new BadRequestException('INVALID_IMAGE_TYPE');
     const key = this.storage.buildKey(`class-types/${id}`, contentType);
     const uploadUrl = await this.storage.getUploadUrl(key, contentType, sizeBytes);
@@ -44,6 +48,7 @@ export class ClassesService {
     const type = await this.findType(id);
     if (!key.startsWith(`class-types/${id}/`)) throw new BadRequestException('INVALID_GALLERY_KEY');
     if (type.galleryKeys.includes(key)) return this.withGalleryUrls(type);
+    if (type.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
     const updated = await this.prisma.classType.update({ where: { id }, data: { galleryKeys: { push: key } } });
     return this.withGalleryUrls(updated);
   }

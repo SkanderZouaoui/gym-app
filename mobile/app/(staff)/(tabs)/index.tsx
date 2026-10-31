@@ -54,7 +54,7 @@ export default function StaffHomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.header}>
-          <Avatar initials={`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'AC'} size={44} background={colors.primarySoft} color={colors.primaryInk} />
+          <Avatar initials={`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'AC'} size={44} background={colors.primarySoft} color={colors.primaryInk} photoUrl={user?.photoUrl} />
           <View style={{ flex: 1 }}>
             <Text style={styles.hello}>{t('staff.bonjour')}</Text>
             <Text style={styles.name} numberOfLines={1}>{user?.firstName ?? ''}</Text>

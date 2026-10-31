@@ -133,7 +133,7 @@ export default function AdminTeamScreen() {
             return (
               <View key={u.id} style={[styles.card, cardShadow, !active && { opacity: 0.65 }]}>
                 <Pressable style={styles.row} onPress={() => { setDetail(u); setDeleteError(null); }}>
-                  <InitialsAvatar first={u.firstName} last={u.lastName} />
+                  <InitialsAvatar first={u.firstName} last={u.lastName} photoUrl={u.photoUrl} />
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.name} numberOfLines={1}>{u.firstName} {u.lastName}</Text>
                     <View style={styles.inlineMeta}><MaterialIcons name={hasRole(u, 'COACH') ? 'sports-gymnastics' : 'badge'} size={14} color={colors.primaryInk} /><Text style={styles.meta} numberOfLines={1}>{hasRole(u, 'COACH') ? t('common.coach') : t('common.accueil')} · {u.email ?? u.phone ?? '—'}</Text></View>
@@ -167,7 +167,7 @@ export default function AdminTeamScreen() {
         {detail ? (
           <View style={{ gap: 12 }}>
             <View style={styles.detailHead}>
-              <InitialsAvatar first={detail.firstName} last={detail.lastName} />
+              <InitialsAvatar first={detail.firstName} last={detail.lastName} photoUrl={detail.photoUrl} />
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.sheetTitle} numberOfLines={1}>{detail.firstName} {detail.lastName}</Text>
                 <View style={styles.inlineMeta}>

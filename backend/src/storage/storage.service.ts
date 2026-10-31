@@ -79,6 +79,18 @@ export class StorageService {
     return getSignedUrl(this.presignClient, command, { expiresIn: PRESIGN_EXPIRY_SECONDS });
   }
 
+  /** Lit un objet en mémoire (serveur → stockage) ; refuse les objets plus gros que MAX_UPLOAD_BYTES. */
+  async getObjectBuffer(key: string): Promise<Buffer> {
+    const res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    if (!res.Body) throw new BadRequestException('FILE_NOT_FOUND');
+    if ((res.ContentLength ?? 0) > MAX_UPLOAD_BYTES) throw new BadRequestException('FILE_TOO_LARGE');
+    return Buffer.from(await res.Body.transformToByteArray());
+  }
+
+  async putObject(key: string, body: Buffer, contentType: string): Promise<void> {
+    await this.client.send(new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }));
+  }
+
   async deleteObject(key: string): Promise<void> {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }

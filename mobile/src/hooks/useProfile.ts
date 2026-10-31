@@ -17,7 +17,8 @@ export interface UpdateProfileInput {
   firstName?: string;
   lastName?: string;
   phone?: string;
-  photoKey?: string;
+  /** Clé de la nouvelle photo ; `null` supprime la photo de profil. */
+  photoKey?: string | null;
 }
 
 export function useUpdateProfile() {
@@ -25,6 +26,23 @@ export function useUpdateProfile() {
   return useMutation({
     mutationKey: ['updateProfile'],
     mutationFn: (dto: UpdateProfileInput) => apiRequest<MeResponse>('/v1/me', { method: 'PATCH', body: dto }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me'] }),
+  });
+}
+
+/** Zone conservée par le recadrage, en fractions (0–1) de la largeur / hauteur de la photo actuelle. */
+export interface AvatarCropRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+/** Recadre la photo de profil actuelle (traitement côté serveur : carré 512×512). */
+export function useCropAvatar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (rect: AvatarCropRect) => apiRequest<MeResponse>('/v1/me/avatar/crop', { method: 'POST', body: rect }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me'] }),
   });
 }

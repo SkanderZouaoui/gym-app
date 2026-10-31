@@ -36,7 +36,7 @@ import { useProfilePhoto } from '../../../src/hooks/useProfilePhoto';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
-  const { pickPhoto, uploading: photoUploading, localPhotoUri } = useProfilePhoto();
+  const { onPressAvatar, uploading: photoUploading, localPhotoUri, controls: photoControls } = useProfilePhoto();
   const nowMs = useNow();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, preference, setScheme } = useTheme();
@@ -176,7 +176,7 @@ export default function ProfileScreen() {
           initials={initials}
           photoUrl={user?.photoUrl}
           localPhotoUri={localPhotoUri}
-          onEditPhoto={pickPhoto}
+          onEditPhoto={onPressAvatar}
           photoUploading={photoUploading}
           name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
           memberCode={user?.memberCode ?? undefined}
@@ -317,6 +317,7 @@ export default function ProfileScreen() {
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}
+      {photoControls}
     </SafeAreaView>
   );
 }

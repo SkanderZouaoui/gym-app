@@ -4,6 +4,7 @@ import { membersApi, type MemberListItem } from '../api/endpoints'
 import { Pagination } from '../components/ui/Pagination'
 import { usePagination } from '../lib/usePagination'
 import { MemberDrawer } from '../components/MemberDrawer'
+import { UserAvatar } from '../components/ui/UserAvatar'
 
 export function MembersPage() {
   const [query, setQuery] = useState('')
@@ -71,7 +72,12 @@ export function MembersPage() {
                 className="cursor-pointer border-b border-(--color-border) last:border-0 hover:bg-(--color-surface-2)"
               >
                 <td className="px-4 py-3 font-semibold">
-                  {m.firstName} {m.lastName}
+                  <div className="flex items-center gap-2.5">
+                    <UserAvatar firstName={m.firstName} lastName={m.lastName} photoUrl={m.photoUrl} />
+                    <span>
+                      {m.firstName} {m.lastName}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-(--color-muted)">{m.phone ?? m.email ?? '—'}</td>
                 <td className="px-4 py-3">
