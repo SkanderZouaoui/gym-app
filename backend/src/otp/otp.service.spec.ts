@@ -138,15 +138,33 @@ describe('buildOtpMail', () => {
   const base = { purpose: 'PASSWORD_RESET' as const, to: 'a@b.co', firstName: 'Sami', code: '123456', brand: 'MuscleUP' };
 
   it('contient le code, le lien et le texte brut', () => {
-    const m = buildOtpMail({ ...base, openAppUrl: 'https://api.x.com/v1/auth/open-app#c=123456' });
+    const m = buildOtpMail({ ...base, landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456' });
     expect(m.html).toContain('123456');
     expect(m.html).toContain('href="https://api.x.com/v1/auth/open-app#c=123456"');
     expect(m.text).toContain('123456');
     expect(m.subject).toContain('MuscleUP');
   });
 
-  it('sans lien configuré : pas de bouton', () => {
-    expect(buildOtpMail(base).html).not.toContain('<a href');
+  it('icône « copier » : lien vers la page avec a=copy, images jointes en cid', () => {
+    const m = buildOtpMail({ ...base, landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456&p=r' });
+    expect(m.html).toContain('href="https://api.x.com/v1/auth/open-app#c=123456&amp;p=r&amp;a=copy"');
+    expect(m.html).toContain('cid:muscleup-copy');
+    expect(m.html).toContain('cid:muscleup-hero');
+    expect(m.attachments?.map((a) => a.cid).sort()).toEqual(['muscleup-copy', 'muscleup-hero']);
+  });
+
+  it('changement d\'e-mail : icône copier mais pas de bouton « ouvrir l\'application »', () => {
+    const m = buildOtpMail({ ...base, purpose: 'EMAIL_CHANGE', landingUrl: 'https://api.x.com/v1/auth/open-app#c=123456&p=e' });
+    expect(m.html).toContain('cid:muscleup-copy');
+    expect(m.html).not.toContain('Ouvrir l&#39;application');
+    expect(m.html).not.toContain('→');
+  });
+
+  it('sans lien configuré : pas de bouton ni d\'icône copier', () => {
+    const m = buildOtpMail(base);
+    expect(m.html).not.toContain('<a href');
+    expect(m.html).not.toContain('cid:muscleup-copy');
+    expect(m.attachments).toHaveLength(1);
   });
 
   it('traduit en anglais et en arabe (RTL), repli sur le français', () => {

@@ -77,7 +77,7 @@ export class OtpService {
           code,
           brand: this.config.get<string>('MAIL_BRAND') ?? 'MuscleUP',
           lang,
-          openAppUrl: purpose === 'PASSWORD_RESET' ? this.openAppUrl(to, code, lang) : undefined,
+          landingUrl: this.landingUrl(to, code, purpose, lang),
         }),
       )
       .then((sent) => {
@@ -85,11 +85,11 @@ export class OtpService {
       });
   }
 
-  /** Lien https de l'e-mail vers la page qui ouvre l'app (code dans le fragment, jamais envoyé au serveur). */
-  private openAppUrl(email: string, code: string, lang?: string): string | undefined {
+  /** Lien https de l'e-mail vers la page qui ouvre l'app / copie le code (code dans le fragment, jamais envoyé au serveur). */
+  private landingUrl(email: string, code: string, purpose: OtpPurpose, lang?: string): string | undefined {
     const base = this.config.get<string>('PUBLIC_API_URL')?.replace(/\/+$/, '');
     if (!base) return undefined;
-    const params = new URLSearchParams({ e: email, c: code, ...(lang ? { l: lang } : {}) });
+    const params = new URLSearchParams({ e: email, c: code, p: purpose === 'PASSWORD_RESET' ? 'r' : 'e', ...(lang ? { l: lang } : {}) });
     return `${base}/v1/auth/open-app#${params.toString()}`;
   }
 
