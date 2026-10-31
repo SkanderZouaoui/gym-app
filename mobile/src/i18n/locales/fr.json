@@ -328,9 +328,7 @@
     "room_media_title": "Photos de la salle",
     "room_media_hint": "Affichées sur la fiche de chaque cours donné dans « {{name}} ».",
     "class_media_cover": "Couverture",
-    "class_media_move_earlier": "Déplacer vers le début",
-    "class_media_move_later": "Déplacer vers la fin",
-    "class_media_reorder_hint": "Utilisez les flèches pour changer l'ordre ; la première photo sert de couverture.",
+    "class_media_reorder_hint": "Maintenez une photo appuyée puis glissez-la pour changer l'ordre ; la première photo est la couverture.",
     "class_media_reorder_error": "Changement d'ordre impossible, réessayez."
   },
   "home": {

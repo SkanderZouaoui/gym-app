@@ -328,9 +328,7 @@
     "room_media_title": "Room photos",
     "room_media_hint": "Shown on the page of every class held in “{{name}}”.",
     "class_media_cover": "Cover",
-    "class_media_move_earlier": "Move earlier",
-    "class_media_move_later": "Move later",
-    "class_media_reorder_hint": "Use the arrows to change the order; the first photo is the cover.",
+    "class_media_reorder_hint": "Press and hold a photo, then drag it to change the order; the first photo is the cover.",
     "class_media_reorder_error": "Could not change the order, please try again."
   },
   "home": {

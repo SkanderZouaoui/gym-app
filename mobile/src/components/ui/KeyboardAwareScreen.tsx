@@ -15,6 +15,9 @@ import {
 /** Appelé par TextField quand un champ prend le focus : l'écran fait remonter ce champ au-dessus du clavier. */
 export const KeyboardScrollContext = createContext<() => void>(() => undefined);
 
+/** Permet à un enfant (ex. galerie réordonnable) de suspendre le défilement de l'écran pendant un glissement. */
+export const ScrollLockContext = createContext<(enabled: boolean) => void>(() => undefined);
+
 interface Props extends Omit<ScrollViewProps, 'children'> {
   children: ReactNode;
   /** Barre fixe sous le contenu (ex. « Enregistrer ») : affichée clavier fermé, masquée pendant la saisie pour laisser la place. */
@@ -34,6 +37,7 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
   const keyboardTop = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const ensureFocusedVisible = useCallback(() => {
     const top = keyboardTop.current;
@@ -81,10 +85,12 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
 
   return (
     <KeyboardScrollContext.Provider value={onFieldFocus}>
+      <ScrollLockContext.Provider value={setScrollEnabled}>
       <View style={{ flex: 1 }}>
         <ScrollView
           ref={scrollRef}
           style={{ flex: 1 }}
+          scrollEnabled={scrollEnabled}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           scrollEventThrottle={16}
@@ -96,6 +102,7 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
         </ScrollView>
         {keyboardHeight === 0 ? footer : null}
       </View>
+      </ScrollLockContext.Provider>
     </KeyboardScrollContext.Provider>
   );
 }
