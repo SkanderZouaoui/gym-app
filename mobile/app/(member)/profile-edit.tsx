@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,6 +15,7 @@ import {
   useUpdateProfile,
 } from '../../src/hooks/useProfile';
 import { Banner, ScreenTitle, Toast } from '../../src/components/ui';
+import { KeyboardAwareScreen } from '../../src/components/ui/KeyboardAwareScreen';
 import { ApiError } from '../../src/api/client';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
@@ -91,10 +92,19 @@ export default function ProfileEditScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView
+      <KeyboardAwareScreen
         contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        footer={
+          <View style={styles.footer}>
+            <Button
+              label={t('member.enregistrer')}
+              onPress={handleSave}
+              loading={updateProfile.isPending}
+              disabled={!firstName.trim() || !lastName.trim()}
+            />
+          </View>
+        }
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
@@ -121,10 +131,11 @@ export default function ProfileEditScreen() {
         <View>
           <Text style={styles.sectionTitle}>{t('common.identite')}</Text>
           <View style={[styles.card, cardShadow]}>
-            <TextField label={t('common.prenom')} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-            <TextField label={t('common.nom')} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
+            <TextField label={t('common.prenom')} icon="person-outline" value={firstName} onChangeText={setFirstName} autoCapitalize="words" autoComplete="given-name" returnKeyType="next" />
+            <TextField label={t('common.nom')} icon="badge" value={lastName} onChangeText={setLastName} autoCapitalize="words" autoComplete="family-name" returnKeyType="next" />
             <TextField
               label={t('common.telephone')}
+              icon="call"
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
@@ -155,12 +166,13 @@ export default function ProfileEditScreen() {
                 <Text style={styles.emailHint}>{t('member.un_code_a_usage_unique')}</Text>
                 <TextField
                   label={t('member.nouvelle_adresse_e_mail')}
+                  icon="mail-outline"
                   value={newEmail}
                   onChangeText={setNewEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
                 />
-                <TextField label={t('member.mot_de_passe_actuel')} value={emailPassword} onChangeText={setEmailPassword} isPassword />
+                <TextField label={t('member.mot_de_passe_actuel')} icon="lock-outline" value={emailPassword} onChangeText={setEmailPassword} isPassword />
                 <View style={styles.emailButtonRow}>
                   <Button
                     label={t('common.envoyer_le_code')}
@@ -175,7 +187,7 @@ export default function ProfileEditScreen() {
               <>
                 {emailError ? <Banner tone="danger" icon="error" text={emailError} /> : null}
                 <Text style={styles.emailHint}>{t('member.entrez_le_code_recu_a', { v1: newEmail.trim() })}</Text>
-                <TextField label={t('common.code_recu')} value={emailCode} onChangeText={setEmailCode} keyboardType="number-pad" maxLength={6} />
+                <TextField label={t('common.code_recu')} icon="pin" value={emailCode} onChangeText={(v) => setEmailCode(v.replace(/[^0-9]/g, ''))} keyboardType="number-pad" maxLength={6} />
                 <View style={styles.emailButtonRow}>
                   <Button
                     label={t('member.confirmer')}
@@ -189,16 +201,7 @@ export default function ProfileEditScreen() {
             )}
           </View>
         </View>
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <Button
-          label={t('member.enregistrer')}
-          onPress={handleSave}
-          loading={updateProfile.isPending}
-          disabled={!firstName.trim() || !lastName.trim()}
-        />
-      </View>
+      </KeyboardAwareScreen>
 
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
@@ -228,7 +231,7 @@ function traduireErreurEmail(code: string): string {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
-    container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
+    container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     avatarSection: { alignItems: 'center', gap: 8 },
@@ -259,7 +262,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     emailHint: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
     emailButtonRow: { gap: spacing.sm },
     footer: {
-      position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.bg,
+      backgroundColor: colors.bg,
       borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,
     },
   });
