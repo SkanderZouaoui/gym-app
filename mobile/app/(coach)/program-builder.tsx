@@ -115,7 +115,7 @@ export default function CoachProgramBuilderScreen() {
         })),
     };
     assignProgram.mutate(payload, {
-      onSuccess: () => router.replace(`/(coach)/student/${params.studentId}`),
+      onSuccess: () => router.replace('/(coach)/(tabs)/programs'),
       onError: (e) => setError(e instanceof ApiError ? e.message : t('coach.erreur_lors_de_lassignation')),
     });
   };
@@ -124,7 +124,7 @@ export default function CoachProgramBuilderScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title={t('coach.programme_pour', { v0: params.studentName ?? '' })} fallbackHref={`/(coach)/student/${params.studentId}`} />
+      <ScreenHeader title={t('coach.programme_pour', { v0: params.studentName ?? '' })} fallbackHref="/(coach)/(tabs)/programs" />
       <ScrollView contentContainerStyle={styles.container}>
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 

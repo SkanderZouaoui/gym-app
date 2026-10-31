@@ -68,7 +68,7 @@ export default function CoachViewProgramExerciseScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScreenHeader title="" fallbackHref={studentId ? `/(coach)/student/${studentId}` : '/(coach)/(tabs)/students'} />
+      <ScreenHeader title="" fallbackHref="/(coach)/(tabs)/programs" />
       <ScrollView
         refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <View style={styles.mediaWrap}>

@@ -37,7 +37,6 @@ export default function CoachTabsLayout() {
           tabBarIcon: ({ color }) => <MaterialIcons name="fitness-center" size={24} color={color as string} />,
         }}
       />
-      <Tabs.Screen name="students" options={{ href: null }} />
       <Tabs.Screen
         name="profile"
         options={{
