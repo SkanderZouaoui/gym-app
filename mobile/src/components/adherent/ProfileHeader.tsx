@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
 import { fonts, typography } from '../../theme/tokens';
@@ -18,6 +18,12 @@ interface ProfileHeaderProps {
   /** Complétion du profil, entre 0 et 1 : anneau autour de l'avatar. */
   completion: number;
   tags?: { label: string; tone: PillTone }[];
+  /** Si fourni, l'avatar affiche un bouton appareil photo qui appelle ce callback (changer la photo de profil). */
+  onEditPhoto?: () => void;
+  /** Envoi de la photo en cours : le bouton affiche un indicateur. */
+  photoUploading?: boolean;
+  /** Photo choisie localement, affichée immédiatement pendant l'envoi. */
+  localPhotoUri?: string | null;
 }
 
 const SIZE = 132;
@@ -26,7 +32,7 @@ const R = (SIZE - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
 /** En-tête de Profil v2 : avatar en dégradé dans un anneau de complétion, nom 30 pt, pastilles. */
-export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, completion, tags }: ProfileHeaderProps) {
+export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, completion, tags, onEditPhoto, photoUploading, localPhotoUri }: ProfileHeaderProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -49,14 +55,26 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, 
           />
         </Svg>
         <View style={styles.avatarShadow}>
-          {photoUrl ? (
-            <Image source={{ uri: photoUrl }} style={styles.avatar} />
+          {localPhotoUri ?? photoUrl ? (
+            <Image source={{ uri: (localPhotoUri ?? photoUrl)! }} style={styles.avatar} />
           ) : (
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
               <Text style={styles.initials}>{initials}</Text>
             </LinearGradient>
           )}
         </View>
+        {onEditPhoto ? (
+          <Pressable
+            onPress={onEditPhoto}
+            disabled={photoUploading}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('member.changer_la_photo')}
+            style={({ pressed }) => [styles.editBadge, pressed && { transform: [{ scale: 0.94 }] }]}
+          >
+            {photoUploading ? <ActivityIndicator size="small" color={colors.primaryContrast} /> : <MaterialIcons name="photo-camera" size={18} color={colors.primaryContrast} />}
+          </Pressable>
+        ) : null}
         <View style={styles.pct}>
           <Text style={styles.pctText}>{pct}%</Text>
         </View>
@@ -91,6 +109,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     avatar: { width: 106, height: 106, borderRadius: 53, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
     initials: { fontFamily: fonts.head, fontSize: 38, letterSpacing: -1.1, color: '#FFFFFF' },
+    editBadge: {
+      position: 'absolute', top: 6, right: 6, width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: colors.primary, borderWidth: 3, borderColor: colors.bg,
+    },
     pct: {
       position: 'absolute', bottom: 0, width: 52, alignItems: 'center', paddingVertical: 3, borderRadius: 999,
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,

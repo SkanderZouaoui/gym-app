@@ -276,7 +276,21 @@
     "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · par {{actor}}",
     "notif_admin_member": "Nouveau compte adhérent",
     "notif_admin_member_body": "{{member}} · créé par {{actor}}",
-    "pagination_unit_payments": "encaissements"
+    "pagination_unit_payments": "encaissements",
+    "class_media_title": "Médias des cours",
+    "class_media_subtitle": "Photos affichées sur la fiche de chaque cours.",
+    "class_media_add": "Ajouter des photos",
+    "class_media_uploading": "Envoi en cours…",
+    "class_media_added": "{{count}} photo(s) ajoutée(s).",
+    "class_media_upload_error": "Envoi impossible pour {{count}} photo(s) : JPEG, PNG ou WebP, 10 Mo maximum.",
+    "class_media_delete_title": "Supprimer cette photo ?",
+    "class_media_delete_text": "Elle ne sera plus affichée sur la fiche du cours.",
+    "class_media_delete_confirm": "Supprimer",
+    "class_media_delete_error": "Suppression impossible, réessayez.",
+    "class_media_empty": "Aucune photo pour ce cours.",
+    "class_media_hint": "Jusqu'à 10 photos à la fois, 10 Mo maximum chacune.",
+    "class_media_no_types_title": "Aucun type de cours",
+    "class_media_no_types": "Créez d'abord un type de cours pour y ajouter des photos."
   },
   "home": {
     "membershipNone": "Sans abonnement",

@@ -113,6 +113,7 @@ export default function AdminDashboardScreen() {
     { key: 'cash', icon: 'point-of-sale', label: i18n.t('admin.shortcut_cash'), route: '/(admin)/cash-select' },
     { key: 'member', icon: 'person-add', label: i18n.t('admin.shortcut_member'), route: '/(admin)/member-create' },
     { key: 'class', icon: 'add-circle-outline', label: i18n.t('admin.shortcut_class'), route: '/(admin)/course-form' },
+    { key: 'class-media', icon: 'photo-library', label: i18n.t('common.class_media_title'), route: '/(admin)/class-media' },
     { key: 'announce', icon: 'campaign', label: i18n.t('admin.shortcut_announce'), route: '/(admin)/announcements' },
     { key: 'programs', icon: 'fitness-center', label: i18n.t('admin.shortcut_programs'), route: '/(admin)/programs', badge: pendingPrograms || undefined },
     { key: 'scan', icon: 'qr-code-scanner', label: i18n.t('common.scanner'), route: '/(admin)/(tabs)/scanner' },

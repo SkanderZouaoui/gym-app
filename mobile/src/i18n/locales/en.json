@@ -276,7 +276,21 @@
     "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · by {{actor}}",
     "notif_admin_member": "New member account",
     "notif_admin_member_body": "{{member}} · created by {{actor}}",
-    "pagination_unit_payments": "payments"
+    "pagination_unit_payments": "payments",
+    "class_media_title": "Class media",
+    "class_media_subtitle": "Photos shown on each class page.",
+    "class_media_add": "Add photos",
+    "class_media_uploading": "Uploading…",
+    "class_media_added": "{{count}} photo(s) added.",
+    "class_media_upload_error": "Could not upload {{count}} photo(s): JPEG, PNG or WebP, 10 MB max.",
+    "class_media_delete_title": "Delete this photo?",
+    "class_media_delete_text": "It will no longer appear on the class page.",
+    "class_media_delete_confirm": "Delete",
+    "class_media_delete_error": "Could not delete, please try again.",
+    "class_media_empty": "No photos for this class yet.",
+    "class_media_hint": "Up to 10 photos at a time, 10 MB max each.",
+    "class_media_no_types_title": "No class types",
+    "class_media_no_types": "Create a class type first to add photos to it."
   },
   "home": {
     "membershipNone": "No membership",

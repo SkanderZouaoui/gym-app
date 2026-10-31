@@ -24,6 +24,7 @@ import { useHideTabBarOnScroll } from '../hooks/useHideTabBarOnScroll';
 import { useTranslation } from 'react-i18next';
 import { LanguageSheet } from './LanguageSheet';
 import { LANGUAGE_LABELS } from '../i18n';
+import { useProfilePhoto } from '../hooks/useProfilePhoto';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -64,6 +65,13 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
     setToast({ text, ok });
     setTimeout(() => setToast(null), 2500);
   };
+  const { pickPhoto, uploading: photoUploading, localPhotoUri } = useProfilePhoto({
+    onSuccess: () => showToast(t('common.profil_enregistre')),
+    onError: (message) => showToast(message, false),
+  });
+  const activeRole = useSessionStore((s) => s.activeRole);
+  // Seul l'admin modifie les cours (types, médias) : l'entrée n'existe que dans son profil.
+  const canManageClassMedia = activeRole === 'ADMIN';
 
   const handleSave = () => {
     const [firstName, ...rest] = fullName.trim().split(/\s+/);
@@ -109,6 +117,9 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         <ProfileHeader
           initials={initials}
           photoUrl={user?.photoUrl}
+          localPhotoUri={localPhotoUri}
+          onEditPhoto={pickPhoto}
+          photoUploading={photoUploading}
           name={user ? `${user.firstName} ${user.lastName}` : ''}
           subtitle={user?.email ?? undefined}
           completion={[user?.firstName, user?.email, user?.phone, user?.photoKey].filter(Boolean).length / 4}
@@ -178,6 +189,21 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
           </View>
           <Text style={styles.hint}>{t('common.ces_informations_servent_a_vous')}</Text>
         </View>
+
+        {canManageClassMedia ? (
+          <SettingsGroup
+            title={t('common.class_media_title')}
+            rows={[
+              {
+                kind: 'nav',
+                icon: 'photo-library',
+                title: t('common.class_media_title'),
+                sub: t('common.class_media_subtitle'),
+                onPress: () => router.push('/(admin)/class-media' as never),
+              },
+            ]}
+          />
+        ) : null}
 
         <SettingsGroup
           title={t('common.apparence')}

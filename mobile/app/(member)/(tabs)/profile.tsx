@@ -32,9 +32,11 @@ import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll'
 import { dateLocale , LANGUAGE_LABELS } from '../../../src/i18n';
 import { LanguageSheet } from '../../../src/components/LanguageSheet';
 import { useNow } from '../../../src/hooks/useNow';
+import { useProfilePhoto } from '../../../src/hooks/useProfilePhoto';
 
 /** Écran Profil Adhérent — FitZone Profils.dc.html, 01. */
 export default function ProfileScreen() {
+  const { pickPhoto, uploading: photoUploading, localPhotoUri } = useProfilePhoto();
   const nowMs = useNow();
   const tabBarScroll = useHideTabBarOnScroll();
   const { colors, preference, setScheme } = useTheme();
@@ -173,6 +175,9 @@ export default function ProfileScreen() {
         <ProfileHeader
           initials={initials}
           photoUrl={user?.photoUrl}
+          localPhotoUri={localPhotoUri}
+          onEditPhoto={pickPhoto}
+          photoUploading={photoUploading}
           name={`${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()}
           memberCode={user?.memberCode ?? undefined}
           subtitle={memberSince ? t('profile.memberSince', { date: memberSince }) : undefined}

@@ -276,7 +276,21 @@
     "notif_admin_payment_body": "{{amount}} DT ({{method}}) · {{member}} · بواسطة {{actor}}",
     "notif_admin_member": "حساب عضو جديد",
     "notif_admin_member_body": "{{member}} · أنشأه {{actor}}",
-    "pagination_unit_payments": "مدفوعات"
+    "pagination_unit_payments": "مدفوعات",
+    "class_media_title": "وسائط الحصص",
+    "class_media_subtitle": "الصور المعروضة في صفحة كل حصة.",
+    "class_media_add": "إضافة صور",
+    "class_media_uploading": "جارٍ الإرسال…",
+    "class_media_added": "تمت إضافة {{count}} صورة.",
+    "class_media_upload_error": "تعذّر إرسال {{count}} صورة: JPEG أو PNG أو WebP، بحد أقصى 10 ميغابايت.",
+    "class_media_delete_title": "حذف هذه الصورة؟",
+    "class_media_delete_text": "لن تظهر بعد الآن في صفحة الحصة.",
+    "class_media_delete_confirm": "حذف",
+    "class_media_delete_error": "تعذّر الحذف، حاول مجددًا.",
+    "class_media_empty": "لا توجد صور لهذه الحصة بعد.",
+    "class_media_hint": "حتى 10 صور في المرة الواحدة، بحد أقصى 10 ميغابايت لكل صورة.",
+    "class_media_no_types_title": "لا توجد أنواع حصص",
+    "class_media_no_types": "أنشئ نوع حصة أولًا لإضافة صور إليه."
   },
   "home": {
     "membershipNone": "بدون اشتراك",

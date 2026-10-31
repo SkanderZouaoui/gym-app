@@ -404,6 +404,9 @@ export function useUpdateTeamMember() {
 export interface AdminClassTypeFull extends AdminClassType {
   isActive: boolean;
   level?: string | null;
+  /** Clés de stockage des photos de la fiche cours (galerie) et leurs URLs de lecture signées. */
+  galleryKeys: string[];
+  galleryUrls: string[];
 }
 
 export function useAllClassTypes() {

@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TextField } from '../../src/components/TextField';
 import { Button } from '../../src/components/Button';
@@ -12,7 +11,6 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { useMe } from '../../src/hooks/useMe';
 import {
   useConfirmEmailChange,
-  useRequestAvatarUploadUrl,
   useRequestEmailChange,
   useUpdateProfile,
 } from '../../src/hooks/useProfile';
@@ -22,7 +20,7 @@ import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
 import { otpRateLimitMessage } from '../../src/utils/otpErrors';
-import { normalizeImageType, readUploadBlob } from '../../src/utils/upload';
+import { useProfilePhoto } from '../../src/hooks/useProfilePhoto';
 
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
@@ -30,7 +28,6 @@ export default function ProfileEditScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user, refetch } = useMe();
   const updateProfile = useUpdateProfile();
-  const requestUploadUrl = useRequestAvatarUploadUrl();
   const requestEmailChange = useRequestEmailChange();
   const confirmEmailChange = useConfirmEmailChange();
   // Les champs (firstName/lastName/phone) sont initialisés une seule fois depuis `user`
@@ -41,9 +38,8 @@ export default function ProfileEditScreen() {
   const [firstName, setFirstName] = useState(user?.firstName ?? '');
   const [lastName, setLastName] = useState(user?.lastName ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
-  const [localPhotoUri, setLocalPhotoUri] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { pickPhoto, uploading, localPhotoUri } = useProfilePhoto({ onError: setError, onSuccess: () => setError(null) });
 
   const [emailStep, setEmailStep] = useState<'idle' | 'form' | 'code'>('idle');
   const [newEmail, setNewEmail] = useState('');
@@ -51,44 +47,6 @@ export default function ProfileEditScreen() {
   const [emailCode, setEmailCode] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailSuccess, setEmailSuccess] = useState(false);
-
-  const pickPhoto = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(t('member.permission_refusee'), t('member.lacces_a_vos_photos_est'));
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (result.canceled || !result.assets[0]) return;
-
-    const asset = result.assets[0];
-    setLocalPhotoUri(asset.uri);
-    setUploading(true);
-    setError(null);
-    try {
-      const contentType = normalizeImageType(asset.mimeType);
-      const blob = await readUploadBlob(asset.uri);
-      const { key, uploadUrl } = await requestUploadUrl.mutateAsync({ contentType, sizeBytes: blob.size });
-      const putResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': contentType },
-        body: blob,
-      });
-      if (!putResponse.ok) throw new Error('UPLOAD_FAILED');
-      await updateProfile.mutateAsync({ photoKey: key });
-    } catch {
-      setError(t('member.lenvoi_de_la_photo_a'));
-      setLocalPhotoUri(null);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleSave = () => {
     setError(null);
