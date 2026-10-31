@@ -1,7 +1,7 @@
-import { createContext, useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
+  Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   ScrollView,
   TextInput,
@@ -11,56 +11,68 @@ import {
   type ScrollViewInstance,
   type ScrollViewProps,
 } from 'react-native';
-import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 
 /** Appelé par TextField quand un champ prend le focus : l'écran fait remonter ce champ au-dessus du clavier. */
 export const KeyboardScrollContext = createContext<() => void>(() => undefined);
 
 interface Props extends Omit<ScrollViewProps, 'children'> {
   children: ReactNode;
-  /** Barre fixe sous le contenu (ex. bouton « Enregistrer ») : reste visible au-dessus du clavier. */
+  /** Barre fixe sous le contenu (ex. « Enregistrer ») : affichée clavier fermé, masquée pendant la saisie pour laisser la place. */
   footer?: ReactNode;
 }
 
+type FocusedInput = { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void };
+
 /**
  * Écran à formulaire : le clavier ne masque jamais le champ actif.
- *  - agencement en colonne (contenu défilant + pied de page fixe), la colonne rétrécit quand le clavier s'ouvre
- *    (iOS : KeyboardAvoidingView ; Android edge-to-edge : marge basse = hauteur du clavier) ;
- *  - le champ qui prend le focus est ramené dans la zone visible.
+ * Sans redimensionner la zone de défilement (donc sans saccade) : à l'ouverture du clavier on ajoute en bas du contenu
+ * une marge de la hauteur du clavier, puis on fait remonter UNE fois le champ actif juste au-dessus de lui.
  */
 export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps }: Props) {
-  const androidKeyboardHeight = useKeyboardHeight();
   const scrollRef = useRef<ScrollViewInstance>(null);
   const scrollY = useRef(0);
+  const keyboardTop = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const ensureFocusedVisible = useCallback(() => {
-    const input = (TextInput as unknown as { State?: { currentlyFocusedInput?: () => { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void } | null } }).State?.currentlyFocusedInput?.();
-    const scroll = scrollRef.current as unknown as { measureInWindow?: (cb: (x: number, y: number, w: number, h: number) => void) => void } | null;
-    if (!input || !scroll?.measureInWindow) return;
-    scroll.measureInWindow((_sx, sy, _sw, sh) => {
-      input.measureInWindow((_ix, iy, _iw, ih) => {
-        const margin = 24;
-        const bottomLimit = sy + sh - margin;
-        const topLimit = sy + margin;
-        if (iy + ih > bottomLimit) scrollRef.current?.scrollTo({ y: scrollY.current + (iy + ih - bottomLimit), animated: true });
-        else if (iy < topLimit) scrollRef.current?.scrollTo({ y: Math.max(0, scrollY.current - (topLimit - iy)), animated: true });
-      });
+    const top = keyboardTop.current;
+    const input = (TextInput as unknown as { State?: { currentlyFocusedInput?: () => FocusedInput | null } }).State?.currentlyFocusedInput?.();
+    if (!top || !input) return;
+    input.measureInWindow((_x, y, _w, h) => {
+      const overflow = y + h + 28 - (top - 8); // 28 : place pour l'aide / l'erreur sous le champ
+      if (overflow > 0) scrollRef.current?.scrollTo({ y: scrollY.current + overflow, animated: true });
     });
   }, []);
 
-  // Le clavier vient de s'ouvrir : la colonne se redimensionne, puis on recale le champ actif (deux passes, le temps du layout).
+  /** Un seul recalage par rafale d'évènements (ouverture du clavier + focus) : évite les à-coups. */
+  const schedule = useCallback(
+    (delay: number) => {
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(ensureFocusedVisible, delay);
+    },
+    [ensureFocusedVisible],
+  );
+
   useEffect(() => {
-    const sub = Keyboard.addListener('keyboardDidShow', () => {
-      setTimeout(ensureFocusedVisible, 60);
-      setTimeout(ensureFocusedVisible, 300);
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', (e) => {
+      keyboardTop.current = e.endCoordinates.screenY || Dimensions.get('window').height - e.endCoordinates.height;
+      setKeyboardHeight(e.endCoordinates.height);
+      schedule(160); // laisse le temps à la marge basse d'être rendue
     });
-    return () => sub.remove();
-  }, [ensureFocusedVisible]);
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => {
+      keyboardTop.current = 0;
+      setKeyboardHeight(0);
+    });
+    return () => {
+      show.remove();
+      hide.remove();
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [schedule]);
 
   // Changement de champ clavier ouvert : pas d'évènement clavier, c'est TextField qui nous prévient.
-  const onFieldFocus = useCallback(() => {
-    setTimeout(ensureFocusedVisible, 160);
-  }, [ensureFocusedVisible]);
+  const onFieldFocus = useCallback(() => schedule(90), [schedule]);
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollY.current = e.nativeEvent.contentOffset.y;
@@ -69,22 +81,21 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
 
   return (
     <KeyboardScrollContext.Provider value={onFieldFocus}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={{ flex: 1, paddingBottom: androidKeyboardHeight }}>
-          <ScrollView
-            ref={scrollRef}
-            style={{ flex: 1 }}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-            scrollEventThrottle={16}
-            {...scrollProps}
-            onScroll={handleScroll}
-          >
-            {children}
-          </ScrollView>
-          {footer}
-        </View>
-      </KeyboardAvoidingView>
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          ref={scrollRef}
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          scrollEventThrottle={16}
+          {...scrollProps}
+          onScroll={handleScroll}
+        >
+          {children}
+          <View style={{ height: keyboardHeight }} />
+        </ScrollView>
+        {keyboardHeight === 0 ? footer : null}
+      </View>
     </KeyboardScrollContext.Provider>
   );
 }
