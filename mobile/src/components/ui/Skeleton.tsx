@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Animated, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Animated, Easing, StyleSheet, View, type ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 
@@ -77,6 +78,43 @@ export function DetailSkeleton() {
         <SkeletonBlock height={70} width="48%" radius={20} />
       </View>
       <SkeletonList count={3} />
+    </View>
+  );
+}
+
+/**
+ * Squelette d'image : remplit son parent (à placer en `absolute`), fond neutre avec un reflet qui balaie de gauche à droite
+ * tant que l'image charge. `dark` pour un fond sombre (visionneuse plein écran).
+ */
+export function SkeletonShimmer({ radius = 0, dark = false }: { radius?: number; dark?: boolean }) {
+  const { colors, scheme } = useTheme();
+  const [width, setWidth] = useState(0);
+  const [progress] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    if (width === 0) return;
+    progress.setValue(0);
+    const loop = Animated.loop(Animated.timing(progress, { toValue: 1, duration: 1300, easing: Easing.inOut(Easing.quad), useNativeDriver: true }));
+    loop.start();
+    return () => loop.stop();
+  }, [width, progress]);
+
+  const base = dark ? 'rgba(255,255,255,0.08)' : colors.surface2;
+  const light = dark || scheme === 'dark' ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.75)';
+  const translateX = progress.interpolate({ inputRange: [0, 1], outputRange: [-width, width] });
+
+  return (
+    <View
+      pointerEvents="none"
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      style={[StyleSheet.absoluteFill, { backgroundColor: base, borderRadius: radius, overflow: 'hidden' }]}
+      accessibilityState={{ busy: true }}
+    >
+      {width > 0 ? (
+        <Animated.View style={[StyleSheet.absoluteFill, { width, transform: [{ translateX }] }]}>
+          <LinearGradient colors={['transparent', light, 'transparent']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={{ flex: 1 }} />
+        </Animated.View>
+      ) : null}
     </View>
   );
 }

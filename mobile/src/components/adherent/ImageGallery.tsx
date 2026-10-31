@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { SkeletonShimmer } from '../ui/Skeleton';
 
 interface ImageGalleryProps {
   urls: string[];
@@ -26,6 +27,9 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [current, setCurrent] = useState(0);
   const listRef = useRef<FlatList<string>>(null);
+  // Images dont le chargement est terminé (réussi ou en échec) : tant qu'elles n'y sont pas, un squelette animé les remplace.
+  const [settled, setSettled] = useState<Record<string, 'ok' | 'error'>>({});
+  const settle = (url: string, state: 'ok' | 'error') => setSettled((s) => (s[url] === state ? s : { ...s, [url]: state }));
 
   if (urls.length === 0) return null;
 
@@ -44,7 +48,13 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
             style={({ pressed }) => [styles.tile, cardShadow, pressed && { transform: [{ scale: 0.97 }] }]}
             accessibilityLabel={t('member.photo_sur', { v0: i + 1, length: urls.length })}
           >
-            <Image source={{ uri: url }} style={styles.tileImage} contentFit="cover" transition={200} />
+            <Image source={{ uri: url }} style={styles.tileImage} contentFit="cover" transition={250} onLoad={() => settle(url, 'ok')} onError={() => settle(url, 'error')} />
+            {!settled[url] ? <SkeletonShimmer radius={radii.lg} /> : null}
+            {settled[url] === 'error' ? (
+              <View style={styles.errorOverlay}>
+                <MaterialIcons name="broken-image" size={30} color={colors.muted} />
+              </View>
+            ) : null}
           </Pressable>
         ))}
       </ScrollView>
@@ -72,7 +82,12 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
               onMomentumScrollEnd={(e) => setCurrent(Math.round(e.nativeEvent.contentOffset.x / width))}
               renderItem={({ item }) => (
                 <Pressable style={{ width, height: height * 0.75, justifyContent: 'center' }} onPress={() => setOpenIndex(null)}>
-                  <Image source={{ uri: item }} style={{ width, height: height * 0.7 }} contentFit="contain" />
+                  <Image source={{ uri: item }} style={{ width, height: height * 0.7 }} contentFit="contain" transition={250} onLoad={() => settle(item, 'ok')} onError={() => settle(item, 'error')} />
+                  {!settled[item] ? (
+                    <View style={styles.viewerSkeleton}>
+                      <SkeletonShimmer radius={radii.lg} dark />
+                    </View>
+                  ) : null}
                 </Pressable>
               )}
             />
@@ -91,6 +106,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       borderWidth: 1, borderColor: colors.border,
     },
     tileImage: { width: '100%', height: '100%' },
+    errorOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
+    viewerSkeleton: { position: 'absolute', alignSelf: 'center', width: '88%', height: '55%', top: '12%' },
     viewer: { flex: 1, backgroundColor: 'rgba(0,0,0,0.94)' },
     viewerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8 },
     counter: { backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
