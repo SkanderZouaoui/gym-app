@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,8 +44,8 @@ export default function AdminExerciseFormScreen() {
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => {
-    if (!existing || hydrated) return;
+  // Remplissage unique depuis l'exercice chargé (ajustement d'état pendant le rendu, sans effet).
+  if (existing && !hydrated) {
     setName(existing.name);
     setMuscleGroup(existing.muscleGroup);
     setEquipment(existing.equipment);
@@ -53,7 +53,7 @@ export default function AdminExerciseFormScreen() {
     setType(existing.type);
     setInstructions(existing.instructions ?? '');
     setHydrated(true);
-  }, [existing, hydrated]);
+  }
 
   const groups = useMemo(() => [...new Set([...(all ?? []).map((e) => e.muscleGroup).filter((g): g is string => !!g), ...extraGroups, ...(muscleGroup ? [muscleGroup] : [])])].sort((a, b) => a.localeCompare(b, 'fr')), [all, extraGroups, muscleGroup]);
   const equipments = useMemo(() => [...new Set([...(all ?? []).map((e) => e.equipment).filter((g): g is string => !!g), ...extraEquip, ...(equipment ? [equipment] : [])])].sort((a, b) => a.localeCompare(b, 'fr')), [all, extraEquip, equipment]);

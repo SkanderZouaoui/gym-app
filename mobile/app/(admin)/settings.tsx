@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -377,19 +377,24 @@ export default function AdminSettingsScreen() {
   const update = useUpdateAttendancePolicy();
   const { data: orgData } = useOrganizationConfig();
   const updateOrg = useUpdateOrganizationConfig();
-  const [cfg, setCfg] = useState<OrganizationConfig | null>(null);
+  const [cfg, setCfg] = useState<OrganizationConfig | null>(orgData ?? null);
   const [cfgDirty, setCfgDirty] = useState(false);
-  const [policy, setPolicy] = useState<AttendancePolicy>(DEFAULT_ATTENDANCE_POLICY);
+  const [policy, setPolicy] = useState<AttendancePolicy>(data ?? DEFAULT_ATTENDANCE_POLICY);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'));
 
-  useEffect(() => {
+  // Tant que rien n'est modifié, les formulaires suivent les données serveur (ajustement d'état pendant le rendu).
+  const [syncedPolicy, setSyncedPolicy] = useState(data);
+  if (data !== syncedPolicy) {
+    setSyncedPolicy(data);
     if (data && !dirty) setPolicy(data);
-  }, [data, dirty]);
-  useEffect(() => {
+  }
+  const [syncedOrg, setSyncedOrg] = useState(orgData);
+  if (orgData !== syncedOrg) {
+    setSyncedOrg(orgData);
     if (orgData && !cfgDirty) setCfg(orgData);
-  }, [orgData, cfgDirty]);
+  }
 
   const patchCfg = (p: Partial<OrganizationConfig>) => {
     setCfg((cur) => (cur ? { ...cur, ...p } : cur));

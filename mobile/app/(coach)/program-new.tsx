@@ -59,8 +59,9 @@ export default function CoachProgramNewScreen() {
   const clearPick = useExercisePickStore((s) => s.clear);
 
   // Duplication : on repart des données d'un programme existant.
-  useEffect(() => {
-    if (!source) return;
+  const [duplicatedFrom, setDuplicatedFrom] = useState<typeof source>(undefined);
+  if (source && source !== duplicatedFrom) {
+    setDuplicatedFrom(source);
     setName(`${source.name} (copie)`);
     if (source.level) setLevel(source.level);
     if (source.goal) setGoal(source.goal);
@@ -76,7 +77,7 @@ export default function CoachProgramNewScreen() {
         })),
       ),
     );
-  }, [source]);
+  }
 
   // Exercice choisi dans la bibliothèque (via le store, l'écran est resté monté).
   useEffect(() => {

@@ -50,10 +50,13 @@ export default function StaffMembersScreen() {
   const [status, setStatus] = useState<StatusFilter>('all');
   // Arrivée avec un filtre (carte « Adhérents actifs », « Voir tout »…) : on l'applique puis on retire le
   // paramètre de la route, pour qu'il ne reste pas collé à l'onglet.
-  useEffect(() => {
-    if (!initialStatus) return;
+  const [appliedStatus, setAppliedStatus] = useState<StatusFilter | undefined>(undefined);
+  if (initialStatus && initialStatus !== appliedStatus) {
+    setAppliedStatus(initialStatus);
     setStatus(initialStatus);
-    router.setParams({ status: undefined });
+  }
+  useEffect(() => {
+    if (initialStatus) router.setParams({ status: undefined });
   }, [initialStatus]);
   const [plan, setPlan] = useState<string | null>(null);
   // En quittant l'écran, tous les filtres et la recherche sont réinitialisés.

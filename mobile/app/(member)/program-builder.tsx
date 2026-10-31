@@ -64,8 +64,8 @@ export default function ProgramBuilderScreen() {
   const updateProgram = useUpdateOwnProgram();
   const saving = createProgram.isPending || updateProgram.isPending;
 
-  useEffect(() => {
-    if (!isEditing || !existingProgram || hydrated) return;
+  // Remplissage unique depuis le programme chargé (ajustement d'état pendant le rendu, sans effet).
+  if (isEditing && existingProgram && !hydrated) {
     setName(existingProgram.name);
     setDays(
       existingProgram.days.map((d) => ({
@@ -81,7 +81,7 @@ export default function ProgramBuilderScreen() {
       })),
     );
     setHydrated(true);
-  }, [isEditing, existingProgram, hydrated]);
+  }
 
   const pick = useExercisePickStore((st) => st.pick);
   const clearPick = useExercisePickStore((st) => st.clear);

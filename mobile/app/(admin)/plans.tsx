@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,11 +27,14 @@ export default function AdminPlansScreen() {
   const toggle = useTogglePlanActive();
   const { data: config } = useOrganizationConfig();
   const saveConfig = useUpdateOrganizationConfig();
-  const [discounts, setDiscounts] = useState<Record<string, number>>({});
+  const [discounts, setDiscounts] = useState<Record<string, number>>(config?.discounts ?? {});
   const [discountsDirty, setDiscountsDirty] = useState(false);
-  useEffect(() => {
+  // Tant que l'admin n'a rien modifié, les remises suivent la configuration serveur.
+  const [syncedConfig, setSyncedConfig] = useState(config);
+  if (config !== syncedConfig) {
+    setSyncedConfig(config);
     if (config && !discountsDirty) setDiscounts(config.discounts);
-  }, [config, discountsDirty]);
+  }
   const setDiscount = (months: string, v: number) => {
     setDiscounts((d) => ({ ...d, [months]: Math.max(0, Math.min(50, v)) }));
     setDiscountsDirty(true);

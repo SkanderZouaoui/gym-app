@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii } from '../../theme/tokens';
@@ -24,9 +24,13 @@ export function CalendarSheet({
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [month, setMonth] = useState(new Date(value.getFullYear(), value.getMonth(), 1));
 
-  useEffect(() => {
+  // À chaque ouverture (ou changement de date), le calendrier se recentre sur le mois de la valeur.
+  const monthKey = visible ? value.getTime() : null;
+  const [syncedMonthKey, setSyncedMonthKey] = useState(monthKey);
+  if (monthKey !== syncedMonthKey) {
+    setSyncedMonthKey(monthKey);
     if (visible) setMonth(new Date(value.getFullYear(), value.getMonth(), 1));
-  }, [visible, value]);
+  }
 
   const first = (new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7; // lundi = 0
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
@@ -80,12 +84,15 @@ export function TimeSheet({
   const [h, setH] = useState(value.h);
   const [m, setM] = useState(value.m);
 
-  useEffect(() => {
+  const timeKey = visible ? `${value.h}:${value.m}` : null;
+  const [syncedTimeKey, setSyncedTimeKey] = useState(timeKey);
+  if (timeKey !== syncedTimeKey) {
+    setSyncedTimeKey(timeKey);
     if (visible) {
       setH(value.h);
       setM(value.m);
     }
-  }, [visible, value.h, value.m]);
+  }
 
   const pad = (n: number) => String(n).padStart(2, '0');
   return (

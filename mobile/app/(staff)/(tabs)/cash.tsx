@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -68,12 +68,14 @@ export default function StaffCashScreen() {
   const monthTotal = monthPayments.reduce((s, p) => s + Number(p.amount), 0);
   const filtered = list.filter((p) => filter === 'all' || p.method === filter);
   const PAGE_SIZE = 10;
-  const [page, setPage] = useState(0);
+  // La page revient à 0 dès que la période ou le moyen de paiement change : elle est mémorisée avec sa clé de filtre.
+  const pageKey = `${filter}|${period}|${customFrom}|${customTo}`;
+  const [pageState, setPageState] = useState({ page: 0, key: pageKey });
+  const page = pageState.key === pageKey ? pageState.page : 0;
+  const setPage = (p: number) => setPageState({ page: p, key: pageKey });
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
   const shown = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
-  // Retour à la première page dès que la période ou le moyen de paiement change.
-  useEffect(() => setPage(0), [filter, period, customFrom, customTo]);
   const byMethod = (['CASH', 'OTHER', 'TRANSFER', 'CHECK'] as PaymentMethod[])
     .map((m) => ({ m, total: monthPayments.filter((p) => p.method === m).reduce((s, p) => s + Number(p.amount), 0), count: monthPayments.filter((p) => p.method === m).length }))
     .filter((x) => x.count > 0);

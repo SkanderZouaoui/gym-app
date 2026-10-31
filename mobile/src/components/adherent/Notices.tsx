@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -88,14 +88,11 @@ export function NoticePopups({ items, onDismiss }: { items: Notice[]; onDismiss:
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const tone = useTone();
+  // `shownPopups` est hors état React : on force un rendu après fermeture pour passer au message suivant.
   const [, force] = useState(0);
   const order = { urgent: 0, warn: 1, info: 2 } as const;
   const queue = [...items].filter((n) => !shownPopups.has(n.id)).sort((a, b) => order[a.level] - order[b.level]);
   const current = queue[0];
-
-  useEffect(() => {
-    force((x) => x + 1);
-  }, [items.length]);
 
   if (!current) return null;
   const tn = tone(current.level);

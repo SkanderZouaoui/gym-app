@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -62,8 +62,8 @@ export default function CourseFormScreen() {
 
   const activeTypes = (types ?? []).filter((t) => t.isActive || t.id === typeId);
 
-  useEffect(() => {
-    if (!session || hydrated) return;
+  // Remplissage unique depuis le cours chargé (ajustement d'état pendant le rendu, sans effet).
+  if (session && !hydrated) {
     setTypeId(session.classType.id);
     setStart(new Date(session.startsAt));
     setDuration(Math.round((new Date(session.endsAt).getTime() - new Date(session.startsAt).getTime()) / 60000));
@@ -71,7 +71,7 @@ export default function CourseFormScreen() {
     setRoomId(session.roomId ?? null);
     setCapacity(session.capacity);
     setHydrated(true);
-  }, [session, hydrated]);
+  }
 
   const pickType = (value: string | null) => {
     setTypeId(value);

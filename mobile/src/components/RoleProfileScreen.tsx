@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -45,18 +45,21 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
 
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState(user ? `${user.firstName} ${user.lastName}`.trim() : '');
+  const [phone, setPhone] = useState(user?.phone ?? '');
   const [toast, setToast] = useState<{ text: string; ok: boolean } | null>(null);
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [languageVisible, setLanguageVisible] = useState(false);
 
   // Les champs se remplissent une seule fois depuis le profil chargé.
-  useEffect(() => {
-    if (!user) return;
-    setFullName(`${user.firstName} ${user.lastName}`.trim());
-    setPhone(user.phone ?? '');
-  }, [user]);
+  const [syncedUser, setSyncedUser] = useState(user);
+  if (user !== syncedUser) {
+    setSyncedUser(user);
+    if (user) {
+      setFullName(`${user.firstName} ${user.lastName}`.trim());
+      setPhone(user.phone ?? '');
+    }
+  }
 
   const dirty = !!user && (fullName.trim() !== `${user.firstName} ${user.lastName}`.trim() || phone.trim() !== (user.phone ?? ''));
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
