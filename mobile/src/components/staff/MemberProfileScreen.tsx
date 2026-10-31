@@ -21,14 +21,8 @@ import { useNow } from '../../hooks/useNow';
 const fmtDate = (d: string, year = true) =>
   new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}) });
 
-interface Props {
-  /** `staff` : fiche complète. `coach` : profil simple, sans abonnement, encaissement, paiements ni mot de passe provisoire. */
-  variant: 'staff' | 'coach';
-}
-
-/** Fiche adhérent : identité, coordonnées ; pour l'accueil aussi abonnement en cours, paiements, renouvellement. */
-export function MemberProfileScreen({ variant }: Props) {
-  const full = variant === 'staff';
+/** Fiche adhérent (accueil, admin) : identité, abonnement en cours, coordonnées, paiements, renouvellement. Jamais affichée à un coach. */
+export function MemberProfileScreen() {
   const nowMs = useNow();
   const { t } = useTranslation();
   const routes = useStaffRoutes();
@@ -36,11 +30,11 @@ export function MemberProfileScreen({ variant }: Props) {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: member, isLoading, refetch } = useMemberDetail(id);
-  const { data: memberships, refetch: refetchMemberships } = useMemberMemberships(id, full);
+  const { data: memberships, refetch: refetchMemberships } = useMemberMemberships(id);
   const { data: memberPayments = [], refetch: refetchPayments } = useMemberPayments(memberships);
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetch(), refetchMemberships(), refetchPayments()]));
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace(full ? routes.members : ('/(coach)/(tabs)/planning' as never)));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.members));
 
   if (isLoading && !member) {
     return (
@@ -89,14 +83,13 @@ export function MemberProfileScreen({ variant }: Props) {
           ratio={ratio}
           status={current?.status}
           daysLeft={daysLeft}
-          showSubscription={full}
         />
 
         <View style={styles.actions}>
           {[
             { icon: 'call' as const, label: t('staff.appeler'), on: member.phone ? () => Linking.openURL(`tel:${member.phone}`) : undefined },
             { icon: 'mail-outline' as const, label: t('common.e_mail'), on: member.email ? () => Linking.openURL(`mailto:${member.email}`) : undefined },
-            ...(full ? [{ icon: 'payments' as const, label: t('staff.encaisser'), on: () => router.push({ pathname: routes.cashSell, params: { memberId: member.id } }) }] : []),
+            { icon: 'payments' as const, label: t('staff.encaisser'), on: () => router.push({ pathname: routes.cashSell, params: { memberId: member.id } }) },
           ].map((a) => (
             <Pressable
               key={a.label}
@@ -112,8 +105,6 @@ export function MemberProfileScreen({ variant }: Props) {
           ))}
         </View>
 
-        {full ? (
-          <>
         {current ? (
           <View style={styles.heroShadow}>
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
@@ -165,8 +156,6 @@ export function MemberProfileScreen({ variant }: Props) {
         </View>
         ) : null}
 
-          </>
-        ) : null}
 
         <View>
           <Text style={styles.sectionTitle}>{t('common.coordonnees')}</Text>
@@ -177,8 +166,6 @@ export function MemberProfileScreen({ variant }: Props) {
           </View>
         </View>
 
-        {full ? (
-          <>
         <View>
           <Text style={styles.sectionTitle}>{t('staff.paiements')}</Text>
           <View style={[styles.listCard, cardShadow]}>
@@ -211,8 +198,6 @@ export function MemberProfileScreen({ variant }: Props) {
             <Text style={styles.ctaText}>{t('staff.renouveler_labonnement')}</Text>
           </LinearGradient>
         </Pressable>
-        ) : null}
-          </>
         ) : null}
       </ScrollView>
     </SafeAreaView>

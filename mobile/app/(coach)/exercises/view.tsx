@@ -6,57 +6,34 @@ import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useExercise } from '../../../src/hooks/useCoaching';
-import { useStudentWorkouts } from '../../../src/hooks/useCoachSessions';
 import { Banner, Pill, DetailSkeleton } from '../../../src/components/ui';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
-import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRecordCard';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
- * vue coach, avec le record personnel de l'élève. FitZone App Coach.dc.html. */
+ * vue coach (sans donnée d'adhérent). FitZone App Coach.dc.html. */
 export default function CoachViewProgramExerciseScreen() {
   const pullClient = useQueryClient();
   const { refreshing: pullRefreshing, onRefresh: pullOnRefresh } = useOfflineAwareRefresh(() => pullClient.invalidateQueries());
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { exerciseId, sets, reps, setDetails, studentId } = useLocalSearchParams<{
+  const { exerciseId, sets, reps, setDetails } = useLocalSearchParams<{
     exerciseId: string;
     sets: string;
     reps: string;
     setDetails?: string;
-    studentId?: string;
   }>();
   const { data: exercise, isLoading } = useExercise(exerciseId);
-  const { data: studentWorkouts } = useStudentWorkouts(studentId);
 
   const parsedSetDetails: { setNumber: number; reps: number | null; weightKg: string | null }[] = setDetails
     ? JSON.parse(setDetails)
     : [];
 
   const parsed = useMemo(() => parseExerciseInstructions(exercise?.instructions ?? null), [exercise]);
-
-  const record = useMemo(() => {
-    if (!studentWorkouts || !exerciseId) return null;
-    const points: { date: Date; weight: number; reps: number }[] = [];
-    for (const log of studentWorkouts) {
-      for (const s of log.sets) {
-        if (s.exerciseId === exerciseId && s.weightKg) {
-          points.push({ date: new Date(log.date), weight: Number(s.weightKg), reps: s.reps ?? 0 });
-        }
-      }
-    }
-    if (points.length === 0) return null;
-    points.sort((a, b) => a.date.getTime() - b.date.getTime());
-    const best = points.reduce((max, p) => (p.weight > max.weight ? p : max), points[0]);
-    const first = points[0];
-    const weeksSpan = Math.max(1, Math.round((best.date.getTime() - first.date.getTime()) / (7 * 86_400_000)));
-    const deltaKg = points.length >= 2 ? Math.round((best.weight - first.weight) * 10) / 10 : null;
-    return { bestWeight: best.weight, bestReps: best.reps, deltaKg, weeksSpan: points.length >= 2 ? weeksSpan : null, series: points.map((p) => p.weight) };
-  }, [studentWorkouts, exerciseId]);
 
   if (isLoading || !exercise) {
     return (
@@ -83,16 +60,6 @@ export default function CoachViewProgramExerciseScreen() {
             <Pill key={m} label={m} tone="secondary" />
           ))}
         </View>
-
-        {record ? (
-          <ExerciseRecordCard
-            bestWeight={record.bestWeight}
-            bestReps={record.bestReps}
-            deltaKg={record.deltaKg}
-            weeksSpan={record.weeksSpan}
-            series={record.series}
-          />
-        ) : null}
 
         <View>
           <Text style={styles.sectionTitle}>{t('coach.series_du_programme')}</Text>

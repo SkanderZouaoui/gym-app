@@ -79,21 +79,6 @@ export function useCoachStudents() {
   });
 }
 
-export interface StudentWorkoutLog {
-  id: string;
-  date: string;
-  feeling: string | null;
-  sets: { id: string; exerciseId: string; exercise: { name: string }; weightKg: string | null; reps: number | null }[];
-}
-
-export function useStudentWorkouts(memberId: string | undefined) {
-  return useQuery({
-    queryKey: ['coach', 'students', memberId, 'workouts'],
-    queryFn: () => apiRequest<StudentWorkoutLog[]>(`/v1/coach/students/${memberId}/workouts`),
-    enabled: !!memberId,
-  });
-}
-
 export type ProgramStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface CoachProgramSummary {
@@ -202,5 +187,34 @@ export function useAssignProgram(asAdmin = false) {
       queryClient.invalidateQueries({ queryKey: ['coach', 'programs'] });
       queryClient.invalidateQueries({ queryKey: ['coach', 'students'] });
     },
+  });
+}
+
+/** Profil limité d'un adhérent vu par un coach : nom, type d'abonnement et cours suivis avec ce coach. */
+export interface CoachMemberView {
+  id: string;
+  firstName: string;
+  lastName: string;
+  photoUrl?: string | null;
+  subscription: string | null;
+  courses: {
+    bookingId: string;
+    status: 'CONFIRMED' | 'WAITLISTED' | 'ATTENDED' | 'NO_SHOW';
+    waitlistPosition: number | null;
+    sessionId: string;
+    startsAt: string;
+    endsAt: string;
+    sessionStatus: string;
+    className: string;
+    room: string | null;
+  }[];
+}
+
+export function useCoachMember(id: string | undefined) {
+  return useQuery({
+    queryKey: ['coach', 'member', id],
+    queryFn: () => apiRequest<CoachMemberView>(`/v1/coach/members/${id}`),
+    enabled: !!id,
+    retry: false,
   });
 }

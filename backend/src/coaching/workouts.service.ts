@@ -147,12 +147,4 @@ export class WorkoutsService {
   }
 
   /** Suivi de la progression d'un élève par le coach — nécessite le consentement (section 4.2/13). */
-  findForMemberByCoach(memberId: string) {
-    return this.prisma.workoutLog.findMany({
-      where: { userId: memberId },
-      include: { sets: { include: { exercise: true } }, program: true, day: true },
-      orderBy: { date: 'desc' },
-      take: 50,
-    });
-  }
 }

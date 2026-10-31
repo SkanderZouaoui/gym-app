@@ -1057,7 +1057,13 @@
     "detail_via_qr": "تم بالـ QR",
     "detail_via_manual": "تم يدويًا",
     "detail_check_in": "تسجيل الحضور",
-    "detail_no_match": "لا أحد في هذه الفئة."
+    "detail_no_match": "لا أحد في هذه الفئة.",
+    "member_upcoming": "القادمة",
+    "member_past": "السابقة",
+    "member_status_confirmed": "مسجَّل",
+    "member_status_no_show": "غائب",
+    "member_scope_hint": "ترى فقط الحصص المحجوزة معك.",
+    "member_not_found": "هذا العضو غير مسجَّل في أيٍّ من حصصك."
   },
   "member": {
     "lannulation_est_gratuite_votre_place": "الإلغاء مجاني. سيُعرض مكانك على قائمة الانتظار.",

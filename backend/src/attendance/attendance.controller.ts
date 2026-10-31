@@ -46,8 +46,9 @@ export class AttendanceController {
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)
   @Get('sessions/:id/roster')
-  getRoster(@Param('id') id: string) {
-    return this.attendanceService.getRoster(id);
+  getRoster(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    // Le coach ne voit que le nom des inscrits à son cours (pas leurs coordonnées ni leur abonnement).
+    return this.attendanceService.getRoster(id, user.activeRole === Role.COACH);
   }
 
   @Roles(Role.COACH, Role.STAFF, Role.ADMIN)

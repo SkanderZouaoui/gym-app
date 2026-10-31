@@ -26,8 +26,8 @@ interface Props {
   fallbackHref: string;
   /** Écran de scan du rôle (reçoit `sessionId`) : bouton « Scanner » de la carte de présence. */
   scannerRoute: string;
-  /** Profil d'un adhérent du rôle (route avec `[id]`) : ouvert par un appui sur une ligne de la liste des inscrits. */
-  memberRoute: string;
+  /** Fiche adhérent du rôle (route avec `[id]`) : ouverte par un appui sur une ligne des inscrits. Absente pour le coach, qui ne consulte aucune donnée d'adhérent. */
+  memberRoute?: string;
 }
 
 /** Détail d'un cours (coach, accueil) : infos du cours, présence, inscrits avec leur formule et pointage, liste d'attente. */
@@ -95,10 +95,11 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute }:
     return (
       <Pressable
         key={entry.id}
-        onPress={() => router.push({ pathname: memberRoute, params: { id: u.id } } as never)}
-        accessibilityRole="button"
+        onPress={memberRoute ? () => router.push({ pathname: memberRoute, params: { id: u.id } } as never) : undefined}
+        disabled={!memberRoute}
+        accessibilityRole={memberRoute ? 'button' : undefined}
         accessibilityLabel={`${u.firstName} ${u.lastName}`}
-        style={({ pressed }) => [styles.person, cardShadow, attended && { borderColor: colors.successSoft }, pressed && { opacity: 0.85 }]}
+        style={({ pressed }) => [styles.person, cardShadow, attended && { borderColor: colors.successSoft }, pressed && !!memberRoute && { opacity: 0.85 }]}
       >
         <Avatar initials={`${u.firstName[0] ?? ''}${u.lastName[0] ?? ''}`.toUpperCase()} size={46} background={attended ? colors.successSoft : colors.primarySoft} color={attended ? colors.successInk : colors.primaryInk} photoUrl={u.photoUrl} />
         <View style={{ flex: 1, minWidth: 0 }}>

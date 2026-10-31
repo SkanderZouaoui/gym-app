@@ -23,12 +23,10 @@ interface Props {
   /** Statut du dernier abonnement et jours restants : pastille « Actif / Expire bientôt / Expiré… ». */
   status?: string;
   daysLeft: number | null;
-  /** Faux pour un rôle sans accès aux abonnements (coach) : pas d'anneau de progression ni de pastille de statut. */
-  showSubscription?: boolean;
 }
 
 /** Profil simple d'un adhérent : photo dans l'anneau d'abonnement, nom, statut et code adhérent. */
-export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, ratio, status, daysLeft, showSubscription = true }: Props) {
+export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, ratio, status, daysLeft }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -38,7 +36,6 @@ export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, rati
   return (
     <View style={styles.identity}>
       <View style={{ width: RING, height: RING }}>
-        {showSubscription ? (
         <Svg width={RING} height={RING} style={{ transform: [{ rotate: '-90deg' }] }}>
           <Circle cx={RING / 2} cy={RING / 2} r={R} stroke={colors.surface2} strokeWidth={STROKE} fill="none" />
           <Circle
@@ -53,9 +50,6 @@ export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, rati
             strokeDashoffset={CIRC * (1 - ratio)}
           />
         </Svg>
-        ) : (
-          <View style={styles.plainRing} />
-        )}
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={[styles.avatar, { backgroundColor: colors.surface2 }]} />
         ) : (
@@ -66,7 +60,7 @@ export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, rati
       </View>
       <Text style={styles.name}>{firstName} {lastName}</Text>
       <View style={styles.tagRow}>
-        {showSubscription ? <StatusTag label={badge.label} tone={badge.tone} /> : null}
+        <StatusTag label={badge.label} tone={badge.tone} />
         {memberCode ? (
           <View style={styles.codeBadge}>
             <MaterialIcons name="pin" size={13} color={colors.primaryInk} />
@@ -82,7 +76,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     identity: { alignItems: 'center', gap: 8, paddingBottom: 6 },
     avatar: { position: 'absolute', top: 9, left: 9, right: 9, bottom: 9, borderRadius: 43, alignItems: 'center', justifyContent: 'center' },
-    plainRing: { position: 'absolute', top: 4, left: 4, right: 4, bottom: 4, borderRadius: 48, borderWidth: 2, borderColor: colors.primaryBorder },
     avatarText: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -0.9, color: '#FFFFFF' },
     name: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text, textAlign: 'center' },
     tagRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },

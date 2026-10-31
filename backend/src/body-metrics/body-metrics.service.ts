@@ -23,14 +23,6 @@ export class BodyMetricsService {
     return this.prisma.bodyMetric.findMany({ where: { userId }, orderBy: { date: 'desc' } });
   }
 
-  /** Visible par le coach uniquement si l'adhérent a partagé (visibility = SHARED_WITH_COACH). */
-  findForMemberByCoach(memberId: string) {
-    return this.prisma.bodyMetric.findMany({
-      where: { userId: memberId, visibility: 'SHARED_WITH_COACH' },
-      orderBy: { date: 'desc' },
-    });
-  }
-
   async remove(id: string, userId: string) {
     const metric = await this.prisma.bodyMetric.findUnique({ where: { id } });
     if (!metric || metric.userId !== userId) throw new ForbiddenException('NOT_YOUR_METRIC');

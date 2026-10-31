@@ -1057,7 +1057,13 @@
     "detail_via_qr": "Checked in by QR",
     "detail_via_manual": "Checked in manually",
     "detail_check_in": "Check in",
-    "detail_no_match": "No one in this category."
+    "detail_no_match": "No one in this category.",
+    "member_upcoming": "Upcoming",
+    "member_past": "Past",
+    "member_status_confirmed": "Booked",
+    "member_status_no_show": "No-show",
+    "member_scope_hint": "You only see the classes taken with you.",
+    "member_not_found": "This member is not booked in any of your classes."
   },
   "member": {
     "lannulation_est_gratuite_votre_place": "Cancelling is free. Your spot will be offered to the waiting list.",

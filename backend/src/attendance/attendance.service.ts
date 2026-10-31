@@ -36,7 +36,7 @@ export class AttendanceService {
   }
 
   /** Inscrits du jour pour un cours — mis en cache côté app pour le mode hors ligne (section 6.6). */
-  async getRoster(sessionId: string) {
+  async getRoster(sessionId: string, limited = false) {
     const session = await this.prisma.classSession.findUnique({ where: { id: sessionId } });
     if (!session) throw new NotFoundException('SESSION_NOT_FOUND');
 
@@ -44,20 +44,23 @@ export class AttendanceService {
       where: { sessionId, status: { in: ['CONFIRMED', 'WAITLISTED', 'ATTENDED'] } },
       include: {
         user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            photoKey: true,
-            memberCode: true,
-            phone: true,
-            memberships: {
-              where: { status: 'ACTIVE' },
-              orderBy: { endDate: 'desc' },
-              take: 1,
-              select: { endDate: true, plan: { select: { name: true } } },
-            },
-          },
+          select: limited
+            ? // Coach : nom et photo uniquement — ni téléphone, ni code adhérent, ni formule.
+              { id: true, firstName: true, lastName: true, photoKey: true }
+            : {
+                id: true,
+                firstName: true,
+                lastName: true,
+                photoKey: true,
+                memberCode: true,
+                phone: true,
+                memberships: {
+                  where: { status: 'ACTIVE' },
+                  orderBy: { endDate: 'desc' },
+                  take: 1,
+                  select: { endDate: true, plan: { select: { name: true } } },
+                },
+              },
         },
       },
       orderBy: { createdAt: 'asc' },

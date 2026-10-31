@@ -244,29 +244,37 @@ export class UsersService {
   }
 
   /** Recherche d'adhérent par nom ou téléphone (section 4.3 — Staff). */
-  async search(query: string) {
+  async search(query: string, limited = false) {
     const members = await this.prisma.user.findMany({
       where: {
         deletedAt: null,
         // Liste des adhérents : ni l'équipe d'accueil ni les admins (comptes gérés dans « Équipe »).
         roles: { some: { role: Role.MEMBER }, none: { role: { in: [Role.STAFF, Role.ADMIN] } } },
-        OR: [
-          { firstName: { contains: query, mode: 'insensitive' } },
-          { lastName: { contains: query, mode: 'insensitive' } },
-          { phone: { contains: query } },
-          { email: { contains: query, mode: 'insensitive' } },
-          { memberCode: query },
-        ],
+        // Coach : recherche par nom uniquement (chercher un téléphone ou un e-mail permettrait de les deviner).
+        OR: limited
+          ? [
+              { firstName: { contains: query, mode: 'insensitive' } },
+              { lastName: { contains: query, mode: 'insensitive' } },
+            ]
+          : [
+              { firstName: { contains: query, mode: 'insensitive' } },
+              { lastName: { contains: query, mode: 'insensitive' } },
+              { phone: { contains: query } },
+              { email: { contains: query, mode: 'insensitive' } },
+              { memberCode: query },
+            ],
       },
-      select: {
-        ...PUBLIC_USER_SELECT,
-        // Dernier abonnement : permet à l'accueil de filtrer et d'afficher la formule dans la liste.
-        memberships: {
-          orderBy: { endDate: 'desc' },
-          take: 1,
-          select: { status: true, endDate: true, plan: { select: { name: true } } },
-        },
-      },
+      select: limited
+        ? { id: true, firstName: true, lastName: true, photoKey: true }
+        : {
+            ...PUBLIC_USER_SELECT,
+            // Dernier abonnement : permet à l'accueil de filtrer et d'afficher la formule dans la liste.
+            memberships: {
+              orderBy: { endDate: 'desc' },
+              take: 1,
+              select: { status: true, endDate: true, plan: { select: { name: true } } },
+            },
+          },
       orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
       take: 100,
     });
@@ -277,6 +285,65 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({ where: { id }, select: PUBLIC_USER_SELECT });
     if (!user) throw new NotFoundException('USER_NOT_FOUND');
     return user;
+  }
+
+  /**
+   * Profil d'un adhérent vu par un coach : nom, photo, type d'abonnement et cours auxquels il est inscrit AVEC ce coach —
+   * rien d'autre (ni coordonnées, ni paiements, ni historique). Réservé aux adhérents inscrits à l'un des cours du coach.
+   */
+  async coachMemberView(coachId: string, memberId: string) {
+    const bookings = await this.prisma.booking.findMany({
+      where: { userId: memberId, status: { in: ['CONFIRMED', 'WAITLISTED', 'ATTENDED', 'NO_SHOW'] }, session: { coachId } },
+      orderBy: { session: { startsAt: 'desc' } },
+      take: 50,
+      select: {
+        id: true,
+        status: true,
+        waitlistPosition: true,
+        session: {
+          select: {
+            id: true,
+            startsAt: true,
+            endsAt: true,
+            status: true,
+            classType: { select: { name: true } },
+            room: { select: { name: true } },
+          },
+        },
+      },
+    });
+    if (bookings.length === 0) throw new NotFoundException('MEMBER_NOT_FOUND');
+
+    const user = await this.prisma.user.findFirst({
+      where: { id: memberId, deletedAt: null },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        photoKey: true,
+        memberships: { where: { status: 'ACTIVE' }, orderBy: { endDate: 'desc' }, take: 1, select: { plan: { select: { name: true } } } },
+      },
+    });
+    if (!user) throw new NotFoundException('MEMBER_NOT_FOUND');
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      photoKey: user.photoKey, // l'intercepteur ajoute photoUrl
+      subscription: user.memberships[0]?.plan.name ?? null,
+      courses: bookings.map((b) => ({
+        bookingId: b.id,
+        status: b.status,
+        waitlistPosition: b.waitlistPosition,
+        sessionId: b.session.id,
+        startsAt: b.session.startsAt,
+        endsAt: b.session.endsAt,
+        sessionStatus: b.session.status,
+        className: b.session.classType.name,
+        room: b.session.room?.name ?? null,
+      })),
+    };
   }
 
   /** Fiche adhérent affichée par le staff/admin : avec l'URL signée de la photo (jamais utilisée dans l'audit). */

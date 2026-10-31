@@ -82,11 +82,18 @@ export class UsersController {
 
   @Roles(Role.STAFF, Role.COACH, Role.ADMIN)
   @Get('members')
-  search(@Query('search') search: string) {
-    return this.usersService.search(search ?? '');
+  search(@Query('search') search: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.search(search ?? '', user.activeRole === Role.COACH);
   }
 
-  @Roles(Role.STAFF, Role.COACH, Role.ADMIN)
+  /** Profil limité d'un adhérent inscrit à l'un des cours du coach : nom, abonnement (type) et cours suivis avec ce coach. */
+  @Roles(Role.COACH)
+  @Get('coach/members/:id')
+  coachMemberView(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.coachMemberView(user.userId, id);
+  }
+
+  @Roles(Role.STAFF, Role.ADMIN)
   @Get('members/:id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOneWithPhoto(id);

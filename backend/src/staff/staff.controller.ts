@@ -18,7 +18,7 @@ export class StaffController {
     return this.staffService.today();
   }
 
-  @Roles(Role.STAFF, Role.ADMIN, Role.COACH)
+  @Roles(Role.STAFF, Role.ADMIN)
   @Get('members/:id/notes')
   getNotes(@Param('id') id: string) {
     return this.staffService.getMemberNotes(id);
