@@ -80,11 +80,11 @@ export interface StaffMembership {
   plan: { id: string; name: string; durationDays: number; price: string };
 }
 
-export function useMemberMemberships(id: string | undefined) {
+export function useMemberMemberships(id: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ['members', 'memberships', id],
     queryFn: () => apiRequest<StaffMembership[]>(`/v1/admin/members/${id}/memberships`),
-    enabled: !!id,
+    enabled: !!id && enabled,
   });
 }
 
