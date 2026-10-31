@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { FlatList, Modal, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,9 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  // Dans une modale, SafeAreaView ne reçoit pas les marges : on les applique à la main (barre d'état / encoche, barre de gestes).
+  const topInset = Math.max(insets.top, Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [current, setCurrent] = useState(0);
   const listRef = useRef<FlatList<string>>(null);
@@ -46,9 +49,9 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
         ))}
       </ScrollView>
 
-      <Modal visible={openIndex !== null} animationType="fade" transparent onRequestClose={() => setOpenIndex(null)}>
+      <Modal visible={openIndex !== null} animationType="fade" transparent statusBarTranslucent onRequestClose={() => setOpenIndex(null)}>
         <View style={styles.viewer}>
-          <SafeAreaView style={{ flex: 1 }}>
+          <View style={{ flex: 1, paddingTop: topInset, paddingBottom: insets.bottom }}>
             <View style={styles.viewerTop}>
               <View style={styles.counter}>
                 <Text style={styles.counterText}>{current + 1} / {urls.length}</Text>
@@ -73,7 +76,7 @@ export function ImageGallery({ urls }: ImageGalleryProps) {
                 </Pressable>
               )}
             />
-          </SafeAreaView>
+          </View>
         </View>
       </Modal>
     </>

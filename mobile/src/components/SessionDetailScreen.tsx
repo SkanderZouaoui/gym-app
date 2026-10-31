@@ -17,6 +17,7 @@ import { useOfflineAwareRefresh } from '../hooks/useOfflineAwareRefresh';
 import { dateLocale } from '../i18n';
 import { levelLabel } from '../i18n/labels';
 import { useNow } from '../hooks/useNow';
+import { ImageGallery } from './adherent/ImageGallery';
 
 type Filter = 'all' | 'present' | 'todo';
 
@@ -156,6 +157,20 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute }: Props) {
           <View style={[styles.card, cardShadow]}>
             <Text style={styles.cardTitle}>{t('coach.detail_about')}</Text>
             <Text style={styles.description}>{session.classType.description}</Text>
+          </View>
+        ) : null}
+
+        {session.room?.galleryUrls && session.room.galleryUrls.length > 0 ? (
+          <View style={{ gap: 8 }}>
+            <Text style={styles.section}>{t('common.salle')} · {session.room.name}</Text>
+            <ImageGallery urls={session.room.galleryUrls} />
+          </View>
+        ) : null}
+
+        {session.classType.galleryUrls && session.classType.galleryUrls.length > 0 ? (
+          <View style={{ gap: 8 }}>
+            <Text style={styles.section}>{t('member.galerie')}</Text>
+            <ImageGallery urls={session.classType.galleryUrls} />
           </View>
         ) : null}
 
