@@ -1,4 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { StorageService } from '../storage/storage.service.js';
+import { GalleryAssetsService } from '../storage/gallery-assets.service.js';
+import { readGalleryMeta, toGalleryJson } from '../storage/gallery-image.js';
+import { MAX_TYPE_GALLERY, assertSamePermutation } from '../classes/classes.service.js';
 import { mergeConfig, organizationConfigSchema } from './organization-config.js';
 import { DEFAULT_ATTENDANCE_POLICY, attendancePolicySchema } from '@muscleup/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -6,7 +10,11 @@ import type { UpdateAttendancePolicyDto } from './dto/update-attendance-policy.d
 
 @Injectable()
 export class OrganizationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+    private readonly gallery: GalleryAssetsService,
+  ) {}
 
   /** OrganizationSettings est une table à une seule ligne (section 8.1). */
   async getSettings() {
@@ -70,5 +78,52 @@ export class OrganizationService {
       data: { actorId: updatedBy, action: 'UPDATE_ORGANIZATION_CONFIG', entity: 'OrganizationSettings', entityId: settings.id, oldValue: settings.config as any, newValue: parsed.data as any },
     });
     return mergeConfig(updated.config);
+  }
+
+  // --- Galerie photos de l'établissement -----------------------------------------
+
+  async getGallery() {
+    const { galleryKeys, galleryMeta } = await this.getSettings();
+    return this.gallery.withUrls({ galleryKeys, galleryMeta });
+  }
+
+  async galleryUploadUrl(contentType: string, sizeBytes: number) {
+    const settings = await this.getSettings();
+    if (settings.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
+    if (!/^image\/(jpeg|png|webp)$/.test(contentType)) throw new BadRequestException('INVALID_IMAGE_TYPE');
+    const key = this.storage.buildKey('organization/gallery', contentType);
+    return { key, uploadUrl: await this.storage.getUploadUrl(key, contentType, sizeBytes) };
+  }
+
+  async addGalleryImage(key: string) {
+    const settings = await this.getSettings();
+    this.storage.assertOwnKey(key, 'organization/gallery');
+    if (settings.galleryKeys.includes(key)) return this.getGallery();
+    if (settings.galleryKeys.length >= MAX_TYPE_GALLERY) throw new BadRequestException('GALLERY_FULL');
+    const meta = await this.gallery.prepare(key);
+    await this.prisma.organizationSettings.update({
+      where: { id: settings.id },
+      data: { galleryKeys: { push: key }, galleryMeta: toGalleryJson({ ...readGalleryMeta(settings.galleryMeta), [key]: meta }) },
+    });
+    return this.getGallery();
+  }
+
+  async reorderGallery(keys: string[]) {
+    const settings = await this.getSettings();
+    assertSamePermutation(settings.galleryKeys, keys);
+    await this.prisma.organizationSettings.update({ where: { id: settings.id }, data: { galleryKeys: keys } });
+    return this.getGallery();
+  }
+
+  async removeGalleryImage(key: string) {
+    const settings = await this.getSettings();
+    if (!settings.galleryKeys.includes(key)) return this.getGallery();
+    const { [key]: _removed, ...meta } = readGalleryMeta(settings.galleryMeta);
+    await this.prisma.organizationSettings.update({
+      where: { id: settings.id },
+      data: { galleryKeys: settings.galleryKeys.filter((k) => k !== key), galleryMeta: toGalleryJson(meta) },
+    });
+    await this.gallery.deleteFiles([key]);
+    return this.getGallery();
   }
 }

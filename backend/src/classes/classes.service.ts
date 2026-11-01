@@ -1,4 +1,5 @@
-import { processGalleryImage, readGalleryMeta, thumbKeyOf, toGalleryJson, type GalleryImageMeta } from '../storage/gallery-image.js';
+import { GalleryAssetsService } from '../storage/gallery-assets.service.js';
+import { readGalleryMeta, thumbKeyOf, toGalleryJson } from '../storage/gallery-image.js';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StorageService } from '../storage/storage.service.js';
@@ -28,6 +29,7 @@ export class ClassesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly gallery: GalleryAssetsService,
   ) {}
 
   // --- Types de cours -----------------------------------------------------
@@ -40,34 +42,17 @@ export class ClassesService {
     return Promise.all(types.map((t) => this.withGalleryUrls(t)));
   }
 
-  /** Ajoute `galleryUrls` (URLs présignées de lecture, durée limitée) à un type de cours. */
-  async withGalleryUrls<T extends { galleryKeys: string[]; galleryMeta?: unknown }>(type: T) {
-    const meta = readGalleryMeta(type.galleryMeta);
-    const galleryUrls = await Promise.all(type.galleryKeys.map((key) => this.storage.getReadUrl(key)));
-    // Miniature (cartes, mosaïque) et aperçu flou : absents des anciennes photos, le client retombe alors sur l'original.
-    const galleryThumbUrls = await Promise.all(
-      type.galleryKeys.map((key, i) => (meta[key] ? this.storage.getReadUrl(thumbKeyOf(key)) : galleryUrls[i])),
-    );
-    const galleryBlurhashes = type.galleryKeys.map((key) => meta[key]?.blurhash ?? null);
-    // Proportions (largeur / hauteur) : la visionneuse anime l'ouverture vers la forme réelle de la photo.
-    const galleryRatios = type.galleryKeys.map((key) => (meta[key] ? meta[key].width / meta[key].height : null));
-    return { ...type, galleryUrls, galleryThumbUrls, galleryBlurhashes, galleryRatios };
+  /** Ajoute les URLs de lecture, miniatures et aperçus flous d'une galerie (type de cours ou salle). */
+  withGalleryUrls<T extends { galleryKeys: string[]; galleryMeta?: unknown }>(item: T) {
+    return this.gallery.withUrls(item);
   }
 
-  /** Lit la photo envoyée, vérifie que c'est une image, enregistre sa miniature et renvoie ses métadonnées. */
-  private async prepareGalleryImage(key: string): Promise<GalleryImageMeta> {
-    try {
-      const { thumb, meta } = await processGalleryImage(await this.storage.getObjectBuffer(key));
-      await this.storage.putObject(thumbKeyOf(key), thumb, 'image/webp');
-      return meta;
-    } catch (err) {
-      await this.storage.deleteObject(key).catch(() => undefined);
-      throw err;
-    }
+  private prepareGalleryImage(key: string) {
+    return this.gallery.prepare(key);
   }
 
-  private async deleteGalleryFiles(keys: string[]) {
-    await Promise.all(keys.flatMap((k) => [k, thumbKeyOf(k)]).map((k) => this.storage.deleteObject(k).catch(() => undefined)));
+  private deleteGalleryFiles(keys: string[]) {
+    return this.gallery.deleteFiles(keys);
   }
 
   /** Complète les miniatures et aperçus des photos envoyées avant leur création (rattrapage, voir scripts/backfill-gallery). */

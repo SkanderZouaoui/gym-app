@@ -5,7 +5,7 @@ import { StorageService } from './storage.service.js';
 import { thumbKeyOf, type GalleryMeta } from './gallery-image.js';
 
 /** Dossiers gérés par l'API. `body-metrics/` : anciennes photos de progression (fonctionnalité supprimée), jamais référencées. */
-export const MANAGED_PREFIXES = ['avatars/', 'class-types/', 'rooms/', 'body-metrics/'];
+export const MANAGED_PREFIXES = ['avatars/', 'class-types/', 'rooms/', 'organization/', 'body-metrics/'];
 /** Un fichier récent peut être en cours d'envoi (pas encore rattaché) : on ne touche qu'aux plus anciens. */
 const DEFAULT_MIN_AGE_HOURS = 24;
 
@@ -63,11 +63,12 @@ export class StorageCleanupService {
   }
 
   private async referencedKeys(): Promise<Set<string>> {
-    const [users, types, rooms, exercises] = await Promise.all([
+    const [users, types, rooms, exercises, settings] = await Promise.all([
       this.prisma.user.findMany({ where: { photoKey: { not: null } }, select: { photoKey: true } }),
       this.prisma.classType.findMany({ select: { galleryKeys: true, galleryMeta: true, imageKey: true } }),
       this.prisma.room.findMany({ select: { galleryKeys: true, galleryMeta: true } }),
       this.prisma.exercise.findMany({ where: { mediaKey: { not: null } }, select: { mediaKey: true } }),
+      this.prisma.organizationSettings.findMany({ select: { galleryKeys: true, galleryMeta: true } }),
     ]);
     const keys = new Set<string>();
     for (const u of users) if (u.photoKey) keys.add(u.photoKey);
@@ -82,6 +83,7 @@ export class StorageCleanupService {
       if (t.imageKey) keys.add(t.imageKey);
     }
     for (const r of rooms) addGallery(r.galleryKeys, r.galleryMeta);
+    for (const s of settings) addGallery(s.galleryKeys, s.galleryMeta);
     for (const e of exercises) if (e.mediaKey) keys.add(e.mediaKey);
     return keys;
   }

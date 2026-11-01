@@ -22,7 +22,7 @@ describe('findOrphans', () => {
 });
 
 describe('StorageCleanupService.run', () => {
-  function make(objects: ReturnType<typeof obj>[], refs: { photos?: string[]; gallery?: string[]; rooms?: string[] }) {
+  function make(objects: ReturnType<typeof obj>[], refs: { photos?: string[]; gallery?: string[]; rooms?: string[]; venue?: string[]; venueThumbs?: boolean }) {
     const storage = {
       listObjects: vi.fn(async (prefix: string) => objects.filter((o) => o.key.startsWith(prefix))),
       deleteObject: vi.fn(async () => undefined),
@@ -32,6 +32,11 @@ describe('StorageCleanupService.run', () => {
       classType: { findMany: vi.fn(async () => [{ galleryKeys: refs.gallery ?? [], imageKey: null }]) },
       room: { findMany: vi.fn(async () => [{ galleryKeys: refs.rooms ?? [] }]) },
       exercise: { findMany: vi.fn(async () => []) },
+      organizationSettings: {
+        findMany: vi.fn(async () => [
+          { galleryKeys: refs.venue ?? [], galleryMeta: Object.fromEntries((refs.venueThumbs ? (refs.venue ?? []) : []).map((k) => [k, { blurhash: 'x', width: 1, height: 1 }])) },
+        ]),
+      },
     };
     return { storage, service: new StorageCleanupService(prisma as never, storage as never) };
   }
@@ -49,6 +54,15 @@ describe('StorageCleanupService.run', () => {
     const { storage, service } = make([old('rooms/r1/a.jpeg'), old('rooms/r1/orphan.jpeg')], { rooms: ['rooms/r1/a.jpeg'] });
     expect(await service.run({ minAgeHours: 24 })).toMatchObject({ orphans: 1, deleted: 1 });
     expect(storage.deleteObject).toHaveBeenCalledExactlyOnceWith('rooms/r1/orphan.jpeg');
+  });
+
+  it('conserve les photos de l’établissement et leurs miniatures, supprime les autres', async () => {
+    const { storage, service } = make(
+      [old('organization/gallery/a.jpeg'), old('organization/gallery/a.thumb.webp'), old('organization/gallery/orphan.jpeg')],
+      { venue: ['organization/gallery/a.jpeg'], venueThumbs: true },
+    );
+    expect(await service.run({ minAgeHours: 24 })).toMatchObject({ orphans: 1, deleted: 1 });
+    expect(storage.deleteObject).toHaveBeenCalledExactlyOnceWith('organization/gallery/orphan.jpeg');
   });
 
   it('simulation : liste sans supprimer', async () => {

@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { OrganizationService } from './organization.service.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
+import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
+import { GalleryKeyDto } from '../classes/dto/gallery-key.dto.js';
+import { GalleryOrderDto } from '../classes/dto/gallery-order.dto.js';
 import { UpdateAttendancePolicyDto } from './dto/update-attendance-policy.dto.js';
 
 @ApiTags('organization')
@@ -27,6 +30,36 @@ export class OrganizationController {
   @Put('config')
   updateConfig(@Body() body: unknown, @CurrentUser() user: AuthenticatedUser) {
     return this.organizationService.updateConfig(body, user.userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Get('gallery')
+  getGallery() {
+    return this.organizationService.getGallery();
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('gallery/upload-url')
+  galleryUploadUrl(@Body() body: RequestUploadUrlDto) {
+    return this.organizationService.galleryUploadUrl(body.contentType, body.sizeBytes);
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('gallery')
+  addGalleryImage(@Body() body: GalleryKeyDto) {
+    return this.organizationService.addGalleryImage(body.key);
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('gallery/order')
+  reorderGallery(@Body() body: GalleryOrderDto) {
+    return this.organizationService.reorderGallery(body.keys);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('gallery')
+  removeGalleryImage(@Body() body: GalleryKeyDto) {
+    return this.organizationService.removeGalleryImage(body.key);
   }
 
   @Roles(Role.ADMIN)
