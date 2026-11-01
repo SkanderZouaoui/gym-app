@@ -1,18 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useNow } from '../../hooks/useNow';
 import { useVenue } from '../../hooks/useVenue';
-import { haptics } from '../../utils/haptics';
 import { hoursLabel, weekdayIndex } from '../../utils/openingHours';
 import { directionsUrl } from '../../utils/maps';
 import { WEEKDAYS_NARROW_MON } from '../../i18n/labels';
-import { Toast } from '../ui';
 import { VenueLogo } from './VenueLogo';
 import { VenueStatusBadge } from './VenueStatusBadge';
 
@@ -27,13 +24,6 @@ export function VenueTodayBanner({ href }: { href: Href }) {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const nowMs = useNow();
   const { data: venue } = useVenue();
-  const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!toast) return;
-    const id = setTimeout(() => setToast(null), 1800);
-    return () => clearTimeout(id);
-  }, [toast]);
 
   if (!venue) return null;
   const now = new Date(nowMs);
@@ -42,15 +32,8 @@ export function VenueTodayBanner({ href }: { href: Href }) {
   const contact = venue.contact;
   const hasPosition = contact?.latitude != null && contact?.longitude != null;
   const directions = contact && hasPosition ? directionsUrl(contact) : null;
-  const copy = async (value: string) => {
-    await Clipboard.setStringAsync(value);
-    void haptics.success();
-    setToast(t('venue.copied'));
-  };
-
   return (
     <View style={{ gap: 10 }}>
-      {toast ? <Toast icon="content-copy" text={toast} /> : null}
       <Text style={styles.sectionTitle}>{t('venue.title')}</Text>
       <View style={[styles.card, cardShadow]}>
         <Pressable onPress={() => router.push(href)} style={styles.head} accessibilityRole="button" accessibilityLabel={t('venue.see_details')}>
@@ -63,9 +46,9 @@ export function VenueTodayBanner({ href }: { href: Href }) {
         </Pressable>
 
         <View style={styles.hoursBox}>
-          <View style={{ flex: 1, minWidth: 0 }}>
+          <View>
             <Text style={styles.hoursKicker}>{t('venue.today').toUpperCase()}</Text>
-            <Text style={[styles.hoursValue, !today && { color: colors.muted }]} numberOfLines={1}>{today ?? t('venue.closed')}</Text>
+            <Text style={[styles.hoursValue, !today && { color: colors.muted }]}>{today ?? t('venue.closed')}</Text>
           </View>
           <View style={styles.week}>
             {venue.hours.map((h, i) => {
@@ -83,7 +66,6 @@ export function VenueTodayBanner({ href }: { href: Href }) {
           <View style={styles.actions}>
             {contact.phone ? <Action icon="call" label={t('venue.call')} strong onPress={() => void Linking.openURL(`tel:${contact.phone.replace(/\s+/g, '')}`)} /> : null}
             {directions ? <Action icon="directions" label={t('venue.directions')} onPress={() => void Linking.openURL(directions)} /> : null}
-            {contact.phone ? <Action icon="content-copy" label={t('venue.copy_phone')} onPress={() => void copy(contact.phone)} /> : null}
           </View>
         ) : null}
       </View>
@@ -106,15 +88,15 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     card: { backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 14 },
     head: { flexDirection: 'row', alignItems: 'center', gap: 14 },
     name: { fontFamily: fonts.head, fontSize: 18, letterSpacing: -0.4, color: colors.text },
-    hoursBox: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 18, backgroundColor: colors.surface2 },
+    hoursBox: { gap: 12, padding: 14, borderRadius: 18, backgroundColor: colors.surface2 },
     hoursKicker: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, color: colors.muted },
-    hoursValue: { fontFamily: fonts.head, fontSize: 22, letterSpacing: -0.6, color: colors.text },
-    week: { flexDirection: 'row', gap: 4 },
-    day: { width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'transparent' },
+    hoursValue: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -0.8, color: colors.text, marginTop: 2 },
+    week: { flexDirection: 'row', justifyContent: 'space-between' },
+    day: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: 'transparent' },
     dayOpen: { backgroundColor: colors.primarySoft },
     dayClosed: { backgroundColor: 'transparent' },
     dayToday: { borderColor: colors.primary },
-    dayText: { fontFamily: fonts.bodySemiBold, fontSize: 11 },
+    dayText: { fontFamily: fonts.bodySemiBold, fontSize: 13 },
     actions: { flexDirection: 'row', gap: 8 },
     action: { flex: 1, minHeight: 58, borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 3, paddingHorizontal: 6, paddingVertical: 8 },
     actionStrong: { backgroundColor: colors.primary },
