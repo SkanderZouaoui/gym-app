@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useAdminDashboard, useExpiringMemberships, usePayments, useStaffToday } from '../api/hooks'
+import { useDailyAttendance, useSetupAlerts, webRoute } from '../api/admin'
 import { useAuth } from '../store/auth'
 import { daysLeft, formatDate, formatMoney, formatTime, greeting, METHOD_ICON, METHOD_LABEL, sameDay } from '../lib/format'
 import { useNow } from '../lib/hooks'
@@ -15,6 +16,8 @@ export function DashboardPage() {
   const dashboard = useAdminDashboard(isAdmin)
   const payments = usePayments()
   const expiring = useExpiringMemberships(isAdmin)
+  const attendance = useDailyAttendance(isAdmin)
+  const setup = useSetupAlerts(isAdmin)
 
   const todayPayments = useMemo(() => (payments.data ?? []).filter((p) => sameDay(new Date(p.recordedAt), new Date(now))), [payments.data, now])
   const collectedToday = isAdmin && dashboard.data ? Number(dashboard.data.revenueToday) : todayPayments.reduce((n, p) => n + Number(p.amount), 0)
@@ -116,6 +119,42 @@ export function DashboardPage() {
           </Card>
         </section>
       </div>
+
+      {isAdmin && (setup.data ?? []).length > 0 ? (
+        <section className="space-y-3">
+          <SectionHeader title="À configurer" icon="checklist" />
+          <Card className="divide-y divide-border overflow-hidden">
+            {(setup.data ?? []).map((a) => (
+              <Link key={a.key} to={webRoute(a.route)} className="flex items-center gap-4 px-5 py-3.5 transition hover:bg-primary-soft/40">
+                <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${a.severity === 'danger' ? 'bg-danger-soft text-danger-ink' : a.severity === 'warning' ? 'bg-warning-soft text-warning-ink' : 'bg-info-soft text-info-ink'}`}><Icon name={a.severity === 'info' ? 'info' : 'warning'} size={22} /></span>
+                <div className="min-w-0 flex-1"><div className="text-sm font-bold">{a.title}</div><div className="truncate text-[13px] text-muted">{a.detail}</div></div>
+                <Icon name="chevron_right" size={20} className="text-muted" />
+              </Link>
+            ))}
+          </Card>
+        </section>
+      ) : null}
+
+      {isAdmin && attendance.data ? (
+        <section className="space-y-3">
+          <SectionHeader title="Présences — 7 derniers jours" icon="bar_chart" action={<Badge tone={attendance.data.changePercent >= 0 ? 'success' : 'danger'}>{attendance.data.changePercent >= 0 ? '+' : ''}{Math.round(attendance.data.changePercent)} % vs semaine précédente</Badge>} />
+          <Card className="p-6">
+            <div className="flex h-40 items-end gap-3">
+              {(() => {
+                const max = Math.max(1, ...attendance.data.days.map((d) => d.count))
+                return attendance.data.days.map((d) => (
+                  <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
+                    <span className="text-xs font-bold">{d.count}</span>
+                    <div className="w-full max-w-14 rounded-t-xl bg-gradient-to-t from-primary to-[#8B5CF6]" style={{ height: `${Math.max(4, (d.count / max) * 100)}%`, opacity: d.count === 0 ? 0.25 : 1 }} />
+                    <span className="text-xs capitalize text-muted">{formatDate(d.date, { weekday: 'short' }).replace('.', '')}</span>
+                  </div>
+                ))
+              })()}
+            </div>
+            <div className="mt-4 text-sm text-muted">{attendance.data.currentWeekTotal} présence{attendance.data.currentWeekTotal > 1 ? 's' : ''} cette semaine · {attendance.data.previousWeekTotal} la semaine précédente</div>
+          </Card>
+        </section>
+      ) : null}
 
       {isAdmin && (expiring.data ?? []).length > 0 ? (
         <section className="space-y-3">

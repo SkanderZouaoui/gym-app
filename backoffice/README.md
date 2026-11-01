@@ -37,6 +37,9 @@ CORS_ORIGINS=http://localhost:5173 node backend/dist/scripts/set-bucket-cors.js
 | Cours et salles (types, salles, galeries photos) | ADMIN | Cours et salles |
 | Équipe (comptes, planning de travail, activité) | ADMIN | Équipe |
 | Réglages (salle et horaires, réservation et présence, paiements, annonces) | ADMIN | Configuration |
+| Communication (annonces, alertes adhérents, notifications push et règles) | ADMIN | Annonces, Alertes, Notifications |
+| Programmes (validation des programmes des coachs, exercices) | ADMIN | Programmes, Exercices |
+| Accueil admin : présences de la semaine et éléments à configurer | ADMIN | Tableau de bord admin |
 
 ## Structure
 

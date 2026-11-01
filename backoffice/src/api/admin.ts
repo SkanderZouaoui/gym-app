@@ -213,3 +213,31 @@ export function useVenueLogo() {
 
 /** Position d'un lien Google Maps (court ou long) ou de coordonnées collées, résolue par l'API. */
 export const resolveLocation = async (text: string) => (await api.post<{ latitude: number; longitude: number }>('/v1/admin/settings/resolve-location', { text })).data
+
+// --- Tableau de bord admin ---------------------------------------------------------
+
+export interface DailyAttendance {
+  days: { date: string; count: number }[]
+  currentWeekTotal: number
+  previousWeekTotal: number
+  changePercent: number
+}
+export const useDailyAttendance = (enabled: boolean) =>
+  useQuery({ queryKey: ['admin', 'stats', 'daily-attendance'], queryFn: () => get<DailyAttendance>('/v1/admin/stats/daily-attendance'), enabled })
+
+export interface SetupAlert {
+  key: string
+  severity: 'warning' | 'danger' | 'info'
+  title: string
+  detail: string
+  route: string
+}
+/** Éléments de configuration manquants (planning d'équipe, forfaits, salles, coordonnées…). */
+export const useSetupAlerts = (enabled: boolean) => useQuery({ queryKey: ['admin', 'setup-alerts'], queryFn: () => get<SetupAlert[]>('/v1/admin/alerts/setup'), enabled, staleTime: 0 })
+
+/** Route de l'application mobile → page équivalente du back-office. */
+export function webRoute(route: string): string {
+  const path = route.replace('/(admin)', '').replace('/(tabs)', '')
+  if (path.startsWith('/settings')) return path
+  return path || '/'
+}

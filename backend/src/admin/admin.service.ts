@@ -59,8 +59,8 @@ export class AdminService {
     if (!configured) {
       alerts.push({ key: 'config-never-saved', severity: 'warning', title: 'Configuration de la salle non enregistrée', detail: 'Horaires, moyens de paiement et règles de réservation utilisent les valeurs par défaut.', route: '/(admin)/settings' });
     }
-    if (!config.contact.address.trim() || !config.contact.phone.trim() || !config.contact.email.trim()) {
-      alerts.push({ key: 'contact-missing', severity: 'info', title: 'Coordonnées de la salle incomplètes', detail: 'Adresse, téléphone ou e-mail manquant.', route: '/(admin)/settings' });
+    if (!config.contact.phone.trim() || !config.contact.email.trim() || config.contact.latitude == null || config.contact.longitude == null) {
+      alerts.push({ key: 'contact-missing', severity: 'info', title: 'Coordonnées de la salle incomplètes', detail: 'Téléphone, e-mail ou position sur la carte manquant.', route: '/(admin)/settings' });
     }
     if (config.hours.every((h) => !h.open)) {
       alerts.push({ key: 'hours-closed', severity: 'warning', title: 'Aucun jour d’ouverture', detail: 'Les horaires indiquent la salle fermée toute la semaine.', route: '/(admin)/settings' });
