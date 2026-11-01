@@ -10,6 +10,7 @@ import { CatalogPage } from './pages/CatalogPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { CommunicationPage } from './pages/CommunicationPage'
 import { ProgramsPage } from './pages/ProgramsPage'
+import { StatsPage } from './pages/StatsPage'
 import { AppShell } from './layouts/AppShell'
 import { RequireAuth, RequireRole } from './components/Guards'
 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/settings" element={<RequireRole roles={['ADMIN']}><SettingsPage /></RequireRole>} />
         <Route path="/communication" element={<RequireRole roles={['ADMIN']}><CommunicationPage /></RequireRole>} />
         <Route path="/programs" element={<RequireRole roles={['ADMIN']}><ProgramsPage /></RequireRole>} />
+        <Route path="/stats" element={<RequireRole roles={['ADMIN']}><StatsPage /></RequireRole>} />
         <Route path="/team" element={<RequireRole roles={['ADMIN']}><TeamPage /></RequireRole>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

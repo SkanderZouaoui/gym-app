@@ -26,6 +26,7 @@ export const NAV: NavGroup[] = [
     title: 'Administration',
     items: [
       { to: '/plans', label: 'Abonnements', icon: 'card_membership', roles: ['ADMIN'] },
+      { to: '/stats', label: 'Statistiques', icon: 'bar_chart', roles: ['ADMIN'] },
       { to: '/programs', label: 'Programmes', icon: 'fact_check', roles: ['ADMIN'] },
       { to: '/communication', label: 'Communication', icon: 'campaign', roles: ['ADMIN'] },
       { to: '/catalog', label: 'Cours et salles', icon: 'exercise', roles: ['ADMIN'] },
