@@ -17,6 +17,7 @@ import { useGalleryApi } from '../api/catalog'
 import { METHOD_ICON, METHOD_LABEL, type PaymentMethod } from '../lib/format'
 import { Button, Card, ChipChoice, Field, Icon, PageHeader, SectionHeader, Skeleton, Stepper, ToggleRow, useToast, cn } from '../components/ui'
 import { GalleryManager } from '../components/domain/GalleryManager'
+import { ImageEditor } from '../components/domain/ImageEditor'
 
 type Section = 'venue' | 'booking' | 'payments' | 'comms'
 const SECTIONS: { id: Section; label: string; sub: string; icon: string }[] = [
@@ -49,8 +50,9 @@ function Logo() {
   const api = useVenueLogo()
   const input = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
-  const pick = async (file?: File) => {
-    if (!file) return
+  const [editing, setEditing] = useState<File | null>(null)
+  const send = async (file: File) => {
+    setEditing(null)
     setBusy(true)
     try {
       await api.upload(file)
@@ -76,7 +78,8 @@ function Logo() {
           {data?.logoUrl ? <Button size="sm" variant="ghost" icon="delete" onClick={() => void api.remove().then(() => toast('Logo retiré'))}>Retirer</Button> : null}
         </div>
       </div>
-      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => void pick(e.target.files?.[0])} />
+      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && setEditing(e.target.files[0])} />
+      {editing ? <ImageEditor source={editing} fileName={editing.name} title="Logo de la salle" confirmLabel="Enregistrer" onSkip={() => void send(editing)} onCancel={() => { setEditing(null); if (input.current) input.current.value = '' }} onDone={(f) => void send(f)} /> : null}
     </div>
   )
 }

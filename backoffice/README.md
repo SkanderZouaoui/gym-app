@@ -10,6 +10,14 @@ pnpm --filter @muscleup/backoffice dev     # http://localhost:5173
 
 `VITE_API_URL` (fichier `.env`, non versionné) désigne l'API, par exemple `http://localhost:3001`.
 
+## Photos : CORS du stockage
+
+L'envoi et la retouche des photos se font directement entre le navigateur et le stockage (URLs présignées) : le bucket doit autoriser l'origine du back-office. Après `pnpm --filter backend build` :
+
+```bash
+CORS_ORIGINS=http://localhost:5173 node backend/dist/scripts/set-bucket-cors.js
+```
+
 ## Accès
 
 - Seuls les comptes ayant le rôle `ADMIN` ou `STAFF` peuvent se connecter ; un adhérent ou un coach est refusé et sa session révoquée.
