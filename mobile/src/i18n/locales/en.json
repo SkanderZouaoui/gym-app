@@ -384,7 +384,8 @@
     "statusExpired": "Expired",
     "nextCourseTitle": "Next class",
     "greetingFallback": "Hello,",
-    "announcementImportant": "Important"
+    "announcementImportant": "Important",
+    "membershipTitle": "My plan"
   },
   "planning": {
     "title": "Schedule",

@@ -384,7 +384,8 @@
     "statusExpired": "منتهٍ",
     "nextCourseTitle": "الحصة القادمة",
     "greetingFallback": "مرحبًا،",
-    "announcementImportant": "مهم"
+    "announcementImportant": "مهم",
+    "membershipTitle": "باقتي"
   },
   "planning": {
     "title": "الجدول",

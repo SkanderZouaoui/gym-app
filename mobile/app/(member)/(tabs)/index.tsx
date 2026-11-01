@@ -177,14 +177,17 @@ export default function HomeScreen() {
           />
         ) : null}
 
-        <MembershipHeroCard
-          planName={activeMembership?.plan.name ?? t('home.membershipNone')}
-          periodLabel={activeMembership ? periodLabel(activeMembership.startDate, activeMembership.endDate) : undefined}
-          daysLeft={activeMembership ? daysLeft : undefined}
-          remainingRatio={remainingRatio}
-          expired={!!expiredMembership || !activeMembership}
-          onPressQr={() => router.push('/(member)/(tabs)/qr')}
-        />
+        <View style={{ gap: spacing.sm }}>
+          <Text style={styles.sectionTitle}>{t('home.membershipTitle')}</Text>
+          <MembershipHeroCard
+            planName={activeMembership?.plan.name ?? t('home.membershipNone')}
+            periodLabel={activeMembership ? periodLabel(activeMembership.startDate, activeMembership.endDate) : undefined}
+            daysLeft={activeMembership ? daysLeft : undefined}
+            remainingRatio={remainingRatio}
+            expired={!!expiredMembership || !activeMembership}
+            onPressQr={() => router.push('/(member)/(tabs)/qr')}
+          />
+        </View>
 
         {expiredMembership ? null : nextBooking?.session ? (
           <View style={{ gap: spacing.sm }}>
