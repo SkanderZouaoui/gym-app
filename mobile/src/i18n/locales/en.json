@@ -1727,6 +1727,7 @@
     "coach_closed": "Gym closed that day",
     "front_desk": "Front desk",
     "copied": "Copied",
-    "copy_phone": "Copy number"
+    "copy_phone": "Copy number",
+    "today": "Today"
   }
 }
