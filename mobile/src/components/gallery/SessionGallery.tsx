@@ -76,7 +76,7 @@ export function SessionGallery({ sections }: Props) {
             const on = i === Math.min(tab, visible.length - 1);
             return (
               <Pressable key={s.id} onPress={() => switchTab(i)} style={[styles.tab, on && styles.tabOn]} accessibilityState={{ selected: on }}>
-                <Text style={[styles.tabText, on && styles.tabTextOn]} numberOfLines={1}>{s.label}</Text>
+                <Text style={[styles.tabText, on && styles.tabTextOn]}>{s.label}</Text>
                 <Text style={[styles.tabCount, on && styles.tabCountOn]}>{s.photos.length}</Text>
               </Pressable>
             );
@@ -115,9 +115,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
     titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, minWidth: 0 },
     count: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk, backgroundColor: colors.primarySoft, paddingHorizontal: 9, paddingVertical: 3, borderRadius: 10, overflow: 'hidden' },
-    tabs: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    tabs: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
     title: { flexShrink: 1, fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text },
-    tab: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexShrink: 1 },
+    tab: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingVertical: 6, paddingHorizontal: 14, borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexShrink: 1 },
     tabOn: { backgroundColor: colors.primary, borderColor: colors.primary },
     tabText: { flexShrink: 1, fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.text },
     tabTextOn: { color: colors.primaryContrast },

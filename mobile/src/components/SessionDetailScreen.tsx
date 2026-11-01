@@ -170,7 +170,7 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute, e
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={styles.infoLabel}>{i.label}</Text>
-                <Text style={styles.infoValue} numberOfLines={1}>{i.value}</Text>
+                <Text style={styles.infoValue}>{i.value}</Text>
               </View>
             </View>
           ))}
@@ -262,7 +262,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     editText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
     infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    infoCard: { width: '48.4%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radii.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+    infoCard: { width: '48.4%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, minHeight: 64, borderRadius: radii.lg, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     infoIcon: { width: 38, height: 38, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     infoLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
     infoValue: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text, marginTop: 1 },
