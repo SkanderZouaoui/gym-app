@@ -235,7 +235,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     logoHint: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.primaryInk },
     nameBox: { alignSelf: 'stretch', marginTop: 4 },
     cardHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 18, paddingTop: 16 },
-    cardTitle: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },
+    cardTitle: { fontFamily: fonts.headBold, fontSize: 16, letterSpacing: -0.3, color: colors.text },
     mapBox: { paddingHorizontal: 14, paddingTop: 12, gap: 6, alignItems: 'center' },
     mapEmpty: { alignSelf: 'stretch', height: 150, borderRadius: 22, borderWidth: 1.5, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 20 },
     mapEmptyTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },

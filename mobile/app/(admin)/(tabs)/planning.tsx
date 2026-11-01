@@ -144,7 +144,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     addShadow: { borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5, marginBottom: 6 },
     addButton: { width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
     editBtn: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
     empty: { padding: 28, alignItems: 'center', gap: 8, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     emptyText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },

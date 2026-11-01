@@ -207,7 +207,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
     chip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.18)' },
     chipText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
-    section: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
+    section: { fontFamily: fonts.headBold, fontSize: 16, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
     toggleCard: {
       flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radii.xl,
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
@@ -218,7 +218,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     photosLocked: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     photosLockedText: { flex: 1, fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
     footer: { backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
   });
 }

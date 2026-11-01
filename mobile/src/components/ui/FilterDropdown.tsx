@@ -95,7 +95,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     title: { fontFamily: fonts.bodySemiBold, fontSize: 11, letterSpacing: 0.4, color: colors.muted, textTransform: 'uppercase' },
     value: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
     valueActive: { color: colors.primaryInk },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text, marginBottom: 8 },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text, marginBottom: 8 },
     list: { gap: 8, marginBottom: 8 },
     option: {
       minHeight: 52, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,

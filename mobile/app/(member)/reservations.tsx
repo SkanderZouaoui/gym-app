@@ -204,7 +204,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 19, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 19, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
   });
 }

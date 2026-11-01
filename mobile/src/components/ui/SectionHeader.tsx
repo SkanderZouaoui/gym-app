@@ -40,7 +40,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     icon: { width: 28, height: 28, borderRadius: 9, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-    title: { flex: 1, minWidth: 0, fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.5, color: colors.text },
+    title: { flex: 1, minWidth: 0, fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.4, color: colors.text },
     action: { flexDirection: 'row', alignItems: 'center', gap: 1 },
     actionText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
   });

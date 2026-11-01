@@ -135,7 +135,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     stat: { flex: 1, padding: 14, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     statLabel: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
     statValue: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, marginTop: 2 },
-    section: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
+    section: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primarySoft },
     chipText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
@@ -145,7 +145,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     stepNumText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
     stepText: { flex: 1, fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: colors.text, paddingTop: 3 },
     empty: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
   });
 }

@@ -552,7 +552,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     pickRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: 10, borderRadius: 14, backgroundColor: colors.surface2 },
     pickIcon: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     pickLabel: { flex: 1, fontFamily: fonts.bodyBold, fontSize: 14.5, color: colors.text },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: colors.muted },
     kpiTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     shortcutsHead: { marginTop: 6 },
@@ -576,7 +576,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     barLabel: { fontFamily: fonts.body, fontSize: 10, color: colors.muted },
     fillNote: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted, marginTop: 10 },
     sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: 14 },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text },
     sectionCount: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.dangerInk },
     alert: {
       minWidth: 0,

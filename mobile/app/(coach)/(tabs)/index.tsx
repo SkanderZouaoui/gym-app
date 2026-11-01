@@ -245,7 +245,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     tile: { flex: 1, paddingVertical: 14, paddingHorizontal: 12, borderRadius: 24, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     tileValue: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -1, color: colors.text },
     tileLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted, marginTop: 2 },
-    section: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text, marginTop: 14 },
+    section: { fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.4, color: colors.text, marginTop: 14 },
     sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 14 },
     link: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     card: { backgroundColor: colors.surface, borderRadius: 24, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 6, paddingVertical: 4 },

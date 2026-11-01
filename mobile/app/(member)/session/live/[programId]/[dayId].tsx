@@ -746,7 +746,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     validateButtonText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
     finishLink: { minHeight: 36, alignItems: 'center', justifyContent: 'center' },
     finishLinkText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.muted },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
   });
 }

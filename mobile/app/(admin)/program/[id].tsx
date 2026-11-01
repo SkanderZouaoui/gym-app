@@ -210,7 +210,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     statCard: { flex: 1, padding: 14, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     statValue: { fontFamily: fonts.head, fontSize: 22, lineHeight: 26, letterSpacing: -0.8, color: colors.text },
     statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted, marginTop: 2 },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primarySoft },
     chipText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
@@ -231,7 +231,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     },
     rejectText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.dangerInk },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
     noteInput: {
       minHeight: 90, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface2, padding: 14,

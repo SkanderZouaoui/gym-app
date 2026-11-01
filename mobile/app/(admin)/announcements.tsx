@@ -227,7 +227,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     audText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
     editNote: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
     iconBtn: { width: 34, height: 34, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
     period: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
     periodText: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.primaryInk },

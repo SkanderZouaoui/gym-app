@@ -143,7 +143,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     content: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 60 },
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
     noPlan: {
       flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, backgroundColor: colors.surface,
       borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,

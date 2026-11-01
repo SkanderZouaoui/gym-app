@@ -256,7 +256,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     heroKicker: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 1.2, color: 'rgba(255,255,255,0.85)' },
     heroTitle: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -0.8, color: '#FFFFFF', marginTop: 2 },
     heroSub: { fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: 'rgba(255,255,255,0.92)', textTransform: 'capitalize' },
-    section: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text, marginTop: 10 },
+    section: { fontFamily: fonts.headBold, fontSize: 16, letterSpacing: -0.3, color: colors.text, marginTop: 10 },
     stepCard: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, paddingHorizontal: 14,
       backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border,
@@ -274,7 +274,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       backgroundColor: colors.dangerSoft, borderWidth: 1, borderColor: colors.border,
     },
     deleteText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.dangerInk },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
   });
 }

@@ -275,7 +275,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     scanBtn: { marginTop: 4, height: 50, borderRadius: radii.sm, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primary },
     scanText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryContrast },
     sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
-    section: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text },
+    section: { fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.4, color: colors.text },
     sectionCount: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk, backgroundColor: colors.primarySoft, paddingHorizontal: 9, paddingVertical: 3, borderRadius: 10, overflow: 'hidden' },
     chip: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 38, paddingStart: 14, paddingEnd: 8, borderRadius: 19, backgroundColor: colors.primarySoft },
     chipOn: { backgroundColor: colors.primary },

@@ -329,7 +329,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
     safeArea: { flex: 1, backgroundColor: colors.bg },
     offlineBannerWrap: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 140 },
-    sectionHeading: { fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.4, color: colors.text, marginTop: spacing.sm, marginBottom: 12 },
+    sectionHeading: { fontFamily: fonts.headBold, fontSize: 20, letterSpacing: -0.4, color: colors.text, marginTop: spacing.sm, marginBottom: 12 },
     logoutButton: {
       minHeight: 52, borderRadius: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 6,
@@ -343,7 +343,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
     languageRowActive: { backgroundColor: colors.primarySoft, borderColor: colors.primaryBorder },
     languageText: { fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text },
     languageTextActive: { color: colors.primaryInk, fontFamily: fonts.bodyBold },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
     sheetDangerButton: {
       height: 52, borderRadius: radii.md, backgroundColor: colors.danger, alignItems: 'center', justifyContent: 'center',

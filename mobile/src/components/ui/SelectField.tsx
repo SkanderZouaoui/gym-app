@@ -159,7 +159,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     iconBox: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     label: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
     value: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, marginTop: 1 },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text, marginBottom: 4 },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text, marginBottom: 4 },
     option: {
       minHeight: 54, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 14, flexDirection: 'row', alignItems: 'center',
       backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border,

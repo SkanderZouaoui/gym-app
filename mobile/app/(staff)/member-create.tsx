@@ -363,7 +363,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     heroHint: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted, textAlign: 'center', maxWidth: 280 },
     sectionHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     sectionIcon: { width: 26, height: 26, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
-    sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, letterSpacing: -0.3, color: colors.text },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 16, letterSpacing: -0.3, color: colors.text },
     autoBox: {
       flexDirection: 'row', alignItems: 'center', gap: 10, padding: 14, borderRadius: radii.lg,
       backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder,

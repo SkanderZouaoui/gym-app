@@ -184,7 +184,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     hero: { flexDirection: 'row', alignItems: 'center', gap: 14 },
     name: { fontFamily: fonts.head, fontSize: 24, letterSpacing: -0.6, color: colors.text },
-    section: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text, marginTop: 6 },
+    section: { fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.4, color: colors.text, marginTop: 6 },
     card: { backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
     contactRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
     contactIcon: { width: 38, height: 38, borderRadius: 12, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },

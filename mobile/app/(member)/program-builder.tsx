@@ -371,7 +371,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primarySoft,
     },
     addExerciseText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text, marginBottom: spacing.sm },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text, marginBottom: spacing.sm },
     footer: {
       position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.bg,
       borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.lg, paddingBottom: spacing.xl,

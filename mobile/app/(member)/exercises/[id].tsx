@@ -187,7 +187,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
     statValue: { fontFamily: fonts.head, fontSize: 24, letterSpacing: -0.8, color: colors.text, marginTop: 2 },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10, marginTop: 6 },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10, marginTop: 6 },
     chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     musclePrimary: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
     musclePrimaryText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#FFFFFF' },

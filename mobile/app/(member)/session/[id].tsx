@@ -268,7 +268,7 @@ function traduireErreurReservation(e: ApiError): string {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
     closed: {
       height: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -303,7 +303,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     spotsTag: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 999 },
     spotsTagText: { fontFamily: fonts.bodyBold, fontSize: 12 },
     spotsSub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
     descriptionCard: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 16 },
     description: { fontFamily: fonts.body, fontSize: 15, color: colors.text, lineHeight: 22 },
     descriptionEmpty: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },

@@ -146,7 +146,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder,
     },
     planText: { fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.primaryInk },
-    section: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text },
+    section: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text },
     course: {
       flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.lg,
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,

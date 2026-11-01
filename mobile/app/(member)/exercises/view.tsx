@@ -147,7 +147,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   name: { fontFamily: fonts.head, fontSize: 22, color: colors.text, textTransform: 'capitalize' },
   equipmentLine: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, textTransform: 'capitalize', marginTop: 2 },
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text, marginBottom: spacing.sm },
+  sectionTitle: { fontFamily: fonts.headBold, fontSize: 15, color: colors.text, marginBottom: spacing.sm },
   stepsList: { gap: spacing.sm },
   stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   stepBadge: {

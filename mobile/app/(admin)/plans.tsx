@@ -179,7 +179,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     heroKicker: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1, color: 'rgba(255,255,255,0.92)' },
     heroValue: { fontFamily: fonts.head, fontSize: 44, letterSpacing: -1.8, color: '#FFFFFF' },
     heroSub: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: 'rgba(255,255,255,0.92)' },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginTop: 6 },
     sep: { height: 1, backgroundColor: colors.border },
     discRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
     stepper: { flexDirection: 'row', alignItems: 'center', height: 44, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },

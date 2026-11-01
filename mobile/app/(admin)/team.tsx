@@ -480,7 +480,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     switchLabel: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
     empty: { padding: 28, alignItems: 'center', gap: 8, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     emptyText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, textAlign: 'center' },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
     credBox: { padding: 14, borderRadius: radii.md, backgroundColor: colors.surface2 },
     credLabel: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase', color: colors.muted },

@@ -117,7 +117,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     mediaWrap: { alignItems: 'center', marginBottom: spacing.sm },
     name: { fontFamily: fonts.head, fontSize: 22, color: colors.text, textTransform: 'capitalize' },
     muscleGroup: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, textTransform: 'capitalize', marginBottom: spacing.sm },
-    sectionTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text, marginTop: spacing.sm },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 15, color: colors.text, marginTop: spacing.sm },
     addSetButton: {
       height: 44, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.primaryBorder, borderStyle: 'dashed',
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.primarySoft,

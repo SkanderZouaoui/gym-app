@@ -140,7 +140,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     },
     logoutText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.dangerInk },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
     sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
   });
 }

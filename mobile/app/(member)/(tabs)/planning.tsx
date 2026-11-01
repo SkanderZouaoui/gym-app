@@ -262,7 +262,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
     filterRow: { gap: 8 },
     bannerWrap: { paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
     list: { paddingHorizontal: spacing.lg, gap: spacing.sm, paddingBottom: 120 },
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 19, color: colors.text, marginBottom: spacing.sm },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 19, color: colors.text, marginBottom: spacing.sm },
     optionsWrap: { gap: 8, marginBottom: spacing.sm },
     optionRow: {
       height: 48, borderRadius: radii.sm, borderWidth: 1, borderColor: colors.border,

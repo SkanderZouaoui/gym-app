@@ -238,7 +238,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       borderRadius: radii.full, backgroundColor: colors.successSoft,
     },
     pillText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.successInk },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
+    sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
     recordBadges: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     recordBadgeShadow: {
       width: '48.5%', borderRadius: 18, shadowColor: GOLD_DEEP, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 4,

@@ -158,7 +158,7 @@ export function useProfilePhoto(opts: Options = {}) {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    sheetTitle: { fontFamily: fonts.head, fontSize: 18, color: colors.text, marginBottom: spacing.sm },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text, marginBottom: spacing.sm },
     row: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 56, paddingHorizontal: 6, borderRadius: radii.lg },
     rowIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     rowText: { fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text },
