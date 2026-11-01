@@ -288,6 +288,7 @@ export default function ProfileScreen() {
         <SettingsGroup
           title={t('common.plus')}
           rows={[
+            { kind: 'nav', icon: 'storefront', title: t('venue.title'), onPress: () => router.push('/(member)/venue') },
             { kind: 'nav', icon: 'event-note', title: t('member.mes_reservations'), onPress: () => router.push('/(member)/reservations') },
             { kind: 'nav', icon: 'lock-outline', title: t('profile.menuSecurity'), onPress: () => router.push('/(member)/account-security') },
             { kind: 'nav', icon: 'help', title: t('profile.menuHelp'), onPress: () => router.push('/(member)/app-info') },

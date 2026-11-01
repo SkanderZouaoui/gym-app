@@ -556,7 +556,7 @@ export function useDeleteNotificationRule() {
 // --- Configuration de la salle ------------------------------------------------------
 
 export interface OrganizationConfig {
-  contact: { address: string; phone: string; email: string; visibleToMembers: boolean };
+  contact: { name: string; address: string; phone: string; email: string; latitude: number | null; longitude: number | null; visibleToMembers: boolean };
   hours: { open: boolean; from: string; to: string }[];
   paymentMethods: { CASH: boolean; OTHER: boolean; TRANSFER: boolean; CHECK: boolean };
   announcements: { format: 'Bandeau' | 'Pop-up' | 'Encart'; alertFormat: 'Bandeau' | 'Pop-up' | 'Encart'; push: boolean; expiryReminderDays: number };
@@ -575,7 +575,10 @@ export function useUpdateOrganizationConfig() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (config: OrganizationConfig) => apiRequest<OrganizationConfig>('/v1/admin/settings/config', { method: 'PUT', body: config }),
-    onSuccess: (data) => queryClient.setQueryData(['settings', 'config'], data),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['settings', 'config'], data);
+      void queryClient.invalidateQueries({ queryKey: ['venue'] });
+    },
   });
 }
 

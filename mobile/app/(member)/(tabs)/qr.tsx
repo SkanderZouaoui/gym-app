@@ -1,3 +1,4 @@
+import { VenueStatusLine } from '../../../src/components/venue/VenueStatusLine';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -79,6 +80,7 @@ export default function QrScreen() {
       <ScrollView
         refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <ScreenTitle title={t('qr.title')} subtitle={t('qr.subtitle')} />
+        <VenueStatusLine />
 
         {offline || !token ? (
           <Banner

@@ -22,6 +22,7 @@ import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
 import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
+import { VenueCard } from '../../../src/components/venue/VenueCard';
 import { Notice, NoticeList, NoticePopups } from '../../../src/components/adherent/Notices';
 import { Banner, BottomSheet, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
@@ -238,6 +239,8 @@ export default function HomeScreen() {
             <Text style={styles.cancelLinkText}>{cancelBooking.isPending ? t('home.cancelling') : t('home.cancelBooking')}</Text>
           </Pressable>
         ) : null}
+
+        <VenueCard href="/(member)/venue" />
 
         {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
           <View style={{ gap: spacing.sm }}>

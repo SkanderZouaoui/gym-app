@@ -42,6 +42,8 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetchMe(), refetchSchedule()]));
   const workingDays = (mySchedule ?? []).filter((d) => d.working);
   const roles = useSessionStore((s) => s.roles);
+  const activeRole = useSessionStore((s) => s.activeRole);
+  const venueHref = activeRole === 'COACH' ? '/(coach)/venue' : activeRole === 'ADMIN' ? '/(admin)/venue' : '/(staff)/venue';
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
 
@@ -213,6 +215,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         <SettingsGroup
           title={t('common.compte')}
           rows={[
+            { kind: 'nav', icon: 'storefront', title: t('venue.title'), onPress: () => router.push(venueHref) },
             { kind: 'nav', icon: 'language', title: t('common.langue'), value: LANGUAGE_LABELS[language], onPress: () => setLanguageVisible(true) },
             { kind: 'nav', icon: 'lock-outline', title: t('common.mot_de_passe'), onPress: () => router.push('/(member)/account-security') },
             ...(hasMemberRole ? [{ kind: 'nav' as const, icon: 'swap-horiz' as const, title: t('common.passer_en_mode_adherent'), onPress: handleSwitchToMember }] : []),

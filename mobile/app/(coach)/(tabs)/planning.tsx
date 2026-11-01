@@ -9,6 +9,7 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useCoachSessions, type CoachSession } from '../../../src/hooks/useCoachSessions';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { VenueHoursStrip } from '../../../src/components/venue/VenueHoursStrip';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { FilterDropdown, ProgressBar, ScreenTitle, SkeletonList } from '../../../src/components/ui';
 import { StatusTag } from '../../../src/components/staff/staffUi';
@@ -93,6 +94,7 @@ export default function CoachPlanningScreen() {
         />
 
         <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
+        <VenueHoursStrip date={day} href="/(coach)/venue" />
 
         <View style={styles.filters}>
           <FilterDropdown title={i18n.t('staff.statut')} icon="event-available" value={status} options={STATUS_FILTERS} onChange={setStatus} />

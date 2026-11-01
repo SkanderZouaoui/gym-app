@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { VenueLocationRow, VenueLogoRow } from '../../src/components/VenueIdentityFields';
 import { VenueMediaSection } from '../../src/components/VenueMediaSection';
 import { ScrollLockContext } from '../../src/components/ui/KeyboardAwareScreen';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -113,7 +114,18 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
         <>
       <Text style={styles.section}>{t('common.coordonnees')}</Text>
       <View style={[styles.card, cardShadow]}>
+        <ConfigField icon="storefront" label={t('admin.venue_name')} value={cfg.contact.name} onChange={(v) => patch({ contact: { ...cfg.contact, name: v } })} />
+        <View style={styles.sep} />
+        <VenueLogoRow name={cfg.contact.name} />
+        <View style={styles.sep} />
         <ConfigField icon="location-on" label={t('admin.adresse')} value={cfg.contact.address} onChange={(v) => patch({ contact: { ...cfg.contact, address: v } })} />
+        <View style={styles.sep} />
+        <VenueLocationRow
+          latitude={cfg.contact.latitude}
+          longitude={cfg.contact.longitude}
+          address={cfg.contact.address}
+          onChange={(pos) => patch({ contact: { ...cfg.contact, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null } })}
+        />
         <View style={styles.sep} />
         <ConfigField icon="call" label={t('common.telephone')} value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" />
         <View style={styles.sep} />

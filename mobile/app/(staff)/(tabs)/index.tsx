@@ -1,3 +1,4 @@
+import { VenueTodayBanner } from '../../../src/components/venue/VenueTodayBanner';
 import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -63,6 +64,8 @@ export default function StaffHomeScreen() {
         </View>
 
         <RoleNotices />
+
+        <VenueTodayBanner href="/(staff)/venue" />
 
         <View style={styles.heroShadow}>
           <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
