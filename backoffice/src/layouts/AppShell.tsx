@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth, type WebRole } from '../store/auth'
+import { useAuth } from '../store/auth'
 import { navFor } from '../nav'
+import { ROLE_LABEL } from '../lib/roles'
 import { Avatar, Icon, LogoMark, cn } from '../components/ui'
 import { useToast } from '../components/ui'
 
-const ROLE_LABEL: Record<WebRole, string> = { ADMIN: 'Administrateur', STAFF: 'Accueil' }
 
 function UserMenu() {
   const { user, roles, activeRole, switchRole, logout } = useAuth()

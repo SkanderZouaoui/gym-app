@@ -4,8 +4,10 @@ import { DashboardPage } from './pages/DashboardPage'
 import { MembersPage } from './pages/MembersPage'
 import { CashPage } from './pages/CashPage'
 import { PlanningPage } from './pages/PlanningPage'
+import { PlansPage } from './pages/PlansPage'
+import { TeamPage } from './pages/TeamPage'
 import { AppShell } from './layouts/AppShell'
-import { RequireAuth } from './components/Guards'
+import { RequireAuth, RequireRole } from './components/Guards'
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/members" element={<MembersPage />} />
         <Route path="/cash" element={<CashPage />} />
         <Route path="/planning" element={<PlanningPage />} />
+        <Route path="/plans" element={<RequireRole roles={['ADMIN']}><PlansPage /></RequireRole>} />
+        <Route path="/team" element={<RequireRole roles={['ADMIN']}><TeamPage /></RequireRole>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

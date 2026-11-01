@@ -22,6 +22,13 @@ export const NAV: NavGroup[] = [
       { to: '/planning', label: 'Planning', icon: 'calendar_month' },
     ],
   },
+  {
+    title: 'Administration',
+    items: [
+      { to: '/plans', label: 'Abonnements', icon: 'card_membership', roles: ['ADMIN'] },
+      { to: '/team', label: 'Équipe', icon: 'badge', roles: ['ADMIN'] },
+    ],
+  },
 ]
 
 export function navFor(role: WebRole | null): NavGroup[] {
