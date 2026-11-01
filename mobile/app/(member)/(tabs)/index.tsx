@@ -21,7 +21,7 @@ import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
 import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
-import { VenueCard } from '../../../src/components/venue/VenueCard';
+import { VenueTodayBanner } from '../../../src/components/venue/VenueTodayBanner';
 import { Notice, NoticeList, NoticePopups } from '../../../src/components/adherent/Notices';
 import { Banner, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
@@ -225,12 +225,7 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        <View style={{ gap: spacing.sm }}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>{t('venue.title')}</Text>
-          </View>
-          <VenueCard href="/(member)/venue" />
-        </View>
+        <VenueTodayBanner href="/(member)/venue" />
 
         {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
           <View style={{ gap: spacing.sm }}>
