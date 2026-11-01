@@ -228,28 +228,39 @@ export default function AdminTeamScreen() {
               </View>
             </View>
             {scheduleError ? <Banner tone="danger" icon="error" text={scheduleError} /> : null}
-            {(draft ?? []).map((d) => (
-              <View key={d.dayOfWeek} style={styles.shiftRow}>
-                <View style={{ width: 84 }}>
-                  <Text style={styles.detailValue}>{WEEK_DAYS[d.dayOfWeek]}</Text>
-                  <Text style={[styles.detailKey, { color: d.working ? colors.successInk : colors.muted }]}>{d.working ? `${shiftHours(d)} h` : t('admin.repos')}</Text>
+            {(draft ?? []).map((d) => {
+              const set = (p: Partial<WorkDay>) => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek === d.dayOfWeek ? { ...x, ...p } : x)));
+              return (
+                <View key={d.dayOfWeek} style={[styles.shiftCard, d.working && styles.shiftCardOn]}>
+                  <View style={styles.shiftHead}>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.shiftDay}>{WEEK_DAYS[d.dayOfWeek]}</Text>
+                      <Text style={[styles.detailKey, { color: d.working ? colors.successInk : colors.muted }]}>
+                        {d.working ? t('admin.shift_summary', { start: d.startTime, end: d.endTime, hours: shiftHours(d) }) : t('admin.repos')}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={d.working}
+                      onValueChange={(v) => set({ working: v })}
+                      trackColor={{ true: colors.primary, false: colors.surface2 }}
+                      thumbColor="#FFFFFF"
+                      ios_backgroundColor={colors.surface2}
+                    />
+                  </View>
+                  {d.working ? (
+                    <View style={styles.shiftTimes}>
+                      <View style={{ flex: 1 }}>
+                        <TimeButton label={t('admin.debut')} value={d.startTime} onChange={(v) => set({ startTime: v })} />
+                      </View>
+                      <MaterialIcons name="arrow-forward" size={18} color={colors.muted} />
+                      <View style={{ flex: 1 }}>
+                        <TimeButton label={t('admin.fin')} value={d.endTime} onChange={(v) => set({ endTime: v })} />
+                      </View>
+                    </View>
+                  ) : null}
                 </View>
-                <View style={{ flex: 1 }}>
-                  <TimeButton value={d.startTime} disabled={!d.working} onChange={(v) => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek === d.dayOfWeek ? { ...x, startTime: v } : x)))} />
-                </View>
-                <Text style={styles.detailKey}>–</Text>
-                <View style={{ flex: 1 }}>
-                  <TimeButton value={d.endTime} disabled={!d.working} onChange={(v) => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek === d.dayOfWeek ? { ...x, endTime: v } : x)))} />
-                </View>
-                <Switch
-                  value={d.working}
-                  onValueChange={(v) => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek === d.dayOfWeek ? { ...x, working: v } : x)))}
-                  trackColor={{ true: colors.primary, false: colors.surface2 }}
-                  thumbColor="#FFFFFF"
-                  ios_backgroundColor={colors.surface2}
-                />
-              </View>
-            ))}
+              );
+            })}
             <Pressable
               style={styles.copyChip}
               onPress={() => setDraft((cur) => cur && cur.map((x) => (x.dayOfWeek >= 1 && x.dayOfWeek <= 4 ? { ...cur[0], dayOfWeek: x.dayOfWeek } : x)))}
@@ -438,7 +449,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     statSub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
     statNote: { fontFamily: fonts.body, fontSize: 11.5, lineHeight: 16, color: colors.muted },
     scheduleRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radii.lg, backgroundColor: colors.primarySoft },
-    shiftRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    shiftCard: { gap: 10, padding: 12, borderRadius: 18, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+    shiftCardOn: { borderColor: colors.primaryBorder },
+    shiftHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    shiftDay: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },
+    shiftTimes: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     copyChip: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: colors.primarySoft },
     copyChipText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
     inlineMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },

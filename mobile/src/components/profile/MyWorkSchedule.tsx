@@ -43,7 +43,21 @@ export function MyWorkSchedule({ days }: { days: Shift[] }) {
       <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.decor} pointerEvents="none" />
         <Text style={styles.kicker}>{t('venue.today').toUpperCase()} · {WEEKDAYS_LONG_MON[todayIndex].toUpperCase()}</Text>
-        <Text style={styles.heroValue}>{today?.working ? `${today.startTime} – ${today.endTime}` : t('staff.ws_rest')}</Text>
+        {today?.working ? (
+          <View style={styles.times}>
+            <View>
+              <Text style={styles.timeLabel}>{t('admin.debut').toUpperCase()}</Text>
+              <Text style={styles.heroValue}>{today.startTime}</Text>
+            </View>
+            <Text style={styles.arrow}>→</Text>
+            <View>
+              <Text style={styles.timeLabel}>{t('admin.fin').toUpperCase()}</Text>
+              <Text style={styles.heroValue}>{today.endTime}</Text>
+            </View>
+          </View>
+        ) : (
+          <Text style={styles.heroValue}>{t('staff.ws_rest')}</Text>
+        )}
         <View style={styles.statusPill}>
           <View style={[styles.statusDot, { backgroundColor: status.kind === 'on' ? '#7CFFB0' : 'rgba(255,255,255,0.6)' }]} />
           <Text style={styles.statusText}>{statusText}</Text>
@@ -84,6 +98,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     decor: { position: 'absolute', right: -40, top: -50, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,0.10)' },
     kicker: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, color: 'rgba(255,255,255,0.75)' },
     heroValue: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -0.8, color: '#FFFFFF' },
+    times: { flexDirection: 'row', alignItems: 'flex-end', gap: 16 },
+    timeLabel: { fontFamily: fonts.bodyBold, fontSize: 10.5, letterSpacing: 0.8, color: 'rgba(255,255,255,0.7)' },
+    arrow: { fontFamily: fonts.head, fontSize: 22, color: 'rgba(255,255,255,0.7)', paddingBottom: 3 },
     statusPill: { flexDirection: 'row', alignItems: 'center', gap: 7, alignSelf: 'flex-start', paddingHorizontal: 11, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.18)', marginTop: 4 },
     statusDot: { width: 8, height: 8, borderRadius: 4 },
     statusText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: '#FFFFFF' },

@@ -82,7 +82,8 @@ export function DateTimeFields({ value, onChange, minimumDate, timeOnly }: Props
 }
 
 /** Bouton compact « HH:mm » qui ouvre le sélecteur d'heure (horaires d'ouverture, planning). */
-export function TimeButton({ value, onChange, disabled }: { value: string; onChange: (hhmm: string) => void; disabled?: boolean }) {
+/** Choix d'une heure. Avec `label` (« Début », « Fin »), le bouton se lit comme un champ : libellé au-dessus, horloge, heure en grand. */
+export function TimeButton({ value, onChange, disabled, label }: { value: string; onChange: (hhmm: string) => void; disabled?: boolean; label?: string }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
@@ -92,12 +93,30 @@ export function TimeButton({ value, onChange, disabled }: { value: string; onCha
       <Pressable
         onPress={() => setOpen(true)}
         disabled={disabled}
-        style={{
-          height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2,
-          borderWidth: 1, borderColor: colors.border, opacity: disabled ? 0.4 : 1,
-        }}
+        accessibilityLabel={label ? `${label} ${value}` : value}
+        style={
+          label
+            ? {
+                flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 56, borderRadius: 14, paddingHorizontal: 12,
+                backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.primaryBorder, opacity: disabled ? 0.4 : 1,
+              }
+            : {
+                height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2,
+                borderWidth: 1, borderColor: colors.border, opacity: disabled ? 0.4 : 1,
+              }
+        }
       >
-        <Text style={{ fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text }}>{value}</Text>
+        {label ? (
+          <>
+            <MaterialIcons name="schedule" size={20} color={colors.primaryInk} />
+            <View>
+              <Text style={{ fontFamily: fonts.bodyBold, fontSize: 10.5, letterSpacing: 0.8, color: colors.muted }}>{label.toUpperCase()}</Text>
+              <Text style={{ fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.5, color: colors.text }}>{value}</Text>
+            </View>
+          </>
+        ) : (
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text }}>{value}</Text>
+        )}
       </Pressable>
       <TimeSheet
         visible={open}

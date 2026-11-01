@@ -943,7 +943,8 @@
     "venue_gps_apply": "تأكيد",
     "venue_gps_link_hint": "في Google Maps: مشاركة ← نسخ الرابط. الروابط المختصرة مقبولة.",
     "venue_identity": "الهوية",
-    "venue_contact": "الاتصال"
+    "venue_contact": "الاتصال",
+    "shift_summary": "{{start}} ← {{end}} · {{hours}} س"
   },
   "auth": {
     "mot_de_passe_mis_a": "تم تحديث كلمة المرور",

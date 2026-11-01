@@ -943,7 +943,8 @@
     "venue_gps_apply": "Apply",
     "venue_gps_link_hint": "In Google Maps: Share → Copy link. Short links are accepted.",
     "venue_identity": "Identity",
-    "venue_contact": "Contact"
+    "venue_contact": "Contact",
+    "shift_summary": "{{start}} → {{end}} · {{hours}} h"
   },
   "auth": {
     "mot_de_passe_mis_a": "Password updated",
