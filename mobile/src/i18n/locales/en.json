@@ -920,7 +920,9 @@
     "cours_non_modifiable": "This class has already started or is over: it can no longer be edited.",
     "annuler_le_cours": "Cancel class",
     "annuler_ce_cours": "Cancel this class?",
-    "annuler_cours_en_cours_texte": "The class is in progress: it will be cancelled and bookings not yet checked in will be cancelled. Attendance already recorded is kept."
+    "annuler_cours_en_cours_texte": "The class is in progress: it will be cancelled and bookings not yet checked in will be cancelled. Attendance already recorded is kept.",
+    "venue_media_title": "Gym photos",
+    "venue_media_hint": "Reception, rooms, locker rooms… Up to 12 photos: tap one to crop it, hold to change the order."
   },
   "auth": {
     "mot_de_passe_mis_a": "Password updated",

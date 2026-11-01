@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { VenueMediaSection } from '../../src/components/VenueMediaSection';
+import { ScrollLockContext } from '../../src/components/ui/KeyboardAwareScreen';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -150,6 +152,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
       </Pressable>
         </>
       ) : null}
+      {parts.includes('contact') ? <VenueMediaSection /> : null}
       {parts.includes('payments') ? (
         <>
       <Text style={styles.section}>{t('admin.moyens_de_paiement_acceptes')}</Text>
@@ -416,6 +419,8 @@ export default function AdminSettingsScreen() {
   const anyDirty = dirty || cfgDirty;
   const saving = update.isPending || updateOrg.isPending;
   const [saveError, setSaveError] = useState(false);
+  // La galerie photos suspend le défilement de l'écran pendant un glissement (réordonnancement).
+  const [scrollEnabled, setScrollEnabled] = useState(true);
 
   const save = async () => {
     setSaveError(false);
@@ -432,7 +437,9 @@ export default function AdminSettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScrollLockContext.Provider value={setScrollEnabled}>
       <ScrollView
+        scrollEnabled={scrollEnabled}
         contentContainerStyle={[styles.container, anyDirty && { paddingBottom: 130 }]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
@@ -526,6 +533,7 @@ export default function AdminSettingsScreen() {
         {saveError ? <Banner tone="danger" icon="error-outline" title={t('admin.enregistrement_impossible')} text={t('admin.verifiez_la_connexion_et_gardez')} /> : null}
         {saved && !anyDirty ? <Banner tone="success" icon="check-circle-outline" title={t('admin.configuration_enregistree')} text={t('admin.les_nouvelles_regles_sappliquent_immediatement')} /> : null}
       </ScrollView>
+      </ScrollLockContext.Provider>
 
       {offlineToastVisible ? <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} /> : null}
 

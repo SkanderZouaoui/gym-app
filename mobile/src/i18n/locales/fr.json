@@ -920,7 +920,9 @@
     "cours_non_modifiable": "Ce cours a déjà commencé ou est terminé : il ne peut plus être modifié.",
     "annuler_le_cours": "Annuler le cours",
     "annuler_ce_cours": "Annuler ce cours ?",
-    "annuler_cours_en_cours_texte": "Le cours est en cours : il sera annulé et les inscriptions non pointées seront annulées. Les présences déjà enregistrées sont conservées."
+    "annuler_cours_en_cours_texte": "Le cours est en cours : il sera annulé et les inscriptions non pointées seront annulées. Les présences déjà enregistrées sont conservées.",
+    "venue_media_title": "Photos de la salle",
+    "venue_media_hint": "Accueil, salles, vestiaires… Jusqu'à 12 photos : touchez-en une pour la rogner, maintenez pour changer l'ordre."
   },
   "auth": {
     "mot_de_passe_mis_a": "Mot de passe mis à jour",

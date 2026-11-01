@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../api/client';
 import { normalizeImageType, readUploadBlob } from '../utils/upload';
 
@@ -8,12 +8,23 @@ export interface PickedImage {
 }
 
 /** Galeries gérées par l'admin : photos d'un type de cours ou d'une salle. */
-export type GalleryKind = 'class-types' | 'rooms';
+export type GalleryKind = 'class-types' | 'rooms' | 'organization';
 
 const LIST_KEY: Record<GalleryKind, string[]> = {
   'class-types': ['admin', 'class-types'],
   rooms: ['admin', 'rooms'],
+  organization: ['settings', 'gallery'],
 };
+
+export interface VenueGallery {
+  galleryKeys: string[];
+  galleryUrls: string[];
+}
+
+/** Galerie photos de l'établissement (admin). */
+export function useVenueGallery() {
+  return useQuery({ queryKey: LIST_KEY.organization, queryFn: () => apiRequest<VenueGallery>('/v1/admin/settings/gallery') });
+}
 
 interface WithGallery {
   id: string;
@@ -37,7 +48,7 @@ function applyOrder<T extends WithGallery>(list: T[] | undefined, ownerId: strin
  */
 export function useGalleryMutations(kind: GalleryKind, ownerId: string) {
   const queryClient = useQueryClient();
-  const base = `/v1/admin/${kind}/${ownerId}`;
+  const base = kind === 'organization' ? '/v1/admin/settings' : `/v1/admin/${kind}/${ownerId}`;
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: LIST_KEY[kind] });
     void queryClient.invalidateQueries({ queryKey: ['classes'] });
@@ -98,7 +109,15 @@ export function useGalleryMutations(kind: GalleryKind, ownerId: string) {
     mutationFn: (keys: string[]) => apiRequest(`${base}/gallery/order`, { method: 'PUT', body: { keys } }),
     onMutate: async (keys) => {
       await queryClient.cancelQueries({ queryKey: LIST_KEY[kind] });
-      queryClient.setQueryData<WithGallery[]>(LIST_KEY[kind], (list) => applyOrder(list, ownerId, keys));
+      if (kind === 'organization') {
+        queryClient.setQueryData<VenueGallery>(LIST_KEY[kind], (g) => {
+          if (!g) return g;
+          const urlByKey = new Map(g.galleryKeys.map((k, i) => [k, g.galleryUrls[i]]));
+          return { ...g, galleryKeys: keys, galleryUrls: keys.map((k) => urlByKey.get(k) ?? '') };
+        });
+      } else {
+        queryClient.setQueryData<WithGallery[]>(LIST_KEY[kind], (list) => applyOrder(list, ownerId, keys));
+      }
     },
     onSettled: refresh,
   });
