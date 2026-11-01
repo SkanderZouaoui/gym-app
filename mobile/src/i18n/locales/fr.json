@@ -345,7 +345,8 @@
     "photo_edit_replaced": "Photo modifiée.",
     "photo_edit_tap_hint": "Touchez une photo pour la rogner ou la modifier.",
     "photo_edit_loading": "Préparation de la photo…",
-    "photo_edit_full": "Galerie pleine : supprimez une photo avant de pouvoir modifier celle-ci."
+    "photo_edit_full": "Galerie pleine : supprimez une photo avant de pouvoir modifier celle-ci.",
+    "defini_par_ladministrateur": "Défini par l’administrateur."
   },
   "home": {
     "membershipNone": "Sans abonnement",
@@ -1575,7 +1576,13 @@
     "period_custom": "Période…",
     "group_class": "Cours collectif",
     "invalid_email": "Adresse e-mail invalide",
-    "non_renseigne": "Non renseigné"
+    "non_renseigne": "Non renseigné",
+    "ws_on_until": "En poste jusqu'à {{time}}",
+    "ws_starts_at": "Prend son poste à {{time}}",
+    "ws_done": "Journée terminée",
+    "ws_off": "Jour de repos",
+    "ws_rest": "Repos",
+    "ws_week_hours": "{{hours}} h / semaine"
   },
   "equipment": {
     "dumbbell": "Haltères",

@@ -11,7 +11,8 @@ import { ProfileHeader } from './adherent/ProfileHeader';
 import { SettingsGroup } from './adherent/ProfileSections';
 import { ApiError } from '../api/client';
 import { useMe } from '../hooks/useMe';
-import { useMySchedule, shiftHours, WEEK_DAYS } from '../hooks/useAdmin';
+import { useMySchedule } from '../hooks/useAdmin';
+import { MyWorkSchedule } from './profile/MyWorkSchedule';
 import { useUpdateProfile } from '../hooks/useProfile';
 import { useSessionStore } from '../store/session';
 import { tokenStorage } from '../api/storage';
@@ -132,17 +133,8 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
 
         {workingDays.length > 0 ? (
           <View>
-            <Text style={styles.groupTitle}>{t('common.mon_planning')}</Text>
-            <View style={[styles.card, cardShadow, { paddingHorizontal: 16 }]}>
-              {workingDays.map((d, i) => (
-                <View key={d.dayOfWeek} style={[styles.navRow, { minHeight: 48 }, i < workingDays.length - 1 && styles.rowBorder]}>
-                  <Text style={[styles.navTitle, { width: 96 }]}>{WEEK_DAYS[d.dayOfWeek]}</Text>
-                  <Text style={[styles.navSub, { flex: 1, fontSize: 14 }]}>{d.startTime} – {d.endTime}</Text>
-                  <Text style={styles.navTitle}>{shiftHours(d)} h</Text>
-                </View>
-              ))}
-            </View>
-            <Text style={styles.hint}>{t('common.h_par_semaine_defini_par', { v1: Math.round(workingDays.reduce((sum, d) => sum + shiftHours(d), 0) * 10) / 10 })}</Text>
+            <MyWorkSchedule days={mySchedule ?? []} />
+            <Text style={styles.hint}>{t('common.defini_par_ladministrateur')}</Text>
           </View>
         ) : null}
 

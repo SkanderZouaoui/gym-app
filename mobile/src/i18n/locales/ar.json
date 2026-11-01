@@ -345,7 +345,8 @@
     "photo_edit_replaced": "تم تعديل الصورة.",
     "photo_edit_tap_hint": "المس صورة لاقتصاصها أو تعديلها.",
     "photo_edit_loading": "جارٍ تحضير الصورة…",
-    "photo_edit_full": "المعرض ممتلئ: احذف صورة قبل تعديل هذه."
+    "photo_edit_full": "المعرض ممتلئ: احذف صورة قبل تعديل هذه.",
+    "defini_par_ladministrateur": "يحدده المسؤول."
   },
   "home": {
     "membershipNone": "بدون اشتراك",
@@ -1575,7 +1576,13 @@
     "period_custom": "فترة محددة…",
     "group_class": "حصة جماعية",
     "invalid_email": "عنوان البريد الإلكتروني غير صالح",
-    "non_renseigne": "غير مُدخل"
+    "non_renseigne": "غير مُدخل",
+    "ws_on_until": "في الدوام حتى {{time}}",
+    "ws_starts_at": "يبدأ الدوام عند {{time}}",
+    "ws_done": "انتهى الدوام",
+    "ws_off": "يوم راحة",
+    "ws_rest": "راحة",
+    "ws_week_hours": "{{hours}} ساعة / أسبوع"
   },
   "equipment": {
     "dumbbell": "دمبلز",

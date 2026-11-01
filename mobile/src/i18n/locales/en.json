@@ -345,7 +345,8 @@
     "photo_edit_replaced": "Photo updated.",
     "photo_edit_tap_hint": "Tap a photo to crop or edit it.",
     "photo_edit_loading": "Preparing photo…",
-    "photo_edit_full": "Gallery is full: delete a photo before editing this one."
+    "photo_edit_full": "Gallery is full: delete a photo before editing this one.",
+    "defini_par_ladministrateur": "Set by the administrator."
   },
   "home": {
     "membershipNone": "No membership",
@@ -1575,7 +1576,13 @@
     "period_custom": "Custom…",
     "group_class": "Group class",
     "invalid_email": "Invalid email address",
-    "non_renseigne": "Not provided"
+    "non_renseigne": "Not provided",
+    "ws_on_until": "On shift until {{time}}",
+    "ws_starts_at": "Shift starts at {{time}}",
+    "ws_done": "Shift finished",
+    "ws_off": "Day off",
+    "ws_rest": "Off",
+    "ws_week_hours": "{{hours}} h / week"
   },
   "equipment": {
     "dumbbell": "Dumbbells",
