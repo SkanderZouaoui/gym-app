@@ -17,15 +17,13 @@ import { useDisplayConfig, useHomeAlerts } from '../../../src/hooks/useHomeAlert
 import { useNotifications } from '../../../src/hooks/useProfile';
 import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { useCancelBooking } from '../../../src/hooks/useClasses';
 import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard';
 import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
 import { VenueCard } from '../../../src/components/venue/VenueCard';
 import { Notice, NoticeList, NoticePopups } from '../../../src/components/adherent/Notices';
-import { Banner, BottomSheet, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
-import { Button } from '../../../src/components/Button';
+import { Banner, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { useNow } from '../../../src/hooks/useNow';
@@ -63,11 +61,9 @@ export default function HomeScreen() {
   const { data: notifications } = useNotifications();
   const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const isDegraded = useSessionStore((s) => s.isDegraded);
-  const cancelBooking = useCancelBooking();
   const queryClient = useQueryClient();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
   const [toastVisible, setToastVisible] = useState(false);
-  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const unreadCount = notifications?.filter((n) => !n.readAt).length ?? 0;
 
@@ -229,17 +225,6 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {nextBooking?.session && !expiredMembership ? (
-          <Pressable
-            style={({ pressed }) => [styles.cancelLink, pressed && { transform: [{ scale: 0.98 }] }]}
-            onPress={() => setConfirmCancel(true)}
-            disabled={cancelBooking.isPending}
-          >
-            <MaterialIcons name="close" size={16} color={colors.dangerInk} />
-            <Text style={styles.cancelLinkText}>{cancelBooking.isPending ? t('home.cancelling') : t('home.cancelBooking')}</Text>
-          </Pressable>
-        ) : null}
-
         <View style={{ gap: spacing.sm }}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>{t('venue.title')}</Text>
@@ -284,19 +269,6 @@ export default function HomeScreen() {
         items={[...(alertFormat === 'Pop-up' ? allAlerts : []), ...(announcementFormat === 'Pop-up' ? allAnnouncements : [])].filter((n) => !isDismissed(n.id))}
         onDismiss={dismissNotice}
       />
-      <BottomSheet visible={confirmCancel} onClose={() => setConfirmCancel(false)}>
-        <Text style={styles.sheetTitle}>{t('common.annuler_2', { name: nextBooking?.session?.classType.name })}</Text>
-        <Text style={styles.sheetText}>{t('member.lannulation_est_gratuite_votre_place')}</Text>
-        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button
-            label={t('member.oui_annuler')}
-            variant="secondary"
-            loading={cancelBooking.isPending}
-            onPress={() => nextBooking && cancelBooking.mutate(nextBooking.id, { onSettled: () => setConfirmCancel(false) })}
-          />
-          <Button label={t('member.garder_ma_place')} variant="outline" onPress={() => setConfirmCancel(false)} />
-        </View>
-      </BottomSheet>
     </SafeAreaView>
   );
 }
@@ -350,8 +322,6 @@ function OnboardRow({
 function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   const textAlign = isRtl ? 'right' as const : 'left' as const;
   return StyleSheet.create({
-    sheetTitle: { fontFamily: fonts.headSemiBold, fontSize: 18, color: colors.text },
-    sheetText: { fontFamily: fonts.body, fontSize: 13.5, lineHeight: 19, color: colors.muted },
   safeArea: { flex: 1, backgroundColor: colors.bg },
   alertCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, borderRadius: 16, padding: 14 },
   alertTitle: { fontFamily: fonts.bodyBold, fontSize: 14 },
@@ -380,11 +350,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   onboardListTitle: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text, marginBottom: 2 },
   onboardRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
   onboardRowLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text, flex: 1 },
-  cancelLink: {
-    alignSelf: 'center', height: 40, paddingHorizontal: 18, borderRadius: 999, flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.danger,
-  },
-  cancelLinkText: { fontFamily: fonts.bodySemiBold, fontSize: 13, letterSpacing: 0.1, color: colors.dangerInk },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   sectionTitle: { ...typography.title, fontSize: 17, color: colors.text, textAlign },
   newsCard: {
