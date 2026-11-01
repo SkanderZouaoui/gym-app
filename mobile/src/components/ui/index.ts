@@ -16,3 +16,4 @@ export * from './BarHistogram';
 export * from './OfflineBanner';
 export * from './ScreenTitle';
 export * from './FilterDropdown';
+export * from './SectionHeader';

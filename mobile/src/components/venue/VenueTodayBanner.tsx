@@ -11,6 +11,7 @@ import { useVenue } from '../../hooks/useVenue';
 import { openMinutes, weekdayIndex } from '../../utils/openingHours';
 import { WEEKDAYS_LONG_MON, WEEKDAYS_NARROW_MON } from '../../i18n/labels';
 import { haptics } from '../../utils/haptics';
+import { SectionHeader } from '../ui';
 import { VenueLogo } from './VenueLogo';
 import { VenueStatusBadge } from './VenueStatusBadge';
 
@@ -34,7 +35,7 @@ export function VenueTodayBanner({ href }: { href: Href }) {
   const hours = day?.open && openMinutes(day) > 0 ? `${day.from}–${day.to}` : null;
   return (
     <View style={{ gap: 10 }}>
-      <Text style={styles.sectionTitle}>{t('venue.title')}</Text>
+      <SectionHeader icon="storefront" title={t('venue.title')} actionLabel={t('venue.see_details')} onAction={() => router.push(href)} />
       <View style={[styles.card, cardShadow]}>
         <Pressable onPress={() => router.push(href)} style={styles.head} accessibilityRole="button" accessibilityLabel={t('venue.see_details')}>
           <VenueLogo name={venue.name} logoUrl={venue.logoUrl} size={40} />
@@ -86,7 +87,6 @@ export function VenueTodayBanner({ href }: { href: Href }) {
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    sectionTitle: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text },
     card: { backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border, padding: 12, gap: 10 },
     head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     name: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },

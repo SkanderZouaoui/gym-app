@@ -23,7 +23,7 @@ import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard'
 import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
 import { VenueTodayBanner } from '../../../src/components/venue/VenueTodayBanner';
 import { Notice, NoticeList, NoticePopups } from '../../../src/components/adherent/Notices';
-import { Banner, OfflineBanner, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { Banner, OfflineBanner, SectionHeader, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { useNow } from '../../../src/hooks/useNow';
@@ -178,7 +178,7 @@ export default function HomeScreen() {
         ) : null}
 
         <View style={{ gap: spacing.sm }}>
-          <Text style={styles.sectionTitle}>{t('home.membershipTitle')}</Text>
+          <SectionHeader icon="card-membership" title={t('home.membershipTitle')} />
           <MembershipHeroCard
             planName={activeMembership?.plan.name ?? t('home.membershipNone')}
             periodLabel={activeMembership ? periodLabel(activeMembership.startDate, activeMembership.endDate) : undefined}
@@ -191,7 +191,7 @@ export default function HomeScreen() {
 
         {expiredMembership ? null : nextBooking?.session ? (
           <View style={{ gap: spacing.sm }}>
-          <Text style={styles.sectionTitle}>{t('home.nextCourseTitle')}</Text>
+          <SectionHeader icon="event" title={t('home.nextCourseTitle')} actionLabel={t('home.viewPlanning')} onAction={() => router.push('/(member)/(tabs)/planning')} />
           <NextCourseCard
             startsAt={nextBooking.session.startsAt}
             className={nextBooking.session.classType.name}
@@ -232,9 +232,7 @@ export default function HomeScreen() {
 
         {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
           <View style={{ gap: spacing.sm }}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.sectionTitle}>{t('home.announcementsTitle')}</Text>
-            </View>
+            <SectionHeader icon="campaign" title={t('home.announcementsTitle')} />
             {(announcements ?? []).slice(0, 3).map((a) => (
               <View key={a.id} style={styles.newsCard}>
                 <LinearGradient colors={[colors.secondary, '#0B0B0F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
@@ -348,8 +346,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
   onboardListTitle: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text, marginBottom: 2 },
   onboardRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
   onboardRowLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text, flex: 1 },
-  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  sectionTitle: { ...typography.title, fontSize: 17, color: colors.text, textAlign },
   newsCard: {
     height: 176, borderRadius: 26, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: '#0B0B0F',
   },

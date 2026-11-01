@@ -12,7 +12,7 @@ import { usePayments, useStaffToday, type StaffTodaySession } from '../../../src
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
-import { Avatar, SkeletonList } from '../../../src/components/ui';
+import { Avatar, SectionHeader, SkeletonList } from '../../../src/components/ui';
 import { useSessionStore } from '../../../src/store/session';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
@@ -102,7 +102,7 @@ export default function StaffHomeScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('staff.cours_du_jour')}</Text>
+          <SectionHeader icon="event" title={t('staff.cours_du_jour')} style={{ marginBottom: 10 }} />
           <View style={{ gap: 10 }}>
             {(upcoming.length > 0 ? upcoming : sessions).map((s) => (
               <SessionRow key={s.id} session={s} />
@@ -117,7 +117,7 @@ export default function StaffHomeScreen() {
 
         <View>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionTitle}>{isAdmin ? t('staff.derniers_encaissements') : t('staff.mes_derniers_encaissements')}</Text>
+            <SectionHeader icon="payments" title={isAdmin ? t('staff.derniers_encaissements') : t('staff.mes_derniers_encaissements')} style={{ marginBottom: 10 }} />
             <Pressable onPress={() => router.push(routes.cash)} hitSlop={8}>
               <Text style={styles.link}>{t('staff.voir_tout')}</Text>
             </Pressable>
@@ -207,7 +207,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     actionIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
     actionLabel: { flex: 1, fontFamily: fonts.bodyBold, fontSize: 13.5, color: colors.text },
     sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-    sectionTitle: { fontFamily: fonts.head, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
     link: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     sessionCard: {
       flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: colors.surface,
