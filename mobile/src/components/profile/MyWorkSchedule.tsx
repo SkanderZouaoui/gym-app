@@ -8,11 +8,8 @@ import { useNow } from '../../hooks/useNow';
 import { WEEKDAYS_LONG_MON } from '../../i18n/labels';
 import { shiftBar, shiftDayIndex, shiftStatus, weekHours, type Shift } from '../../utils/workShift';
 
-const hoursOf = (d: Shift) => {
-  const m = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
-  return Math.max(0, (m(d.endTime) - m(d.startTime)) / 60);
-};
-const fmtHours = (h: number) => `${Math.round(h * 10) / 10} h`;
+/** Largeur de la colonne « début – fin » à droite de chaque jour. */
+const HOURS_W = 96;
 
 /**
  * Planning de travail personnel (accueil, coach) : le créneau du jour avec l'état du moment (en poste, pas encore,
@@ -75,7 +72,7 @@ export function MyWorkSchedule({ days }: { days: Shift[] }) {
               <View style={styles.track}>
                 {bar ? <View style={[styles.fill, { left: `${bar.from * 100}%`, width: `${Math.max(2, (bar.to - bar.from) * 100)}%`, backgroundColor: isToday ? colors.primary : colors.primaryBorder }]} /> : null}
               </View>
-              <Text style={[styles.hours, !bar && { color: colors.muted }]}>{bar && d ? fmtHours(hoursOf(d)) : t('staff.ws_rest')}</Text>
+              <Text style={[styles.hours, !bar && { color: colors.muted }]} numberOfLines={1}>{bar && d ? `${d.startTime} – ${d.endTime}` : t('staff.ws_rest')}</Text>
             </View>
           );
         })}
@@ -92,7 +89,7 @@ export function MyWorkSchedule({ days }: { days: Shift[] }) {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    title: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text },
+    title: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1, color: colors.muted, textTransform: 'uppercase', marginLeft: 4 },
     weekPill: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk, backgroundColor: colors.primarySoft, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 11, overflow: 'hidden' },
     hero: { borderRadius: radii.xl, padding: 16, gap: 6, overflow: 'hidden' },
     decor: { position: 'absolute', right: -40, top: -50, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,0.10)' },
@@ -112,8 +109,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     dayToday: { fontFamily: fonts.bodyBold, color: colors.primaryInk },
     track: { flex: 1, height: 10, borderRadius: 5, backgroundColor: colors.surface2, overflow: 'hidden' },
     fill: { position: 'absolute', top: 0, bottom: 0, borderRadius: 5 },
-    hours: { width: 50, textAlign: 'right', fontFamily: fonts.bodyBold, fontSize: 13, color: colors.text },
-    legend: { flexDirection: 'row', justifyContent: 'space-between', paddingStart: 14 + 78 + 10, paddingEnd: 14 + 50 + 10, paddingVertical: 6, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+    hours: { width: HOURS_W, textAlign: 'right', fontFamily: fonts.bodyBold, fontSize: 13, color: colors.text },
+    legend: { flexDirection: 'row', justifyContent: 'space-between', paddingStart: 14 + 78 + 10, paddingEnd: 14 + HOURS_W + 10, paddingVertical: 6, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
     legendText: { fontFamily: fonts.bodyMedium, fontSize: 10.5, color: colors.muted },
   });
 }
