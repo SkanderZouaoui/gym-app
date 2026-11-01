@@ -60,6 +60,8 @@ export interface SessionSummary {
   classType: { id: string; name: string; description: string | null; level?: string | null }
   room: { id: string; name: string } | null
   coach: { user: { firstName: string; lastName: string } } | null
+  coachId?: string | null
+  roomId?: string | null
   _count: { bookings: number }
 }
 

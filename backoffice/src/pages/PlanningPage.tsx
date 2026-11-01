@@ -7,6 +7,9 @@ import { useNow } from '../lib/hooks'
 import { Card, EmptyState, ErrorState, Icon, PageHeader, Skeleton, Tabs, cn } from '../components/ui'
 import { SessionCard } from '../components/domain/SessionCard'
 import { SessionDrawer } from '../components/domain/SessionDrawer'
+import { SessionFormModal } from '../components/domain/SessionFormModal'
+import { useAuth } from '../store/auth'
+import { Button } from '../components/ui'
 
 type Status = 'all' | 'upcoming' | 'full' | 'low'
 const DAYS = 14
@@ -20,6 +23,8 @@ export function PlanningPage() {
   const [type, setType] = useState('')
   const [coach, setCoach] = useState('')
   const [open, setOpen] = useState<SessionSummary | null>(null)
+  const [creating, setCreating] = useState(false)
+  const isAdmin = useAuth((s) => s.activeRole === 'ADMIN')
   const { data: sessions, isLoading, isError, refetch } = useSessions(today, addDays(today, DAYS))
 
   const day = days[selected]
@@ -45,7 +50,7 @@ export function PlanningPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Planning" subtitle={`Cours collectifs · ${formatDate(day, { month: 'long', year: 'numeric' })}`} />
+      <PageHeader title="Planning" subtitle={`Cours collectifs · ${formatDate(day, { month: 'long', year: 'numeric' })}`} actions={isAdmin ? <Button icon="add" onClick={() => setCreating(true)}>Nouveau cours</Button> : undefined} />
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {days.map((d, i) => {
@@ -111,7 +116,8 @@ export function PlanningPage() {
         </div>
       )}
 
-      {open ? <SessionDrawer session={open} onClose={() => setOpen(null)} /> : null}
+      {open ? <SessionDrawer key={open.id} session={open} onClose={() => setOpen(null)} /> : null}
+      {creating ? <SessionFormModal defaultDay={day} onClose={() => setCreating(false)} /> : null}
     </div>
   )
 }

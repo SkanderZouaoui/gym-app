@@ -6,7 +6,10 @@ import { REASON_HINT, REASON_LABEL } from '../../lib/reasons'
 import { formatDate, formatTime } from '../../lib/format'
 import { minutesBetween, sessionState } from '../../lib/sessions'
 import { useNow } from '../../lib/hooks'
-import { Avatar, Badge, Card, Drawer, EmptyState, Icon, SectionHeader, Skeleton, Tabs, useToast, Button, cn } from '../ui'
+import { Avatar, Badge, Card, ConfirmDialog, Drawer, EmptyState, Icon, SectionHeader, Skeleton, Tabs, useToast, Button, cn } from '../ui'
+import { useAuth } from '../../store/auth'
+import { useCancelSession, useDeleteSession } from '../../api/catalog'
+import { SessionFormModal } from './SessionFormModal'
 import { FillBar } from './SessionCard'
 
 type Filter = 'all' | 'todo' | 'present'
@@ -21,6 +24,11 @@ export function SessionDrawer({ session, onClose }: { session: SessionSummary; o
   const st = sessionState(session, now)
   const { data: roster, isLoading } = useRoster(session.id)
   const checkin = useManualCheckin()
+  const isAdmin = useAuth((s) => s.activeRole === 'ADMIN')
+  const cancel = useCancelSession()
+  const remove = useDeleteSession()
+  const [editing, setEditing] = useState(false)
+  const [confirm, setConfirm] = useState<'cancel' | 'delete' | null>(null)
   const [filter, setFilter] = useState<Filter>('all')
   const [pending, setPending] = useState<string | null>(null)
   const [code, setCode] = useState('')
@@ -32,6 +40,9 @@ export function SessionDrawer({ session, onClose }: { session: SessionSummary; o
   const list = confirmed.filter((r) => (filter === 'all' ? true : filter === 'present' ? r.status === 'ATTENDED' : r.status === 'CONFIRMED'))
   const open = st.key !== 'cancelled'
   const left = Math.max(0, session.capacity - session._count.bookings)
+  // Un cours passé ou en cours n'est plus modifiable ; un cours en cours peut encore être annulé.
+  const editable = st.key !== 'done' && st.key !== 'live' && st.key !== 'cancelled'
+  const cancellable = st.key !== 'done' && st.key !== 'cancelled'
 
   const check = (payload: { userId?: string; memberCode?: string }, entryId?: string) => {
     setPending(entryId ?? 'code')
@@ -81,6 +92,7 @@ export function SessionDrawer({ session, onClose }: { session: SessionSummary; o
   }
 
   return (
+    <>
     <Drawer
       title={session.classType.name}
       subtitle={<span>{formatDate(session.startsAt, { weekday: 'long', day: 'numeric', month: 'long' })} · {formatTime(session.startsAt)}</span>}
@@ -88,6 +100,13 @@ export function SessionDrawer({ session, onClose }: { session: SessionSummary; o
       width="max-w-2xl"
     >
       <div className="space-y-6">
+        {isAdmin && (editable || cancellable) ? (
+          <div className="flex flex-wrap gap-2">
+            {editable ? <Button variant="soft" size="sm" icon="edit" onClick={() => setEditing(true)}>Modifier le cours</Button> : null}
+            {cancellable ? <Button variant="outline" size="sm" icon="event_busy" onClick={() => setConfirm('cancel')}>Annuler le cours</Button> : null}
+            {editable ? <Button variant="danger" size="sm" icon="delete" onClick={() => setConfirm('delete')}>Supprimer</Button> : null}
+          </div>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={st.tone} dot>{st.label}</Badge>
           {session.coach ? <Badge tone="primary"><Icon name="sports" size={14} />{session.coach.user.firstName} {session.coach.user.lastName}</Badge> : <Badge>Sans coach</Badge>}
@@ -180,5 +199,28 @@ export function SessionDrawer({ session, onClose }: { session: SessionSummary; o
         ) : null}
       </div>
     </Drawer>
+    {editing ? <SessionFormModal session={session} onClose={() => { setEditing(false); onClose() }} /> : null}
+    {confirm === 'cancel' ? (
+      <ConfirmDialog
+        title="Annuler ce cours ?"
+        message={st.key === 'live' ? 'Le cours est en cours : il sera annulé et les inscriptions non pointées seront annulées. Les présences déjà enregistrées sont conservées.' : "Le cours sera annulé et les inscriptions seront annulées. Les adhérents n'en sont pas prévenus automatiquement."}
+        confirmLabel="Annuler le cours"
+        loading={cancel.isPending}
+        onClose={() => setConfirm(null)}
+        onConfirm={() => cancel.mutate(session.id, { onSuccess: () => { toast('Cours annulé'); onClose() }, onError: (e) => { toast(apiErrorMessage(e), 'danger'); setConfirm(null) } })}
+      />
+    ) : null}
+    {confirm === 'delete' ? (
+      <ConfirmDialog
+        danger
+        title="Supprimer ce cours ?"
+        message="S'il y a des inscrits, le cours est annulé au lieu d'être supprimé."
+        confirmLabel="Supprimer"
+        loading={remove.isPending}
+        onClose={() => setConfirm(null)}
+        onConfirm={() => remove.mutate(session.id, { onSuccess: () => { toast('Cours supprimé'); onClose() }, onError: (e) => { toast(apiErrorMessage(e), 'danger'); setConfirm(null) } })}
+      />
+    ) : null}
+    </>
   )
 }
