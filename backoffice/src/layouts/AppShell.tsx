@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/auth'
 import { navFor } from '../nav'
 import { ROLE_LABEL } from '../lib/roles'
+import { useMyNotifications } from '../api/me'
 import { Avatar, Icon, LogoMark, cn } from '../components/ui'
 import { useToast } from '../components/ui'
 
@@ -54,6 +55,9 @@ function UserMenu() {
               ))}
             </div>
           ) : null}
+          <button onClick={() => { setOpen(false); navigate('/profile') }} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-surface-2">
+            <Icon name="person" size={18} /> Mon profil
+          </button>
           <button
             onClick={async () => {
               await logout()
@@ -71,6 +75,7 @@ function UserMenu() {
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const activeRole = useAuth((s) => s.activeRole)
+  const unread = (useMyNotifications().data ?? []).filter((n) => !n.readAt).length
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-[#3b1764] to-[#2a0f4a] px-4 py-5 text-white">
       <div className="mb-6 flex items-center gap-3 px-2">
@@ -103,7 +108,8 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 {({ isActive }) => (
                   <>
                     <Icon name={item.icon} size={22} filled={isActive} />
-                    {item.label}
+                    <span className="flex-1">{item.label}</span>
+                    {item.to === '/notifications' && unread > 0 ? <span className={cn('grid min-w-6 place-items-center rounded-full px-1.5 py-0.5 text-[11px] font-bold', isActive ? 'bg-primary text-white' : 'bg-white text-primary-ink')}>{unread}</span> : null}
                   </>
                 )}
               </NavLink>

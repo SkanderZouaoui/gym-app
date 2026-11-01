@@ -38,7 +38,10 @@ CORS_ORIGINS=http://localhost:5173 node backend/dist/scripts/set-bucket-cors.js
 | Équipe (comptes, planning de travail, activité) | ADMIN | Équipe |
 | Réglages (salle et horaires, réservation et présence, paiements, annonces) | ADMIN | Configuration |
 | Communication (annonces, alertes adhérents, notifications push et règles) | ADMIN | Annonces, Alertes, Notifications |
-| Programmes (validation des programmes des coachs, exercices) | ADMIN | Programmes, Exercices |
+| Programmes (validation des programmes des coachs, création par l'admin, exercices) | ADMIN | Programmes, Exercices, nouveau programme |
+| Statistiques (période, fréquentation, encaissements, rétention, export CSV) et journal de pointage | ADMIN | Tableau de bord admin |
+| Notifications personnelles | STAFF, ADMIN | Notifications |
+| Mon profil (informations, photo, mot de passe) | STAFF, ADMIN | Profil |
 | Accueil admin : présences de la semaine et éléments à configurer | ADMIN | Tableau de bord admin |
 
 ## Structure

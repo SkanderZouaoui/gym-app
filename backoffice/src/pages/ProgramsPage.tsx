@@ -5,6 +5,7 @@ import { useApproveProgram, useDeactivateExercise, useExercises, useMuscleGroups
 import { formatDate } from '../lib/format'
 import { Avatar, Badge, Button, Card, ChipChoice, ConfirmDialog, Drawer, EmptyState, ErrorState, Field, Icon, Modal, PageHeader, SearchInput, SectionHeader, SelectField, Skeleton, Tabs, TextArea, useToast } from '../components/ui'
 import { useDebounce } from '../lib/hooks'
+import { ProgramCreateModal } from '../components/domain/ProgramCreateModal'
 
 const STATUS: Record<ProgramStatus, { label: string; tone: 'warning' | 'success' | 'danger' }> = {
   PENDING: { label: 'En validation', tone: 'warning' },
@@ -213,10 +214,12 @@ function Exercises() {
 /** Programmes : validation des programmes proposés par les coachs, et bibliothèque d'exercices. */
 export function ProgramsPage() {
   const [params, setParams] = useSearchParams()
+  const [creating, setCreating] = useState(false)
   const tab = params.get('tab') === 'exercises' ? 'exercises' : 'validation'
   return (
     <div className="space-y-6">
-      <PageHeader title="Programmes" subtitle="Validation des programmes des coachs et bibliothèque d’exercices." />
+      <PageHeader title="Programmes" subtitle="Validation des programmes des coachs et bibliothèque d’exercices." actions={<Button icon="add" onClick={() => setCreating(true)}>Nouveau programme</Button>} />
+      {creating ? <ProgramCreateModal onClose={() => setCreating(false)} /> : null}
       <Tabs value={tab} onChange={(t) => setParams({ tab: t }, { replace: true })} options={[{ value: 'validation', label: 'Validation' }, { value: 'exercises', label: 'Exercices' }]} />
       {tab === 'validation' ? <Validation /> : <Exercises />}
     </div>

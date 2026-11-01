@@ -48,18 +48,20 @@ interface Props {
   onSkip?: () => void
   onCancel: () => void
   onDone: (file: File) => void
+  /** Proportions proposées à l'ouverture (ex. 1 pour une photo de profil carrée) ; libre par défaut. */
+  defaultRatio?: number | null
 }
 
 /**
  * Retouche d'une photo avant envoi (même parcours que sur le mobile) : rognage libre ou à proportions fixes avec poignées
  * aux quatre coins, rotation par quarts de tour, miroir, retour à l'original.
  */
-export function ImageEditor({ source, fileName = 'photo', title, confirmLabel, progress, onSkip, onCancel, onDone }: Props) {
+export function ImageEditor({ source, fileName = 'photo', title, confirmLabel, progress, onSkip, onCancel, onDone, defaultRatio = null }: Props) {
   const [bitmap, setBitmap] = useState<ImageBitmap | null>(null)
   const [failed, setFailed] = useState(false)
   const [rot, setRot] = useState(0)
   const [flip, setFlip] = useState(false)
-  const [ratio, setRatio] = useState<number | null>(null)
+  const [ratio, setRatio] = useState<number | null>(defaultRatio)
   // Cadre déplacé ou redimensionné à la main ; null = cadre par défaut (toute l'image, aux proportions choisies).
   const [custom, setCustom] = useState<Box | null>(null)
   const [area, setArea] = useState<Size>({ w: 0, h: 0 })

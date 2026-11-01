@@ -20,6 +20,7 @@ export const NAV: NavGroup[] = [
       { to: '/members', label: 'Adhérents', icon: 'groups' },
       { to: '/cash', label: 'Caisse', icon: 'payments' },
       { to: '/planning', label: 'Planning', icon: 'calendar_month' },
+      { to: '/notifications', label: 'Notifications', icon: 'notifications' },
     ],
   },
   {

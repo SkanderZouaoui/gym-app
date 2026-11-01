@@ -11,6 +11,8 @@ import { SettingsPage } from './pages/SettingsPage'
 import { CommunicationPage } from './pages/CommunicationPage'
 import { ProgramsPage } from './pages/ProgramsPage'
 import { StatsPage } from './pages/StatsPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { NotificationsPage } from './pages/NotificationsPage'
 import { AppShell } from './layouts/AppShell'
 import { RequireAuth, RequireRole } from './components/Guards'
 
@@ -35,6 +37,8 @@ function App() {
         <Route path="/communication" element={<RequireRole roles={['ADMIN']}><CommunicationPage /></RequireRole>} />
         <Route path="/programs" element={<RequireRole roles={['ADMIN']}><ProgramsPage /></RequireRole>} />
         <Route path="/stats" element={<RequireRole roles={['ADMIN']}><StatsPage /></RequireRole>} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/team" element={<RequireRole roles={['ADMIN']}><TeamPage /></RequireRole>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

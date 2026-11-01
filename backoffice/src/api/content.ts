@@ -223,3 +223,16 @@ export function useDeleteNotificationRule() {
   const done = useInvalidate(['admin', 'notifications'])
   return useMutation({ mutationFn: async (id: string) => (await api.delete(`/v1/admin/notifications/rules/${id}`)).data, onSuccess: done })
 }
+
+// --- Création d'un programme (admin : publié sans validation) ----------------------
+
+export interface ProgramInput {
+  name: string
+  level?: string
+  goal?: string
+  days: { dayOfWeek: number; label?: string; exercises: { exerciseId: string; sets: number; reps: string; setDetails: { setNumber: number; reps?: number; weightKg?: number }[] }[] }[]
+}
+export function useCreateProgram() {
+  const done = useInvalidatePrograms()
+  return useMutation({ mutationFn: async (input: ProgramInput) => (await api.post('/v1/admin/programs', input)).data, onSuccess: done })
+}
