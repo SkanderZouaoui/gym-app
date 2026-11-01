@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
@@ -9,12 +9,10 @@ interface DaySelectorProps {
   days: { label: string; dayNumber: string; date: Date }[];
   selectedIndex: number;
   onSelect: (index: number) => void;
-  /** Nombre de cours par jour (même ordre que `days`) : un point sous le numéro signale les jours qui en ont. */
-  counts?: number[];
 }
 
 /** Sélecteur de 7 jours utilisé en haut du Planning (vue Jour). */
-export function DaySelector({ days, selectedIndex, onSelect, counts }: DaySelectorProps) {
+export function DaySelector({ days, selectedIndex, onSelect }: DaySelectorProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
@@ -28,7 +26,6 @@ export function DaySelector({ days, selectedIndex, onSelect, counts }: DaySelect
             ) : null}
             <Text style={[styles.label, active && styles.activeText]}>{d.label}</Text>
             <Text style={[styles.number, active && styles.activeText]}>{d.dayNumber}</Text>
-            {counts ? <View style={[styles.dot, (counts[i] ?? 0) === 0 && { opacity: 0 }, active && { backgroundColor: colors.primaryContrast }]} /> : null}
           </Pressable>
         );
       })}
@@ -39,11 +36,10 @@ export function DaySelector({ days, selectedIndex, onSelect, counts }: DaySelect
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     row: { gap: 8, paddingVertical: 4 },
-    cell: { width: 50, height: 64, borderRadius: 16, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', gap: 2, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+    cell: { width: 50, height: 60, borderRadius: 16, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', gap: 2, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     active: { backgroundColor: colors.primary, borderColor: colors.primary, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
     label: { fontFamily: fonts.bodySemiBold, fontSize: 11, color: colors.muted },
     number: { fontFamily: fonts.headBold, fontSize: 16, letterSpacing: -0.3, color: colors.text },
     activeText: { color: colors.primaryContrast },
-    dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.primary },
   });
 }

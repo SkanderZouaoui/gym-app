@@ -1575,15 +1575,7 @@
     "period_custom": "Période…",
     "group_class": "Cours collectif",
     "invalid_email": "Adresse e-mail invalide",
-    "non_renseigne": "Non renseigné",
-    "period_morning": "Matin",
-    "period_afternoon": "Après-midi",
-    "period_evening": "Soir",
-    "maintenant": "MAINTENANT",
-    "stat_courses": "Cours",
-    "stat_booked": "Inscrits",
-    "stat_fill": "Remplissage",
-    "stat_present": "Présents"
+    "non_renseigne": "Non renseigné"
   },
   "equipment": {
     "dumbbell": "Haltères",

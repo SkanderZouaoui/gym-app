@@ -10,10 +10,7 @@ import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll'
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
 import { FilterDropdown, ScreenTitle, SkeletonList } from '../../../src/components/ui';
-import { sessionState } from '../../../src/components/staff/sessionState';
-import { DayStats } from '../../../src/components/planning/DayStats';
-import { SessionTimeline, type TimelineSession } from '../../../src/components/planning/SessionTimeline';
-import { fillPercent } from '../../../src/utils/planning';
+import { SessionPlanningCard, sessionState } from '../../../src/components/staff/SessionPlanningCard';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { WEEKDAYS_SHORT_SUN } from '../../../src/i18n/labels';
@@ -61,7 +58,6 @@ export default function StaffPlanningScreen() {
         .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()),
     [sessions, day],
   );
-  const counts = useMemo(() => days.map((d) => (sessions ?? []).filter((s) => new Date(s.startsAt).toDateString() === d.date.toDateString() && s.status !== 'CANCELLED').length), [sessions, days]);
   const types = useMemo(() => Array.from(new Set(daySessions.map((s) => s.classType.name))).sort(), [daySessions]);
   const coaches = useMemo(
     () => Array.from(new Set(daySessions.map((s) => s.coach?.user.firstName).filter((c): c is string => !!c))).sort(),
@@ -93,7 +89,7 @@ export default function StaffPlanningScreen() {
           subtitle={i18n.t('staff.cours_collectifs', { v0: day.toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' }) })}
         />
 
-        <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} counts={counts} />
+        <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
 
         <View style={styles.filters}>
           <FilterDropdown title={i18n.t('staff.statut')} icon="event-available" value={status} options={STATUS_FILTERS} onChange={setStatus} />
@@ -117,66 +113,57 @@ export default function StaffPlanningScreen() {
           ) : null}
         </View>
 
-        <DayStats
-          stats={[
-            { icon: 'event', value: String(shown.length), label: i18n.t('staff.stat_courses') },
-            { icon: 'groups', value: String(totalBooked), label: i18n.t('staff.stat_booked') },
-            { icon: 'donut-large', value: `${fillPercent(shown.map((s) => ({ capacity: s.capacity, booked: s._count.bookings })))} %`, label: i18n.t('staff.stat_fill') },
-          ]}
-        />
+        <View style={styles.summary}>
+          <MaterialIcons name="event" size={18} color={colors.primaryInk} />
+          <Text style={[styles.summaryText, { flex: 1 }]}>{i18n.t('staff.cours_inscrit', { length: shown.length, totalBooked, v5: totalBooked > 1 ? 's' : '' })}</Text>
+          {status !== 'all' || activeType || activeCoach ? (
+            <Pressable
+              onPress={() => {
+                setStatus('all');
+                setType(null);
+                setCoach(null);
+              }}
+              hitSlop={8}
+              style={styles.reset}
+            >
+              <MaterialIcons name="close" size={16} color={colors.primaryInk} />
+              <Text style={styles.resetText}>{i18n.t('staff.reinitialiser')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
 
-        {status !== 'all' || activeType || activeCoach ? (
-          <Pressable
-            onPress={() => {
-              setStatus('all');
-              setType(null);
-              setCoach(null);
-            }}
-            hitSlop={8}
-            style={styles.reset}
-          >
-            <MaterialIcons name="close" size={16} color={colors.primaryInk} />
-            <Text style={styles.resetText}>{i18n.t('staff.reinitialiser')}</Text>
-          </Pressable>
-        ) : null}
-
-        {isLoading ? (
-          <SkeletonList count={3} height={120} />
-        ) : shown.length === 0 ? (
-          <View style={[styles.empty, cardShadow]}>
-            <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
-            <Text style={styles.emptyText}>{i18n.t('staff.aucun_cours_ne_correspond_a')}</Text>
-          </View>
-        ) : (
-          <SessionTimeline
-            now={now}
-            isToday={selectedDay === 0}
-            sessions={shown.map<TimelineSession>((s) => ({
-              id: s.id,
-              startsAt: s.startsAt,
-              endsAt: s.endsAt,
-              title: s.classType.name,
-              meta: [s.coach ? `${s.coach.user.firstName} ${s.coach.user.lastName.charAt(0)}.` : i18n.t('common.sans_coach'), s.room?.name].filter((m): m is string => !!m),
-              booked: s._count.bookings,
-              capacity: s.capacity,
-              state: sessionState(s, now),
-            }))}
-            onPress={(id) => router.push({ pathname: '/(staff)/session/[id]', params: { id } } as never)}
-            renderAction={(item) =>
-              item.state.key !== 'done' && item.state.key !== 'cancelled' ? (
-                <Pressable
-                  onPress={() => router.push({ pathname: '/(staff)/(tabs)/scanner', params: { sessionId: item.id } })}
-                  hitSlop={6}
-                  style={({ pressed }) => [styles.scanQuick, pressed && { transform: [{ scale: 0.92 }] }]}
-                  accessibilityRole="button"
-                  accessibilityLabel={i18n.t('coach.home_scan')}
-                >
-                  <MaterialIcons name="qr-code-scanner" size={20} color={colors.primaryContrast} />
-                </Pressable>
-              ) : null
-            }
-          />
-        )}
+        <View style={{ gap: 12 }}>
+          {shown.map((s) => {
+            const st = sessionState(s, now);
+            return (
+              <SessionPlanningCard
+                key={s.id}
+                session={s}
+                now={now}
+                onPress={() => router.push({ pathname: '/(staff)/session/[id]', params: { id: s.id } } as never)}
+                action={
+                  st.key !== 'done' && st.key !== 'cancelled' ? (
+                    <Pressable
+                      onPress={() => router.push({ pathname: '/(staff)/(tabs)/scanner', params: { sessionId: s.id } })}
+                      hitSlop={6}
+                      style={({ pressed }) => [styles.scanQuick, pressed && { transform: [{ scale: 0.92 }] }]}
+                      accessibilityRole="button"
+                      accessibilityLabel={i18n.t('coach.home_scan')}
+                    >
+                      <MaterialIcons name="qr-code-scanner" size={22} color={colors.primaryContrast} />
+                    </Pressable>
+                  ) : null
+                }
+              />
+            );
+          })}
+          {isLoading ? <SkeletonList count={3} height={120} /> : shown.length === 0 ? (
+            <View style={[styles.empty, cardShadow]}>
+              <MaterialIcons name="event-busy" size={34} color={colors.primaryInk} />
+              <Text style={styles.emptyText}>{i18n.t('staff.aucun_cours_ne_correspond_a')}</Text>
+            </View>
+          ) : null}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -187,10 +174,12 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     safeArea: { flex: 1, backgroundColor: colors.bg },
     container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 140 },
     filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    reset: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 14, backgroundColor: colors.primarySoft },
+    summary: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    reset: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, height: 28, borderRadius: 14, backgroundColor: colors.primarySoft },
     resetText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk },
+    summaryText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     empty: { padding: 28, alignItems: 'center', gap: 8, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     emptyText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, textAlign: 'center' },
-    scanQuick: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
+    scanQuick: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
   });
 }

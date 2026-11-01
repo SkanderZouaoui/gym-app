@@ -1575,15 +1575,7 @@
     "period_custom": "فترة محددة…",
     "group_class": "حصة جماعية",
     "invalid_email": "عنوان البريد الإلكتروني غير صالح",
-    "non_renseigne": "غير مُدخل",
-    "period_morning": "الصباح",
-    "period_afternoon": "بعد الظهر",
-    "period_evening": "المساء",
-    "maintenant": "الآن",
-    "stat_courses": "الحصص",
-    "stat_booked": "المسجلون",
-    "stat_fill": "نسبة الامتلاء",
-    "stat_present": "الحاضرون"
+    "non_renseigne": "غير مُدخل"
   },
   "equipment": {
     "dumbbell": "دمبلز",

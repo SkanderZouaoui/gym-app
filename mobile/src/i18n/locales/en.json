@@ -1575,15 +1575,7 @@
     "period_custom": "Custom…",
     "group_class": "Group class",
     "invalid_email": "Invalid email address",
-    "non_renseigne": "Not provided",
-    "period_morning": "Morning",
-    "period_afternoon": "Afternoon",
-    "period_evening": "Evening",
-    "maintenant": "NOW",
-    "stat_courses": "Classes",
-    "stat_booked": "Booked",
-    "stat_fill": "Fill rate",
-    "stat_present": "Present"
+    "non_renseigne": "Not provided"
   },
   "equipment": {
     "dumbbell": "Dumbbells",
