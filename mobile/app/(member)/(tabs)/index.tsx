@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { fonts, radii, spacing, typography } from '../../../src/theme/tokens';
+import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useDismissedNotices } from '../../../src/store/preferences';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
@@ -315,8 +315,7 @@ function OnboardRow({
   );
 }
 
-function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
-  const textAlign = isRtl ? 'right' as const : 'left' as const;
+function makeStyles(colors: ReturnType<typeof useTheme>['colors'], _isRtl: boolean) {
   return StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.bg },
   alertCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, borderRadius: 16, padding: 14 },
