@@ -1,81 +1,117 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { classTemplatesApi, type ClassTemplateItem } from '../api/endpoints'
-import { SessionDrawer } from '../components/SessionDrawer'
+import { useMemo, useState } from 'react'
+import { useSessions } from '../api/hooks'
+import type { SessionSummary } from '../api/types'
+import { addDays, formatDate, sameDay, startOfDay } from '../lib/format'
+import { sessionState } from '../lib/sessions'
+import { useNow } from '../lib/hooks'
+import { Card, EmptyState, ErrorState, Icon, PageHeader, Skeleton, Tabs, cn } from '../components/ui'
+import { SessionCard } from '../components/domain/SessionCard'
+import { SessionDrawer } from '../components/domain/SessionDrawer'
 
-const DAYS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
-const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
+type Status = 'all' | 'upcoming' | 'full' | 'low'
+const DAYS = 14
 
 export function PlanningPage() {
-  const { data: templates } = useQuery({ queryKey: ['class-templates'], queryFn: classTemplatesApi.findAll })
-  const [drawer, setDrawer] = useState<{ item: ClassTemplateItem | null; day?: number } | null>(null)
+  const now = useNow()
+  const [today] = useState(() => startOfDay(new Date()))
+  const days = useMemo(() => Array.from({ length: DAYS }, (_, i) => addDays(today, i)), [today])
+  const [selected, setSelected] = useState(0)
+  const [status, setStatus] = useState<Status>('all')
+  const [type, setType] = useState('')
+  const [coach, setCoach] = useState('')
+  const [open, setOpen] = useState<SessionSummary | null>(null)
+  const { data: sessions, isLoading, isError, refetch } = useSessions(today, addDays(today, DAYS))
 
-  const byDay = DISPLAY_ORDER.map((day) => ({
-    day,
-    items: (templates ?? [])
-      .filter((t) => t.dayOfWeek === day)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime)),
-  }))
-  const totalCount = templates?.length ?? 0
+  const day = days[selected]
+  const daySessions = useMemo(
+    () => (sessions ?? []).filter((s) => sameDay(new Date(s.startsAt), day)).sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
+    [sessions, day],
+  )
+  const counts = useMemo(() => days.map((d) => (sessions ?? []).filter((s) => sameDay(new Date(s.startsAt), d) && s.status !== 'CANCELLED').length), [sessions, days])
+  const types = useMemo(() => [...new Set(daySessions.map((s) => s.classType.name))].sort(), [daySessions])
+  const coaches = useMemo(() => [...new Set(daySessions.map((s) => s.coach?.user.firstName).filter((c): c is string => !!c))].sort(), [daySessions])
+
+  const shown = daySessions.filter((s) => {
+    const st = sessionState(s, now)
+    if (type && s.classType.name !== type) return false
+    if (coach && s.coach?.user.firstName !== coach) return false
+    if (status === 'upcoming') return st.key !== 'done'
+    if (status === 'full') return s._count.bookings >= s.capacity
+    if (status === 'low') return st.key !== 'done' && st.ratio < 0.5
+    return true
+  })
+  const booked = shown.reduce((n, s) => n + s._count.bookings, 0)
+  const filtered = status !== 'all' || type || coach
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-6">
+      <PageHeader title="Planning" subtitle={`Cours collectifs · ${formatDate(day, { month: 'long', year: 'numeric' })}`} />
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {days.map((d, i) => {
+          const active = i === selected
+          return (
+            <button
+              key={d.toISOString()}
+              onClick={() => setSelected(i)}
+              className={cn(
+                'relative flex h-[68px] w-[56px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl border transition',
+                active ? 'border-primary bg-gradient-to-br from-primary to-primary-pressed text-white shadow-primary' : 'border-border bg-surface hover:border-primary-border',
+              )}
+            >
+              <span className={cn('text-[11px] font-semibold capitalize', active ? 'text-white/85' : 'text-muted')}>{formatDate(d, { weekday: 'short' }).replace('.', '')}</span>
+              <span className="font-head text-lg font-bold leading-none">{d.getDate()}</span>
+              <span className={cn('size-1.5 rounded-full', counts[i] === 0 ? 'opacity-0' : active ? 'bg-white' : 'bg-primary')} />
+            </button>
+          )
+        })}
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
-        <div>
-          <h1 className="font-head text-2xl font-extrabold text-(--color-secondary)">Planning</h1>
-          <p className="text-sm text-(--color-muted)">{totalCount} séance(s) récurrente(s) par semaine</p>
-        </div>
-        <div className="flex-1" />
-        <button
-          onClick={() => setDrawer({ item: null })}
-          className="flex h-10 items-center gap-1.5 rounded-lg bg-(--color-primary) px-3.5 text-[13.5px] font-bold text-(--color-primary-contrast) hover:bg-(--color-primary-hover)"
-        >
-          <span className="material-symbols-rounded text-[18px]">add</span>
-          Nouvelle séance
-        </button>
-      </div>
-
-      <div className="overflow-x-auto pb-1">
-        <div className="grid min-w-[1000px] grid-cols-7 gap-2.5">
-          {byDay.map(({ day, items }) => (
-            <div key={day} className="flex min-h-90 flex-col gap-2 rounded-2xl border border-(--color-border) bg-(--color-surface) p-2.5">
-              <div className="flex items-baseline justify-between border-b border-(--color-border) px-1 pb-1.5">
-                <span className="text-[13.5px] font-bold">{DAYS[day]}</span>
-                <span className="text-xs text-(--color-muted)">{items.length}</span>
-              </div>
-              {items.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setDrawer({ item: s })}
-                  className="flex flex-col gap-0.5 rounded-lg border p-2.5 text-start"
-                  style={{
-                    borderColor: `var(--color-${s.classType.tone}-border)`,
-                    background: `var(--color-${s.classType.tone}-soft)`,
-                  }}
-                >
-                  <span className="font-mono text-[11.5px] font-semibold" style={{ color: `var(--color-${s.classType.tone}-ink)` }}>
-                    {s.startTime}
-                  </span>
-                  <span className="text-[13px] font-bold leading-tight">{s.classType.name}</span>
-                  <span className="text-[11.5px] text-(--color-muted)">
-                    {s.coach ? s.coach.user.firstName : '—'} · {s.room?.name ?? 'Salle'}
-                  </span>
-                  <span className="text-[11.5px] font-bold">Capacité {s.capacity}</span>
-                </button>
-              ))}
-              <button
-                onClick={() => setDrawer({ item: null, day })}
-                className="mt-auto flex h-8 items-center justify-center gap-1 rounded-lg border border-dashed border-(--color-border-strong) text-xs font-semibold text-(--color-muted) hover:bg-(--color-surface-2) hover:text-(--color-text)"
-              >
-                <span className="material-symbols-rounded text-[16px]">add</span>
-                Ajouter
-              </button>
-            </div>
-          ))}
+        <Tabs value={status} onChange={setStatus} options={[{ value: 'all', label: 'Tous' }, { value: 'upcoming', label: 'À venir' }, { value: 'full', label: 'Complets' }, { value: 'low', label: 'Sous-remplis' }]} />
+        {types.length > 1 ? (
+          <select value={type} onChange={(e) => setType(e.target.value)} aria-label="Type de cours" className="h-11 rounded-full border border-border bg-surface px-4 text-sm font-semibold outline-none focus:border-primary">
+            <option value="">Tous les cours</option>
+            {types.map((t) => <option key={t}>{t}</option>)}
+          </select>
+        ) : null}
+        {coaches.length > 1 ? (
+          <select value={coach} onChange={(e) => setCoach(e.target.value)} aria-label="Coach" className="h-11 rounded-full border border-border bg-surface px-4 text-sm font-semibold outline-none focus:border-primary">
+            <option value="">Tous les coachs</option>
+            {coaches.map((c) => <option key={c}>{c}</option>)}
+          </select>
+        ) : null}
+        <div className="ml-auto flex items-center gap-3 text-sm font-bold text-primary-ink">
+          <Icon name="event" size={18} />
+          {shown.length} cours · {booked} inscrit{booked > 1 ? 's' : ''}
+          {filtered ? (
+            <button
+              onClick={() => {
+                setStatus('all')
+                setType('')
+                setCoach('')
+              }}
+              className="inline-flex h-7 items-center gap-1 rounded-full bg-primary-soft px-2.5 text-xs hover:bg-primary-border/60"
+            >
+              <Icon name="close" size={14} /> Réinitialiser
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {drawer ? <SessionDrawer item={drawer.item} presetDay={drawer.day} onClose={() => setDrawer(null)} /> : null}
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-44 rounded-xl" />)}</div>
+      ) : isError ? (
+        <Card><ErrorState onRetry={() => void refetch()} /></Card>
+      ) : shown.length === 0 ? (
+        <Card><EmptyState icon="event_busy" title="Aucun cours" hint="Aucun cours ne correspond à ce jour ou à ces filtres." /></Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {shown.map((s) => <SessionCard key={s.id} session={s} now={now} onClick={() => setOpen(s)} />)}
+        </div>
+      )}
+
+      {open ? <SessionDrawer session={open} onClose={() => setOpen(null)} /> : null}
     </div>
   )
 }

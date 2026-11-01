@@ -1,177 +1,142 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { adminApi, appConfigApi, plansApi } from '../api/endpoints'
-import { contrastRatio } from '@muscleup/shared'
-import { useAppConfigDraft } from '../store/useAppConfigDraft'
+import { useAdminDashboard, useExpiringMemberships, usePayments, useStaffToday } from '../api/hooks'
+import { useAuth } from '../store/auth'
+import { daysLeft, formatDate, formatMoney, formatTime, greeting, METHOD_ICON, METHOD_LABEL, sameDay } from '../lib/format'
+import { useNow } from '../lib/hooks'
+import { Avatar, Badge, Card, EmptyState, Icon, SectionHeader, Skeleton, Stat } from '../components/ui'
+import { FillBar } from '../components/domain/SessionCard'
 
 export function DashboardPage() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin', 'dashboard'],
-    queryFn: adminApi.getDashboard,
-  })
-  const { draft } = useAppConfigDraft()
-  const { data: history } = useQuery({ queryKey: ['app-config', 'history'], queryFn: appConfigApi.history })
-  const { data: plans } = useQuery({ queryKey: ['plans'], queryFn: plansApi.findAll })
+  const user = useAuth((s) => s.user)
+  const isAdmin = useAuth((s) => s.activeRole === 'ADMIN')
+  const now = useNow()
+  const today = useStaffToday()
+  const dashboard = useAdminDashboard(isAdmin)
+  const payments = usePayments()
+  const expiring = useExpiringMemberships(isAdmin)
 
-  const kpis = [
-    { label: 'Adhérents actifs', value: data?.activeMembers ?? 0, icon: 'group' },
-    { label: 'Présences du jour', value: data?.attendanceToday ?? 0, icon: 'event_available' },
-    { label: "Cours aujourd'hui", value: data?.classesToday ?? 0, icon: 'calendar_month' },
-    { label: 'Remplissage moyen', value: `${data?.avgFillRate ?? 0}%`, icon: 'bar_chart' },
-    { label: 'Revenus du jour', value: `${data?.revenueToday ?? 0} DT`, icon: 'payments' },
-    { label: 'Revenus du mois', value: `${data?.revenueMonth ?? 0} DT`, icon: 'account_balance_wallet' },
-  ]
-
-  const live = history?.[0]
-  const branding = draft?.branding
-  const ratio = branding ? contrastRatio(branding.primaryContrast, branding.primary) : 0
-  const contrastOk = ratio >= 4.5
-  const modulesOn = draft?.homeModules.filter((m) => m.on).length ?? 0
-  const tabsOn = draft?.tabs.filter((t) => t.on).length ?? 0
-  const tabsOk = tabsOn >= 3 && tabsOn <= 5
-  const arTotal = draft?.strings.length ?? 0
-  const arDone = draft?.strings.filter((s) => s.ar.trim()).length ?? 0
-  const plansOn = (plans ?? []).length
-
-  const checklist = [
-    {
-      icon: 'palette',
-      label: 'Identité visuelle',
-      detail: `Contraste du bouton primaire ${ratio.toFixed(2)}:1`,
-      ok: contrastOk,
-      status: contrastOk ? 'Conforme AA' : 'À corriger',
-      to: '/brand',
-    },
-    {
-      icon: 'home',
-      label: 'Écran d’accueil',
-      detail: `${modulesOn} blocs affichés`,
-      ok: modulesOn >= 2,
-      status: modulesOn >= 2 ? 'OK' : 'Trop vide',
-      to: '/home',
-    },
-    {
-      icon: 'tab',
-      label: 'Navigation',
-      detail: `${tabsOn} onglets actifs`,
-      ok: tabsOk,
-      status: tabsOk ? 'OK' : 'Invalide',
-      to: '/nav',
-    },
-    {
-      icon: 'translate',
-      label: 'Traduction arabe',
-      detail: `${arDone} / ${arTotal} textes traduits`,
-      ok: arDone === arTotal,
-      status: arDone === arTotal ? 'Complète' : `${arTotal - arDone} manquant(s)`,
-      to: '/texts',
-    },
-    {
-      icon: 'sell',
-      label: 'Formules visibles',
-      detail: `${plansOn} formule(s) proposée(s) dans l'app`,
-      ok: plansOn > 0,
-      status: plansOn > 0 ? 'OK' : 'Aucune',
-      to: '/plans',
-    },
-  ]
+  const todayPayments = useMemo(() => (payments.data ?? []).filter((p) => sameDay(new Date(p.recordedAt), new Date(now))), [payments.data, now])
+  const collectedToday = isAdmin && dashboard.data ? Number(dashboard.data.revenueToday) : todayPayments.reduce((n, p) => n + Number(p.amount), 0)
+  const sessions = today.data?.sessions ?? []
+  const upcoming = sessions.filter((s) => new Date(s.endsAt).getTime() > now)
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-head text-2xl font-extrabold text-(--color-secondary)">Vue d’ensemble</h1>
-        <p className="text-sm text-(--color-muted)">État de l'application client et contrôles avant publication.</p>
+    <div className="space-y-8">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#8B5CF6] via-primary to-[#3b1764] p-7 text-white shadow-primary sm:p-9">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute -bottom-24 right-40 size-56 rounded-full bg-white/5" />
+        <div className="relative flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <div className="text-sm font-semibold capitalize text-white/75">{formatDate(new Date(now), { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+            <h1 className="mt-1 text-[32px] leading-tight">{greeting(new Date(now))}, {user?.firstName}</h1>
+            <p className="mt-1 max-w-md text-white/80">{isAdmin ? 'Voici l’activité de votre salle aujourd’hui.' : 'Voici votre journée à l’accueil.'}</p>
+          </div>
+          <div className="text-right">
+            <div className="text-[11px] font-bold uppercase tracking-widest text-white/70">{isAdmin ? 'Encaissé aujourd’hui' : 'Vous avez encaissé aujourd’hui'}</div>
+            <div className="font-head text-[40px] font-extrabold leading-none">{payments.isLoading ? '…' : formatMoney(collectedToday)}</div>
+            <div className="mt-1 text-sm text-white/80">{(isAdmin ? dashboard.data?.paymentsToday : undefined) ?? todayPayments.length} encaissement{((isAdmin ? dashboard.data?.paymentsToday : undefined) ?? todayPayments.length) > 1 ? 's' : ''}</div>
+          </div>
+        </div>
       </div>
 
-      {isLoading ? (
-        <p className="text-sm text-(--color-muted)">Chargement…</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-            {kpis.map((k) => (
-              <div key={k.label} className="flex flex-col gap-2 rounded-2xl border border-(--color-border) bg-(--color-surface) p-4">
-                <span className="material-symbols-rounded flex h-8 w-8 items-center justify-center rounded-lg bg-(--color-primary-soft) text-[18px] text-(--color-primary-ink)">
-                  {k.icon}
-                </span>
-                <span className="font-head text-2xl font-extrabold">{k.value}</span>
-                <span className="text-xs text-(--color-muted)">{k.label}</span>
-              </div>
-            ))}
-          </div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Stat icon="event" label="Cours aujourd’hui" value={isAdmin && dashboard.data ? dashboard.data.classesToday : sessions.length} tone="primary" />
+        <Stat icon="how_to_reg" label="Présents aujourd’hui" value={isAdmin && dashboard.data ? dashboard.data.attendanceToday : (today.data?.attendedToday ?? 0)} tone="success" />
+        {isAdmin ? (
+          <>
+            <Stat icon="groups" label="Adhérents actifs" value={dashboard.data?.activeMembers ?? '…'} hint={dashboard.data?.newMembersToday ? `+${dashboard.data.newMembersToday} aujourd’hui` : undefined} tone="info" />
+            <Stat icon="trending_up" label="Remplissage moyen" value={dashboard.data ? `${Math.round(dashboard.data.avgFillRate)} %` : '…'} hint={dashboard.data ? `${formatMoney(dashboard.data.revenueMonth)} ce mois` : undefined} tone="warning" />
+          </>
+        ) : (
+          <>
+            <Stat icon="schedule" label="Cours à venir" value={upcoming.length} tone="info" />
+            <Stat icon="receipt_long" label="Encaissements du jour" value={todayPayments.length} tone="warning" />
+          </>
+        )}
+      </div>
 
-          {data?.alerts ? (
-            <div className="rounded-2xl border border-(--color-warning) bg-(--color-warning-soft) p-4">
-              <h3 className="font-head text-sm font-bold text-(--color-warning-ink)">Alertes</h3>
-              <ul className="mt-2 flex flex-col gap-1 text-sm text-(--color-warning-ink)">
-                {data.alerts.expiringMemberships > 0 ? (
-                  <li>{data.alerts.expiringMemberships} abonnement(s) expirent dans les 7 jours</li>
-                ) : null}
-                {data.alerts.underfilledClasses > 0 ? (
-                  <li>{data.alerts.underfilledClasses} cours sous-remplis dans les 3 prochains jours</li>
-                ) : null}
-                {data.alerts.expiringMemberships === 0 && data.alerts.underfilledClasses === 0 ? (
-                  <li>Aucune alerte</li>
-                ) : null}
-              </ul>
-            </div>
-          ) : null}
-        </>
-      )}
+      <div className="grid gap-8 xl:grid-cols-5">
+        <section className="space-y-3 xl:col-span-3">
+          <SectionHeader
+            title="Cours du jour"
+            icon="event"
+            action={<Link to="/planning" className="inline-flex items-center gap-0.5 text-sm font-bold text-primary-ink hover:underline">Voir le planning <Icon name="chevron_right" size={18} /></Link>}
+          />
+          <Card className="divide-y divide-border overflow-hidden">
+            {today.isLoading ? (
+              <div className="space-y-3 p-4">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>
+            ) : sessions.length === 0 ? (
+              <EmptyState icon="event_busy" title="Aucun cours aujourd’hui" hint="Les cours planifiés pour la journée apparaîtront ici." />
+            ) : (
+              (upcoming.length > 0 ? upcoming : sessions).map((s) => {
+                const full = s.booked >= s.capacity
+                return (
+                  <Link key={s.id} to="/planning" className="flex items-center gap-4 px-5 py-3.5 transition hover:bg-primary-soft/40">
+                    <div className="grid h-12 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary-pressed font-head text-base font-extrabold text-white">{formatTime(s.startsAt)}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate font-bold">{s.classTypeName}</div>
+                      <div className="truncate text-[13px] text-muted">{[s.coachName, s.room].filter(Boolean).join(' · ') || 'Cours collectif'}</div>
+                    </div>
+                    <div className="w-32 space-y-1.5">
+                      <div className="flex justify-between text-xs font-bold"><span>{s.booked}/{s.capacity}</span><span className="text-muted">{s.fillRate} %</span></div>
+                      <FillBar ratio={s.capacity ? s.booked / s.capacity : 0} />
+                    </div>
+                    <Badge tone={full ? 'danger' : s.fillRate >= 70 ? 'warning' : 'muted'}>{full ? 'Complet' : `${s.fillRate} %`}</Badge>
+                  </Link>
+                )
+              })
+            )}
+          </Card>
+        </section>
 
-      {live ? (
-        <div className="flex flex-wrap items-center gap-6 rounded-2xl bg-(--color-secondary) p-6 text-white">
-          <div className="min-w-50 flex-1">
-            <div className="text-xs font-bold uppercase tracking-wide opacity-75">Version en ligne</div>
-            <div className="font-head text-[28px] font-extrabold tracking-tight">v{live.versionNumber}</div>
-            <div className="text-[13.5px] opacity-85">
-              Publiée {new Date(live.publishedAt ?? live.createdAt).toLocaleDateString('fr-FR')}
-              {live.publishedBy ? ` par ${live.publishedBy.firstName} ${live.publishedBy.lastName}` : ''} · iOS, Android et Web
-            </div>
-          </div>
-          <Link
-            to="/publish"
-            className="flex h-10 items-center rounded-lg border border-white/35 px-3.5 text-[13.5px] font-bold hover:bg-white/10"
-          >
-            Historique
-          </Link>
-        </div>
+        <section className="space-y-3 xl:col-span-2">
+          <SectionHeader
+            title={isAdmin ? 'Derniers encaissements' : 'Mes derniers encaissements'}
+            icon="payments"
+            action={<Link to="/cash" className="inline-flex items-center gap-0.5 text-sm font-bold text-primary-ink hover:underline">Tout voir <Icon name="chevron_right" size={18} /></Link>}
+          />
+          <Card className="divide-y divide-border overflow-hidden">
+            {payments.isLoading ? (
+              <div className="space-y-3 p-4">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12" />)}</div>
+            ) : (payments.data ?? []).length === 0 ? (
+              <EmptyState icon="payments" title="Aucun encaissement" hint="Les ventes d’abonnements s’afficheront ici." />
+            ) : (
+              (payments.data ?? []).slice(0, 6).map((p) => (
+                <div key={p.id} className="flex items-center gap-3 px-5 py-3">
+                  <Avatar firstName={p.membership.user.firstName} lastName={p.membership.user.lastName} photoUrl={p.membership.user.photoUrl} size={38} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold">{p.membership.user.firstName} {p.membership.user.lastName}</div>
+                    <div className="flex items-center gap-1 truncate text-xs text-muted"><Icon name={METHOD_ICON[p.method]} size={14} />{METHOD_LABEL[p.method]} · {p.membership.plan.name}</div>
+                  </div>
+                  <div className="font-head text-sm font-extrabold">{formatMoney(p.amount)}</div>
+                </div>
+              ))
+            )}
+          </Card>
+        </section>
+      </div>
+
+      {isAdmin && (expiring.data ?? []).length > 0 ? (
+        <section className="space-y-3">
+          <SectionHeader title="Abonnements qui expirent bientôt" icon="event_busy" />
+          <Card className="divide-y divide-border overflow-hidden">
+            {(expiring.data ?? []).slice(0, 6).map((m) => {
+              const left = daysLeft(m.endDate, now)
+              return (
+                <div key={m.id} className="flex items-center gap-4 px-5 py-3">
+                  <Avatar firstName={m.user.firstName} lastName={m.user.lastName} size={38} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold">{m.user.firstName} {m.user.lastName}</div>
+                    <div className="text-xs text-muted">{m.plan.name} · {m.user.phone ?? 'pas de téléphone'}</div>
+                  </div>
+                  <Badge tone={left <= 3 ? 'danger' : 'warning'}>{left <= 0 ? 'Expire aujourd’hui' : `${left} jour${left > 1 ? 's' : ''}`}</Badge>
+                </div>
+              )
+            })}
+          </Card>
+        </section>
       ) : null}
-
-      <section className="overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface)">
-        <div className="border-b border-(--color-border) px-5 py-4">
-          <div className="font-head text-[15px] font-bold">État de la configuration</div>
-          <div className="text-[13px] text-(--color-muted)">Contrôles automatiques avant publication</div>
-        </div>
-        {checklist.map((c) => (
-          <div key={c.label} className="flex items-center gap-3.5 border-b border-(--color-border) px-5 py-3 last:border-0">
-            <span
-              className="grid h-8.5 w-8.5 flex-none place-items-center rounded-lg"
-              style={{
-                background: c.ok ? 'var(--color-success-soft)' : 'var(--color-danger-soft)',
-                color: c.ok ? 'var(--color-success-ink)' : 'var(--color-danger-ink)',
-              }}
-            >
-              <span className="material-symbols-rounded text-[20px]">{c.icon}</span>
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-bold">{c.label}</div>
-              <div className="text-[12.5px] text-(--color-muted)">{c.detail}</div>
-            </div>
-            <span
-              className="rounded-full px-2.5 py-1 text-xs font-bold"
-              style={{
-                background: c.ok ? 'var(--color-success-soft)' : 'var(--color-danger-soft)',
-                color: c.ok ? 'var(--color-success-ink)' : 'var(--color-danger-ink)',
-              }}
-            >
-              {c.status}
-            </span>
-            <Link to={c.to} className="h-8 rounded-md border border-(--color-border-strong) px-3 text-xs font-bold leading-8 hover:bg-(--color-surface-2)">
-              Ouvrir
-            </Link>
-          </div>
-        ))}
-      </section>
     </div>
   )
 }

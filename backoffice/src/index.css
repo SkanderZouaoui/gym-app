@@ -1,69 +1,70 @@
 @import 'tailwindcss';
 
-:root {
-  --color-bg: #f7f7f9;
-  --color-surface: #ffffff;
-  --color-surface-2: #f1f2f4;
-  --color-text: #111827;
-  --color-muted: #5b6270;
-  --color-border: #e3e4e7;
-  --color-border-strong: #c5c8ce;
+/* Jetons de design alignés sur l'application mobile (mobile/src/theme/tokens.ts). */
+@theme {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-head: 'Sora', system-ui, sans-serif;
 
-  --color-primary: #6d28d9;
-  --color-primary-hover: #5f21be;
-  --color-primary-pressed: #511ba3;
-  --color-primary-soft: #f1eafb;
-  --color-primary-border: #d5c2f3;
-  --color-primary-ink: #5b21b6;
+  --color-bg: #f7f6fa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f0eff5;
+  --color-text: #0e0d12;
+  --color-muted: #5c5b69;
+  --color-border: #e7e5ef;
+  --color-border-strong: #cfc9e2;
+
+  --color-primary: #7c3aed;
+  --color-primary-hover: #7033d6;
+  --color-primary-pressed: #6a2fcb;
+  --color-primary-soft: #efe9fd;
+  --color-primary-border: #d8c8fa;
+  --color-primary-ink: #572aa6;
   --color-primary-contrast: #ffffff;
 
-  --color-secondary: #14213d;
-  --color-secondary-soft: #e8e9ec;
-  --color-secondary-ink: #14213d;
-
-  --color-accent: #fca311;
-  --color-accent-soft: #fff6e7;
-  --color-accent-ink: #8a5600;
+  --color-secondary: #3b1764;
+  --color-secondary-soft: #ede5f7;
 
   --color-success: #16a34a;
-  --color-success-soft: #e8f6ed;
-  --color-success-ink: #11793a;
-
+  --color-success-soft: #e3f6ea;
+  --color-success-ink: #0f6b33;
   --color-warning: #f59e0b;
-  --color-warning-soft: #fef5e7;
-  --color-warning-ink: #8a5600;
-
+  --color-warning-soft: #fef3dc;
+  --color-warning-ink: #7a4b00;
   --color-danger: #dc2626;
-  --color-danger-soft: #fce9e9;
-  --color-danger-ink: #b91c1c;
-  --color-danger-border: #f3b4b4;
-
+  --color-danger-soft: #fce8e8;
+  --color-danger-ink: #a71818;
   --color-info: #2563eb;
   --color-info-soft: #e9effd;
   --color-info-ink: #1d4ed8;
-  --color-info-border: #b9cdf7;
 
-  --color-success-border: #abe0bf;
-  --color-warning-border: #f7dba3;
-  --color-accent-border: #fcdca0;
-  --color-secondary-border: #c7cadd;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
 
-  --r: 16px;
-  --r-xs: 6px;
-  --r-sm: 10px;
-  --r-lg: 24px;
+  --shadow-card: 0 6px 14px rgba(20, 10, 40, 0.07);
+  --shadow-pop: 0 18px 50px rgba(20, 10, 40, 0.22);
+  --shadow-primary: 0 10px 22px rgba(124, 58, 237, 0.3);
 }
 
+html,
 body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, .font-head {
-  font-family: 'Sora', system-ui, sans-serif;
+h1,
+h2,
+h3,
+h4,
+.font-head {
+  font-family: var(--font-head);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .material-symbols-rounded {
@@ -75,8 +76,75 @@ h1, h2, h3, .font-head {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
 }
 
 #root {
   min-height: 100svh;
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Barres de défilement discrètes */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface-2) 25%, #ffffff 50%, var(--color-surface-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pop-in {
+  animation: pop-in 180ms ease-out;
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.slide-in {
+  animation: slide-in 200ms ease-out;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.fade-in {
+  animation: fade-in 160ms ease-out;
 }
