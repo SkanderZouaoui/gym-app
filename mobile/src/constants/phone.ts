@@ -1,2 +1,2 @@
-/** Exemple de numéro affiché dans les champs téléphone vides (format tunisien). */
-export const PHONE_PLACEHOLDER = '+216 22 345 678';
+/** Exemple de numéro affiché dans les champs téléphone vides : 8 chiffres, format tunisien. */
+export const PHONE_PLACEHOLDER = '22 222 222';
