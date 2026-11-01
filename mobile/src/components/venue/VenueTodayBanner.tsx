@@ -32,14 +32,12 @@ export function VenueTodayBanner({ href }: { href: Href }) {
   const shown = picked ?? todayIndex;
   const day = venue.hours[shown];
   const hours = day?.open && openMinutes(day) > 0 ? `${day.from}–${day.to}` : null;
-  const minutes = openMinutes(day);
-  const duration = `${Math.floor(minutes / 60)} h${minutes % 60 ? ` ${String(minutes % 60).padStart(2, '0')}` : ''}`;
   return (
     <View style={{ gap: 10 }}>
       <Text style={styles.sectionTitle}>{t('venue.title')}</Text>
       <View style={[styles.card, cardShadow]}>
         <Pressable onPress={() => router.push(href)} style={styles.head} accessibilityRole="button" accessibilityLabel={t('venue.see_details')}>
-          <VenueLogo name={venue.name} logoUrl={venue.logoUrl} size={50} />
+          <VenueLogo name={venue.name} logoUrl={venue.logoUrl} size={40} />
           <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
             <Text style={styles.name} numberOfLines={2}>{venue.name}</Text>
             <VenueStatusBadge hours={venue.hours} compact />
@@ -54,12 +52,6 @@ export function VenueTodayBanner({ href }: { href: Href }) {
               <Text style={styles.hoursKicker} numberOfLines={1}>{(shown === todayIndex ? t('venue.today') : WEEKDAYS_LONG_MON[shown]).toUpperCase()}</Text>
               <Text style={styles.hoursValue}>{hours ?? t('venue.closed')}</Text>
             </View>
-            {hours ? (
-              <View style={styles.durationPill}>
-                <MaterialIcons name="schedule" size={14} color="#FFFFFF" />
-                <Text style={styles.durationText}>{t('venue.open_duration', { duration })}</Text>
-              </View>
-            ) : null}
           </View>
           <View style={styles.week}>
             {venue.hours.map((h, i) => {
@@ -95,24 +87,22 @@ export function VenueTodayBanner({ href }: { href: Href }) {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     sectionTitle: { fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text },
-    card: { backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 14 },
-    head: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    name: { fontFamily: fonts.head, fontSize: 18, letterSpacing: -0.4, color: colors.text },
-    hoursBox: { gap: 14, padding: 16, borderRadius: 20, overflow: 'hidden' },
-    decor: { position: 'absolute', right: -40, top: -50, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,0.10)' },
-    hoursKicker: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, color: 'rgba(255,255,255,0.75)' },
-    hoursValue: { fontFamily: fonts.head, fontSize: 30, letterSpacing: -1, color: '#FFFFFF', marginTop: 2 },
+    card: { backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border, padding: 12, gap: 10 },
+    head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    name: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },
+    hoursBox: { gap: 8, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 16, overflow: 'hidden' },
+    decor: { position: 'absolute', right: -30, top: -40, width: 110, height: 110, borderRadius: 55, backgroundColor: 'rgba(255,255,255,0.10)' },
+    hoursKicker: { fontFamily: fonts.bodyBold, fontSize: 10, letterSpacing: 0.8, color: 'rgba(255,255,255,0.75)' },
+    hoursValue: { fontFamily: fonts.head, fontSize: 18, letterSpacing: -0.4, color: '#FFFFFF' },
     hoursTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    durationPill: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 28, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.18)' },
-    durationText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
     week: { flexDirection: 'row', justifyContent: 'space-between' },
-    dayCol: { alignItems: 'center', gap: 4 },
-    day: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+    dayCol: { alignItems: 'center', gap: 3 },
+    day: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
     dayOpen: { backgroundColor: 'rgba(255,255,255,0.22)' },
     dayClosed: { backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
     daySelected: { backgroundColor: '#FFFFFF', borderWidth: 0 },
-    dayText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: '#FFFFFF' },
+    dayText: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: '#FFFFFF' },
     dayTextSelected: { fontFamily: fonts.bodyBold, color: colors.primaryInk },
-    todayDot: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#FFFFFF' },
+    todayDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#FFFFFF' },
   });
 }
