@@ -68,7 +68,7 @@ export class StorageCleanupService {
       this.prisma.classType.findMany({ select: { galleryKeys: true, galleryMeta: true, imageKey: true } }),
       this.prisma.room.findMany({ select: { galleryKeys: true, galleryMeta: true } }),
       this.prisma.exercise.findMany({ where: { mediaKey: { not: null } }, select: { mediaKey: true } }),
-      this.prisma.organizationSettings.findMany({ select: { galleryKeys: true, galleryMeta: true } }),
+      this.prisma.organizationSettings.findMany({ select: { galleryKeys: true, galleryMeta: true, logoKey: true } }),
     ]);
     const keys = new Set<string>();
     for (const u of users) if (u.photoKey) keys.add(u.photoKey);
@@ -83,7 +83,10 @@ export class StorageCleanupService {
       if (t.imageKey) keys.add(t.imageKey);
     }
     for (const r of rooms) addGallery(r.galleryKeys, r.galleryMeta);
-    for (const s of settings) addGallery(s.galleryKeys, s.galleryMeta);
+    for (const s of settings) {
+      addGallery(s.galleryKeys, s.galleryMeta);
+      if (s.logoKey) keys.add(s.logoKey);
+    }
     for (const e of exercises) if (e.mediaKey) keys.add(e.mediaKey);
     return keys;
   }

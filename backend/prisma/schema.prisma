@@ -22,6 +22,8 @@ model OrganizationSettings {
   /// Photos de l'établissement (ordre d'affichage) et leurs miniatures / aperçus flous.
   galleryKeys      String[] @default([]) @map("gallery_keys")
   galleryMeta      Json     @default("{}") @map("gallery_meta")
+  /// Logo de l'établissement (clé de stockage).
+  logoKey          String?  @map("logo_key")
   version          Int      @default(1)
   updatedBy        String?  @map("updated_by")
   updatedAt        DateTime @updatedAt @map("updated_at")

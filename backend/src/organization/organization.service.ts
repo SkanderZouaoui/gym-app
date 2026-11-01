@@ -2,6 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { StorageService } from '../storage/storage.service.js';
 import { GalleryAssetsService } from '../storage/gallery-assets.service.js';
 import { readGalleryMeta, toGalleryJson } from '../storage/gallery-image.js';
+import { processLogo } from '../storage/logo-image.js';
+import { randomUUID } from 'node:crypto';
+import { Role } from '@muscleup/shared';
 import { MAX_TYPE_GALLERY, assertSamePermutation } from '../classes/classes.service.js';
 import { mergeConfig, organizationConfigSchema } from './organization-config.js';
 import { DEFAULT_ATTENDANCE_POLICY, attendancePolicySchema } from '@muscleup/shared';
@@ -125,5 +128,65 @@ export class OrganizationService {
     });
     await this.gallery.deleteFiles([key]);
     return this.getGallery();
+  }
+
+  // --- Logo -----------------------------------------------------------------------
+
+  async logoUploadUrl(contentType: string, sizeBytes: number) {
+    const key = this.storage.buildKey('organization/logo', contentType);
+    return { key, uploadUrl: await this.storage.getUploadUrl(key, contentType, sizeBytes) };
+  }
+
+  /** Enregistre le logo envoyé : réduit et ré-encodé en WebP, l'envoi brut et l'ancien logo sont supprimés. */
+  async setLogo(rawKey: string) {
+    const settings = await this.getSettings();
+    this.storage.assertOwnKey(rawKey, 'organization/logo');
+    let processed: Buffer;
+    try {
+      processed = await processLogo(await this.storage.getObjectBuffer(rawKey));
+    } catch (err) {
+      await this.storage.deleteObject(rawKey).catch(() => undefined);
+      throw err;
+    }
+    const logoKey = `organization/logo/${randomUUID()}.webp`;
+    await this.storage.putObject(logoKey, processed, 'image/webp');
+    await this.prisma.organizationSettings.update({ where: { id: settings.id }, data: { logoKey } });
+    await Promise.all([rawKey, settings.logoKey].filter((k): k is string => !!k && k !== logoKey).map((k) => this.storage.deleteObject(k).catch(() => undefined)));
+    return { logoUrl: await this.storage.getReadUrl(logoKey) };
+  }
+
+  async removeLogo() {
+    const settings = await this.getSettings();
+    if (!settings.logoKey) return { logoUrl: null };
+    await this.prisma.organizationSettings.update({ where: { id: settings.id }, data: { logoKey: null } });
+    await this.storage.deleteObject(settings.logoKey).catch(() => undefined);
+    return { logoUrl: null };
+  }
+
+  // --- Fiche de la salle (tous les rôles) ----------------------------------------
+
+  /**
+   * Ce que l'application montre de l'établissement : nom, logo, horaires et photos pour tous ; adresse, téléphone et e-mail
+   * pour l'équipe (accueil, coach, admin) et, pour un adhérent, seulement si l'admin a coché « visible par les adhérents ».
+   */
+  async getVenue(role: Role) {
+    const settings = await this.getSettings();
+    const config = mergeConfig(settings.config);
+    const showContact = role !== Role.MEMBER || config.contact.visibleToMembers;
+    return {
+      name: config.contact.name.trim() || settings.name,
+      logoUrl: settings.logoKey ? await this.storage.getReadUrl(settings.logoKey) : null,
+      hours: config.hours,
+      contact: showContact
+        ? {
+            address: config.contact.address,
+            phone: config.contact.phone,
+            email: config.contact.email,
+            latitude: config.contact.latitude,
+            longitude: config.contact.longitude,
+          }
+        : null,
+      gallery: await this.gallery.withUrls({ galleryKeys: settings.galleryKeys, galleryMeta: settings.galleryMeta }),
+    };
   }
 }

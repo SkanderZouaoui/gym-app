@@ -6,7 +6,12 @@ const hour = z.object({ open: z.boolean(), from: z.string().regex(/^\d{2}:\d{2}$
 /** Réglages de la salle (écran Configuration admin) — stockés dans organization_settings.config. */
 export const organizationConfigSchema = z.object({
   contact: z.object({
+    /** Nom de la salle affiché dans l'application. */
+    name: z.string().max(80).default(''),
     address: z.string(),
+    /** Position GPS de la salle (carte et itinéraire dans l'application). */
+    latitude: z.number().min(-90).max(90).nullable().default(null),
+    longitude: z.number().min(-180).max(180).nullable().default(null),
     phone: z.string(),
     email: z.string(),
     visibleToMembers: z.boolean(),
@@ -38,7 +43,7 @@ export type OrganizationConfig = z.infer<typeof organizationConfigSchema>;
 const DEFAULT_HOURS = Array.from({ length: 7 }, (_, i) => ({ open: i !== 6, from: '07:00', to: i === 5 ? '20:00' : '22:00' }));
 
 export const DEFAULT_ORGANIZATION_CONFIG: OrganizationConfig = {
-  contact: { address: '', phone: '', email: '', visibleToMembers: true },
+  contact: { name: '', latitude: null, longitude: null, address: '', phone: '', email: '', visibleToMembers: true },
   hours: DEFAULT_HOURS,
   paymentMethods: { CASH: true, OTHER: true, TRANSFER: true, CHECK: true },
   announcements: { format: 'Bandeau', alertFormat: 'Bandeau', push: true, expiryReminderDays: 7 },

@@ -63,11 +63,47 @@ export class OrganizationController {
   }
 
   @Roles(Role.ADMIN)
+  @Get('logo')
+  async getLogo() {
+    return { logoUrl: (await this.organizationService.getVenue(Role.ADMIN)).logoUrl };
+  }
+
+  @Roles(Role.ADMIN)
+  @Post('logo/upload-url')
+  logoUploadUrl(@Body() body: RequestUploadUrlDto) {
+    return this.organizationService.logoUploadUrl(body.contentType, body.sizeBytes);
+  }
+
+  @Roles(Role.ADMIN)
+  @Put('logo')
+  setLogo(@Body() body: GalleryKeyDto) {
+    return this.organizationService.setLogo(body.key);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete('logo')
+  removeLogo() {
+    return this.organizationService.removeLogo();
+  }
+
+  @Roles(Role.ADMIN)
   @Put('attendance')
   updateAttendancePolicy(
     @Body() dto: UpdateAttendancePolicyDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.organizationService.updateAttendancePolicy(dto, user.userId);
+  }
+}
+
+/** Fiche de la salle, lisible par tout utilisateur connecté (contenu adapté au rôle actif). */
+@ApiTags('organization')
+@Controller('v1/venue')
+export class VenueController {
+  constructor(private readonly organizationService: OrganizationService) {}
+
+  @Get()
+  get(@CurrentUser() user: AuthenticatedUser) {
+    return this.organizationService.getVenue(user.activeRole);
   }
 }
