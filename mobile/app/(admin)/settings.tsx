@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { PHONE_PLACEHOLDER } from '../../src/constants/phone';
 import { VenueIdentityCard, VenueLocationCard } from '../../src/components/VenueIdentityFields';
 import { VenueMediaSection } from '../../src/components/VenueMediaSection';
 import { ScrollLockContext } from '../../src/components/ui/KeyboardAwareScreen';
@@ -81,7 +82,7 @@ const PAYMENTS: { key: keyof OrganizationConfig['paymentMethods']; label: string
 ];
 
 /** Champ de coordonnée : défini hors de SalleConfig pour garder la même identité (le clavier reste ouvert). */
-function ConfigField({ icon, label, value, onChange, kb }: { icon: keyof typeof MaterialIcons.glyphMap; label: string; value: string; onChange: (v: string) => void; kb?: 'default' | 'phone-pad' | 'email-address' }) {
+function ConfigField({ icon, label, value, onChange, kb, placeholder }: { icon: keyof typeof MaterialIcons.glyphMap; label: string; value: string; onChange: (v: string) => void; kb?: 'default' | 'phone-pad' | 'email-address'; placeholder?: string }) {
   useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -92,7 +93,7 @@ function ConfigField({ icon, label, value, onChange, kb }: { icon: keyof typeof 
       </LinearGradient>
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={styles.fieldLabel}>{label.toUpperCase()}</Text>
-        <TextInput value={value} onChangeText={onChange} keyboardType={kb} autoCapitalize={kb ? 'none' : 'sentences'} placeholderTextColor={colors.muted} style={styles.fieldInput} />
+        <TextInput value={value} onChangeText={onChange} placeholder={placeholder} keyboardType={kb} autoCapitalize={kb ? 'none' : 'sentences'} placeholderTextColor={colors.muted} style={styles.fieldInput} />
       </View>
     </View>
   );
@@ -123,7 +124,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
 
       <Text style={styles.section}>{t('admin.venue_contact')}</Text>
       <View style={[styles.card, cardShadow]}>
-        <ConfigField icon="call" label={t('common.telephone')} value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" />
+        <ConfigField icon="call" label={t('common.telephone')} value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" placeholder={PHONE_PLACEHOLDER} />
         <View style={styles.sep} />
         <ConfigField icon="mail" label={t('common.email')} value={cfg.contact.email} onChange={(v) => patch({ contact: { ...cfg.contact, email: v } })} kb="email-address" />
         <View style={styles.sep} />

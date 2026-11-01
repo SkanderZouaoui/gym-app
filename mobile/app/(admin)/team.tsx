@@ -1,3 +1,4 @@
+import { PHONE_PLACEHOLDER } from '../../src/constants/phone';
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
@@ -398,7 +399,7 @@ export default function AdminTeamScreen() {
         <TextField label={t('common.prenom')} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
         <TextField label={t('common.nom')} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
         <TextField label={t('common.e_mail')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-        <TextField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder={t('common.optionnel')} />
+        <TextField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder={PHONE_PLACEHOLDER} />
         <Button label={create.isPending ? t('common.creation') : t('admin.creer_le_compte')} onPress={submit} disabled={!valid || create.isPending} />
       </BottomSheet>
 

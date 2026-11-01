@@ -1,3 +1,4 @@
+import { PHONE_PLACEHOLDER } from '../../src/constants/phone';
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
@@ -139,7 +140,7 @@ export default function ProfileEditScreen() {
               value={phone}
               onChangeText={setPhone}
               keyboardType="phone-pad"
-              placeholder={t('common.optionnel')}
+              placeholder={PHONE_PLACEHOLDER}
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
           </View>

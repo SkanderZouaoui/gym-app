@@ -1,3 +1,4 @@
+import { PHONE_PLACEHOLDER } from '../../src/constants/phone';
 import { useMemo, useState } from 'react';
 import { Link, router } from 'expo-router';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -104,7 +105,7 @@ export default function RegisterScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            <TextField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+216 22 345 678" />
+            <TextField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder={PHONE_PLACEHOLDER} />
             <TextField
               label={t('common.mot_de_passe')}
               value={password}

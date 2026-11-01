@@ -11,6 +11,7 @@ import { ProfileHeader } from './adherent/ProfileHeader';
 import { SettingsGroup } from './adherent/ProfileSections';
 import { ApiError } from '../api/client';
 import { useMe } from '../hooks/useMe';
+import { PHONE_PLACEHOLDER } from '../constants/phone';
 import { useMySchedule } from '../hooks/useAdmin';
 import { MyWorkSchedule } from './profile/MyWorkSchedule';
 import { useUpdateProfile } from '../hooks/useProfile';
@@ -113,7 +114,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const contactRows: { icon: IconName; label: string; value: string; onChange?: (v: string) => void; placeholder: string; keyboardType?: 'default' | 'phone-pad'; verified?: boolean }[] = [
     { icon: 'person-outline', label: t('common.nom_complet'), value: fullName, onChange: setFullName, placeholder: t('common.nom') },
     { icon: 'mail-outline', label: t('common.email'), value: user?.email ?? '', placeholder: t('common.email_salle_fr'), verified: !!user?.email },
-    { icon: 'call', label: t('common.telephone'), value: phone, onChange: setPhone, placeholder: '06 00 00 00 00', keyboardType: 'phone-pad' },
+    { icon: 'call', label: t('common.telephone'), value: phone, onChange: setPhone, placeholder: PHONE_PLACEHOLDER, keyboardType: 'phone-pad' },
   ];
 
   return (

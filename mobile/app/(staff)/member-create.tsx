@@ -1,3 +1,4 @@
+import { PHONE_PLACEHOLDER } from '../../src/constants/phone';
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
@@ -273,7 +274,7 @@ export default function StaffMemberCreateScreen() {
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
-            placeholder={t('common.optionnel')}
+            placeholder={PHONE_PLACEHOLDER}
             error={error?.field === 'phone' ? t('staff.deja_utilise') : undefined}
           />
         </Section>
