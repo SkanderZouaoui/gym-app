@@ -1714,8 +1714,6 @@
     "call": "اتصال",
     "email": "بريد إلكتروني",
     "directions": "الاتجاهات",
-    "copy_address": "نسخ العنوان",
-    "address_copied": "تم نسخ العنوان",
     "hours": "ساعات العمل",
     "closed": "مغلق",
     "see_details": "عرض التفاصيل",
@@ -1727,6 +1725,8 @@
     "unavailable": "المعلومات غير متاحة حاليًا.",
     "coach_hours": "النادي مفتوح {{hours}}",
     "coach_closed": "النادي مغلق في هذا اليوم",
-    "front_desk": "الاستقبال"
+    "front_desk": "الاستقبال",
+    "copied": "تم النسخ",
+    "copy_phone": "نسخ الرقم"
   }
 }

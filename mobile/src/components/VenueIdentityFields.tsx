@@ -86,14 +86,10 @@ export function VenueIdentityCard({ name, onName }: { name: string; onName: (v: 
  * Maps (lien court accepté : l'API le résout), effacer. La carte et l'itinéraire apparaissent ensuite côté adhérent.
  */
 export function VenueLocationCard({
-  address,
-  onAddress,
   latitude,
   longitude,
   onChange,
 }: {
-  address: string;
-  onAddress: (v: string) => void;
   latitude: number | null;
   longitude: number | null;
   onChange: (pos: Position | null) => void;
@@ -167,13 +163,9 @@ export function VenueLocationCard({
         <Text style={styles.cardTitle}>{t('admin.venue_gps')}</Text>
       </View>
 
-      <View style={styles.addressBox}>
-        <TextField label={t('admin.adresse')} icon="location-on" value={address} onChangeText={onAddress} autoCapitalize="sentences" returnKeyType="done" />
-      </View>
-
       <View style={styles.mapBox}>
         {has ? (
-          <VenueMap latitude={latitude!} longitude={longitude!} address={address} width={mapWidth - 28} height={170} />
+          <VenueMap latitude={latitude!} longitude={longitude!} width={mapWidth - 28} height={170} />
         ) : (
           <View style={[styles.mapEmpty, { borderColor: colors.primaryBorder, backgroundColor: colors.primarySoft }]}>
             <MaterialIcons name="map" size={34} color={colors.primaryInk} />
@@ -244,7 +236,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     nameBox: { alignSelf: 'stretch', marginTop: 4 },
     cardHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 18, paddingTop: 16 },
     cardTitle: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },
-    addressBox: { paddingHorizontal: 14, paddingTop: 12 },
     mapBox: { paddingHorizontal: 14, paddingTop: 12, gap: 6, alignItems: 'center' },
     mapEmpty: { alignSelf: 'stretch', height: 150, borderRadius: 22, borderWidth: 1.5, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 20 },
     mapEmptyTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },

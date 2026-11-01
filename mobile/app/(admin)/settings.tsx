@@ -116,8 +116,6 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
       <VenueIdentityCard name={cfg.contact.name} onName={(v) => patch({ contact: { ...cfg.contact, name: v } })} />
 
       <VenueLocationCard
-        address={cfg.contact.address}
-        onAddress={(v) => patch({ contact: { ...cfg.contact, address: v } })}
         latitude={cfg.contact.latitude}
         longitude={cfg.contact.longitude}
         onChange={(pos) => patch({ contact: { ...cfg.contact, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null } })}

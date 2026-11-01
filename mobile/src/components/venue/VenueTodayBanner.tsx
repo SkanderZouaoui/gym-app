@@ -10,6 +10,7 @@ import { useNow } from '../../hooks/useNow';
 import { useVenue } from '../../hooks/useVenue';
 import { haptics } from '../../utils/haptics';
 import { hoursLabel } from '../../utils/openingHours';
+import { directionsUrl } from '../../utils/maps';
 import { Toast } from '../ui';
 import { VenueStatusBadge } from './VenueStatusBadge';
 
@@ -34,10 +35,11 @@ export function VenueTodayBanner({ href }: { href: Href }) {
   if (!venue) return null;
   const today = hoursLabel(venue.hours, new Date(nowMs));
   const contact = venue.contact;
+  const hasPosition = contact?.latitude != null && contact?.longitude != null;
   const copy = async (value: string) => {
     await Clipboard.setStringAsync(value);
     void haptics.success();
-    setToast(t('venue.address_copied'));
+    setToast(t('venue.copied'));
   };
 
   return (
@@ -54,7 +56,7 @@ export function VenueTodayBanner({ href }: { href: Href }) {
           </View>
           <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
         </Pressable>
-        {contact && (contact.phone || contact.address) ? (
+        {contact && (contact.phone || hasPosition) ? (
           <View style={styles.actions}>
             {contact.phone ? (
               <>
@@ -62,7 +64,7 @@ export function VenueTodayBanner({ href }: { href: Href }) {
                 <Chip icon="content-copy" label={contact.phone} onPress={() => void copy(contact.phone)} subtle />
               </>
             ) : null}
-            {contact.address ? <Chip icon="location-on" label={t('venue.copy_address')} onPress={() => void copy(contact.address)} subtle /> : null}
+            {hasPosition ? <Chip icon="directions" label={t('venue.directions')} onPress={() => void Linking.openURL(directionsUrl(contact)!)} subtle /> : null}
           </View>
         ) : null}
       </View>

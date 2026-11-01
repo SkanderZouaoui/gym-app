@@ -11,7 +11,6 @@ import { useNow } from '../../hooks/useNow';
 import { useVenue, type VenueContact } from '../../hooks/useVenue';
 import { useOfflineAwareRefresh } from '../../hooks/useOfflineAwareRefresh';
 import { haptics } from '../../utils/haptics';
-import { directionsUrl } from '../../utils/maps';
 import { weekdayIndex } from '../../utils/openingHours';
 import { WEEKDAYS_LONG_MON } from '../../i18n/labels';
 import { Banner, SkeletonBlock, Toast } from '../ui';
@@ -44,10 +43,10 @@ export function VenueScreen() {
   }, [toast]);
 
   const open = (url: string | null) => url && void Linking.openURL(url);
-  const copyAddress = async (address: string) => {
-    await Clipboard.setStringAsync(address);
+  const copyPhone = async (phone: string) => {
+    await Clipboard.setStringAsync(phone);
     void haptics.success();
-    setToast(t('venue.address_copied'));
+    setToast(t('venue.copied'));
   };
 
   return (
@@ -84,8 +83,7 @@ export function VenueScreen() {
               mapWidth={width - spacing.lg * 2}
               onCall={(p) => open(`tel:${p.replace(/\s+/g, '')}`)}
               onMail={(e) => open(`mailto:${e}`)}
-              onCopy={copyAddress}
-              onDirections={(c) => open(directionsUrl(c))}
+              onCopy={copyPhone}
             />
 
             <Text style={styles.section}>{t('venue.hours')}</Text>
@@ -112,43 +110,38 @@ function ContactBlock({
   onCall,
   onMail,
   onCopy,
-  onDirections,
 }: {
   contact: VenueContact | null;
   mapWidth: number;
   onCall: (phone: string) => void;
   onMail: (email: string) => void;
-  onCopy: (address: string) => void;
-  onDirections: (c: { latitude: number | null; longitude: number | null; address: string }) => void;
+  onCopy: (phone: string) => void;
 }) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   if (!contact) return null;
   const hasPosition = contact.latitude != null && contact.longitude != null;
-  const hasAnything = hasPosition || contact.address || contact.phone || contact.email;
+  const hasAnything = hasPosition || contact.phone || contact.email;
   if (!hasAnything) return null;
 
   return (
     <>
       <Text style={styles.section}>{t('venue.contact')}</Text>
-      {hasPosition ? <VenueMap latitude={contact.latitude!} longitude={contact.longitude!} address={contact.address} width={mapWidth} /> : null}
+      {hasPosition ? <VenueMap latitude={contact.latitude!} longitude={contact.longitude!} width={mapWidth} /> : null}
       <View style={[styles.card, cardShadow]}>
-        {contact.address ? (
+        {contact.phone ? (
           <ContactRow
-            icon="location-on"
-            label={contact.address}
+            icon="call"
+            label={contact.phone}
             actions={[
-              { icon: 'directions', label: t('venue.directions'), onPress: () => onDirections(contact) },
-              { icon: 'content-copy', label: t('venue.copy_address'), onPress: () => onCopy(contact.address) },
+              { icon: 'content-copy', label: t('venue.copy_phone'), onPress: () => onCopy(contact.phone) },
+              { icon: 'call', label: t('venue.call'), onPress: () => onCall(contact.phone) },
             ]}
           />
         ) : null}
-        {contact.phone ? (
-          <ContactRow icon="call" label={contact.phone} border={!!contact.address} actions={[{ icon: 'call', label: t('venue.call'), onPress: () => onCall(contact.phone) }]} />
-        ) : null}
         {contact.email ? (
-          <ContactRow icon="mail" label={contact.email} border={!!(contact.address || contact.phone)} actions={[{ icon: 'send', label: t('venue.email'), onPress: () => onMail(contact.email) }]} />
+          <ContactRow icon="mail" label={contact.email} border={!!contact.phone} actions={[{ icon: 'send', label: t('venue.email'), onPress: () => onMail(contact.email) }]} />
         ) : null}
       </View>
     </>

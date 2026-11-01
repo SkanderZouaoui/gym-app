@@ -1714,8 +1714,6 @@
     "call": "Call",
     "email": "Email",
     "directions": "Directions",
-    "copy_address": "Copy address",
-    "address_copied": "Address copied",
     "hours": "Opening hours",
     "closed": "Closed",
     "see_details": "View details",
@@ -1727,6 +1725,8 @@
     "unavailable": "Information currently unavailable.",
     "coach_hours": "Gym open {{hours}}",
     "coach_closed": "Gym closed that day",
-    "front_desk": "Front desk"
+    "front_desk": "Front desk",
+    "copied": "Copied",
+    "copy_phone": "Copy number"
   }
 }

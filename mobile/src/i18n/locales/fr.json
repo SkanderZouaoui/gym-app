@@ -1714,8 +1714,6 @@
     "call": "Appeler",
     "email": "E-mail",
     "directions": "Itinéraire",
-    "copy_address": "Copier l'adresse",
-    "address_copied": "Adresse copiée",
     "hours": "Horaires d'ouverture",
     "closed": "Fermé",
     "see_details": "Voir la fiche",
@@ -1727,6 +1725,8 @@
     "unavailable": "Informations indisponibles pour le moment.",
     "coach_hours": "Salle ouverte {{hours}}",
     "coach_closed": "Salle fermée ce jour-là",
-    "front_desk": "Accueil"
+    "front_desk": "Accueil",
+    "copied": "Copié",
+    "copy_phone": "Copier le numéro"
   }
 }
