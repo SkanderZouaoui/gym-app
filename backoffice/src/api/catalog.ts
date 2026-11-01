@@ -33,6 +33,7 @@ export const useCoaches = () => useQuery({ queryKey: ['admin', 'coaches'], query
 function useInvalidateCatalog() {
   const qc = useQueryClient()
   return () => {
+    void qc.invalidateQueries({ queryKey: ['venue'] })
     void qc.invalidateQueries({ queryKey: ['admin', 'class-types'] })
     void qc.invalidateQueries({ queryKey: ['admin', 'rooms'] })
     void qc.invalidateQueries({ queryKey: ['sessions'] })
@@ -67,12 +68,12 @@ export function useDeleteRoom() {
   return useMutation({ mutationFn: async (id: string) => (await api.delete(`/v1/admin/rooms/${id}`)).data, onSuccess: done })
 }
 
-export type GalleryKind = 'class-types' | 'rooms'
+export type GalleryKind = 'class-types' | 'rooms' | 'organization'
 
 /** Galerie photos d'un type de cours ou d'une salle : envoi direct au stockage (URL présignée), puis rattachement. */
 export function useGalleryApi(kind: GalleryKind, id: string) {
   const done = useInvalidateCatalog()
-  const base = `/v1/admin/${kind}/${id}`
+  const base = kind === 'organization' ? '/v1/admin/settings' : `/v1/admin/${kind}/${id}`
   return {
     async upload(file: File): Promise<GalleryFields> {
       const { data } = await api.post<{ key: string; uploadUrl: string }>(`${base}/gallery/upload-url`, { contentType: file.type, sizeBytes: file.size })

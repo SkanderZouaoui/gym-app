@@ -150,3 +150,66 @@ export interface TeamStats {
 }
 export const useTeamStats = (id: string | null, days: number) =>
   useQuery({ queryKey: ['admin', 'team', id, 'stats', days], enabled: !!id, queryFn: () => get<TeamStats>(`/v1/admin/team/${id}/stats`, { days }) })
+
+// --- Présence (règles de pointage) -----------------------------------------------
+
+export interface AttendancePolicy {
+  scanOpensMinutesBefore: number
+  scanClosesMinutesAfterStart: number
+  allowWalkIn: boolean
+  noShowGraceMinutes: number
+  noShowPenalty: { enabled: boolean; threshold: number; windowDays: number; blockBookingDays: number }
+  staffCanRecordPayments: boolean
+}
+export const DEFAULT_ATTENDANCE_POLICY: AttendancePolicy = {
+  scanOpensMinutesBefore: 15,
+  scanClosesMinutesAfterStart: 10,
+  allowWalkIn: false,
+  noShowGraceMinutes: 15,
+  noShowPenalty: { enabled: false, threshold: 3, windowDays: 30, blockBookingDays: 7 },
+  staffCanRecordPayments: true,
+}
+
+export const useAttendancePolicy = () =>
+  useQuery({
+    queryKey: ['settings', 'attendance'],
+    queryFn: async () => ({ ...DEFAULT_ATTENDANCE_POLICY, ...(await get<{ attendancePolicy: AttendancePolicy }>('/v1/admin/settings')).attendancePolicy }),
+    staleTime: 60_000,
+  })
+
+export function useUpdateAttendancePolicy() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (policy: AttendancePolicy) => (await api.put('/v1/admin/settings/attendance', policy)).data,
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['settings'] }),
+  })
+}
+
+// --- Identité de la salle : logo, galerie, position -------------------------------
+
+export interface VenueIdentity {
+  logoUrl: string | null
+  gallery: { galleryKeys: string[]; galleryUrls: string[]; galleryThumbUrls?: string[] }
+}
+export const useVenueIdentity = () => useQuery({ queryKey: ['venue'], queryFn: () => get<VenueIdentity>('/v1/venue') })
+
+export function useVenueLogo() {
+  const qc = useQueryClient()
+  const done = () => void qc.invalidateQueries({ queryKey: ['venue'] })
+  return {
+    async upload(file: File) {
+      const { data } = await api.post<{ key: string; uploadUrl: string }>('/v1/admin/settings/logo/upload-url', { contentType: file.type, sizeBytes: file.size })
+      const put = await fetch(data.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
+      if (!put.ok) throw new Error('UPLOAD_FAILED')
+      await api.put('/v1/admin/settings/logo', { key: data.key })
+      done()
+    },
+    async remove() {
+      await api.delete('/v1/admin/settings/logo')
+      done()
+    },
+  }
+}
+
+/** Position d'un lien Google Maps (court ou long) ou de coordonnées collées, résolue par l'API. */
+export const resolveLocation = async (text: string) => (await api.post<{ latitude: number; longitude: number }>('/v1/admin/settings/resolve-location', { text })).data

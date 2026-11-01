@@ -7,6 +7,7 @@ import { PlanningPage } from './pages/PlanningPage'
 import { PlansPage } from './pages/PlansPage'
 import { TeamPage } from './pages/TeamPage'
 import { CatalogPage } from './pages/CatalogPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { AppShell } from './layouts/AppShell'
 import { RequireAuth, RequireRole } from './components/Guards'
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/planning" element={<PlanningPage />} />
         <Route path="/plans" element={<RequireRole roles={['ADMIN']}><PlansPage /></RequireRole>} />
         <Route path="/catalog" element={<RequireRole roles={['ADMIN']}><CatalogPage /></RequireRole>} />
+        <Route path="/settings" element={<RequireRole roles={['ADMIN']}><SettingsPage /></RequireRole>} />
         <Route path="/team" element={<RequireRole roles={['ADMIN']}><TeamPage /></RequireRole>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

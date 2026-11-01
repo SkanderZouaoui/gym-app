@@ -24,6 +24,11 @@ pnpm --filter @muscleup/backoffice dev     # http://localhost:5173
 | Adhérents (liste, fiche, création, encaissement) | STAFF, ADMIN | Adhérents, profil adhérent, création de compte |
 | Caisse | STAFF, ADMIN | Caisse / encaissements |
 | Planning (détail du cours, pointage manuel) | STAFF, ADMIN | Planning, détail d'un cours |
+| Planning : créer, modifier, annuler, supprimer un cours | ADMIN | Formulaire cours, planning admin |
+| Abonnements (forfaits, remises) | ADMIN | Abonnements |
+| Cours et salles (types, salles, galeries photos) | ADMIN | Cours et salles |
+| Équipe (comptes, planning de travail, activité) | ADMIN | Équipe |
+| Réglages (salle et horaires, réservation et présence, paiements, annonces) | ADMIN | Configuration |
 
 ## Structure
 
