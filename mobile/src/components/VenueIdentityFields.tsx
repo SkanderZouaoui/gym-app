@@ -12,6 +12,7 @@ import { useResolveLocation, useVenue, useVenueLogoMutations } from '../hooks/us
 import { parseMapsLocation } from '../utils/maps';
 import { haptics } from '../utils/haptics';
 import { ImageEditor } from './ImageEditor';
+import { TextField } from './TextField';
 import { Banner } from './ui';
 import { VenueLogo } from './venue/VenueLogo';
 import { VenueMap } from './venue/VenueMap';
@@ -62,8 +63,7 @@ export function VenueIdentityCard({ name, onName }: { name: string; onName: (v: 
       {error ? <Banner tone="danger" icon="error-outline" text={t('admin.venue_logo_error')} /> : null}
 
       <View style={styles.nameBox}>
-        <Text style={styles.fieldLabel}>{t('admin.venue_name').toUpperCase()}</Text>
-        <TextInput value={name} onChangeText={onName} placeholder={venue?.name} placeholderTextColor={colors.muted} style={styles.nameInput} textAlign="center" />
+        <TextField label={t('admin.venue_name')} icon="storefront" value={name} onChangeText={onName} placeholder={venue?.name} autoCapitalize="words" returnKeyType="done" />
       </View>
 
       <ImageEditor
@@ -168,8 +168,7 @@ export function VenueLocationCard({
       </View>
 
       <View style={styles.addressBox}>
-        <Text style={styles.fieldLabel}>{t('admin.adresse').toUpperCase()}</Text>
-        <TextInput value={address} onChangeText={onAddress} placeholderTextColor={colors.muted} style={styles.fieldInput} />
+        <TextField label={t('admin.adresse')} icon="location-on" value={address} onChangeText={onAddress} autoCapitalize="sentences" returnKeyType="done" />
       </View>
 
       <View style={styles.mapBox}>
@@ -242,13 +241,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     logoWrap: { marginTop: 4 },
     camera: { position: 'absolute', right: -4, bottom: -4, width: 32, height: 32, borderRadius: 16, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
     logoHint: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.primaryInk },
-    nameBox: { alignSelf: 'stretch', gap: 4, marginTop: 4 },
-    fieldLabel: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, color: colors.muted },
-    nameInput: { fontFamily: fonts.head, fontSize: 22, letterSpacing: -0.5, color: colors.text, paddingVertical: 4 },
+    nameBox: { alignSelf: 'stretch', marginTop: 4 },
     cardHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 18, paddingTop: 16 },
     cardTitle: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },
-    addressBox: { paddingHorizontal: 18, paddingTop: 12, gap: 4 },
-    fieldInput: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.text, paddingVertical: 4 },
+    addressBox: { paddingHorizontal: 14, paddingTop: 12 },
     mapBox: { paddingHorizontal: 14, paddingTop: 12, gap: 6, alignItems: 'center' },
     mapEmpty: { alignSelf: 'stretch', height: 150, borderRadius: 22, borderWidth: 1.5, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 20 },
     mapEmptyTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
