@@ -1728,6 +1728,7 @@
     "front_desk": "Front desk",
     "copied": "Copied",
     "copy_phone": "Copy number",
-    "today": "Today"
+    "today": "Today",
+    "open_duration": "Open {{duration}}"
   }
 }

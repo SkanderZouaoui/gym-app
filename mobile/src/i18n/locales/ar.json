@@ -1728,6 +1728,7 @@
     "front_desk": "الاستقبال",
     "copied": "تم النسخ",
     "copy_phone": "نسخ الرقم",
-    "today": "اليوم"
+    "today": "اليوم",
+    "open_duration": "مفتوح {{duration}}"
   }
 }

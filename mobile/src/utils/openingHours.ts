@@ -40,6 +40,11 @@ export function venueStatus(hours: DayHours[], now: Date): VenueStatus {
   return { kind: 'closedAllWeek' };
 }
 
+/** Durée d'ouverture d'un jour en minutes (0 si fermé ou créneau incohérent). */
+export function openMinutes(day: DayHours | undefined): number {
+  return isOpenDay(day) ? toMinutes(day.to) - toMinutes(day.from) : 0;
+}
+
 /** « 07:00–22:00 » pour la date donnée, ou null si la salle est fermée ce jour-là. */
 export function hoursLabel(hours: DayHours[], date: Date): string | null {
   const d = hours[weekdayIndex(date)];

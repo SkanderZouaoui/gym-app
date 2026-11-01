@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hoursLabel, venueStatus, weekdayIndex, type DayHours } from '../utils/openingHours';
+import { hoursLabel, openMinutes, venueStatus, weekdayIndex, type DayHours } from '../utils/openingHours';
 import { directionsUrl, parseMapsLocation, tilesAround, worldPixel } from '../utils/maps';
 
 // lundi → dimanche
@@ -53,6 +53,17 @@ describe('hoursLabel', () => {
     expect(hoursLabel(week, at(2, 9))).toBe('07:00–22:00');
     expect(hoursLabel(week, at(7, 9))).toBe('08:00–20:00');
     expect(hoursLabel(week, at(8, 9))).toBeNull();
+  });
+});
+
+describe('openMinutes', () => {
+  it('durée du créneau, 0 si fermé ou incohérent', () => {
+    expect(openMinutes(week[0])).toBe(15 * 60);
+    expect(openMinutes(week[5])).toBe(12 * 60);
+    expect(openMinutes(week[6])).toBe(0);
+    expect(openMinutes({ open: true, from: '22:00', to: '06:00' })).toBe(0);
+    expect(openMinutes({ open: true, from: '07:30', to: '12:00' })).toBe(270);
+    expect(openMinutes(undefined)).toBe(0);
   });
 });
 

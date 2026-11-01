@@ -1728,6 +1728,7 @@
     "front_desk": "Accueil",
     "copied": "Copié",
     "copy_phone": "Copier le numéro",
-    "today": "Aujourd'hui"
+    "today": "Aujourd'hui",
+    "open_duration": "{{duration}} d'ouverture"
   }
 }
