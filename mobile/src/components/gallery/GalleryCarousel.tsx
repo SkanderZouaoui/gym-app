@@ -24,7 +24,7 @@ export const tileWidthFor = (screenWidth: number, count: number) => (count === 1
 interface Props {
   photos: GalleryPhoto[];
   onOpen: (index: number, origin: PhotoOrigin) => void;
-  onActiveChange: (index: number) => void;
+  onActiveChange?: (index: number) => void;
   /** Photo à amener au centre (ex. au retour de la visionneuse). */
   focusIndex: number;
   /** Défilement automatique, suspendu au toucher puis repris. */
@@ -57,7 +57,7 @@ export function GalleryCarousel({ photos, onOpen, onActiveChange, focusIndex, au
       if (idx !== active.current) {
         active.current = idx;
         haptics.selection();
-        onActiveChange(idx);
+        onActiveChange?.(idx);
       }
     });
     return () => scrollX.removeListener(id);

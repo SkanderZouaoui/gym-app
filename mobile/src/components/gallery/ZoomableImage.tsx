@@ -22,13 +22,15 @@ interface Props {
   /** Le zoom est actif : la visionneuse suspend le défilement horizontal entre photos. */
   onZoomChange: (zoomed: boolean) => void;
   onClose: () => void;
+  /** La photo en haute définition est affichée. */
+  onLoaded?: () => void;
 }
 
 /**
  * Photo plein écran : pincement pour zoomer (jusqu'à ×5), double appui pour basculer ×1 / ×2,5, déplacement quand elle est
  * zoomée, glissement vers le bas pour fermer (quand elle ne l'est pas), simple appui pour fermer.
  */
-export function ZoomableImage({ photo, width, height, dismissY, setDismissY, onZoomChange, onClose }: Props) {
+export function ZoomableImage({ photo, width, height, dismissY, setDismissY, onZoomChange, onClose, onLoaded }: Props) {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const tx = useSharedValue(0);
@@ -151,8 +153,11 @@ export function ZoomableImage({ photo, width, height, dismissY, setDismissY, onZ
             placeholder={{ uri: photo.thumbUrl }}
             style={{ width, height }}
             contentFit="contain"
-            transition={250}
-            onLoad={() => setLoaded(true)}
+            transition={120}
+            onLoad={() => {
+              setLoaded(true);
+              onLoaded?.();
+            }}
           />
         </Animated.View>
         {!loaded ? (

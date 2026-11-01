@@ -168,7 +168,7 @@ export default function SessionDetailScreen() {
         <SessionGallery
           sections={[
             { id: 'type', label: t('member.galerie_cours'), photos: photosOf(session.classType) },
-            { id: 'room', label: t('member.galerie_salle'), photos: photosOf(session.room) },
+            { id: 'room', label: session.room?.name ?? t('member.galerie_salle'), photos: photosOf(session.room) },
           ]}
         />
       </ScrollView>

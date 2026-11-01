@@ -1,7 +1,7 @@
 import { useRef, type ComponentRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { fonts } from '../../theme/tokens';
+import { fonts, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { TilePhoto } from './TilePhoto';
 import type { GalleryPhoto, PhotoOrigin } from './photos';
@@ -24,16 +24,23 @@ export function GalleryMosaic({ photos, onOpen }: Props) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const refs = useRef<Record<number, ViewHandle | null>>({});
+  const { width: screenWidth } = useWindowDimensions();
   const extra = photos.length - 3;
+  // Dimensions explicites (largeur de l'écran moins les marges) : chaque vignette a toujours une taille nette.
+  const total = screenWidth - spacing.lg * 2;
+  const half = (total - GAP) / 2;
+  const bigW = Math.round((total - GAP) * 0.6);
+  const smallW = total - GAP - bigW;
+  const smallH = (HEIGHT - GAP) / 2;
 
-  const tile = (index: number, flex: number, key?: string) => (
+  const tile = (index: number, w: number, h: number) => (
     <Pressable
-      key={key ?? index}
+      key={index}
       ref={(r) => {
         refs.current[index] = r;
       }}
       onPress={() => refs.current[index]?.measureInWindow((x, y, w, h) => onOpen(index, { x, y, width: w, height: h }))}
-      style={({ pressed }) => [styles.tile, cardShadow, { flex, backgroundColor: colors.surface2, borderColor: colors.border }, pressed && { opacity: 0.9 }]}
+      style={({ pressed }) => [styles.tile, cardShadow, { width: w, height: h, backgroundColor: colors.surface2, borderColor: colors.border }, pressed && { opacity: 0.9 }]}
       accessibilityLabel={t('member.photo_sur', { v0: index + 1, length: photos.length })}
     >
       <TilePhoto photo={photos[index]} radius={RADIUS} />
@@ -45,14 +52,14 @@ export function GalleryMosaic({ photos, onOpen }: Props) {
     </Pressable>
   );
 
-  if (photos.length === 1) return <View style={[styles.row, { height: HEIGHT }]}>{tile(0, 1)}</View>;
-  if (photos.length === 2) return <View style={[styles.row, { height: HEIGHT }]}>{tile(0, 1)}{tile(1, 1)}</View>;
+  if (photos.length === 1) return <View style={styles.row}>{tile(0, total, HEIGHT)}</View>;
+  if (photos.length === 2) return <View style={styles.row}>{tile(0, half, HEIGHT)}{tile(1, half, HEIGHT)}</View>;
   return (
-    <View style={[styles.row, { height: HEIGHT }]}>
-      {tile(0, 1.45)}
-      <View style={[styles.column, { flex: 1 }]}>
-        {tile(1, 1)}
-        {tile(2, 1)}
+    <View style={styles.row}>
+      {tile(0, bigW, HEIGHT)}
+      <View style={styles.column}>
+        {tile(1, smallW, smallH)}
+        {tile(2, smallW, smallH)}
       </View>
     </View>
   );

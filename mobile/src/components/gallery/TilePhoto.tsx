@@ -12,7 +12,7 @@ export function TilePhoto({ photo, radius, style }: { photo: GalleryPhoto; radiu
   const { colors } = useTheme();
   const [state, setState] = useState<'loading' | 'ok' | 'error'>('loading');
   return (
-    <View style={[styles.fill, style]}>
+    <View style={[StyleSheet.absoluteFill, style]}>
       <Image
         source={{ uri: photo.thumbUrl }}
         placeholder={photo.blurhash ? { blurhash: photo.blurhash } : undefined}

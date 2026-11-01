@@ -49,7 +49,9 @@ export class ClassesService {
       type.galleryKeys.map((key, i) => (meta[key] ? this.storage.getReadUrl(thumbKeyOf(key)) : galleryUrls[i])),
     );
     const galleryBlurhashes = type.galleryKeys.map((key) => meta[key]?.blurhash ?? null);
-    return { ...type, galleryUrls, galleryThumbUrls, galleryBlurhashes };
+    // Proportions (largeur / hauteur) : la visionneuse anime l'ouverture vers la forme réelle de la photo.
+    const galleryRatios = type.galleryKeys.map((key) => (meta[key] ? meta[key].width / meta[key].height : null));
+    return { ...type, galleryUrls, galleryThumbUrls, galleryBlurhashes, galleryRatios };
   }
 
   /** Lit la photo envoyée, vérifie que c'est une image, enregistre sa miniature et renvoie ses métadonnées. */

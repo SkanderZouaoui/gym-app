@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Animated, FlatList, Modal, Platform, Pressable, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Alert, Animated, Easing, FlatList, Modal, Platform, Pressable, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ReanimatedView, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Image } from 'expo-image';
@@ -14,7 +14,7 @@ import { blurhashRgba } from '../../utils/blurhash';
 import { ZoomableImage } from './ZoomableImage';
 import type { GalleryPhoto, PhotoOrigin } from './photos';
 
-const THUMB = 52;
+const THUMB = 58;
 const OPEN_MS = 280;
 const CLOSE_MS = 180;
 
@@ -51,6 +51,8 @@ function ViewerBody({ photos, startIndex, origin, onClose, onIndexChange }: Omit
   const [current, setCurrent] = useState(startIndex);
   const [zoomed, setZoomed] = useState(false);
   const [ready, setReady] = useState(!origin);
+  // Le visuel de transition reste jusqu'à ce que la photo plein écran soit affichée : pas de saut entre les deux.
+  const [startLoaded, setStartLoaded] = useState(!origin);
   const [sharing, setSharing] = useState(false);
   const listRef = useRef<FlatList<GalleryPhoto>>(null);
   const railRef = useRef<FlatList<GalleryPhoto>>(null);
@@ -65,8 +67,15 @@ function ViewerBody({ photos, startIndex, origin, onClose, onIndexChange }: Omit
 
   useEffect(() => {
     Animated.timing(fade, { toValue: 1, duration: OPEN_MS, useNativeDriver: true }).start();
-    if (origin) Animated.timing(grow, { toValue: 1, duration: OPEN_MS, useNativeDriver: false }).start(() => setReady(true));
+    if (origin) Animated.timing(grow, { toValue: 1, duration: OPEN_MS, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start(() => setReady(true));
   }, [fade, grow, origin]);
+
+  // Garde-fou : si la photo plein écran tarde, on retire quand même le visuel de transition.
+  useEffect(() => {
+    if (!ready || startLoaded) return;
+    const id = setTimeout(() => setStartLoaded(true), 900);
+    return () => clearTimeout(id);
+  }, [ready, startLoaded]);
 
   // Le rail de miniatures suit la photo affichée.
   useEffect(() => {
@@ -101,7 +110,12 @@ function ViewerBody({ photos, startIndex, origin, onClose, onIndexChange }: Omit
   }));
 
   const photo = photos[current];
-  const target = { x: 0, y: pagerTop, w: width, h: pagerHeight };
+  // Arrivée de la transition : le rectangle exact qu'occupera la photo (mise à l'échelle « contain », centrée) ;
+  // à défaut de proportions connues, celles de la vignette.
+  const ratio = photos[startIndex].ratio ?? (origin ? origin.width / origin.height : 1);
+  const fitW = ratio >= width / pagerHeight ? width : pagerHeight * ratio;
+  const fitH = ratio >= width / pagerHeight ? width / ratio : pagerHeight;
+  const target = { x: (width - fitW) / 2, y: pagerTop + (pagerHeight - fitH) / 2, w: fitW, h: fitH };
 
   return (
     <Animated.View style={[styles.root, { opacity: fade }]}>
@@ -144,7 +158,7 @@ function ViewerBody({ photos, startIndex, origin, onClose, onIndexChange }: Omit
           }}
           style={[styles.pager, { opacity: ready ? 1 : 0 }]}
           renderItem={({ item }) => (
-            <ZoomableImage photo={item} width={width} height={pagerHeight} dismissY={dismissY} setDismissY={setDismissY} onZoomChange={setZoomed} onClose={close} />
+            <ZoomableImage photo={item} width={width} height={pagerHeight} onLoaded={item === photos[startIndex] ? () => setStartLoaded(true) : undefined} dismissY={dismissY} setDismissY={setDismissY} onZoomChange={setZoomed} onClose={close} />
           )}
         />
 
@@ -178,7 +192,7 @@ function ViewerBody({ photos, startIndex, origin, onClose, onIndexChange }: Omit
       </View>
 
       {/* Transition : la photo touchée s'agrandit depuis sa vignette jusqu'à sa place dans la visionneuse. */}
-      {!ready && origin ? (
+      {origin && !(ready && startLoaded) ? (
         <Animated.View
           pointerEvents="none"
           style={{
@@ -208,9 +222,9 @@ const styles = StyleSheet.create({
   round: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.16)', alignItems: 'center', justifyContent: 'center' },
   pager: { flexGrow: 0 },
   rail: { flexGrow: 0, marginTop: 14 },
-  railContent: { paddingHorizontal: 20, gap: 10, alignItems: 'center' },
-  thumbBtn: { width: THUMB, height: THUMB, borderRadius: 14, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent' },
-  thumbBtnActive: { borderColor: '#FFFFFF', transform: [{ scale: 1.08 }] },
+  railContent: { paddingHorizontal: 20, paddingVertical: 8, gap: 10, alignItems: 'center' },
+  thumbBtn: { width: THUMB, height: THUMB, borderRadius: 16, overflow: 'hidden', borderWidth: 2.5, borderColor: 'rgba(255,255,255,0.12)' },
+  thumbBtnActive: { borderColor: '#FFFFFF' },
   thumbImg: { width: '100%', height: '100%' },
   thumbDim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.35)' },
 });

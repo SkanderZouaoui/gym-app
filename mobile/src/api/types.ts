@@ -32,8 +32,8 @@ export interface ClassSessionSummary {
   endsAt: string;
   capacity: number;
   status: string;
-  classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[]; galleryThumbUrls?: string[]; galleryBlurhashes?: (string | null)[] };
-  room: { id: string; name: string; galleryUrls?: string[]; galleryThumbUrls?: string[]; galleryBlurhashes?: (string | null)[] } | null;
+  classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[]; galleryThumbUrls?: string[]; galleryBlurhashes?: (string | null)[]; galleryRatios?: (number | null)[] };
+  room: { id: string; name: string; galleryUrls?: string[]; galleryThumbUrls?: string[]; galleryBlurhashes?: (string | null)[]; galleryRatios?: (number | null)[] } | null;
   coach: { user: { firstName: string; lastName: string } } | null;
   coachId?: string | null;
   roomId?: string | null;
@@ -41,7 +41,7 @@ export interface ClassSessionSummary {
 }
 
 export interface ClassSessionDetail extends ClassSessionSummary {
-  classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[]; galleryThumbUrls?: string[]; galleryBlurhashes?: (string | null)[] };
+  classType: { id: string; name: string; description: string | null; level?: string | null; galleryUrls?: string[]; galleryThumbUrls?: string[]; galleryBlurhashes?: (string | null)[]; galleryRatios?: (number | null)[] };
 }
 
 export interface Booking {
