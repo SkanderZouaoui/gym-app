@@ -99,12 +99,9 @@ export function TextField({ label, error, hint, icon, style, isPassword, secureT
           <Pressable style={styles.action} onPress={() => onChangeText?.('')} hitSlop={8} accessibilityRole="button" accessibilityLabel={t('member.effacer')}>
             <MaterialIcons name="cancel" size={20} color={colors.muted} />
           </Pressable>
-        ) : !focused && !multiline ? (
-          hasValue ? (
-            <MaterialIcons name="check-circle" size={20} color={colors.success} />
-          ) : (
-            <MaterialIcons name="edit" size={18} color={colors.muted} style={{ opacity: 0.8 }} />
-          )
+        ) : !focused ? (
+          // Crayon : le champ se modifie (violet une fois rempli, gris tant qu'il est vide).
+          <MaterialIcons name="edit" size={18} color={hasValue ? colors.primary : colors.muted} style={[{ opacity: hasValue ? 0.85 : 0.8 }, multiline && { alignSelf: 'flex-start', marginTop: 8 }]} />
         ) : null}
       </Pressable>
 

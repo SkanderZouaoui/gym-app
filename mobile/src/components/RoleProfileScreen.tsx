@@ -187,6 +187,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
                     style={[styles.contactInput, !r.onChange && { color: colors.muted }]}
                   />
                 </View>
+                <MaterialIcons name={r.onChange ? 'edit' : 'lock-outline'} size={18} color={r.onChange && r.value.trim() ? colors.primary : colors.muted} style={{ opacity: 0.8 }} />
               </View>
             ))}
           </View>

@@ -101,6 +101,7 @@ function ConfigField({ icon, label, value, onChange, kb, placeholder }: { icon: 
         <Text style={[styles.fieldLabel, value.trim() ? { color: colors.primaryInk } : null]}>{label.toUpperCase()}</Text>
         <TextInput value={value} onChangeText={onChange} placeholder={placeholder} keyboardType={kb} autoCapitalize={kb ? 'none' : 'sentences'} placeholderTextColor={colors.muted} style={styles.fieldInput} />
       </View>
+      <MaterialIcons name="edit" size={18} color={value.trim() ? colors.primary : colors.muted} style={{ opacity: 0.8 }} />
     </View>
   );
 }
