@@ -43,27 +43,48 @@ export function useGalleryMutations(kind: GalleryKind, ownerId: string) {
     void queryClient.invalidateQueries({ queryKey: ['classes'] });
   };
 
+  /** Envoie une photo au stockage puis la rattache à la galerie (en dernière position) ; renvoie sa clé. */
+  const uploadOne = async (image: PickedImage): Promise<string> => {
+    const contentType = normalizeImageType(image.mimeType);
+    const blob = await readUploadBlob(image.uri);
+    const { key, uploadUrl } = await apiRequest<{ key: string; uploadUrl: string }>(`${base}/gallery/upload-url`, {
+      method: 'POST',
+      body: { contentType, sizeBytes: blob.size },
+    });
+    const put = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': contentType }, body: blob });
+    if (!put.ok) throw new Error('UPLOAD_FAILED');
+    await apiRequest(`${base}/gallery`, { method: 'POST', body: { key } });
+    return key;
+  };
+
   const add = useMutation({
     mutationFn: async (images: PickedImage[]) => {
       let added = 0;
       let failed = 0;
       for (const image of images) {
         try {
-          const contentType = normalizeImageType(image.mimeType);
-          const blob = await readUploadBlob(image.uri);
-          const { key, uploadUrl } = await apiRequest<{ key: string; uploadUrl: string }>(`${base}/gallery/upload-url`, {
-            method: 'POST',
-            body: { contentType, sizeBytes: blob.size },
-          });
-          const put = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': contentType }, body: blob });
-          if (!put.ok) throw new Error('UPLOAD_FAILED');
-          await apiRequest(`${base}/gallery`, { method: 'POST', body: { key } });
+          await uploadOne(image);
           added += 1;
         } catch {
           failed += 1;
         }
       }
       return { added, failed };
+    },
+    onSettled: refresh,
+  });
+
+  /**
+   * Remplace une photo par sa version retouchée, à la même position : la nouvelle est envoyée d'abord (en cas d'échec
+   * l'ancienne reste intacte), puis l'ancienne est supprimée du stockage et la nouvelle replacée à son rang.
+   */
+  const replace = useMutation({
+    mutationFn: async ({ oldKey, image, keys }: { oldKey: string; image: PickedImage; keys: string[] }) => {
+      const newKey = await uploadOne(image);
+      await apiRequest(`${base}/gallery`, { method: 'DELETE', body: { key: oldKey } });
+      const order = keys.map((k) => (k === oldKey ? newKey : k));
+      // Le rang est un confort : si cet appel échoue, la photo retouchée reste simplement en dernière position.
+      await apiRequest(`${base}/gallery/order`, { method: 'PUT', body: { keys: order } }).catch(() => undefined);
     },
     onSettled: refresh,
   });
@@ -82,5 +103,5 @@ export function useGalleryMutations(kind: GalleryKind, ownerId: string) {
     onSettled: refresh,
   });
 
-  return { add, remove, reorder };
+  return { add, remove, reorder, replace };
 }

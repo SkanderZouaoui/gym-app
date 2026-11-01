@@ -1,13 +1,15 @@
 import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Animated, Image, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { File, Paths } from 'expo-file-system';
 import { useTranslation } from 'react-i18next';
 import { fonts, radii } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { Banner } from './ui';
 import { ScrollLockContext } from './ui/KeyboardAwareScreen';
-import { useGalleryMutations } from '../hooks/useGallery';
+import { ImageEditor, type EditedImage } from './ImageEditor';
+import { useGalleryMutations, type PickedImage } from '../hooks/useGallery';
 import { haptics } from '../utils/haptics';
 
 const COLUMNS = 3;
@@ -25,6 +27,14 @@ interface Props {
   mutations: ReturnType<typeof useGalleryMutations>;
 }
 
+/** Fichier temporaire (cache) où télécharger une photo à retoucher. */
+const tempImageFile = () => new File(Paths.cache, `gallery-edit-${Date.now()}.jpg`);
+
+/** Retouche en cours : photos tout juste choisies (une par une) ou photo déjà en galerie. */
+type EditorState =
+  | { kind: 'import'; queue: PickedImage[]; index: number; done: PickedImage[] }
+  | { kind: 'edit'; key: string; uri: string };
+
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
 
 /** Coin haut-gauche d'une case de la grille pour une taille de tuile donnée. */
@@ -39,10 +49,12 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { add, remove, reorder } = mutations;
+  const { add, remove, reorder, replace } = mutations;
   const setScrollEnabled = useContext(ScrollLockContext);
   const [width, setWidth] = useState(0);
   const [message, setMessage] = useState<{ tone: 'danger' | 'success' | 'warning'; text: string } | null>(null);
+  const [editor, setEditor] = useState<EditorState | null>(null);
+  const [preparing, setPreparing] = useState<string | null>(null);
 
   const remaining = MAX_GALLERY - keys.length;
   const offset = remaining > 0 ? 1 : 0; // la tuile « Ajouter » occupe la première case tant qu'il reste de la place
@@ -184,10 +196,59 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
     });
     if (result.canceled || result.assets.length === 0) return;
 
+    // Chaque photo passe d'abord par l'éditeur (rogner, pivoter…) ; « Utiliser telle quelle » l'envoie sans retouche.
     setMessage(null);
-    const { added, failed } = await add.mutateAsync(result.assets.slice(0, remaining).map((a) => ({ uri: a.uri, mimeType: a.mimeType })));
+    setEditor({ kind: 'import', queue: result.assets.slice(0, remaining).map((a) => ({ uri: a.uri, mimeType: a.mimeType })), index: 0, done: [] });
+  };
+
+  const upload = async (images: PickedImage[]) => {
+    const { added, failed } = await add.mutateAsync(images);
     if (failed === 0) setMessage({ tone: 'success', text: t('common.class_media_added', { count: added }) });
     else setMessage({ tone: added > 0 ? 'warning' : 'danger', text: t('common.class_media_upload_error', { count: failed }) });
+  };
+
+  /** Photo suivante de l'import (retouchée ou non) ; la dernière déclenche l'envoi de toutes. */
+  const advance = (image: PickedImage) => {
+    if (editor?.kind !== 'import') return;
+    const done = [...editor.done, image];
+    if (editor.index + 1 < editor.queue.length) {
+      setEditor({ ...editor, index: editor.index + 1, done });
+    } else {
+      setEditor(null);
+      void upload(done);
+    }
+  };
+
+  /** Retouche d'une photo déjà en galerie : on la télécharge, puis la version modifiée la remplace à la même place. */
+  const openEdit = async (key: string, url: string) => {
+    if (preparing || replace.isPending) return;
+    if (remaining <= 0) {
+      setMessage({ tone: 'warning', text: t('common.photo_edit_full') });
+      return;
+    }
+    setMessage(null);
+    setPreparing(key);
+    try {
+      const file = await File.downloadFileAsync(url, tempImageFile());
+      setEditor({ kind: 'edit', key, uri: file.uri });
+    } catch {
+      setMessage({ tone: 'danger', text: t('common.photo_edit_error') });
+    } finally {
+      setPreparing(null);
+    }
+  };
+
+  const saveEdit = (image: EditedImage) => {
+    if (editor?.kind !== 'edit') return;
+    const oldKey = editor.key;
+    setEditor(null);
+    replace.mutate(
+      { oldKey, image, keys },
+      {
+        onSuccess: () => setMessage({ tone: 'success', text: t('common.photo_edit_replaced') }),
+        onError: () => setMessage({ tone: 'danger', text: t('common.photo_edit_replace_error') }),
+      },
+    );
   };
 
   const confirmRemove = (key: string) => {
@@ -250,6 +311,7 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
               >
                 <Pressable
                   style={StyleSheet.absoluteFill}
+                  onPress={() => void openEdit(key, url)}
                   onLongPress={() => startDrag(key, i)}
                   delayLongPress={LONG_PRESS_MS}
                   onPressOut={cancelIfNotMoved}
@@ -257,7 +319,17 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
                   accessibilityHint={t('common.class_media_reorder_hint')}
                 >
                   <Image source={{ uri: url }} style={styles.image} />
+                  {preparing === key || (replace.isPending && replace.variables?.oldKey === key) ? (
+                    <View style={styles.busy} pointerEvents="none">
+                      <ActivityIndicator color="#FFFFFF" />
+                    </View>
+                  ) : null}
                 </Pressable>
+                {!lifted ? (
+                  <View style={styles.editBadge} pointerEvents="none">
+                    <MaterialIcons name="crop" size={14} color="#FFFFFF" />
+                  </View>
+                ) : null}
 
                 {i === 0 ? (
                   <View style={styles.coverBadge} pointerEvents="none">
@@ -278,8 +350,25 @@ export function GalleryEditor({ title, hint, keys, urls, mutations }: Props) {
       ) : null}
 
       {keys.length === 0 ? <Text style={styles.empty}>{t('common.class_media_empty')}</Text> : null}
+      {keys.length > 0 ? <Text style={styles.empty}>{t('common.photo_edit_tap_hint')}</Text> : null}
       {keys.length > 1 ? <Text style={styles.empty}>{t('common.class_media_reorder_hint')}</Text> : null}
       {remaining <= 0 ? <Text style={styles.empty}>{t('common.class_media_full')}</Text> : null}
+
+      <ImageEditor
+        visible={editor !== null}
+        uri={editor?.kind === 'import' ? editor.queue[editor.index].uri : editor?.kind === 'edit' ? editor.uri : null}
+        title={t('common.photo_edit_title')}
+        progress={editor?.kind === 'import' && editor.queue.length > 1 ? `${editor.index + 1}/${editor.queue.length}` : undefined}
+        confirmLabel={
+          editor?.kind === 'import' && editor.queue.length > 1
+            ? editor.index + 1 < editor.queue.length ? t('common.photo_edit_next') : t('common.photo_edit_done')
+            : t('common.photo_edit_apply')
+        }
+        skipLabel={editor?.kind === 'import' ? t('common.photo_edit_use_original') : undefined}
+        onSkip={editor?.kind === 'import' ? () => advance(editor.queue[editor.index]) : undefined}
+        onCancel={() => setEditor(null)}
+        onDone={(image) => (editor?.kind === 'import' ? advance(image) : saveEdit(image))}
+      />
     </View>
   );
 }
@@ -300,6 +389,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     addText: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.primaryInk, textAlign: 'center' },
     image: { width: '100%', height: '100%' },
+    busy: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.45)', alignItems: 'center', justifyContent: 'center' },
+    editBadge: {
+      position: 'absolute', bottom: 6, right: 6, width: 24, height: 24, borderRadius: 12,
+      alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.55)',
+    },
     coverBadge: {
       position: 'absolute', top: 6, left: 6, flexDirection: 'row', alignItems: 'center', gap: 3,
       paddingHorizontal: 6, height: 20, borderRadius: 10, backgroundColor: colors.primary,
