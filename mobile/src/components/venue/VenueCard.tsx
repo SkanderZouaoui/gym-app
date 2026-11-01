@@ -23,7 +23,6 @@ export function VenueCard({ href }: { href: Href }) {
     >
       <VenueLogo name={venue.name} logoUrl={venue.logoUrl} size={54} />
       <View style={styles.body}>
-        <Text style={[styles.kicker, { color: colors.muted }]}>{t('venue.title').toUpperCase()}</Text>
         <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>{venue.name}</Text>
         <VenueStatusBadge hours={venue.hours} compact />
       </View>
@@ -35,7 +34,6 @@ export function VenueCard({ href }: { href: Href }) {
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: radii.xl, borderWidth: 1 },
   body: { flex: 1, minWidth: 0, gap: 3 },
-  kicker: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8 },
   name: { fontFamily: fonts.head, fontSize: 18, letterSpacing: -0.4 },
   chevron: { transform: [{ scaleX: 1 }] },
 });

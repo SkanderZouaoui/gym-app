@@ -936,7 +936,13 @@
     "venue_gps_clear": "Effacer",
     "venue_gps_denied": "Autorisez la localisation pour utiliser votre position actuelle.",
     "venue_gps_invalid": "Aucune position trouvée. Copiez le lien complet depuis Google Maps (pas le lien court) ou des coordonnées « 36.80, 10.18 ».",
-    "venue_gps_hint": "Les adhérents verront une carte et un bouton d'itinéraire."
+    "venue_gps_hint": "Les adhérents verront une carte et un bouton d'itinéraire.",
+    "venue_gps_link": "Lien Google Maps",
+    "venue_gps_link_placeholder": "Collez le lien ou les coordonnées",
+    "venue_gps_apply": "Valider",
+    "venue_gps_link_hint": "Dans Google Maps : Partager → Copier le lien. Les liens courts sont acceptés.",
+    "venue_identity": "Identité",
+    "venue_contact": "Contact"
   },
   "auth": {
     "mot_de_passe_mis_a": "Mot de passe mis à jour",

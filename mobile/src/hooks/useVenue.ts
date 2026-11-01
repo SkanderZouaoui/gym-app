@@ -55,3 +55,10 @@ export function useVenueLogoMutations() {
   });
   return { upload, remove };
 }
+
+/** Position d'un lien Google Maps (court ou long) ou de coordonnées collées, résolue par l'API. */
+export function useResolveLocation() {
+  return useMutation({
+    mutationFn: (text: string) => apiRequest<{ latitude: number; longitude: number }>('/v1/admin/settings/resolve-location', { method: 'POST', body: { text } }),
+  });
+}

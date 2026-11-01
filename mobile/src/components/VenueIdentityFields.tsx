@@ -1,29 +1,35 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
-import { fonts, spacing } from '../theme/tokens';
+import { fonts, radii, spacing } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
-import { useVenue, useVenueLogoMutations } from '../hooks/useVenue';
+import { useResolveLocation, useVenue, useVenueLogoMutations } from '../hooks/useVenue';
 import { parseMapsLocation } from '../utils/maps';
+import { haptics } from '../utils/haptics';
 import { ImageEditor } from './ImageEditor';
 import { Banner } from './ui';
 import { VenueLogo } from './venue/VenueLogo';
 import { VenueMap } from './venue/VenueMap';
 
-/** Logo de la salle : importé (avec rognage) puis converti par l'API ; retirable. */
-export function VenueLogoRow({ name }: { name: string }) {
+type Position = { latitude: number; longitude: number };
+const round = (n: number) => Math.round(n * 1e6) / 1e6;
+
+/** Identité de la salle : logo (touchez-le pour l'importer ou le changer) et nom, présentés comme une fiche. */
+export function VenueIdentityCard({ name, onName }: { name: string; onName: (v: string) => void }) {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: venue } = useVenue();
   const { upload, remove } = useVenueLogoMutations();
   const [editing, setEditing] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const busy = upload.isPending || remove.isPending;
+  const hasLogo = !!venue?.logoUrl;
 
   const pick = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -39,26 +45,26 @@ export function VenueLogoRow({ name }: { name: string }) {
   };
 
   return (
-    <View style={styles.block}>
-      <View style={styles.row}>
-        <VenueLogo name={name || venue?.name || 'M'} logoUrl={venue?.logoUrl ?? null} size={64} />
-        <View style={{ flex: 1, gap: 8 }}>
-          <Text style={styles.label}>{t('admin.venue_logo')}</Text>
-          <View style={styles.buttons}>
-            <Pressable style={[styles.btn, styles.btnStrong]} onPress={pick} disabled={busy}>
-              {busy ? <ActivityIndicator size="small" color={colors.primaryContrast} /> : <MaterialIcons name="add-photo-alternate" size={18} color={colors.primaryContrast} />}
-              <Text style={[styles.btnText, { color: colors.primaryContrast }]}>{venue?.logoUrl ? t('admin.venue_logo_change') : t('admin.venue_logo_add')}</Text>
-            </Pressable>
-            {venue?.logoUrl ? (
-              <Pressable style={[styles.btn, styles.btnSoft]} onPress={() => remove.mutate()} disabled={busy}>
-                <MaterialIcons name="delete-outline" size={18} color={colors.dangerInk} />
-                <Text style={[styles.btnText, { color: colors.dangerInk }]}>{t('admin.venue_logo_remove')}</Text>
-              </Pressable>
-            ) : null}
-          </View>
+    <View style={[styles.card, cardShadow]}>
+      <LinearGradient colors={[colors.primarySoft, 'rgba(0,0,0,0)']} style={styles.identityGlow} pointerEvents="none" />
+      <Pressable onPress={pick} disabled={busy} style={styles.logoWrap} accessibilityRole="button" accessibilityLabel={hasLogo ? t('admin.venue_logo_change') : t('admin.venue_logo_add')}>
+        <VenueLogo name={name || venue?.name || 'M'} logoUrl={venue?.logoUrl ?? null} size={92} />
+        <View style={[styles.camera, { backgroundColor: colors.primary, borderColor: colors.surface }]}>
+          {busy ? <ActivityIndicator size="small" color={colors.primaryContrast} /> : <MaterialIcons name={hasLogo ? 'edit' : 'add-a-photo'} size={16} color={colors.primaryContrast} />}
         </View>
-      </View>
+      </Pressable>
+      <Text style={styles.logoHint}>{hasLogo ? t('admin.venue_logo_change') : t('admin.venue_logo_add')}</Text>
+      {hasLogo ? (
+        <Pressable onPress={() => remove.mutate()} disabled={busy} hitSlop={8}>
+          <Text style={[styles.logoHint, { color: colors.dangerInk, marginTop: -6 }]}>{t('admin.venue_logo_remove')}</Text>
+        </Pressable>
+      ) : null}
       {error ? <Banner tone="danger" icon="error-outline" text={t('admin.venue_logo_error')} /> : null}
+
+      <View style={styles.nameBox}>
+        <Text style={styles.fieldLabel}>{t('admin.venue_name').toUpperCase()}</Text>
+        <TextInput value={name} onChangeText={onName} placeholder={venue?.name} placeholderTextColor={colors.muted} style={styles.nameInput} textAlign="center" />
+      </View>
 
       <ImageEditor
         visible={editing !== null}
@@ -75,25 +81,34 @@ export function VenueLogoRow({ name }: { name: string }) {
   );
 }
 
-/** Position GPS de la salle : position actuelle du téléphone, lien/coordonnées collés depuis Google Maps, aperçu de la carte. */
-export function VenueLocationRow({
+/**
+ * Position de la salle : aperçu de la carte, puis trois actions — position actuelle du téléphone, lien/coordonnées Google
+ * Maps (lien court accepté : l'API le résout), effacer. La carte et l'itinéraire apparaissent ensuite côté adhérent.
+ */
+export function VenueLocationCard({
+  address,
+  onAddress,
   latitude,
   longitude,
-  address,
   onChange,
 }: {
+  address: string;
+  onAddress: (v: string) => void;
   latitude: number | null;
   longitude: number | null;
-  address: string;
-  onChange: (pos: { latitude: number; longitude: number } | null) => void;
+  onChange: (pos: Position | null) => void;
 }) {
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { width } = useWindowDimensions();
+  const resolve = useResolveLocation();
   const [message, setMessage] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [link, setLink] = useState('');
   const has = latitude != null && longitude != null;
+  const mapWidth = width - spacing.lg * 2 - 2;
 
   const useCurrent = async () => {
     setMessage(null);
@@ -106,6 +121,8 @@ export function VenueLocationRow({
       }
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       onChange({ latitude: round(pos.coords.latitude), longitude: round(pos.coords.longitude) });
+      void haptics.success();
+      setLinkOpen(false);
     } catch {
       setMessage(t('admin.venue_gps_denied'));
     } finally {
@@ -113,53 +130,140 @@ export function VenueLocationRow({
     }
   };
 
-  const paste = async () => {
+  /** Lecture locale d'abord (lien long, coordonnées) ; sinon l'API suit le lien court et lit la position. */
+  const submit = async (text: string) => {
+    const value = text.trim();
+    if (!value) return;
     setMessage(null);
-    const parsed = parseMapsLocation(await Clipboard.getStringAsync());
-    if (parsed) onChange(parsed);
-    else setMessage(t('admin.venue_gps_invalid'));
+    const local = parseMapsLocation(value);
+    if (local) {
+      onChange(local);
+      setLink('');
+      setLinkOpen(false);
+      void haptics.success();
+      return;
+    }
+    resolve.mutate(value, {
+      onSuccess: (pos) => {
+        onChange({ latitude: round(pos.latitude), longitude: round(pos.longitude) });
+        setLink('');
+        setLinkOpen(false);
+        void haptics.success();
+      },
+      onError: () => setMessage(t('admin.venue_gps_invalid')),
+    });
+  };
+
+  const pasteAndSubmit = async () => {
+    const text = await Clipboard.getStringAsync();
+    setLink(text);
+    await submit(text);
   };
 
   return (
-    <View style={styles.block}>
-      <View style={{ gap: 2 }}>
-        <Text style={styles.label}>{t('admin.venue_gps')}</Text>
-        <Text style={styles.hint}>{has ? `${latitude!.toFixed(5)}, ${longitude!.toFixed(5)}` : t('admin.venue_gps_none')}</Text>
+    <View style={[styles.card, cardShadow, { alignItems: 'stretch', paddingHorizontal: 0, paddingBottom: 0, gap: 0 }]}>
+      <View style={styles.cardHead}>
+        <MaterialIcons name="place" size={20} color={colors.primaryInk} />
+        <Text style={styles.cardTitle}>{t('admin.venue_gps')}</Text>
       </View>
-      {has ? <VenueMap latitude={latitude!} longitude={longitude!} address={address} width={width - spacing.lg * 2 - 32} height={150} /> : null}
-      <View style={styles.buttons}>
-        <Pressable style={[styles.btn, styles.btnStrong]} onPress={useCurrent} disabled={locating}>
-          {locating ? <ActivityIndicator size="small" color={colors.primaryContrast} /> : <MaterialIcons name="my-location" size={18} color={colors.primaryContrast} />}
-          <Text style={[styles.btnText, { color: colors.primaryContrast }]}>{t('admin.venue_gps_current')}</Text>
-        </Pressable>
-        <Pressable style={[styles.btn, styles.btnSoft]} onPress={paste}>
-          <MaterialIcons name="content-paste" size={18} color={colors.primaryInk} />
-          <Text style={[styles.btnText, { color: colors.primaryInk }]}>{t('admin.venue_gps_paste')}</Text>
-        </Pressable>
+
+      <View style={styles.addressBox}>
+        <Text style={styles.fieldLabel}>{t('admin.adresse').toUpperCase()}</Text>
+        <TextInput value={address} onChangeText={onAddress} placeholderTextColor={colors.muted} style={styles.fieldInput} />
+      </View>
+
+      <View style={styles.mapBox}>
         {has ? (
-          <Pressable style={[styles.btn, styles.btnSoft]} onPress={() => onChange(null)}>
-            <MaterialIcons name="close" size={18} color={colors.dangerInk} />
-            <Text style={[styles.btnText, { color: colors.dangerInk }]}>{t('admin.venue_gps_clear')}</Text>
-          </Pressable>
-        ) : null}
+          <VenueMap latitude={latitude!} longitude={longitude!} address={address} width={mapWidth - 28} height={170} />
+        ) : (
+          <View style={[styles.mapEmpty, { borderColor: colors.primaryBorder, backgroundColor: colors.primarySoft }]}>
+            <MaterialIcons name="map" size={34} color={colors.primaryInk} />
+            <Text style={styles.mapEmptyTitle}>{t('admin.venue_gps_none')}</Text>
+            <Text style={styles.mapEmptyHint}>{t('admin.venue_gps_hint')}</Text>
+          </View>
+        )}
+        {has ? <Text style={styles.coords}>{latitude!.toFixed(5)}, {longitude!.toFixed(5)}</Text> : null}
       </View>
-      {message ? <Banner tone="warning" icon="info-outline" text={message} /> : <Text style={styles.hint}>{t('admin.venue_gps_hint')}</Text>}
+
+      <View style={styles.tiles}>
+        <ActionTile icon="my-location" label={t('admin.venue_gps_current')} busy={locating} onPress={useCurrent} />
+        <ActionTile icon="link" label={t('admin.venue_gps_link')} active={linkOpen} onPress={() => setLinkOpen((o) => !o)} />
+        {has ? <ActionTile icon="delete-outline" label={t('admin.venue_gps_clear')} danger onPress={() => onChange(null)} /> : null}
+      </View>
+
+      {linkOpen ? (
+        <View style={styles.linkBox}>
+          <View style={styles.linkRow}>
+            <TextInput
+              value={link}
+              onChangeText={setLink}
+              onSubmitEditing={() => void submit(link)}
+              placeholder={t('admin.venue_gps_link_placeholder')}
+              placeholderTextColor={colors.muted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="done"
+              style={styles.linkInput}
+            />
+            <Pressable onPress={pasteAndSubmit} style={styles.linkBtn} accessibilityLabel={t('admin.venue_gps_paste')} hitSlop={6}>
+              <MaterialIcons name="content-paste" size={20} color={colors.primaryInk} />
+            </Pressable>
+            <Pressable onPress={() => void submit(link)} disabled={!link.trim() || resolve.isPending} style={[styles.linkBtn, styles.linkBtnStrong, (!link.trim() || resolve.isPending) && { opacity: 0.5 }]} accessibilityLabel={t('admin.venue_gps_apply')} hitSlop={6}>
+              {resolve.isPending ? <ActivityIndicator size="small" color={colors.primaryContrast} /> : <MaterialIcons name="check" size={20} color={colors.primaryContrast} />}
+            </Pressable>
+          </View>
+          <Text style={styles.linkHint}>{t('admin.venue_gps_link_hint')}</Text>
+        </View>
+      ) : null}
+
+      {message ? (
+        <View style={styles.message}>
+          <Banner tone="warning" icon="info-outline" text={message} />
+        </View>
+      ) : null}
+      <View style={{ height: 14 }} />
     </View>
   );
-}
 
-const round = (n: number) => Math.round(n * 1e6) / 1e6;
+  function ActionTile({ icon, label, onPress, busy, active, danger }: { icon: keyof typeof MaterialIcons.glyphMap; label: string; onPress: () => void; busy?: boolean; active?: boolean; danger?: boolean }) {
+    return (
+      <Pressable onPress={onPress} disabled={busy} style={({ pressed }) => [styles.tile, active && styles.tileActive, pressed && { transform: [{ scale: 0.97 }] }]} accessibilityRole="button">
+        {busy ? <ActivityIndicator size="small" color={colors.primaryInk} /> : <MaterialIcons name={icon} size={22} color={danger ? colors.dangerInk : colors.primaryInk} />}
+        <Text style={[styles.tileText, danger && { color: colors.dangerInk }]} numberOfLines={2}>{label}</Text>
+      </Pressable>
+    );
+  }
+}
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    block: { gap: 10, paddingVertical: 12, paddingHorizontal: 16 },
-    row: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-    label: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
-    hint: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
-    buttons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 18 },
-    btnStrong: { backgroundColor: colors.primary },
-    btnSoft: { backgroundColor: colors.surface2 },
-    btnText: { fontFamily: fonts.bodyBold, fontSize: 13 },
+    card: { backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border, padding: 18, gap: 12, alignItems: 'center', overflow: 'hidden' },
+    identityGlow: { position: 'absolute', top: 0, left: 0, right: 0, height: 120 },
+    logoWrap: { marginTop: 4 },
+    camera: { position: 'absolute', right: -4, bottom: -4, width: 32, height: 32, borderRadius: 16, borderWidth: 3, alignItems: 'center', justifyContent: 'center' },
+    logoHint: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.primaryInk },
+    nameBox: { alignSelf: 'stretch', gap: 4, marginTop: 4 },
+    fieldLabel: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 0.8, color: colors.muted },
+    nameInput: { fontFamily: fonts.head, fontSize: 22, letterSpacing: -0.5, color: colors.text, paddingVertical: 4 },
+    cardHead: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 18, paddingTop: 16 },
+    cardTitle: { fontFamily: fonts.head, fontSize: 16, letterSpacing: -0.3, color: colors.text },
+    addressBox: { paddingHorizontal: 18, paddingTop: 12, gap: 4 },
+    fieldInput: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.text, paddingVertical: 4 },
+    mapBox: { paddingHorizontal: 14, paddingTop: 12, gap: 6, alignItems: 'center' },
+    mapEmpty: { alignSelf: 'stretch', height: 150, borderRadius: 22, borderWidth: 1.5, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 20 },
+    mapEmptyTitle: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    mapEmptyHint: { fontFamily: fonts.body, fontSize: 12.5, color: colors.primaryInk, textAlign: 'center', opacity: 0.85 },
+    coords: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.muted },
+    tiles: { flexDirection: 'row', gap: 8, paddingHorizontal: 14, paddingTop: 12 },
+    tile: { flex: 1, minHeight: 62, borderRadius: 16, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: 6, paddingVertical: 8 },
+    tileActive: { backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder },
+    tileText: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.primaryInk, textAlign: 'center' },
+    linkBox: { paddingHorizontal: 14, paddingTop: 10, gap: 6 },
+    linkRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    linkInput: { flex: 1, height: 44, borderRadius: 14, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, fontFamily: fonts.body, fontSize: 14, color: colors.text },
+    linkBtn: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+    linkBtnStrong: { backgroundColor: colors.primary },
+    linkHint: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    message: { paddingHorizontal: 14, paddingTop: 10 },
   });
 }

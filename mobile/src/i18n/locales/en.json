@@ -936,7 +936,13 @@
     "venue_gps_clear": "Clear",
     "venue_gps_denied": "Allow location access to use your current position.",
     "venue_gps_invalid": "No location found. Copy the full Google Maps link (not the short one) or coordinates like “36.80, 10.18”.",
-    "venue_gps_hint": "Members will see a map and a directions button."
+    "venue_gps_hint": "Members will see a map and a directions button.",
+    "venue_gps_link": "Google Maps link",
+    "venue_gps_link_placeholder": "Paste the link or coordinates",
+    "venue_gps_apply": "Apply",
+    "venue_gps_link_hint": "In Google Maps: Share → Copy link. Short links are accepted.",
+    "venue_identity": "Identity",
+    "venue_contact": "Contact"
   },
   "auth": {
     "mot_de_passe_mis_a": "Password updated",

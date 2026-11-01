@@ -8,6 +8,8 @@ import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
 import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
 import { GalleryKeyDto } from '../classes/dto/gallery-key.dto.js';
 import { GalleryOrderDto } from '../classes/dto/gallery-order.dto.js';
+import { ResolveLocationDto } from './dto/resolve-location.dto.js';
+import { resolveLocation } from './maps-location.js';
 import { UpdateAttendancePolicyDto } from './dto/update-attendance-policy.dto.js';
 
 @ApiTags('organization')
@@ -60,6 +62,13 @@ export class OrganizationController {
   @Delete('gallery')
   removeGalleryImage(@Body() body: GalleryKeyDto) {
     return this.organizationService.removeGalleryImage(body.key);
+  }
+
+  /** Position (latitude / longitude) d'un lien Google Maps — court ou long — ou de coordonnées collées. */
+  @Roles(Role.ADMIN)
+  @Post('resolve-location')
+  resolveLocation(@Body() body: ResolveLocationDto) {
+    return resolveLocation(body.text);
   }
 
   @Roles(Role.ADMIN)

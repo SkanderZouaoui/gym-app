@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { VenueLocationRow, VenueLogoRow } from '../../src/components/VenueIdentityFields';
+import { VenueIdentityCard, VenueLocationCard } from '../../src/components/VenueIdentityFields';
 import { VenueMediaSection } from '../../src/components/VenueMediaSection';
 import { ScrollLockContext } from '../../src/components/ui/KeyboardAwareScreen';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -112,21 +112,19 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
     <>
       {parts.includes('contact') ? (
         <>
-      <Text style={styles.section}>{t('common.coordonnees')}</Text>
+      <Text style={styles.section}>{t('admin.venue_identity')}</Text>
+      <VenueIdentityCard name={cfg.contact.name} onName={(v) => patch({ contact: { ...cfg.contact, name: v } })} />
+
+      <VenueLocationCard
+        address={cfg.contact.address}
+        onAddress={(v) => patch({ contact: { ...cfg.contact, address: v } })}
+        latitude={cfg.contact.latitude}
+        longitude={cfg.contact.longitude}
+        onChange={(pos) => patch({ contact: { ...cfg.contact, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null } })}
+      />
+
+      <Text style={styles.section}>{t('admin.venue_contact')}</Text>
       <View style={[styles.card, cardShadow]}>
-        <ConfigField icon="storefront" label={t('admin.venue_name')} value={cfg.contact.name} onChange={(v) => patch({ contact: { ...cfg.contact, name: v } })} />
-        <View style={styles.sep} />
-        <VenueLogoRow name={cfg.contact.name} />
-        <View style={styles.sep} />
-        <ConfigField icon="location-on" label={t('admin.adresse')} value={cfg.contact.address} onChange={(v) => patch({ contact: { ...cfg.contact, address: v } })} />
-        <View style={styles.sep} />
-        <VenueLocationRow
-          latitude={cfg.contact.latitude}
-          longitude={cfg.contact.longitude}
-          address={cfg.contact.address}
-          onChange={(pos) => patch({ contact: { ...cfg.contact, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null } })}
-        />
-        <View style={styles.sep} />
         <ConfigField icon="call" label={t('common.telephone')} value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" />
         <View style={styles.sep} />
         <ConfigField icon="mail" label={t('common.email')} value={cfg.contact.email} onChange={(v) => patch({ contact: { ...cfg.contact, email: v } })} kb="email-address" />

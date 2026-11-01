@@ -240,7 +240,12 @@ export default function HomeScreen() {
           </Pressable>
         ) : null}
 
-        <VenueCard href="/(member)/venue" />
+        <View style={{ gap: spacing.sm }}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>{t('venue.title')}</Text>
+          </View>
+          <VenueCard href="/(member)/venue" />
+        </View>
 
         {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
           <View style={{ gap: spacing.sm }}>

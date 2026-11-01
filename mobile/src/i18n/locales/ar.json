@@ -936,7 +936,13 @@
     "venue_gps_clear": "مسح",
     "venue_gps_denied": "اسمح بالوصول إلى الموقع لاستخدام موقعك الحالي.",
     "venue_gps_invalid": "لم يتم العثور على موقع. انسخ رابط Google Maps الكامل (وليس المختصر) أو إحداثيات مثل «36.80, 10.18».",
-    "venue_gps_hint": "سيرى المشتركون خريطة وزر الاتجاهات."
+    "venue_gps_hint": "سيرى المشتركون خريطة وزر الاتجاهات.",
+    "venue_gps_link": "رابط Google Maps",
+    "venue_gps_link_placeholder": "ألصق الرابط أو الإحداثيات",
+    "venue_gps_apply": "تأكيد",
+    "venue_gps_link_hint": "في Google Maps: مشاركة ← نسخ الرابط. الروابط المختصرة مقبولة.",
+    "venue_identity": "الهوية",
+    "venue_contact": "الاتصال"
   },
   "auth": {
     "mot_de_passe_mis_a": "تم تحديث كلمة المرور",
