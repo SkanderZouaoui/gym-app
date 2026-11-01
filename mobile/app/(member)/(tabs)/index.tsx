@@ -150,6 +150,8 @@ export default function HomeScreen() {
         <NoticeList items={alertNotices} format={alertFormat === 'Pop-up' ? 'Bandeau' : alertFormat} onDismiss={dismissNotice} />
         {announcementFormat === 'Bandeau' ? <NoticeList items={announcementNotices} format="Bandeau" onDismiss={dismissNotice} /> : null}
 
+        <VenueTodayBanner href="/(member)/venue" />
+
         {isDegraded ? (
           <Banner
             tone="warning"
@@ -224,8 +226,6 @@ export default function HomeScreen() {
             <OnboardRow icon="notifications" label={t('home.onboardNotifications')} onPress={() => router.push('/(member)/(tabs)/profile')} />
           </View>
         ) : null}
-
-        <VenueTodayBanner href="/(member)/venue" />
 
         {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
           <View style={{ gap: spacing.sm }}>
