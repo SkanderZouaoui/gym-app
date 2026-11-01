@@ -157,9 +157,15 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
           <View style={[styles.card, cardShadow, { padding: 6 }]}>
             {contactRows.map((r, i) => (
               <View key={r.label} style={[styles.contactRow, i < contactRows.length - 1 && styles.rowBorder]}>
-                <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
-                  <MaterialIcons name={r.icon} size={24} color="#FFFFFF" />
-                </LinearGradient>
+                {r.value.trim() ? (
+                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
+                    <MaterialIcons name={r.icon} size={24} color="#FFFFFF" />
+                  </LinearGradient>
+                ) : (
+                  <View style={[styles.contactIcon, { backgroundColor: colors.primarySoft }]}>
+                    <MaterialIcons name={r.icon} size={24} color={colors.primaryInk} style={{ opacity: 0.7 }} />
+                  </View>
+                )}
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <View style={styles.contactLabelRow}>
                     <Text style={styles.contactLabel}>{r.label.toUpperCase()}</Text>

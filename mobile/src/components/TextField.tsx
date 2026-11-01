@@ -38,7 +38,7 @@ export function TextField({ label, error, hint, icon, style, isPassword, secureT
   return (
     <View style={styles.container}>
       <Pressable onPress={() => inputRef.current?.focus()} disabled={readOnly} accessible={false}>
-        <Text style={[styles.label, focused && !hasError && { color: colors.primaryInk }, hasError && { color: colors.dangerInk }]} numberOfLines={1}>
+        <Text style={[styles.label, (focused || hasValue) && !hasError && { color: colors.primaryInk }, hasError && { color: colors.dangerInk }]} numberOfLines={1}>
           {label.toUpperCase()}
         </Text>
       </Pressable>
@@ -47,17 +47,22 @@ export function TextField({ label, error, hint, icon, style, isPassword, secureT
         onPress={() => inputRef.current?.focus()}
         disabled={readOnly}
         accessible={false}
-        style={[styles.well, multiline && styles.wellMultiline, focused && styles.wellFocused, hasError && styles.wellError, readOnly && styles.wellReadOnly]}
+        style={[styles.well, !hasValue && !focused && styles.wellEmpty, multiline && styles.wellMultiline, focused && styles.wellFocused, hasError && styles.wellError, readOnly && styles.wellReadOnly]}
       >
         {icon ? (
           hasError ? (
             <View style={[styles.tile, { backgroundColor: colors.dangerSoft }]}>
               <MaterialIcons name={icon} size={20} color={colors.dangerInk} />
             </View>
-          ) : (
+          ) : hasValue || focused ? (
             <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.tile, readOnly && { opacity: 0.55 }]}>
               <MaterialIcons name={icon} size={20} color="#FFFFFF" />
             </LinearGradient>
+          ) : (
+            // Champ vide : tuile pâle (pictogramme violet sur fond clair) — la tuile pleine signale un champ rempli.
+            <View style={[styles.tile, { backgroundColor: colors.primarySoft }, readOnly && { opacity: 0.55 }]}>
+              <MaterialIcons name={icon} size={20} color={colors.primaryInk} style={{ opacity: 0.7 }} />
+            </View>
           )
         ) : null}
 
@@ -95,7 +100,11 @@ export function TextField({ label, error, hint, icon, style, isPassword, secureT
             <MaterialIcons name="cancel" size={20} color={colors.muted} />
           </Pressable>
         ) : !focused && !multiline ? (
-          <MaterialIcons name="edit" size={18} color={colors.primary} style={{ opacity: 0.75 }} />
+          hasValue ? (
+            <MaterialIcons name="check-circle" size={20} color={colors.success} />
+          ) : (
+            <MaterialIcons name="edit" size={18} color={colors.muted} style={{ opacity: 0.8 }} />
+          )
         ) : null}
       </Pressable>
 
@@ -128,6 +137,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       borderColor: colors.primaryBorder,
       backgroundColor: colors.surface,
     },
+    // Vide : bordure pointillée neutre ; rempli : bordure pleine teintée de violet.
+    wellEmpty: { borderStyle: 'dashed', borderColor: colors.border },
     wellMultiline: { alignItems: 'flex-start', paddingVertical: 10 },
     wellFocused: {
       borderColor: colors.primary,

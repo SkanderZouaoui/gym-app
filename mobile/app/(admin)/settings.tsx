@@ -88,11 +88,17 @@ function ConfigField({ icon, label, value, onChange, kb, placeholder }: { icon: 
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.row}>
-      <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fieldIcon}>
-        <MaterialIcons name={icon} size={22} color="#FFFFFF" />
-      </LinearGradient>
+      {value.trim() ? (
+        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fieldIcon}>
+          <MaterialIcons name={icon} size={22} color="#FFFFFF" />
+        </LinearGradient>
+      ) : (
+        <View style={[styles.fieldIcon, { backgroundColor: colors.primarySoft }]}>
+          <MaterialIcons name={icon} size={22} color={colors.primaryInk} style={{ opacity: 0.7 }} />
+        </View>
+      )}
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.fieldLabel}>{label.toUpperCase()}</Text>
+        <Text style={[styles.fieldLabel, value.trim() ? { color: colors.primaryInk } : null]}>{label.toUpperCase()}</Text>
         <TextInput value={value} onChangeText={onChange} placeholder={placeholder} keyboardType={kb} autoCapitalize={kb ? 'none' : 'sentences'} placeholderTextColor={colors.muted} style={styles.fieldInput} />
       </View>
     </View>
