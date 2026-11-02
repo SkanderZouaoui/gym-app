@@ -1,5 +1,5 @@
 # Déploiement MVP sur Render (plan gratuit) : API NestJS en Docker.
-# Base de données = Supabase, stockage = Cloudflare R2. Pas de Redis (non utilisé par l'API).
+# Base de données et stockage = Supabase (Storage via le protocole S3). Pas de Redis (non utilisé par l'API).
 # Les variables `sync: false` sont à renseigner dans le dashboard Render.
 
 services:
@@ -30,13 +30,13 @@ services:
         value: 15m
       - key: JWT_REFRESH_TTL
         value: 30d
-      # Cloudflare R2
+      # Supabase Storage (protocole S3 : Storage > S3 Configuration)
       - key: S3_ENDPOINT
-        sync: false # https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+        value: https://wboavnrfprhdqzgjbawz.storage.supabase.co/storage/v1/s3
       - key: S3_PUBLIC_ENDPOINT
-        sync: false # même valeur que S3_ENDPOINT
+        value: https://wboavnrfprhdqzgjbawz.storage.supabase.co/storage/v1/s3
       - key: S3_REGION
-        value: auto
+        value: eu-west-1
       - key: S3_FORCE_PATH_STYLE
         value: "true"
       - key: S3_BUCKET
@@ -45,9 +45,9 @@ services:
         sync: false
       - key: S3_SECRET_ACCESS_KEY
         sync: false
-      # URL publique de l'API (https://muscleup-api.onrender.com) et origines du back-office
+      # URL publique de l'API et origines du back-office (séparées par des virgules)
       - key: PUBLIC_API_URL
-        sync: false
+        value: https://muscleup-api-8a6p.onrender.com
       - key: CORS_ORIGINS
         sync: false
       - key: APP_SCHEME
@@ -67,3 +67,21 @@ services:
         sync: false
       - key: MAIL_BRAND
         value: MuscleUP
+
+  # Back-office (Vite/React) servi comme site statique.
+  - type: web
+    name: muscleup-backoffice
+    runtime: static
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @muscleup/shared build && pnpm --filter @muscleup/backoffice build
+    staticPublishPath: backoffice/dist
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_URL
+        value: https://muscleup-api-8a6p.onrender.com
+    routes:
+      # SPA : toutes les routes renvoient vers index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
