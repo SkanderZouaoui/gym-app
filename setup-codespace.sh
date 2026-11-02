@@ -5,6 +5,16 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+API_URL="https://${CODESPACE_NAME}-3001.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+BO_URL="https://${CODESPACE_NAME}-5173.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+
+# Déjà lancé (réouverture du Codespace) : on réaffiche juste les liens.
+if curl -s -o /dev/null localhost:5173 && [ -f expo-url.txt ]; then
+  echo "✅ Back-office : $BO_URL"
+  echo "   Expo Go     : $(cat expo-url.txt)"
+  exit 0
+fi
+
 corepack enable >/dev/null 2>&1 || npm i -g pnpm
 pnpm install
 
@@ -16,9 +26,6 @@ docker compose up -d postgres redis mailpit
 until docker compose exec -T postgres pg_isready >/dev/null 2>&1; do sleep 1; done
 
 pnpm --filter "./packages/*" build
-
-API_URL="https://${CODESPACE_NAME}-3001.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
-BO_URL="https://${CODESPACE_NAME}-5173.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 
 cd backend
 if [ ! -f .env ]; then
