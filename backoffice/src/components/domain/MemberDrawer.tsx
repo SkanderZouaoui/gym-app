@@ -125,7 +125,7 @@ export function MemberDrawer({ id, onClose }: { id: string; onClose: () => void 
               </Card>
             </section>
 
-            {isAdmin ? <MemberAdminActions member={member} current={current} onDeleted={onClose} /> : null}
+            {isAdmin || current ? <MemberAdminActions member={member} current={current} isAdmin={isAdmin} onDeleted={onClose} /> : null}
 
             <section className="space-y-2.5">
               <SectionHeader title="Paiements" icon="receipt_long" />

@@ -74,19 +74,20 @@ export class MembershipsController {
     return this.membershipsService.create(dto, user.userId);
   }
 
-  @Roles(Role.ADMIN)
+  // Prolonger, suspendre et réactiver un abonnement : accueil et admin (tracés à l'audit) ; annuler reste réservé à l'admin.
+  @Roles(Role.STAFF, Role.ADMIN)
   @Patch('admin/memberships/:id/suspend')
   suspend(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.membershipsService.suspend(id, user.userId);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.STAFF, Role.ADMIN)
   @Patch('admin/memberships/:id/reactivate')
   reactivate(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.membershipsService.reactivate(id, user.userId);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.STAFF, Role.ADMIN)
   @Patch('admin/memberships/:id/extend')
   extend(
     @Param('id') id: string,

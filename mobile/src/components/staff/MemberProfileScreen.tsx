@@ -189,7 +189,7 @@ export function MemberProfileScreen() {
           </View>
         </View>
 
-        {isAdmin ? <MemberAdminSection member={member} current={current} onDeleted={goBack} /> : null}
+        {isAdmin || current ? <MemberAdminSection member={member} current={current} isAdmin={isAdmin} onDeleted={goBack} /> : null}
 
         <ResetPasswordButton name={`${member.firstName} ${member.lastName}`} email={member.email} reset={() => resetMemberPassword(member.id)} />
 

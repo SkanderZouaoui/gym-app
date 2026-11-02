@@ -15,10 +15,10 @@ const PRESETS = [7, 15, 30, 90];
 type Sheet = 'extend' | 'cancel' | 'delete' | null;
 
 /**
- * Actions d'administration sur un adhérent (réservées à l'admin, comme l'API) : prolonger, suspendre ou annuler son
- * abonnement, suspendre ou réactiver son compte, le supprimer.
+ * Actions sur un adhérent : prolonger ou suspendre son abonnement (accueil et admin) ; annuler l'abonnement, suspendre
+ * ou réactiver le compte et supprimer l'adhérent (admin uniquement, comme l'API).
  */
-export function MemberAdminSection({ member, current, onDeleted }: { member: MemberDetail; current?: StaffMembership; onDeleted: () => void }) {
+export function MemberAdminSection({ member, current, isAdmin, onDeleted }: { member: MemberDetail; current?: StaffMembership; isAdmin: boolean; onDeleted: () => void }) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -50,7 +50,7 @@ export function MemberAdminSection({ member, current, onDeleted }: { member: Mem
 
   return (
     <View>
-      <Text style={styles.title}>{t('staff.adm_title')}</Text>
+      <Text style={styles.title}>{isAdmin ? t('staff.adm_title') : t('admin.abonnements')}</Text>
       {message ? <Banner tone={message.tone} icon={message.tone === 'success' ? 'check-circle' : 'error'} text={message.text} /> : null}
       <View style={[styles.card, cardShadow]}>
         {current ? (
@@ -65,9 +65,11 @@ export function MemberAdminSection({ member, current, onDeleted }: { member: Mem
                 onPress={() => suspendMembership.mutate({ id: current.id, suspended: !membershipSuspended }, { onSuccess: () => ok(membershipSuspended ? t('staff.adm_membership_reactivated') : t('staff.adm_membership_suspended')), onError: fail })}
               />
             ) : null}
-            {live ? <AdminRow icon="event-busy" label={t('staff.adm_cancel_membership')} danger onPress={() => setSheet('cancel')} /> : null}
+            {live && isAdmin ? <AdminRow icon="event-busy" label={t('staff.adm_cancel_membership')} danger onPress={() => setSheet('cancel')} /> : null}
           </>
         ) : null}
+        {isAdmin ? (
+          <>
         <Text style={styles.group}>{t('staff.adm_account')}</Text>
         <AdminRow
           icon={accountSuspended ? 'lock-open' : 'block'}
@@ -76,6 +78,8 @@ export function MemberAdminSection({ member, current, onDeleted }: { member: Mem
           onPress={() => status.mutate({ id: member.id, suspended: !accountSuspended }, { onSuccess: () => ok(accountSuspended ? t('staff.adm_account_reactivated') : t('staff.adm_account_suspended')), onError: fail })}
         />
         <AdminRow icon="delete-outline" label={t('staff.adm_delete')} danger onPress={() => setSheet('delete')} />
+          </>
+        ) : null}
       </View>
 
       <BottomSheet visible={sheet === 'extend'} onClose={() => setSheet(null)}>

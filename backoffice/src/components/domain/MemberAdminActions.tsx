@@ -37,10 +37,10 @@ function ExtendModal({ membership, onClose }: { membership: Membership; onClose:
 }
 
 /**
- * Actions d'administration sur un adhérent (réservées à l'admin, comme l'API) : prolonger, suspendre ou annuler
- * son abonnement, suspendre ou réactiver son compte, le supprimer.
+ * Actions sur un adhérent : prolonger ou suspendre son abonnement (accueil et admin) ; annuler l'abonnement,
+ * suspendre ou réactiver le compte et supprimer l'adhérent (admin uniquement, comme l'API).
  */
-export function MemberAdminActions({ member, current, onDeleted }: { member: Member; current?: Membership; onDeleted: () => void }) {
+export function MemberAdminActions({ member, current, isAdmin, onDeleted }: { member: Member; current?: Membership; isAdmin: boolean; onDeleted: () => void }) {
   const toast = useToast()
   const status = useSetMemberStatus()
   const remove = useDeleteMember()
@@ -55,7 +55,7 @@ export function MemberAdminActions({ member, current, onDeleted }: { member: Mem
 
   return (
     <section className="space-y-2.5">
-      <SectionHeader title="Administration" icon="admin_panel_settings" />
+      <SectionHeader title={isAdmin ? 'Administration' : 'Abonnement'} icon="admin_panel_settings" />
       <Card className="space-y-4 p-4">
         {current ? (
           <div className="space-y-2">
@@ -67,10 +67,11 @@ export function MemberAdminActions({ member, current, onDeleted }: { member: Mem
                   {membershipSuspended ? 'Réactiver' : 'Suspendre'}
                 </Button>
               ) : null}
-              {live ? <Button size="sm" variant="danger" icon="event_busy" onClick={() => setConfirm('cancel')}>Annuler l’abonnement</Button> : null}
+              {live && isAdmin ? <Button size="sm" variant="danger" icon="event_busy" onClick={() => setConfirm('cancel')}>Annuler l’abonnement</Button> : null}
             </div>
           </div>
         ) : null}
+        {isAdmin ? (
         <div className="space-y-2">
           <div className="text-xs font-bold uppercase tracking-wider text-muted">Compte</div>
           <div className="flex flex-wrap gap-2">
@@ -80,6 +81,7 @@ export function MemberAdminActions({ member, current, onDeleted }: { member: Mem
             <Button size="sm" variant="danger" icon="delete" onClick={() => setConfirm('delete')}>Supprimer l’adhérent</Button>
           </div>
         </div>
+        ) : null}
       </Card>
 
       {extending && current ? <ExtendModal membership={current} onClose={() => setExtending(false)} /> : null}
