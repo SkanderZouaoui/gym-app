@@ -17,6 +17,8 @@ import { MemberContactRow } from './MemberContactRow';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../i18n';
 import { useNow } from '../../hooks/useNow';
+import { useSessionStore } from '../../store/session';
+import { MemberAdminSection } from './MemberAdminSection';
 
 const fmtDate = (d: string, year = true) =>
   new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}) });
@@ -33,6 +35,7 @@ export function MemberProfileScreen() {
   const { data: memberships, refetch: refetchMemberships } = useMemberMemberships(id);
   const { data: memberPayments = [], refetch: refetchPayments } = useMemberPayments(memberships);
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetch(), refetchMemberships(), refetchPayments()]));
+  const isAdmin = useSessionStore((s) => s.activeRole === 'ADMIN');
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace(routes.members));
 
@@ -185,6 +188,8 @@ export function MemberProfileScreen() {
             )}
           </View>
         </View>
+
+        {isAdmin ? <MemberAdminSection member={member} current={current} onDeleted={goBack} /> : null}
 
         <ResetPasswordButton name={`${member.firstName} ${member.lastName}`} email={member.email} reset={() => resetMemberPassword(member.id)} />
 

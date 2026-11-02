@@ -4,6 +4,8 @@ import { daysLeft, formatDate, formatMoney, METHOD_ICON, METHOD_LABEL } from '..
 import { membershipBadge } from '../../lib/membership'
 import { Avatar, Badge, Button, Card, Drawer, EmptyState, Icon, SectionHeader, Skeleton, useToast } from '../ui'
 import { SellModal } from './SellModal'
+import { MemberAdminActions } from './MemberAdminActions'
+import { useAuth } from '../../store/auth'
 
 function CopyValue({ icon, label, value, href }: { icon: string; label: string; value: string | null | undefined; href?: string }) {
   const toast = useToast()
@@ -40,6 +42,7 @@ export function MemberDrawer({ id, onClose }: { id: string; onClose: () => void 
   const { data: memberships } = useMemberMemberships(id)
   const { data: payments = [] } = useMemberPayments(memberships)
   const [selling, setSelling] = useState(false)
+  const isAdmin = useAuth((s) => s.activeRole === 'ADMIN')
 
   const sorted = [...(memberships ?? [])].sort((a, b) => b.endDate.localeCompare(a.endDate))
   const current = sorted[0]
@@ -121,6 +124,8 @@ export function MemberDrawer({ id, onClose }: { id: string; onClose: () => void 
                 {member.createdAt ? <CopyValue icon="event" label="Membre depuis" value={formatDate(member.createdAt)} /> : null}
               </Card>
             </section>
+
+            {isAdmin ? <MemberAdminActions member={member} current={current} onDeleted={onClose} /> : null}
 
             <section className="space-y-2.5">
               <SectionHeader title="Paiements" icon="receipt_long" />

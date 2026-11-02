@@ -209,3 +209,46 @@ export function useMemberPayments(memberships: StaffMembership[] | undefined) {
 export function resetMemberPassword(id: string) {
   return apiRequest<{ password: string }>(`/v1/members/${id}/reset-password`, { method: 'POST' });
 }
+
+// --- Actions d'administration sur un adhérent (admin uniquement, comme l'API) -----------
+
+function useInvalidateMembers() {
+  const queryClient = useQueryClient();
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: ['members'] });
+    void queryClient.invalidateQueries({ queryKey: ['staff'] });
+    void queryClient.invalidateQueries({ queryKey: ['admin'] });
+  };
+}
+
+/** Suspend ou réactive le compte d'un adhérent. */
+export function useSetMemberStatus() {
+  const done = useInvalidateMembers();
+  return useMutation({
+    mutationFn: ({ id, suspended }: { id: string; suspended: boolean }) => apiRequest(`/v1/members/${id}/${suspended ? 'suspend' : 'reactivate'}`, { method: 'PATCH' }),
+    onSuccess: done,
+  });
+}
+export function useDeleteMember() {
+  const done = useInvalidateMembers();
+  return useMutation({ mutationFn: (id: string) => apiRequest(`/v1/members/${id}`, { method: 'DELETE' }), onSuccess: done });
+}
+/** Prolonge un abonnement de `days` jours. */
+export function useExtendMembership() {
+  const done = useInvalidateMembers();
+  return useMutation({
+    mutationFn: ({ id, days }: { id: string; days: number }) => apiRequest(`/v1/admin/memberships/${id}/extend`, { method: 'PATCH', body: { days } }),
+    onSuccess: done,
+  });
+}
+export function useSetMembershipSuspended() {
+  const done = useInvalidateMembers();
+  return useMutation({
+    mutationFn: ({ id, suspended }: { id: string; suspended: boolean }) => apiRequest(`/v1/admin/memberships/${id}/${suspended ? 'suspend' : 'reactivate'}`, { method: 'PATCH' }),
+    onSuccess: done,
+  });
+}
+export function useCancelMembership() {
+  const done = useInvalidateMembers();
+  return useMutation({ mutationFn: (id: string) => apiRequest(`/v1/admin/memberships/${id}/cancel`, { method: 'PATCH', body: {} }), onSuccess: done });
+}

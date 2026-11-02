@@ -181,3 +181,38 @@ export interface ExpiringMembership {
 }
 export const useExpiringMemberships = (enabled: boolean) =>
   useQuery({ queryKey: ['admin', 'expiring'], queryFn: () => get<ExpiringMembership[]>('/v1/admin/alerts/expiring-memberships'), enabled })
+
+// --- Actions d'administration sur un adhérent (ADMIN) ---------------------------------
+
+function useInvalidateMember() {
+  const qc = useQueryClient()
+  return () => {
+    void qc.invalidateQueries({ queryKey: ['members'] })
+    void qc.invalidateQueries({ queryKey: ['staff'] })
+    void qc.invalidateQueries({ queryKey: ['admin', 'dashboard'] })
+    void qc.invalidateQueries({ queryKey: ['admin', 'expiring'] })
+  }
+}
+
+/** Suspend ou réactive le compte d'un adhérent. */
+export function useSetMemberStatus() {
+  const done = useInvalidateMember()
+  return useMutation({ mutationFn: async ({ id, suspended }: { id: string; suspended: boolean }) => (await api.patch(`/v1/members/${id}/${suspended ? 'suspend' : 'reactivate'}`)).data, onSuccess: done })
+}
+export function useDeleteMember() {
+  const done = useInvalidateMember()
+  return useMutation({ mutationFn: async (id: string) => (await api.delete(`/v1/members/${id}`)).data, onSuccess: done })
+}
+/** Prolonge un abonnement de `days` jours. */
+export function useExtendMembership() {
+  const done = useInvalidateMember()
+  return useMutation({ mutationFn: async ({ id, days }: { id: string; days: number }) => (await api.patch(`/v1/admin/memberships/${id}/extend`, { days })).data, onSuccess: done })
+}
+export function useSetMembershipSuspended() {
+  const done = useInvalidateMember()
+  return useMutation({ mutationFn: async ({ id, suspended }: { id: string; suspended: boolean }) => (await api.patch(`/v1/admin/memberships/${id}/${suspended ? 'suspend' : 'reactivate'}`)).data, onSuccess: done })
+}
+export function useCancelMembership() {
+  const done = useInvalidateMember()
+  return useMutation({ mutationFn: async ({ id, reason }: { id: string; reason?: string }) => (await api.patch(`/v1/admin/memberships/${id}/cancel`, { reason })).data, onSuccess: done })
+}
