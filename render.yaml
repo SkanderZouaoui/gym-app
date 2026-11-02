@@ -81,7 +81,10 @@ services:
       - key: VITE_API_URL
         value: https://muscleup-api-8a6p.onrender.com
     routes:
-      # SPA : toutes les routes renvoient vers index.html
+      # SPA : toutes les routes renvoient vers index.html (la racine est listée explicitement)
+      - type: rewrite
+        source: /
+        destination: /index.html
       - type: rewrite
         source: /*
         destination: /index.html
