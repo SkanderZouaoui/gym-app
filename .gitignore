@@ -46,3 +46,7 @@ coverage/
 *.p12
 *.key
 *.mobileprovision
+backend.log
+backoffice.log
+expo.log
+expo-url.txt
