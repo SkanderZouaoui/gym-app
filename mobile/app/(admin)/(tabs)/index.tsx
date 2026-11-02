@@ -22,6 +22,7 @@ import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll'
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { useNow } from '../../../src/hooks/useNow';
+import { OccupancyCard } from '../../../src/components/staff/OccupancyCard';
 
 const nf = (n: number) => n.toLocaleString(dateLocale());
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
@@ -237,6 +238,8 @@ export default function AdminDashboardScreen() {
             })}
           </View>
         ) : null}
+
+        <OccupancyCard settingsHref="/(admin)/occupancy-settings" />
 
         <View style={[styles.shortcutsHead, styles.sectionRow]}>
           <Text style={styles.sectionTitle}>{i18n.t('admin.shortcuts')}</Text>

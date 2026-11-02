@@ -10,6 +10,8 @@ import type {
   NotifSettings,
   BookingRules,
   Role,
+  OccupancyEstimate,
+  OccupancyPolicy,
 } from '@muscleup/shared';
 
 export const authApi = {
@@ -233,6 +235,25 @@ export const settingsApi = {
   updateAttendance: (data: AttendancePolicy) =>
     api.put('/v1/admin/settings/attendance', data).then((r) => r.data),
 };
+
+/** Estimation de l'occupation : APPROXIMATION (WiFi de la salle + activité de l'app), jamais un comptage exact. */
+export interface OccupancySettings {
+  policy: OccupancyPolicy
+  publicIp: string | null
+  publicIpUpdatedAt: string | null
+  /** IP vue par le serveur pour cette requête (« utiliser mon IP actuelle » depuis le WiFi de la salle). */
+  requestIp: string | null
+}
+
+export const occupancyApi = {
+  get: () => api.get<OccupancyEstimate>('/v1/occupancy').then((r) => r.data),
+  setOverride: (data: { count: number; durationMinutes?: number; note?: string }) =>
+    api.patch<OccupancyEstimate>('/v1/admin/occupancy/override', data).then((r) => r.data),
+  clearOverride: () => api.delete<OccupancyEstimate>('/v1/admin/occupancy/override').then((r) => r.data),
+  getSettings: () => api.get<OccupancySettings>('/v1/admin/settings/occupancy-policy').then((r) => r.data),
+  saveSettings: (data: OccupancyPolicy & { publicIp: string | null }) =>
+    api.put<OccupancySettings>('/v1/admin/settings/occupancy-policy', data).then((r) => r.data),
+}
 
 export interface AttendanceScanLog {
   id: string;

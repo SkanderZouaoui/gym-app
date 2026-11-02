@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { adminApi, appConfigApi, plansApi } from '../api/endpoints'
 import { contrastRatio } from '@muscleup/shared'
 import { useAppConfigDraft } from '../store/useAppConfigDraft'
+import { OccupancyPanel } from '../components/OccupancyPanel'
 
 export function DashboardPage() {
   const { data, isLoading } = useQuery({
@@ -82,6 +83,8 @@ export function DashboardPage() {
         <h1 className="font-head text-2xl font-extrabold text-(--color-secondary)">Vue d’ensemble</h1>
         <p className="text-sm text-(--color-muted)">État de l'application client et contrôles avant publication.</p>
       </div>
+
+      <OccupancyPanel />
 
       {isLoading ? (
         <p className="text-sm text-(--color-muted)">Chargement…</p>

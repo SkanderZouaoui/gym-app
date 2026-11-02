@@ -27,6 +27,7 @@ import { StorageModule } from './storage/storage.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
 import { MailModule } from './mail/mail.module.js';
 import { CoachesModule } from './coaches/coaches.module.js';
+import { OccupancyModule } from './occupancy/occupancy.module.js';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { CoachesModule } from './coaches/coaches.module.js';
     NotificationsModule,
     AppConfigModule,
     CoachesModule,
+    OccupancyModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
