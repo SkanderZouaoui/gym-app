@@ -72,7 +72,7 @@ echo
 
 # --- App mobile (Expo Go) via le tunnel Expo (n'empêche pas d'utiliser le back-office) ---
 npm ls -g @expo/ngrok >/dev/null 2>&1 || npm i -g @expo/ngrok@^4.1.0
-(cd mobile && EXPO_PUBLIC_API_URL="$API_URL" CI=1 nohup npx expo start --tunnel ngrok --clear --port 8081 > ../expo.log 2>&1 &)
+(cd mobile && EXPO_PUBLIC_API_URL="$API_URL" CI=1 nohup npx expo start --go --tunnel ngrok --clear --port 8081 > ../expo.log 2>&1 &)
 echo "Attente du tunnel Expo (3 min max)..."
 EXPO_HOST=""
 for i in $(seq 1 90); do
