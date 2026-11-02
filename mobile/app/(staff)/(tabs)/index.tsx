@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../../../src/components/NotificationBell';
 import { RoleAnnouncements, RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
+import { OccupancyCard } from '../../../src/components/staff/OccupancyCard';
 
 /** Accueil de l'espace staff : chiffres du jour, raccourcis, cours du jour et derniers encaissements. */
 export default function StaffHomeScreen() {
@@ -85,6 +86,8 @@ export default function StaffHomeScreen() {
             </View>
           </LinearGradient>
         </View>
+
+        <OccupancyCard settingsHref={isAdmin ? '/(admin)/occupancy-settings' : undefined} />
 
         <View style={styles.actions}>
           {actions.map((a) => (

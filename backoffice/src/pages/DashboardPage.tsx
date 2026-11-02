@@ -7,6 +7,7 @@ import { daysLeft, formatDate, formatMoney, formatTime, greeting, METHOD_ICON, M
 import { useNow } from '../lib/hooks'
 import { Avatar, Badge, Card, EmptyState, Icon, SectionHeader, Skeleton, Stat } from '../components/ui'
 import { FillBar } from '../components/domain/SessionCard'
+import { OccupancyPanel } from '../components/domain/OccupancyPanel'
 
 export function DashboardPage() {
   const user = useAuth((s) => s.user)
@@ -58,6 +59,8 @@ export function DashboardPage() {
           </>
         )}
       </div>
+
+      <OccupancyPanel />
 
       <div className="grid gap-8 xl:grid-cols-5">
         <section className="space-y-3 xl:col-span-3">

@@ -238,6 +238,7 @@ export const useSetupAlerts = (enabled: boolean) => useQuery({ queryKey: ['admin
 /** Route de l'application mobile → page équivalente du back-office. */
 export function webRoute(route: string): string {
   const path = route.replace('/(admin)', '').replace('/(tabs)', '')
+  if (path.startsWith('/occupancy-settings')) return '/settings?section=occupancy'
   if (path.startsWith('/settings')) return path
   return path || '/'
 }

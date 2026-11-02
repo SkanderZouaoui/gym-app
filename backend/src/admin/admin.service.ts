@@ -14,7 +14,7 @@ export class AdminService {
     const now = new Date();
     const weekEnd = new Date(now.getTime() + 7 * 86_400_000);
     const [settings, teamUsers, withShifts, plans, rooms, types, upcoming, noCoach, staffCount] = await Promise.all([
-      this.prisma.organizationSettings.findFirst({ select: { config: true } }),
+      this.prisma.organizationSettings.findFirst({ select: { config: true, publicIp: true } }),
       this.prisma.user.findMany({
         where: { deletedAt: null, status: 'ACTIVE', roles: { some: { role: { in: ['STAFF', 'COACH'] } } } },
         select: { id: true, firstName: true, lastName: true },
@@ -64,6 +64,10 @@ export class AdminService {
     }
     if (config.hours.every((h) => !h.open)) {
       alerts.push({ key: 'hours-closed', severity: 'warning', title: 'Aucun jour d’ouverture', detail: 'Les horaires indiquent la salle fermée toute la semaine.', route: '/(admin)/settings' });
+    }
+    if (!settings?.publicIp?.trim()) {
+      // Sans IP publique, l'estimation d'occupation ne repose que sur le signal faible « app ouverte ailleurs ».
+      alerts.push({ key: 'occupancy-ip-missing', severity: 'info', title: 'IP du WiFi de la salle non renseignée', detail: 'L’estimation d’occupation ne peut pas repérer les adhérents connectés au WiFi.', route: '/(admin)/occupancy-settings' });
     }
     if (upcoming === 0) {
       alerts.push({ key: 'no-sessions', severity: 'warning', title: 'Aucun cours programmé cette semaine', detail: 'Les adhérents ne peuvent rien réserver.', route: '/(admin)/(tabs)/planning' });

@@ -17,12 +17,16 @@ import { useGalleryApi } from '../api/catalog'
 import { METHOD_ICON, METHOD_LABEL, type PaymentMethod } from '../lib/format'
 import { Button, Card, ChipChoice, Field, Icon, PageHeader, SectionHeader, Skeleton, Stepper, ToggleRow, useToast, cn } from '../components/ui'
 import { GalleryManager } from '../components/domain/GalleryManager'
+import { OccupancySettingsForm } from '../components/domain/OccupancySettingsForm'
+import { formFrom, payloadFrom, type OccupancyForm } from '../lib/occupancyForm'
+import { useOccupancySettings, useSaveOccupancySettings } from '../api/occupancy'
 import { ImageEditor } from '../components/domain/ImageEditor'
 
-type Section = 'venue' | 'booking' | 'payments' | 'comms'
+type Section = 'venue' | 'booking' | 'occupancy' | 'payments' | 'comms'
 const SECTIONS: { id: Section; label: string; sub: string; icon: string }[] = [
   { id: 'venue', label: 'Salle et horaires', sub: 'Identité, coordonnées et horaires d’ouverture', icon: 'storefront' },
   { id: 'booking', label: 'Réservation et présence', sub: 'Annulation, liste d’attente, période de scan', icon: 'event_available' },
+  { id: 'occupancy', label: 'Présence et occupation', sub: 'WiFi de la salle, pondération et réglage manuel', icon: 'groups' },
   { id: 'payments', label: 'Paiements', sub: 'Moyens de paiement acceptés', icon: 'payments' },
   { id: 'comms', label: 'Annonces et alertes', sub: 'Format, notifications push et rappels', icon: 'campaign' },
 ]
@@ -164,10 +168,13 @@ export function SettingsPage() {
   const savePolicy = useUpdateAttendancePolicy()
   const [cfgDraft, setCfgDraft] = useState<OrganizationConfig | null>(null)
   const [policyDraft, setPolicyDraft] = useState<AttendancePolicy | null>(null)
+  const occQuery = useOccupancySettings()
+  const saveOcc = useSaveOccupancySettings()
+  const [occDraft, setOccDraft] = useState<OccupancyForm | null>(null)
   const cfg = cfgDraft ?? configQuery.data
   const policy = policyDraft ?? policyQuery.data ?? DEFAULT_ATTENDANCE_POLICY
-  const dirty = !!cfgDraft || !!policyDraft
-  const saving = saveConfig.isPending || savePolicy.isPending
+  const dirty = !!cfgDraft || !!policyDraft || !!occDraft
+  const saving = saveConfig.isPending || savePolicy.isPending || saveOcc.isPending
 
   // Avertit avant de quitter la page avec des modifications non enregistrées.
   useEffect(() => {
@@ -182,11 +189,14 @@ export function SettingsPage() {
     try {
       if (cfgDraft) await saveConfig.mutateAsync(cfgDraft)
       if (policyDraft) await savePolicy.mutateAsync(policyDraft)
+      if (occDraft) await saveOcc.mutateAsync(payloadFrom(occDraft))
       setCfgDraft(null)
       setPolicyDraft(null)
+      setOccDraft(null)
       toast('Réglages enregistrés')
     } catch (e) {
-      toast(apiErrorMessage(e, 'Enregistrement impossible. Réessayez.'), 'danger')
+      const code = (e as { response?: { data?: { code?: string } } }).response?.data?.code
+      toast(code === 'INVALID_PUBLIC_IP' ? 'Adresse IP invalide.' : code === 'OVERRIDE_DEFAULT_EXCEEDS_MAX' ? 'La durée par défaut dépasse la durée maximale.' : apiErrorMessage(e, 'Enregistrement impossible. Réessayez.'), 'danger')
     }
   }
 
@@ -278,6 +288,8 @@ export function SettingsPage() {
                 ) : null}
               </Group>
             </>
+          ) : section === 'occupancy' ? (
+            occQuery.data ? <OccupancySettingsForm form={occDraft ?? formFrom(occQuery.data)} requestIp={occQuery.data.requestIp} onChange={setOccDraft} /> : <Skeleton className="h-64 rounded-xl" />
           ) : section === 'payments' ? (
             <Group title="Moyens de paiement acceptés" icon="payments">
               {PAYMENTS.map((p) => (
@@ -312,7 +324,7 @@ export function SettingsPage() {
         <div className="pop-in fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-5 lg:left-64">
           <div className="flex items-center gap-3 rounded-full border border-border bg-surface px-3 py-2.5 shadow-pop">
             <span className="pl-3 text-sm font-semibold">Modifications non enregistrées</span>
-            <Button variant="ghost" size="sm" onClick={() => { setCfgDraft(null); setPolicyDraft(null) }}>Annuler</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setCfgDraft(null); setPolicyDraft(null); setOccDraft(null) }}>Annuler</Button>
             <Button size="sm" icon="check" loading={saving} onClick={() => void save()}>Enregistrer</Button>
           </div>
         </div>
