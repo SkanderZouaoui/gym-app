@@ -9,9 +9,9 @@ API_URL="https://${CODESPACE_NAME}-3001.${GITHUB_CODESPACES_PORT_FORWARDING_DOMA
 BO_URL="https://${CODESPACE_NAME}-5173.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 
 # Déjà lancé (réouverture du Codespace) : on réaffiche juste les liens.
-if curl -s -o /dev/null localhost:5173 && [ -f expo-url.txt ]; then
+if curl -s -o /dev/null localhost:5173; then
   echo "✅ Back-office : $BO_URL"
-  echo "   Expo Go     : $(cat expo-url.txt)"
+  [ -f expo-url.txt ] && echo "   Expo Go     : $(cat expo-url.txt)" || echo "   Expo Go     : pas encore prêt (voir expo.log)"
   exit 0
 fi
 
@@ -61,23 +61,31 @@ echo "Attente du démarrage de l'API..."
 until curl -s -o /dev/null localhost:3001; do sleep 2; done
 until curl -s -o /dev/null localhost:5173; do sleep 1; done
 
-# --- App mobile (Expo Go) via le tunnel Expo ---
-npm ls -g @expo/ngrok >/dev/null 2>&1 || npm i -g @expo/ngrok@^4.1.0
-(cd mobile && EXPO_PUBLIC_API_URL="$API_URL" CI=1 nohup npx expo start --tunnel --clear --port 8081 > ../expo.log 2>&1 &)
-echo "Attente du tunnel Expo..."
-EXPO_HOST=""
-for i in $(seq 1 120); do
-  EXPO_HOST=$(curl -s -H 'expo-platform: android' localhost:8081 2>/dev/null | grep -o '"hostUri":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
-  case "$EXPO_HOST" in *exp.direct*) break;; esac
-  sleep 2
-done
-
 gh codespace ports visibility 3001:public 5173:public -c "$CODESPACE_NAME" || \
   echo "⚠️  Passe les ports 3001 et 5173 en Public dans l'onglet PORTS."
 
 echo
 echo "✅ Back-office : $BO_URL"
 echo "   API         : $API_URL"
-echo "   Expo Go     : exp://${EXPO_HOST:-<voir expo.log>}"
 echo "   Connexion   : admin-demo@ / coach-demo@ / staff-demo@ / member-phase2@muscleup.dev — Muscle123!"
-echo "exp://${EXPO_HOST}" > expo-url.txt
+echo
+
+# --- App mobile (Expo Go) via le tunnel Expo (n'empêche pas d'utiliser le back-office) ---
+npm ls -g @expo/ngrok >/dev/null 2>&1 || npm i -g @expo/ngrok@^4.1.0
+(cd mobile && EXPO_PUBLIC_API_URL="$API_URL" CI=1 nohup npx expo start --tunnel --clear --port 8081 > ../expo.log 2>&1 &)
+echo "Attente du tunnel Expo (3 min max)..."
+EXPO_HOST=""
+for i in $(seq 1 90); do
+  EXPO_HOST=$(curl -s -H 'expo-platform: android' localhost:8081 2>/dev/null | grep -o '"hostUri":"[^"]*exp\.direct[^"]*"' | head -1 | cut -d'"' -f4 || true)
+  [ -z "$EXPO_HOST" ] && EXPO_HOST=$(grep -o 'exp://[^ ]*exp\.direct[^ ]*' expo.log 2>/dev/null | head -1 | sed 's#exp://##' || true)
+  [ -n "$EXPO_HOST" ] && break
+  sleep 2
+done
+
+if [ -n "$EXPO_HOST" ]; then
+  echo "exp://${EXPO_HOST}" > expo-url.txt
+  echo "✅ Expo Go     : exp://${EXPO_HOST}"
+else
+  echo "⚠️  Tunnel Expo non prêt. Dernières lignes de expo.log :"
+  tail -20 expo.log || true
+fi
