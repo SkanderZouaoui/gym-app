@@ -1,0 +1,69 @@
+# Déploiement MVP sur Render (plan gratuit) : API NestJS en Docker.
+# Base de données = Supabase, stockage = Cloudflare R2. Pas de Redis (non utilisé par l'API).
+# Les variables `sync: false` sont à renseigner dans le dashboard Render.
+
+services:
+  - type: web
+    name: muscleup-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: TRUST_PROXY
+        value: "1"
+      # Supabase : « Session pooler » (port 5432, hôte *.pooler.supabase.com), compatible IPv4 et migrations Prisma.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: QR_KEY_ENCRYPTION_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_TTL
+        value: 30d
+      # Cloudflare R2
+      - key: S3_ENDPOINT
+        sync: false # https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+      - key: S3_PUBLIC_ENDPOINT
+        sync: false # même valeur que S3_ENDPOINT
+      - key: S3_REGION
+        value: auto
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: S3_BUCKET
+        value: muscleup
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      # URL publique de l'API (https://muscleup-api.onrender.com) et origines du back-office
+      - key: PUBLIC_API_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: APP_SCHEME
+        value: muscleup
+      # Emails (optionnel, ex. Brevo)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: MAIL_BRAND
+        value: MuscleUP
