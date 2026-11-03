@@ -13,7 +13,6 @@ export * from './IconCircleButton';
 export * from './CircularTimer';
 export * from './LineChart';
 export * from './BarHistogram';
-export * from './OfflineBanner';
 export * from './ScreenTitle';
 export * from './FilterDropdown';
 export * from './SectionHeader';

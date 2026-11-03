@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
-import { Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Pressable, ScrollView, type ScrollViewInstance, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,6 +19,7 @@ import {
 } from '../../../../../src/hooks/useCoaching';
 import type { SetDraft } from '../../../../../src/components/training/SetRow';
 import { clearSessionDraft, readSessionDraft, writeSessionDraft } from '../../../../../src/hooks/useSessionDraft';
+import { lastValueForSet, useLastSessionValues } from '../../../../../src/hooks/useLastSessionValues';
 import { useNetworkStatusContext } from '../../../../../src/hooks/NetworkStatusContext';
 import { useExercisePickStore } from '../../../../../src/store/exercisePick';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +33,8 @@ interface LiveSet {
   weightKg: string;
   weightTouched: boolean;
   reps: string;
+  /** true dès que l'utilisateur a saisi les répétitions de cette série : elle n'est plus remplie par recopie. */
+  repsTouched?: boolean;
   restSeconds: number;
   done: boolean;
   isExtraSet: boolean;
@@ -54,9 +57,10 @@ function summarizeReps(reps: string[]): string {
  * repos en anneau circulaire entre les séries. */
 export default function LiveSessionScreen() {
   useTranslation();
-  const { programId, dayId, pickedExerciseId, pickedExerciseName, pickedExerciseSets } = useLocalSearchParams<{
+  const { programId, dayId, resume, pickedExerciseId, pickedExerciseName, pickedExerciseSets } = useLocalSearchParams<{
     programId: string;
     dayId: string;
+    resume?: string;
     pickedExerciseId?: string;
     pickedExerciseName?: string;
     pickedExerciseSets?: string;
@@ -70,18 +74,8 @@ export default function LiveSessionScreen() {
   const day = program?.days.find((d) => d.id === dayId);
   const navigation = useNavigation();
 
-  const lastWeightByExercise = useMemo(() => {
-    const map = new Map<string, number>();
-    if (!workouts) return map;
-    const sorted = [...workouts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    for (const log of sorted) {
-      for (const s of log.sets) {
-        if (map.has(s.exerciseId) || !s.weightKg) continue;
-        map.set(s.exerciseId, Number(s.weightKg));
-      }
-    }
-    return map;
-  }, [workouts]);
+  // Poids et répétitions de la dernière séance enregistrée (voir useLastSessionValues).
+  const lastSessionWeights = useLastSessionValues(day?.exercises.map((e) => e.exercise.id) ?? []);
 
   const [sets, setSets] = useState<LiveSet[]>([]);
   const [addedExercises, setAddedExercises] = useState<AddedExercise[]>([]);
@@ -95,9 +89,11 @@ export default function LiveSessionScreen() {
   const [saveChoiceOpen, setSaveChoiceOpen] = useState(false);
   const [removedExerciseIds, setRemovedExerciseIds] = useState<Set<string>>(new Set());
   const [foundDraft, setFoundDraft] = useState(() => (programId && dayId ? readSessionDraft(programId, dayId) : null));
-  const [draftPromptVisible, setDraftPromptVisible] = useState(() => !!foundDraft);
+  // `resume=1` (bannière « séance en cours ») : on reprend directement, sans demander.
+  const [draftPromptVisible, setDraftPromptVisible] = useState(() => !!foundDraft && resume !== '1');
   const [exitConfirmVisible, setExitConfirmVisible] = useState(false);
-  const [startedAtMs] = useState(() => Date.now() - (foundDraft?.elapsedSeconds ?? 0) * 1000);
+  // Heure de début réelle : le chrono continue de courir hors de l'écran, tant que la séance n'est ni terminée ni abandonnée.
+  const [startedAtMs, setStartedAtMs] = useState(() => (foundDraft && resume === '1' ? foundDraft.startedAt : Date.now()));
   const scrollRef = useRef<ScrollViewInstance>(null);
   const exerciseOffsets = useRef<Record<string, number>>({});
   const lastScrolledExerciseId = useRef<string | null>(null);
@@ -113,14 +109,32 @@ export default function LiveSessionScreen() {
     setSets(foundDraft.sets);
     setAddedExercises(foundDraft.addedExercises);
     setRemovedExerciseIds(new Set(foundDraft.removedExerciseIds));
-    setElapsedSeconds(foundDraft.elapsedSeconds);
+    setStartedAtMs(foundDraft.startedAt);
+    setElapsedSeconds(Math.max(0, Math.floor((Date.now() - foundDraft.startedAt) / 1000)));
     hydratedRef.current = true;
     setDraftPromptVisible(false);
   };
 
+  // Séance abandonnée : plus aucune sauvegarde automatique du brouillon (sinon la séance « revient » en cours).
+  const abandonedRef = useRef(false);
+  const leaveScreen = () => {
+    if (router.canGoBack()) router.back();
+    else router.replace('/(member)/(tabs)/training');
+  };
+
+  const autoResumedRef = useRef(false);
+  useEffect(() => {
+    if (resume !== '1' || !foundDraft || autoResumedRef.current || hydratedRef.current) return;
+    autoResumedRef.current = true;
+    resumeFromDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const discardDraft = () => {
     if (programId && dayId) clearSessionDraft(programId, dayId);
     setFoundDraft(null);
+    setStartedAtMs(Date.now());
+    setElapsedSeconds(0);
     setDraftPromptVisible(false);
   };
 
@@ -129,12 +143,16 @@ export default function LiveSessionScreen() {
     hydratedRef.current = true;
     const flattened: LiveSet[] = [];
     day.exercises.forEach((ex) => {
-      const lastWeight = lastWeightByExercise.get(ex.exercise.id);
+      const last = lastSessionWeights.get(ex.exercise.id);
       const base = ex.setDetails.length > 0
         ? ex.setDetails
         : Array.from({ length: ex.sets }, (_, i) => ({ setNumber: i + 1, reps: null, weightKg: null, restSeconds: ex.restSeconds }));
       base.forEach((s) => {
-        const plannedOrLastWeight = s.weightKg ?? (lastWeight !== undefined ? String(lastWeight) : null);
+        // Poids et répétitions de la même série à la dernière séance (à défaut, de sa dernière série),
+        // sinon les valeurs prévues au programme.
+        const lastWeight = lastValueForSet(last?.weightBySet, s.setNumber);
+        const lastReps = lastValueForSet(last?.repsBySet, s.setNumber);
+        const plannedOrLastWeight = lastWeight !== undefined ? String(lastWeight) : s.weightKg;
         flattened.push({
           exerciseId: ex.exercise.id,
           exerciseName: ex.exercise.name,
@@ -142,7 +160,8 @@ export default function LiveSessionScreen() {
           previousLabel: lastWeight !== undefined ? `${lastWeight} kg` : '—',
           weightKg: plannedOrLastWeight ? String(plannedOrLastWeight) : '',
           weightTouched: false,
-          reps: s.reps ? String(s.reps) : '',
+          reps: lastReps !== undefined ? String(lastReps) : s.reps ? String(s.reps) : '',
+          repsTouched: false,
           restSeconds: s.restSeconds ?? ex.restSeconds ?? 90,
           done: false,
           isExtraSet: false,
@@ -150,7 +169,7 @@ export default function LiveSessionScreen() {
       });
     });
     setSets(flattened);
-  }, [day, workouts, lastWeightByExercise, isLoadingWorkouts, draftPromptVisible]);
+  }, [day, workouts, lastSessionWeights, isLoadingWorkouts, draftPromptVisible]);
 
   useEffect(() => {
     const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - startedAtMs) / 1000)), 1000);
@@ -158,11 +177,13 @@ export default function LiveSessionScreen() {
   }, [startedAtMs]);
 
   useEffect(() => {
-    if (!programId || !dayId || !hydratedRef.current || sets.length === 0) return;
+    if (!programId || !dayId || !hydratedRef.current || sets.length === 0 || abandonedRef.current) return;
     const t = setTimeout(() => {
+      if (abandonedRef.current) return;
       writeSessionDraft({
         programId,
         dayId,
+        programName: program?.name,
         startedAt: startedAtMs,
         elapsedSeconds,
         sets,
@@ -171,7 +192,7 @@ export default function LiveSessionScreen() {
       });
     }, 800);
     return () => clearTimeout(t);
-  }, [programId, dayId, sets, addedExercises, removedExerciseIds, elapsedSeconds, startedAtMs]);
+  }, [programId, dayId, program?.name, sets, addedExercises, removedExerciseIds, elapsedSeconds, startedAtMs]);
 
   useEffect(() => {
     if (restSecondsLeft === null) return;
@@ -240,6 +261,7 @@ export default function LiveSessionScreen() {
         weightKg: d.weightKg ?? '',
         weightTouched: !!d.weightKg,
         reps: d.reps ?? '',
+        repsTouched: !!d.reps,
         restSeconds: 90,
         done: false,
         isExtraSet: false,
@@ -273,6 +295,21 @@ export default function LiveSessionScreen() {
     );
   };
 
+  /** Comme le poids : saisir les répétitions d'une série les recopie dans les séries suivantes de l'exercice
+   * qui n'ont pas encore été saisies à la main ni validées. */
+  const handleChangeReps = (globalIndex: number, exerciseId: string, value: string) => {
+    setActiveExerciseId(exerciseId);
+    setSets((prev) =>
+      prev.map((s, i) => {
+        if (i === globalIndex) return { ...s, reps: value, repsTouched: true };
+        if (s.exerciseId === exerciseId && i > globalIndex && !s.repsTouched && !s.done) {
+          return { ...s, reps: value };
+        }
+        return s;
+      }),
+    );
+  };
+
   const addSet = (exerciseId: string) => {
     setActiveExerciseId(exerciseId);
     const group = exerciseGroups.find(([exId]) => exId === exerciseId);
@@ -285,7 +322,8 @@ export default function LiveSessionScreen() {
       setNumber: last.setNumber + 1,
       weightKg: last.weightKg,
       weightTouched: false,
-      reps: '',
+      reps: last.reps,
+      repsTouched: false,
       done: false,
       isExtraSet: true,
     };
@@ -321,6 +359,8 @@ export default function LiveSessionScreen() {
     }
     setError(null);
     setErrorGlobalIndex(null);
+    // Série validée : on ferme le clavier (laissé ouvert si la saisie est invalide, pour pouvoir corriger).
+    Keyboard.dismiss();
     updateSet(globalIndex, { done: true });
 
     const exGroupIndex = exerciseGroups.findIndex(([exId]) => exId === current.exerciseId);
@@ -597,10 +637,7 @@ export default function LiveSessionScreen() {
                       state={state}
                       error={errorGlobalIndex === globalIdx && !!error}
                       onChangeWeight={(v) => handleChangeWeight(globalIdx, s.exerciseId, v)}
-                      onChangeReps={(v) => {
-                        setActiveExerciseId(s.exerciseId);
-                        updateSet(globalIdx, { reps: v });
-                      }}
+                      onChangeReps={(v) => handleChangeReps(globalIdx, s.exerciseId, v)}
                       onValidate={() => handleValidateSet(globalIdx)}
                       onRemove={exSets.length > 1 ? () => removeSet(s.exerciseId, s.setNumber) : undefined}
                     />
@@ -673,16 +710,26 @@ export default function LiveSessionScreen() {
       </BottomSheet>
 
       <BottomSheet visible={exitConfirmVisible} onClose={() => setExitConfirmVisible(false)}>
-        <Text style={styles.sheetTitle}>{i18n.t('member.abandonner_la_seance')}</Text>
-        <Text style={styles.sheetText}>{i18n.t('member.votre_progression_reste_sauvegardee_et')}</Text>
+        <Text style={styles.sheetTitle}>{i18n.t('member.quitter_la_seance')}</Text>
+        <Text style={styles.sheetText}>{i18n.t('member.quitter_la_seance_texte')}</Text>
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+          <Button
+            label={i18n.t('member.revenir_plus_tard')}
+            onPress={() => {
+              setExitConfirmVisible(false);
+              leaveScreen();
+            }}
+            variant="secondary"
+          />
           <Button
             label={i18n.t('member.abandonner')}
             onPress={() => {
+              abandonedRef.current = true;
+              if (programId && dayId) clearSessionDraft(programId, dayId);
               setExitConfirmVisible(false);
-              router.navigate(`/(member)/program/${programId}`);
+              leaveScreen();
             }}
-            variant="secondary"
+            variant="danger"
           />
           <Button label={i18n.t('member.continuer_la_seance')} onPress={() => setExitConfirmVisible(false)} variant="outline" />
         </View>

@@ -10,8 +10,7 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useMe } from '../../../src/hooks/useMe';
 import { useCoachPrograms, useCoachSessions } from '../../../src/hooks/useCoachSessions';
-import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
-import { OfflineBanner, SkeletonBlock } from '../../../src/components/ui';
+import { SkeletonBlock } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { NotificationBell } from '../../../src/components/NotificationBell';
@@ -33,7 +32,6 @@ export default function CoachHomeScreen() {
   const { data: user, isLoading: userLoading } = useMe();
   const { data: sessions, isLoading: sessionsLoading } = useCoachSessions();
   const { data: programs } = useCoachPrograms();
-  const { isOnline, lastSyncAt } = useNetworkStatus();
 
   const now = new Date();
   const dateLabel = now.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
@@ -108,7 +106,6 @@ export default function CoachHomeScreen() {
           </Pressable>
         </View>
 
-        {!isOnline ? <OfflineBanner lastSyncAt={lastSyncAt} /> : null}
         <RoleNotices />
 
         <View style={styles.heroShadow}>

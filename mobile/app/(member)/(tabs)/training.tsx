@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { spacing } from '../../../src/theme/tokens';
@@ -9,8 +9,7 @@ import { TrainingTabs, type TrainingTab } from '../../../src/components/training
 import { ProgramsView } from '../../../src/components/training/views/ProgramsView';
 import { ExercisesView } from '../../../src/components/training/views/ExercisesView';
 import { HistoryView } from '../../../src/components/training/views/HistoryView';
-import { OfflineBanner, ScreenTitle } from '../../../src/components/ui';
-import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { ScreenTitle } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useQueryClient } from '@tanstack/react-query';
@@ -23,17 +22,11 @@ export default function TrainingScreen() {
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const [tab, setTab] = useState<TrainingTab>('proposed');
-  const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const queryClient = useQueryClient();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {!isOnline ? (
-        <View style={styles.offlineBannerWrap}>
-          <OfflineBanner lastSyncAt={lastSyncAt} />
-        </View>
-      ) : null}
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}

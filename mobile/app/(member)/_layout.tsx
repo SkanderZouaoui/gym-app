@@ -1,7 +1,9 @@
+import { View } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 import { useSessionStore } from '../../src/store/session';
 import { onboardingSkipped } from '../../src/store/onboardingSkip';
 import { usePrefetchOfflineData } from '../../src/hooks/usePrefetchOfflineData';
+import { ActiveSessionBanner } from '../../src/components/ActiveSessionBanner';
 
 /** Pile de navigation Adhérent : les 5 onglets vivent dans (tabs) (Tabs natif),
  * tous les écrans de détail sont poussés ici en tant que vrais écrans de Stack —
@@ -18,14 +20,17 @@ function MemberStackInner() {
   // Tant que l'objectif et le profil physique ne sont pas remplis, l'onboarding revient à chaque connexion (« Passer » ne vaut que pour la session).
   if (onboardedAt === null && !onboardingSkipped.value) return <Redirect href={'/onboarding' as any} />;
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        gestureEnabled: true,
-        fullScreenGestureEnabled: true,
-      }}
-    >
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+    <View style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          gestureEnabled: true,
+          fullScreenGestureEnabled: true,
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+      <ActiveSessionBanner />
+    </View>
   );
 }

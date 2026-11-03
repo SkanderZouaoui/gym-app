@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
+import { SubmitButton } from '../SubmitButton';
+import { Banner } from '../ui/Banner';
 
 /** Refonte connexion & mot de passe — Design System/FitZone Login Refonte.dc.html. */
 export const VIOLET = '#7C3AED';
@@ -174,18 +176,29 @@ export function AuthField({ icon, secure, borderColor, action, ...input }: AuthF
 }
 
 /** Bouton principal en dégradé violet (grisé tant que le formulaire n'est pas valide). */
-export function AuthButton({ label, onPress, loading, disabled, icon = 'arrow-forward' }: { label: string; onPress: () => void; loading?: boolean; disabled?: boolean; icon?: keyof typeof MaterialIcons.glyphMap }) {
-  const off = disabled || loading;
+export function AuthButton({
+  label, onPress, loading, disabled, icon = 'arrow-forward', success, successLabel, shakeTrigger,
+}: {
+  label: string; onPress: () => void; loading?: boolean; disabled?: boolean; icon?: keyof typeof MaterialIcons.glyphMap;
+  /** Affiche l'animation de réussite (coche verte) ; `successLabel` remplace alors le libellé. */
+  success?: boolean; successLabel?: string;
+  /** À incrémenter pour secouer le bouton après un échec. */
+  shakeTrigger?: number;
+}) {
   return (
-    <Pressable onPress={onPress} disabled={off} style={({ pressed }) => [{ borderRadius: 18 }, !disabled && styles.glow, pressed && { transform: [{ scale: 0.97 }] }]}>
-      <LinearGradient
-        colors={disabled ? ['#8E86A8', '#8E86A8'] : ['#8B5CF6', VIOLET_DARK]}
-        style={{ height: 58, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}
-      >
-        <Text style={{ fontFamily: fonts.bodyBold, fontSize: 17, letterSpacing: 0.3, color: '#fff' }}>{label}</Text>
-        {loading ? null : <MaterialIcons name={icon} size={22} color="#fff" />}
-      </LinearGradient>
-    </Pressable>
+    <SubmitButton
+      label={label}
+      successLabel={successLabel}
+      status={success ? 'success' : loading ? 'loading' : 'idle'}
+      onPress={onPress}
+      disabled={disabled}
+      icon={icon}
+      colors={['#8B5CF6', VIOLET_DARK]}
+      glowColor={VIOLET}
+      height={58}
+      fontSize={17}
+      shakeTrigger={shakeTrigger}
+    />
   );
 }
 
@@ -200,11 +213,19 @@ export function Chip({ icon, label }: { icon: keyof typeof MaterialIcons.glyphMa
   );
 }
 
+/** Bannière d'erreur des écrans d'authentification : la bannière de l'app (même style que partout ailleurs).
+ * `danger` pour un refus (identifiants, serveur), `warning` pour un problème de réseau ; changer `attempt` rejoue
+ * son apparition à chaque nouvel échec. */
+export function AuthErrorBanner({ tone, icon, title, message, attempt = 0 }: {
+  tone: 'danger' | 'warning'; icon: keyof typeof MaterialIcons.glyphMap; title: string; message: string; attempt?: number;
+}) {
+  return <Banner key={attempt} tone={tone} icon={icon} title={title} text={message} />;
+}
+
 export function ErrorLine({ text }: { text: string }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 }}>
-      <MaterialIcons name="error" size={18} color="#EF4444" />
-      <Text style={{ flex: 1, fontFamily: fonts.bodySemiBold, fontSize: 13, color: '#EF4444' }}>{text}</Text>
+    <View style={{ marginTop: 10 }}>
+      <Banner tone="danger" icon="error-outline" text={text} />
     </View>
   );
 }
@@ -259,7 +280,3 @@ export function DoneView({ title, text, button, onPress }: { title: string; text
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  glow: { shadowColor: VIOLET, shadowOpacity: 0.45, shadowRadius: 12, shadowOffset: { width: 0, height: 10 }, elevation: 8 },
-});

@@ -15,7 +15,6 @@ import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe
 import { useMyAnnouncements } from '../../../src/hooks/useAnnouncements';
 import { useDisplayConfig, useHomeAlerts } from '../../../src/hooks/useHomeAlerts';
 import { useNotifications } from '../../../src/hooks/useProfile';
-import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useSessionStore } from '../../../src/store/session';
 import { AppHeader } from '../../../src/components/adherent/AppHeader';
@@ -23,7 +22,7 @@ import { NextCourseCard } from '../../../src/components/adherent/NextCourseCard'
 import { MembershipHeroCard } from '../../../src/components/adherent/MembershipHeroCard';
 import { VenueTodayBanner } from '../../../src/components/venue/VenueTodayBanner';
 import { Notice, NoticeList, NoticePopups } from '../../../src/components/adherent/Notices';
-import { Banner, OfflineBanner, SectionHeader, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { Banner, SectionHeader, SkeletonBlock, Toast } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { useNow } from '../../../src/hooks/useNow';
@@ -46,6 +45,7 @@ export default function HomeScreen() {
   const { isDismissed, dismiss: dismissNotice } = useDismissedNotices();
   const alertFormat = display?.alertFormat ?? 'Bandeau';
   const announcementFormat = display?.announcementFormat ?? 'Bandeau';
+  const announcementsAsCards = announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0;
   const toLevel = (l: string): Notice['level'] => (l === 'urgent' || l === 'warn' ? l : 'info');
   const allAlerts: Notice[] = (homeAlerts ?? []).map((a) => ({ id: `alert:${a.id}`, title: a.title, message: a.message, level: toLevel(a.level) }));
   const allAnnouncements: Notice[] = (announcements ?? []).slice(0, 3).map((a) => ({
@@ -59,7 +59,6 @@ export default function HomeScreen() {
   const alertNotices = allAlerts.filter((n) => !isDismissed(n.id));
   const announcementNotices = allAnnouncements.filter((n) => !isDismissed(n.id));
   const { data: notifications } = useNotifications();
-  const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const isDegraded = useSessionStore((s) => s.isDegraded);
   const queryClient = useQueryClient();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
@@ -129,11 +128,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {!isOnline ? (
-        <View style={styles.offlineBannerWrap}>
-          <OfflineBanner lastSyncAt={lastSyncAt} />
-        </View>
-      ) : null}
       <ScrollView {...tabBarScroll}
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -150,7 +144,8 @@ export default function HomeScreen() {
         <NoticeList items={alertNotices} format={alertFormat === 'Pop-up' ? 'Bandeau' : alertFormat} onDismiss={dismissNotice} />
         {announcementFormat === 'Bandeau' ? <NoticeList items={announcementNotices} format="Bandeau" onDismiss={dismissNotice} /> : null}
 
-        <VenueTodayBanner href="/(member)/venue" />
+        {/* « La salle » s'affiche juste sous les annonces : ici si elles sont en bandeau (ou absentes), sinon après la section Annonces. */}
+        {!announcementsAsCards ? <VenueTodayBanner href="/(member)/venue" /> : null}
 
         {isDegraded ? (
           <Banner
@@ -230,7 +225,7 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        {announcementFormat !== 'Bandeau' && (announcements ?? []).length > 0 ? (
+        {announcementsAsCards ? (
           <View style={{ gap: spacing.sm }}>
             <SectionHeader icon="campaign" title={t('home.announcementsTitle')} />
             {(announcements ?? []).slice(0, 3).map((a) => (
@@ -248,6 +243,7 @@ export default function HomeScreen() {
             ))}
           </View>
         ) : null}
+        {announcementsAsCards ? <VenueTodayBanner href="/(member)/venue" /> : null}
       </ScrollView>
 
       {toastVisible ? (

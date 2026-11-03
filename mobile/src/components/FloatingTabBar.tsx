@@ -45,7 +45,7 @@ export interface FloatingTabBarProps {
   actionIcon?: keyof typeof MaterialIcons.glyphMap;
 }
 
-const BAR_HEIGHT = 68;
+export const BAR_HEIGHT = 68;
 const INDICATOR_W = 50;
 const INDICATOR_H = 56;
 const SPRING = { damping: 14, stiffness: 180 };

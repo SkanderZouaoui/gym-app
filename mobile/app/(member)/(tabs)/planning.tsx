@@ -12,8 +12,7 @@ import { useCreateBooking, useSessions } from '../../../src/hooks/useClasses';
 import { useMyBookings } from '../../../src/hooks/useMe';
 import type { ClassSessionSummary } from '../../../src/api/types';
 import { ApiError } from '../../../src/api/client';
-import { Banner, EmptyState, OfflineBanner, ScreenTitle, SkeletonBlock, SkeletonGroup, Toast } from '../../../src/components/ui';
-import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { Banner, EmptyState, ScreenTitle, SkeletonBlock, SkeletonGroup, Toast } from '../../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { CourseCard } from '../../../src/components/adherent/CourseCard';
 import { BookingConfirmSheet } from '../../../src/components/adherent/BookingConfirmSheet';
@@ -45,7 +44,6 @@ export default function PlanningScreen() {
   const { isRtl } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
   const { data: sessions, isLoading, isError, refetch } = useSessions();
-  const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const createBooking = useCreateBooking();
   const [bookingError, setBookingError] = useState<string | null>(null);
@@ -102,11 +100,6 @@ export default function PlanningScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {!isOnline ? (
-        <View style={styles.bannerWrap}>
-          <OfflineBanner lastSyncAt={lastSyncAt} />
-        </View>
-      ) : null}
 
       <View style={styles.header}>
         <ScreenTitle

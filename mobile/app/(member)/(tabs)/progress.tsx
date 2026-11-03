@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { fonts, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { ProgressView } from '../../../src/components/training/views/ProgressView';
-import { OfflineBanner, ScreenTitle } from '../../../src/components/ui';
-import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { ScreenTitle } from '../../../src/components/ui';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useQueryClient } from '@tanstack/react-query';
@@ -19,17 +18,11 @@ export default function ProgressScreen() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const queryClient = useQueryClient();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => queryClient.invalidateQueries());
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {!isOnline ? (
-        <View style={styles.offlineBannerWrap}>
-          <OfflineBanner lastSyncAt={lastSyncAt} />
-        </View>
-      ) : null}
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}

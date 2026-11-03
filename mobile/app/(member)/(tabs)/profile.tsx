@@ -14,8 +14,7 @@ import { authApi } from '../../../src/api/endpoints';
 import { goalTarget } from '../../../src/hooks/useWeeklyGoal';
 import { useSessionStore } from '../../../src/store/session';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
-import { Banner, BottomSheet, OfflineBanner, Toast } from '../../../src/components/ui';
-import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { Banner, BottomSheet, Toast } from '../../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { Button } from '../../../src/components/Button';
 import { ProfileHeader } from '../../../src/components/adherent/ProfileHeader';
@@ -53,7 +52,6 @@ export default function ProfileScreen() {
   const isDegraded = useSessionStore((s) => s.isDegraded);
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
-  const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
     Promise.all([
       refetchMe(),
@@ -154,11 +152,6 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {!isOnline ? (
-        <View style={styles.offlineBannerWrap}>
-          <OfflineBanner lastSyncAt={lastSyncAt} />
-        </View>
-      ) : null}
       <ScrollView {...tabBarScroll}
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}

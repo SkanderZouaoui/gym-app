@@ -10,9 +10,9 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useProgramDetail } from '../../../src/hooks/useCoachSessions';
 import { useDeleteOwnProgram } from '../../../src/hooks/useCoaching';
 import { Button } from '../../../src/components/Button';
-import { BottomSheet, EmptyState, OfflineBanner, Toast, DetailSkeleton } from '../../../src/components/ui';
+import { BottomSheet, EmptyState, Toast, DetailSkeleton } from '../../../src/components/ui';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
-import { useNetworkStatusContext } from '../../../src/hooks/NetworkStatusContext';
+import { summarizeExercise, useLastSessionValues } from '../../../src/hooks/useLastSessionValues';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import { WEEKDAYS_LONG_SUN } from '../../../src/i18n/labels';
@@ -27,11 +27,12 @@ export default function ProgramDetailScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: program, isLoading, isError, refetch } = useProgramDetail(id);
   const deleteProgram = useDeleteOwnProgram();
-  const { isOnline, lastSyncAt } = useNetworkStatusContext();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const [activeDayIndex, setActiveDayIndex] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Séries et répétitions réelles (dernière séance enregistrée), pas seulement les valeurs globales du programme.
+  const lastSession = useLastSessionValues(program?.days[activeDayIndex]?.exercises.map((e) => e.exercise.id) ?? []);
 
   if (isLoading && !program) {
     return (
@@ -80,11 +81,6 @@ export default function ProgramDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {!isOnline ? (
-        <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
-          <OfflineBanner lastSyncAt={lastSyncAt} />
-        </View>
-      ) : null}
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -159,7 +155,7 @@ export default function ProgramDetailScreen() {
           <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
           <View style={{ gap: 10 }}>
             {day?.exercises.map((ex, i) => {
-              const firstSet = ex.setDetails[0];
+              const summary = summarizeExercise(ex, lastSession.get(ex.exercise.id));
               return (
                 <Pressable
                   key={ex.id}
@@ -181,8 +177,8 @@ export default function ProgramDetailScreen() {
                     ) : null}
                   </View>
                   <View style={styles.exerciseRight}>
-                    <Text style={styles.exerciseSets}>{ex.sets} × {ex.reps}</Text>
-                    <Text style={styles.exerciseMeta}>{firstSet?.weightKg ? `${Number(firstSet.weightKg)} kg` : t('common.poids_du_corps')}</Text>
+                    <Text style={styles.exerciseSets}>{summary.count} × {summary.repsLabel}</Text>
+                    <Text style={styles.exerciseMeta}>{summary.weightLabel ? `${summary.weightLabel} kg` : t('common.poids_du_corps')}</Text>
                   </View>
                   <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
                 </Pressable>

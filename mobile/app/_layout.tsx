@@ -24,6 +24,7 @@ import { ApiError } from '../src/api/client';
 import { queryPersister, QUERY_CACHE_VERSION } from '../src/api/queryStorage';
 import { usePreferencesStore } from '../src/store/preferences';
 import { NetworkStatusProvider } from '../src/hooks/NetworkStatusContext';
+import { OfflineIndicator } from '../src/components/OfflineIndicator';
 import { useSessionStore } from '../src/store/session';
 import { Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -196,6 +197,7 @@ function RootLayoutInner() {
       <AndroidInsetsFrame>
         <Stack screenOptions={{ headerShown: false }} />
       </AndroidInsetsFrame>
+      <OfflineIndicator />
     </NetworkStatusProvider>
   );
 }

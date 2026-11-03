@@ -10,6 +10,8 @@ import { useCreateWorkoutLog, useExercises, useMyWorkouts } from '../../../src/h
 import { Banner, ScreenTitle } from '../../../src/components/ui';
 import { WorkoutHeroCard } from '../../../src/components/training/WorkoutHeroCard';
 import { clearSessionDraft } from '../../../src/hooks/useSessionDraft';
+import { rememberSessionWeights } from '../../../src/hooks/lastWeights';
+import { SubmitButton } from '../../../src/components/SubmitButton';
 import { formatClock } from '../../../src/utils/duration';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
@@ -52,6 +54,8 @@ export default function SessionSummaryScreen() {
   const createWorkout = useCreateWorkoutLog();
   const [feeling, setFeeling] = useState<string>('OK');
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [shakeTrigger, setShakeTrigger] = useState(0);
 
   const totalSeconds = Number(elapsedSeconds ?? 0);
   const minutes = Math.round(totalSeconds / 60);
@@ -100,13 +104,21 @@ export default function SessionSummaryScreen() {
       },
       {
         onSuccess: () => {
+          rememberSessionWeights(sets);
           if (programId && dayId) clearSessionDraft(programId, dayId);
-          // On repart de l'onglet Entraînement avec une pile propre : le bouton retour ne ramène pas
-          // sur la séance ou le programme (dont les jours ont pu changer).
-          if (router.canDismiss()) router.dismissAll();
-          router.replace('/(member)/(tabs)/training');
+          // Le bouton passe au vert (coche, onde) pendant un court instant avant de quitter l'écran.
+          setSaved(true);
+          setTimeout(() => {
+            // On repart de l'onglet Entraînement avec une pile propre : le bouton retour ne ramène pas
+            // sur la séance ou le programme (dont les jours ont pu changer).
+            if (router.canDismiss()) router.dismissAll();
+            router.replace('/(member)/(tabs)/training');
+          }, 1400);
         },
-        onError: () => setError(t('member.erreur_lors_de_lenregistrement_de')),
+        onError: () => {
+          setError(t('member.erreur_lors_de_lenregistrement_de'));
+          setShakeTrigger((n) => n + 1);
+        },
       },
     );
   };
@@ -213,16 +225,17 @@ export default function SessionSummaryScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <Pressable
+        <SubmitButton
+          label={t('member.enregistrer_la_seance')}
+          loadingLabel={t('common.enregistrement')}
+          successLabel={t('member.seance_enregistree')}
+          status={saved ? 'success' : createWorkout.isPending ? 'loading' : 'idle'}
           onPress={handleSave}
-          disabled={createWorkout.isPending}
-          style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, createWorkout.isPending && { opacity: 0.7 }]}
-        >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
-            <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
-            <Text style={styles.ctaText}>{createWorkout.isPending ? t('common.enregistrement') : t('member.enregistrer_la_seance')}</Text>
-          </LinearGradient>
-        </Pressable>
+          icon="check"
+          colors={[colors.primary, colors.primaryPressed]}
+          glowColor={colors.primary}
+          shakeTrigger={shakeTrigger}
+        />
       </View>
     </SafeAreaView>
   );

@@ -13,9 +13,8 @@ import { useAdminDashboard, useDailyAttendance, useExpiringMemberships, useRevie
 import { useOpenReports } from '../../../src/hooks/useModeration';
 import { usePayments } from '../../../src/hooks/usePayments';
 import { useStaffToday } from '../../../src/hooks/useStaff';
-import { useNetworkStatus } from '../../../src/hooks/useNetworkStatus';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { BottomSheet, OfflineBanner, ProgressBar, SkeletonBlock, SkeletonList } from '../../../src/components/ui';
+import { BottomSheet, ProgressBar, SkeletonBlock, SkeletonList } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { DEFAULT_ADMIN_SHORTCUTS, usePreferencesStore } from '../../../src/store/preferences';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
@@ -47,7 +46,6 @@ export default function AdminDashboardScreen() {
   useFocusEffect(useCallback(() => { void refetchSetup(); }, [refetchSetup]));
   const { data: payments, isLoading: paymentsLoading } = usePayments();
   const { data: staffToday, isLoading: todayLoading } = useStaffToday();
-  const { isOnline, lastSyncAt } = useNetworkStatus();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetch(), refetchDaily()]));
 
   const now = new Date();
@@ -184,7 +182,6 @@ export default function AdminDashboardScreen() {
           </Pressable>
         </View>
 
-        {!isOnline ? <OfflineBanner lastSyncAt={lastSyncAt} /> : null}
 
         <Pressable
           style={({ pressed }) => [styles.heroShadow, pressed && { transform: [{ scale: 0.98 }] }]}
