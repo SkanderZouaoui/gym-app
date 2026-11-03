@@ -9,6 +9,7 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { meApi } from '../../../src/api/endpoints';
+import { ApiError } from '../../../src/api/client';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useOfflineQrToken } from '../../../src/hooks/useOfflineQrToken';
 import { Avatar, Banner, Pill, ProgressBar, ScreenTitle } from '../../../src/components/ui';
@@ -33,7 +34,11 @@ export default function QrScreen() {
   const [token, setToken] = useState<string | null>(null);
   const [totalSeconds, setTotalSeconds] = useState(FALLBACK_REFRESH_SECONDS);
   const [secondsLeft, setSecondsLeft] = useState(FALLBACK_REFRESH_SECONDS);
-  const [offline, setOffline] = useState(false);
+  // Distingue une vraie coupure réseau (fetch qui échoue) d'une réponse d'erreur du serveur (ApiError).
+  const [errorKind, setErrorKind] = useState<'network' | 'server' | null>(null);
+  const [serverCode, setServerCode] = useState<string>('');
+  const offline = errorKind === 'network';
+  const serverError = errorKind === 'server';
   const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { data: user } = useMe();
@@ -48,9 +53,14 @@ export default function QrScreen() {
       setToken(res.token);
       setTotalSeconds(res.expiresInSeconds);
       setSecondsLeft(res.expiresInSeconds);
-      setOffline(false);
-    } catch {
-      setOffline(true);
+      setErrorKind(null);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setErrorKind('server');
+        setServerCode(` (${err.status}${err.code && err.code !== 'UNKNOWN' ? ` ${err.code}` : ''})`);
+      } else {
+        setErrorKind('network');
+      }
     }
   };
 
@@ -82,7 +92,9 @@ export default function QrScreen() {
         <ScreenTitle title={t('qr.title')} subtitle={t('qr.subtitle')} />
         <VenueStatusLine />
 
-        {offline || !token ? (
+        {serverError ? (
+          <Banner tone="danger" icon="error-outline" text={t('qr.serverError', { code: serverCode })} />
+        ) : offline ? (
           <Banner
             tone="warning"
             icon="wifi-off"
@@ -119,7 +131,7 @@ export default function QrScreen() {
           ) : null}
         </View>
 
-        {!offline ? (
+        {!offline && !serverError ? (
           <View style={[styles.dynamicCard, cardShadow]}>
             <View style={styles.dynamicRow}>
               <View style={styles.dynamicLabel}>

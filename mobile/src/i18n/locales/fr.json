@@ -418,6 +418,7 @@
     "brightness": "Luminosité max",
     "offlineWithFallback": "Mode hors ligne : code de secours valable jusqu'à {{time}}.",
     "offlineNoFallback": "Mode hors ligne : aucun code de secours en cache. Connectez-vous au réseau pour en générer un.",
+    "serverError": "Impossible de générer le code d'accès : le serveur a rencontré une erreur{{code}}. Réessayez dans un instant.",
     "newCodeIn": "Nouveau code dans 0:{{seconds}}",
     "fallbackCode": "Code de secours · usage unique",
     "noOfflineCode": "Aucun code disponible hors ligne",

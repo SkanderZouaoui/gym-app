@@ -418,6 +418,7 @@
     "brightness": "Max brightness",
     "offlineWithFallback": "Offline mode: backup code valid until {{time}}.",
     "offlineNoFallback": "Offline mode: no backup code cached. Connect to the network to generate one.",
+    "serverError": "Unable to generate the access code: the server returned an error{{code}}. Please try again shortly.",
     "newCodeIn": "New code in 0:{{seconds}}",
     "fallbackCode": "Backup code · single use",
     "noOfflineCode": "No code available offline",
