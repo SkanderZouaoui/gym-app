@@ -4,12 +4,11 @@
 # Usage :
 #   docker compose -f docker-compose.prod.yml --env-file deploy/clients/<nom>/.env up -d
 #
-# Inclut l'infra (postgres/redis/minio) définie dans leurs dossiers respectifs
+# Inclut l'infra (postgres/minio) définie dans leurs dossiers respectifs
 # et ajoute le service api construit depuis backend/Dockerfile.
 
 include:
   - postgres/docker-compose.yml
-  - redis/docker-compose.yml
   - minio/docker-compose.yml
 
 services:
@@ -21,13 +20,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
       garage:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-muscleup}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD requis}@postgres:5432/${POSTGRES_DB:-muscleup}?schema=public
-      REDIS_URL: redis://redis:6379
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}

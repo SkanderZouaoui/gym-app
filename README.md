@@ -104,7 +104,7 @@ Application React (Vite) pour la configuration complète : tableau de bord, adh�
 |---|---|
 | Application mobile | Expo SDK 58, React Native 0.88, expo-router (typed routes), react-native-reanimated, TanStack Query (cache persisté), Zustand, react-i18next |
 | Backend | NestJS, Prisma 6, PostgreSQL, JWT (access + refresh), argon2, tâches planifiées (`@Cron`) |
-| Stockage et cache | S3 compatible (Garage / MinIO) pour les photos, Redis |
+| Stockage | S3 compatible (Garage / MinIO) pour les photos |
 | Back-office | React, Vite, TypeScript |
 | Monorepo | pnpm workspaces + Turborepo ; package partagé `@muscleup/shared` (rôles, types) |
 
@@ -113,12 +113,12 @@ Points notables : QR de présence signés et à courte durée de vie ; politique
 ## Démarrage
 
 ### Prérequis
-Node.js ≥ 20, pnpm, Docker (PostgreSQL, Redis, stockage objet).
+Node.js ≥ 20, pnpm, Docker (PostgreSQL, stockage objet).
 
 ### Installation
 ```bash
 pnpm install
-pnpm infra:up                      # PostgreSQL, Redis, stockage S3
+pnpm infra:up                      # PostgreSQL, stockage S3
 cp backend/.env.example backend/.env   # puis renseigner les secrets
 cd backend && npx prisma migrate deploy && pnpm db:seed && cd ..
 ```

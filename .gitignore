@@ -46,3 +46,9 @@ coverage/
 *.p12
 *.key
 *.mobileprovision
+
+# Variables d'environnement de production (secrets)
+prod.env
+
+# Sauvegardes de base de données
+backups/
