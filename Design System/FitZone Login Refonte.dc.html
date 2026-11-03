@@ -39,7 +39,7 @@
 <text x="338" y="257" style="font-size:13px;font-weight:800;fill:#5B21B6;text-anchor:middle">1</text><text x="316" y="195" style="font-size:13px;font-weight:800;fill:#5B21B6;text-anchor:middle">2</text><text x="332" y="117" style="font-size:13px;font-weight:800;fill:#5B21B6;text-anchor:middle">3</text>
 <text x="28" y="268" style="font-size:11px;font-weight:700;letter-spacing:.08em;fill:#DDD6FE">1 TRACTION · 2 TRANSITION · 3 POUSSÉE</text>
 </svg></sc-if>
-<div style="position:absolute;left:28px;top:60px;width:42px;height:42px;border-radius:13px;background:#fff;display:grid;place-items:center;z-index:2"><div style="display:flex;align-items:center"><div style="width:5px;height:18px;border-radius:2px;background:#5B21B6"></div><div style="width:5px;height:12px;border-radius:2px;background:#5B21B6;margin-left:2px"></div><div style="width:10px;height:4px;background:#5B21B6"></div><div style="width:5px;height:12px;border-radius:2px;background:#5B21B6"></div><div style="width:5px;height:18px;border-radius:2px;background:#5B21B6;margin-left:2px"></div></div></div>
+<div style="position:absolute;left:28px;top:52px;width:36px;height:36px;border-radius:11px;background:#fff;display:grid;place-items:center;z-index:2"><div style="display:flex;align-items:center"><div style="width:5px;height:18px;border-radius:2px;background:#5B21B6"></div><div style="width:5px;height:12px;border-radius:2px;background:#5B21B6;margin-left:2px"></div><div style="width:10px;height:4px;background:#5B21B6"></div><div style="width:5px;height:12px;border-radius:2px;background:#5B21B6"></div><div style="width:5px;height:18px;border-radius:2px;background:#5B21B6;margin-left:2px"></div></div></div>
 </div>
 </sc-if>
 <sc-if value="{{ s.isPw }}" hint-placeholder-val="{{ false }}">
@@ -99,7 +99,32 @@
 <div style="font-size:14px;font-weight:700;color:#1B1530">{{ s.label }}</div>
 </div>
 </sc-for>
+</div>
+<div style="width:100%;max-width:1400px;display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:28px"><div style="text-align:center"><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5B21B6;font-weight:700">Section</div><div style="font-size:26px;font-weight:800;letter-spacing:-.025em;color:#1B1530;margin-top:4px">Erreurs de connexion</div><div style="font-size:14px;color:#4A4463;margin-top:4px">Même thème que ci-dessus. Rouge pour une erreur, ambre pour une restriction.</div></div>
+<div style="display:flex;gap:44px;flex-wrap:wrap;justify-content:center">
+<sc-for list="{{ errs }}" as="e" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+<div style="width:390px;height:844px;border-radius:54px;overflow:hidden;position:relative;border:10px solid #0B0A12;box-sizing:content-box;box-shadow:0 30px 70px rgba(40,20,90,.35);background:{{ e.bg }};color:{{ e.fg }}">
+<div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;justify-content:space-between;align-items:center;padding:6px 30px 0;font-weight:700;font-size:15px;z-index:5;color:#fff"><span>9:41</span><span style="font-family:'Material Symbols Rounded';font-size:18px;letter-spacing:4px">signal_cellular_alt wifi battery_full</span></div>
+<div style="position:absolute;left:0;right:0;top:0;height:232px;background:linear-gradient(160deg,#8B5CF6 0%,#6D28D9 45%,#2E1065 100%);overflow:hidden"><div style="position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 26px)"></div>
+<svg width="390" height="232" style="position:absolute;left:0;top:0"><rect x="0" y="122" width="390" height="8" style="fill:#fff"></rect><rect x="0" y="113" width="12" height="26" rx="4" style="fill:#fff"></rect><rect x="378" y="113" width="12" height="26" rx="4" style="fill:#fff"></rect><text x="26" y="112" style="font-size:40px;font-weight:900;font-style:italic;letter-spacing:-.03em;fill:none;stroke:#fff;stroke-width:1.4">MUSCLE</text><text x="24" y="196" style="font-size:72px;font-weight:900;font-style:italic;letter-spacing:-.05em;fill:#fff">UP</text></svg></div>
+<div style="position:absolute;left:0;right:0;bottom:0;top:204px;background:{{ e.bg }};border-radius:34px 34px 0 0;padding:20px 24px 0;box-sizing:border-box;box-shadow:0 -12px 40px rgba(20,8,60,.25);z-index:2">
+<div style="font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.05">Content de te revoir</div>
+<div style="{{ e.banSt }}"><div style="width:40px;height:40px;border-radius:50%;background:{{ e.soft }};color:{{ e.c }};display:grid;place-items:center;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ e.i }}</span></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:{{ e.fg }}">{{ e.bt }}</div><div style="font-size:13px;color:{{ e.mu }};margin-top:2px;text-wrap:pretty">{{ e.bd }}</div></div></div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-top:14px">
+<div style="{{ e.idSt }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ e.idIc }}">mail</span><span style="flex:1;font-size:16px;color:{{ e.fg }};opacity:{{ e.idO }}">{{ e.idV }}</span></div><div style="{{ e.idMs }}">{{ e.idM }}</div>
+<div style="{{ e.pwSt }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ e.pwIc }}">lock</span><span style="flex:1;font-size:16px;color:{{ e.fg }};opacity:{{ e.pwO }}">{{ e.pwV }}</span><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ e.mu }}">visibility</span></div><div style="{{ e.pwMs }}">{{ e.pwM }}</div>
+</div>
+<button style="{{ e.btnSt }}">{{ e.bl }}<span style="font-family:'Material Symbols Rounded';font-size:22px">{{ e.bi }}</span></button>
+<div style="{{ e.lkSt }}">{{ e.lk }}</div>
+</div>
+<div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:{{ e.fg }};opacity:.85;z-index:6"></div>
+</div>
+<div style="font-size:14px;font-weight:700;color:#1B1530">{{ e.label }}</div>
+</div>
+</sc-for>
 </div></div>
+</div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
@@ -143,8 +168,31 @@ class Component extends DCLogic {
     };
     const first = mkPw('first', { chip: 'ÉTAPE 1 SUR 1 · SÉCURITÉ', chipI: 'shield', title: 'Bienvenue, Karim', sub: 'C’est ta première connexion. Remplace le mot de passe provisoire par le tien.', btnL: 'Activer mon compte', foot: 'Le mot de passe provisoire ne fonctionnera plus.', doneT: 'Compte activé', doneS: 'Ton mot de passe est enregistré. Ton espace t’attend.', doneB: 'Accéder à mon espace' });
     const reset = mkPw('reset', { chip: 'LIEN VALIDE 23 MIN', chipI: 'timer', title: 'Nouveau mot de passe', sub: 'Lien vérifié pour karim.b@email.com. Choisis un mot de passe que tu n’as pas déjà utilisé.', btnL: 'Réinitialiser', foot: 'Lien expiré ? Redemande-en un depuis la page de connexion.', doneT: 'Mot de passe mis à jour', doneS: 'Tu peux te connecter avec ton nouveau mot de passe.', doneB: 'Se connecter' });
+    const RED = '#EF4444', AMB = '#F59E0B';
+    const fSt = (c, sh, eye) => `height:56px;border-radius:18px;background:${T.sf};border:1.5px solid ${c};display:flex;align-items:center;gap:12px;padding:0 ${eye ? 16 : 16}px;${sh ? 'animation:sh .45s' : ''}`;
+    const mSt = m => `font-size:12px;font-weight:600;color:${RED};padding-left:4px;height:${m ? 16 : 0};overflow:hidden`;
+    const mkE = o => {
+      const c = o.c, off = o.dis;
+      return { label: o.label, bg: T.bg, fg: T.fg, mu: T.mu, c, i: o.i, bt: o.bt, bd: o.bd, soft: c + '26',
+        banSt: o.bt ? `display:flex;gap:12px;align-items:center;margin-top:14px;padding:12px 14px;border-radius:20px;background:${T.sf};border:1px solid ${c}66;animation:sh .45s` : 'display:none',
+        idV: o.idV, idO: o.idV.includes('Email') ? .5 : 1, idIc: o.idC ? RED : T.mu, idSt: fSt(o.idC || T.bd, !!o.idC), idM: o.idM || '', idMs: mSt(o.idM),
+        pwV: o.pwV, pwO: o.pwV.includes('Mot') ? .5 : 1, pwIc: o.pwC ? RED : T.mu, pwSt: fSt(o.pwC || T.bd, !!o.pwC), pwM: o.pwM || '', pwMs: mSt(o.pwM),
+        bl: o.bl, bi: o.bi,
+        btnSt: `margin-top:14px;width:100%;height:58px;border:0;border-radius:18px;color:#fff;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:10px;background:${off ? (T.bg === '#0F0B1E' ? '#4B4468' : '#9A93B5') : 'linear-gradient(180deg,#8B5CF6,#5B21B6)'};box-shadow:${off ? 'none' : '0 10px 24px rgba(124,58,237,.45)'}`,
+        lk: o.lk || '', lkSt: `text-align:center;margin-top:14px;font-size:14px;font-weight:600;color:#7C3AED;display:${o.lk ? 'block' : 'none'}` };
+    };
+    const ph = { idV: 'Email ou téléphone', pwV: 'Mot de passe' };
+    const errs = [
+      mkE({ label: '1 · Identifiants incorrects', c: RED, i: 'error', bt: 'Identifiants incorrects', bd: 'Vérifie ton email et ton mot de passe. 2 tentatives restantes.', idV: 'karim.b@email.com', pwV: '••••••••', idC: RED, pwC: RED, bl: 'Se connecter', bi: 'arrow_forward', lk: 'Mot de passe oublié ?' }),
+      mkE({ label: '2 · Champs invalides', c: RED, i: 'error', bt: '', bd: '', idV: 'karim@', idC: RED, idM: 'Adresse email incomplète', pwV: ph.pwV, pwC: RED, pwM: 'Le mot de passe est requis', bl: 'Se connecter', bi: 'arrow_forward' }),
+      mkE({ label: '3 · Trop de tentatives', c: AMB, i: 'lock_clock', bt: 'Accès suspendu', bd: 'Par sécurité, réessaie dans 14:32.', idV: 'karim.b@email.com', pwV: '••••••••', dis: true, bl: 'Réessayer dans 14:32', bi: 'lock_clock', lk: 'Contacter l’accueil' }),
+      mkE({ label: '4 · Compte désactivé', c: RED, i: 'block', bt: 'Compte désactivé', bd: 'Ton accès est suspendu. Passe à l’accueil pour le réactiver.', idV: 'karim.b@email.com', pwV: '••••••••', dis: true, bl: 'Se connecter', bi: 'arrow_forward', lk: 'Contacter l’accueil' }),
+      mkE({ label: '5 · Abonnement expiré', c: AMB, i: 'event_busy', bt: 'Abonnement expiré', bd: 'Il a pris fin le 12 oct. Renouvelle-le à l’accueil ou en ligne.', idV: 'karim.b@email.com', pwV: '••••••••', bl: 'Voir les formules', bi: 'arrow_forward', lk: 'Utiliser un autre compte' }),
+      mkE({ label: '6 · Pas de réseau', c: AMB, i: 'wifi_off', bt: 'Connexion impossible', bd: 'Vérifie ton réseau puis réessaie.', idV: 'karim.b@email.com', pwV: '••••••••', bl: 'Réessayer', bi: 'refresh' })
+    ];
     const base = { ...T, hA: true, hB: S.hero === 'B', hC: S.hero === 'C' };
     return {
+      errs,
       heroes: ['A', 'B', 'C'].map(h => ({ l: 'Option ' + h, st: chip(S.hero === h), on: () => this.setState({ hero: h }) })),
       themeBtns: [['dark', 'Sombre'], ['light', 'Clair']].map(([k, l]) => ({ l, st: chip(S.theme === k), on: () => this.setState({ theme: k }) })),
       heroNote: notes[S.hero],

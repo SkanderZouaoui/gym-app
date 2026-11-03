@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
+<style>body{margin:0;-webkit-font-smoothing:antialiased}a{color:#7C3AED;text-decoration:none}a:hover{color:#5B21B6;text-decoration:underline}button,input{font:inherit;color:inherit}input{outline:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes sh{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes draw{from{stroke-dashoffset:30}to{stroke-dashoffset:0}}
+@keyframes sd{from{transform:translateY(-24px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes su{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes shim{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes ind{0%{left:-40%}100%{left:100%}}
+@keyframes jump{0%{transform:translateY(0) scale(1,1)}25%{transform:translateY(4px) scale(1.08,.92)}55%{transform:translateY(-34px) scale(.95,1.05)}80%{transform:translateY(0) scale(1.06,.94)}100%{transform:translateY(0) scale(1,1)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes tm{from{width:100%}to{width:0}}
+@keyframes halo{0%{box-shadow:0 0 0 0 var(--c)}100%{box-shadow:0 0 0 9px transparent}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#E8E5F1;padding:40px 28px 70px;box-sizing:border-box;font-family:-apple-system,'SF Pro Text','Inter',sans-serif;color:#1B1530">
+<div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:30px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px"><div><div style="display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(160deg,#8B5CF6,#5B21B6);display:grid;place-items:center"><div style="display:flex;align-items:center"><div style="width:4px;height:16px;border-radius:2px;background:#fff"></div><div style="width:4px;height:10px;border-radius:2px;background:#fff;margin-left:2px"></div><div style="width:8px;height:3px;background:#fff"></div><div style="width:4px;height:10px;border-radius:2px;background:#fff"></div><div style="width:4px;height:16px;border-radius:2px;background:#fff;margin-left:2px"></div></div></div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#5B21B6;font-weight:700">Muscle UP · Composants</div></div><div style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:6px">Feedback &amp; états de l’app</div><div style="font-size:15px;color:#4A4463;margin-top:6px;max-width:620px;text-wrap:pretty">Chaque démo est interactive. Les composants s’affichent dans le thème choisi.</div></div>
+<div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;font-weight:700;color:#6B6485;letter-spacing:.08em;text-transform:uppercase">Thème</span><sc-for list="{{ themeBtns }}" as="x" hint-placeholder-count="2"><button onClick="{{ x.on }}" style="{{ x.st }}">{{ x.l }}</button></sc-for></div></div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px">
+<div style="background:#fff;border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:18px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div><div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#7C3AED">01</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Bouton de connexion</div></div>
+<div style="background:{{ t.stripe }};border-radius:24px;padding:28px 22px;display:flex;flex-direction:column;gap:16px;align-items:center">
+<div style="display:flex;justify-content:center;width:100%;position:relative"><div style="{{ b.bar }}"></div><button onClick="{{ b.click }}" style="{{ b.st }}"><sc-if value="{{ b.idle }}" hint-placeholder-val="{{ true }}"><span style="display:flex;align-items:center;gap:10px">Se connecter<span style="font-family:'Material Symbols Rounded';font-size:22px">arrow_forward</span></span></sc-if><sc-if value="{{ b.loading }}"><span style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:sp .7s linear infinite"></span>Connexion…</span></sc-if><sc-if value="{{ b.success }}"><svg width="30" height="30" viewBox="0 0 30 30" style="animation:pop .4s ease both"><polyline points="7,16 13,22 23,9" style="fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;animation:draw .45s .15s ease both"></polyline></svg></sc-if><sc-if value="{{ b.error }}"><span style="display:flex;align-items:center;gap:8px;animation:pop .3s ease both"><span style="font-family:'Material Symbols Rounded';font-size:24px">error</span>Identifiants incorrects</span></sc-if><sc-if value="{{ b.locked }}"><span style="display:flex;align-items:center;gap:8px"><span style="font-family:'Material Symbols Rounded';font-size:22px">lock_clock</span>Réessaie dans 0:30</span></sc-if></button></div>
+<sc-if value="{{ b.hint }}"><div style="display:flex;align-items:center;gap:8px;color:{{ t.er }};font-size:13px;font-weight:600;animation:su .3s ease both"><span style="font-family:'Material Symbols Rounded';font-size:18px">info</span>3 tentatives restantes avant blocage.</div></sc-if>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ btnBtns }}" as="x" hint-placeholder-count="4"><button onClick="{{ x.on }}" style="{{ x.st }}">{{ x.l }}</button></sc-for></div>
+<div style="font-size:13px;color:#4A4463;text-wrap:pretty">Succès : le bouton se réduit en cercle vert, la coche se dessine. Échec : secousse, rouge, message court. Blocage : gris, compte à rebours.</div>
+</div>
+
+<div style="background:#fff;border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#7C3AED">02</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Bannières</div></div><button onClick="{{ replayBan }}" style="border:0;cursor:pointer;height:34px;padding:0 14px;border-radius:999px;background:#EFE8FF;color:#5B21B6;font-weight:700;font-size:13px">Rejouer</button></div>
+<div style="background:{{ t.stripe }};border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:200px">
+<sc-if value="{{ showBan }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ banners }}" as="n" hint-placeholder-count="4"><div style="{{ n.st }}"><div style="display:flex;gap:12px;align-items:center;padding:14px 14px 12px"><div style="width:40px;height:40px;border-radius:50%;background:{{ n.soft }};color:{{ n.c }};display:grid;place-items:center;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:22px">{{ n.i }}</span></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:{{ t.fg }}">{{ n.t }}</div><div style="font-size:13px;color:{{ t.mu }};margin-top:2px;text-wrap:pretty">{{ n.d }}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:18px;color:{{ t.mu }}">close</span><span style="font-size:13px;font-weight:700;color:{{ n.c }}">{{ n.a }}</span></div></div><div style="height:3px;background:{{ n.soft }}"><div style="{{ n.bar }}"></div></div></div></sc-for></sc-if>
+</div>
+</div>
+</div>
+
+<div style="background:#fff;border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:22px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px"><div><div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#7C3AED">03</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Mode hors connexion · l’app reste utilisable</div><div style="font-size:14px;color:#4A4463;margin-top:4px;max-width:640px;text-wrap:pretty">Rien n’est bloqué ni masqué. Trois façons discrètes de le signaler : choisis celle qui te plaît.</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ netBtns }}" as="x" hint-placeholder-count="4"><button onClick="{{ x.on }}" style="{{ x.st }}">{{ x.l }}</button></sc-for></div></div>
+<div style="display:flex;gap:30px;flex-wrap:wrap;justify-content:center">
+<sc-for list="{{ phones }}" as="p" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:300px"><div style="width:300px;height:520px;border-radius:40px;border:8px solid #0B0A12;box-sizing:content-box;overflow:hidden;position:relative;background:{{ p.bg }};color:{{ p.fg }}">
+<div style="{{ p.line }}"></div>
+<div style="position:absolute;top:0;left:0;right:0;height:44px;display:flex;justify-content:space-between;align-items:center;padding:8px 24px 0;font-weight:700;font-size:13px;box-sizing:border-box"><span>9:41</span><span style="font-family:'Material Symbols Rounded';font-size:15px;letter-spacing:3px">signal_cellular_alt wifi battery_full</span></div>
+<div style="{{ p.cap }}"><span style="{{ p.dot }}"></span>{{ p.capT }}</div>
+<div style="padding:66px 18px 0;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:12px"><div style="{{ p.av }}">KB</div><div style="flex:1;min-width:0"><div style="{{ p.sub }}">{{ p.subT }}</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Salut Karim</div></div><div style="{{ p.chip }}"><span style="font-family:'Material Symbols Rounded';font-size:15px">{{ p.chipI }}</span>{{ p.chipT }}</div></div>
+<div style="height:96px;border-radius:22px;background:linear-gradient(160deg,#8B5CF6,#4C1D95);padding:16px;box-sizing:border-box;color:#fff"><div style="font-size:12px;opacity:.85">Prochaine séance</div><div style="font-size:20px;font-weight:800;margin-top:4px">Pull · 18:30</div></div>
+<div style="display:flex;gap:12px"><div style="{{ p.card }}"><div style="font-size:11px;color:{{ p.mu }}">Séries</div><div style="font-size:24px;font-weight:800">12</div></div><div style="{{ p.card }}"><div style="font-size:11px;color:{{ p.mu }}">Abonnement</div><div style="font-size:24px;font-weight:800">24 j</div></div></div>
+<div style="{{ p.card }};height:60px;display:flex;align-items:center;gap:12px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ p.mu }}">qr_code_2</span><div style="font-size:14px;font-weight:600">Mon QR d’accès</div></div>
+</div></div><div style="font-size:13px;font-weight:700;text-align:center">{{ p.label }}</div><div style="font-size:12px;color:#6B6485;text-align:center;text-wrap:pretty">{{ p.desc }}</div></div>
+</sc-for>
+</div></div>
+
+<div><div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#7C3AED">04</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Autres composants utiles</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px;margin-top:-14px">
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">Toasts</div>
+<div style="height:120px;background:{{ t.stripe }};border-radius:20px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;padding:14px;box-sizing:border-box">
+<sc-if value="{{ toast.on }}"><div style="{{ toast.st }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ toast.c }}">{{ toast.i }}</span><span style="font-size:14px;font-weight:600;flex:1">{{ toast.t }}</span><span style="font-size:13px;font-weight:700;color:#7C3AED">Annuler</span></div></sc-if>
+<sc-if value="{{ toast.off }}"><div style="font-size:13px;color:{{ t.mu }};align-self:center">Choisis un toast</div></sc-if></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ toastBtns }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.on }}" style="{{ x.st }}">{{ x.l }}</button></sc-for></div></div>
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">Chargement (squelettes)</div>
+<div style="background:{{ t.stripe }};border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px"><sc-for list="{{ skels }}" as="x" hint-placeholder-count="3"><div style="display:flex;gap:12px;align-items:center"><div style="{{ x.a }}"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div style="{{ x.b }}"></div><div style="{{ x.c }}"></div></div></div></sc-for></div>
+<div style="font-size:13px;color:#4A4463">Un reflet violet traverse les blocs pendant la récupération des données.</div></div>
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">Champs : erreur &amp; validation</div>
+<div style="background:{{ t.stripe }};border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ fields }}" as="x" hint-placeholder-count="3"><div><div style="{{ x.st }}"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ x.ic }}">{{ x.i }}</span><span style="flex:1;font-size:15px;color:{{ x.fg }}">{{ x.v }}</span><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ x.ic }}">{{ x.s }}</span></div><div style="font-size:12px;font-weight:600;color:{{ x.ic }};margin:6px 0 0 4px">{{ x.m }}</div></div></sc-for></div></div>
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">État vide</div>
+<div style="background:{{ t.stripe }};border-radius:20px;padding:26px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:{{ t.fg }}">
+<div style="width:72px;height:72px;border-radius:24px;background:rgba(124,58,237,.16);display:grid;place-items:center;color:#7C3AED;animation:fl 3s ease-in-out infinite"><div style="display:flex;align-items:center"><div style="width:7px;height:26px;border-radius:3px;background:#7C3AED"></div><div style="width:7px;height:17px;border-radius:3px;background:#7C3AED;margin-left:3px"></div><div style="width:14px;height:6px;background:#7C3AED"></div><div style="width:7px;height:17px;border-radius:3px;background:#7C3AED"></div><div style="width:7px;height:26px;border-radius:3px;background:#7C3AED;margin-left:3px"></div></div></div>
+<div style="font-size:18px;font-weight:800">Aucune séance pour l’instant</div><div style="font-size:13px;color:{{ t.mu }};text-wrap:pretty">Ta première série t’attend. Choisis un programme pour démarrer.</div>
+<button style="margin-top:6px;height:46px;padding:0 22px;border:0;border-radius:16px;background:#7C3AED;color:#fff;font-weight:700;font-size:14px">Voir les programmes</button></div></div>
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">Confirmation</div>
+<div style="background:{{ t.stripe }};border-radius:20px;padding:22px 18px;color:{{ t.fg }}"><div style="background:{{ t.sf }};border:1px solid {{ t.bd }};border-radius:26px;padding:22px;display:flex;flex-direction:column;gap:6px;box-shadow:0 16px 40px {{ t.sh }}">
+<div style="width:44px;height:44px;border-radius:14px;background:rgba(239,68,68,.15);color:{{ t.er }};display:grid;place-items:center"><span style="font-family:'Material Symbols Rounded';font-size:24px">logout</span></div>
+<div style="font-size:18px;font-weight:800;margin-top:8px">Se déconnecter ?</div><div style="font-size:13px;color:{{ t.mu }}">Tu devras te reconnecter pour accéder à ton espace.</div>
+<div style="display:flex;gap:10px;margin-top:12px"><button style="flex:1;height:48px;border:1.5px solid {{ t.bd }};border-radius:16px;background:none;font-weight:700;font-size:14px">Annuler</button><button style="flex:1;height:48px;border:0;border-radius:16px;background:#EF4444;color:#fff;font-weight:700;font-size:14px">Déconnexion</button></div></div></div></div>
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">Synchronisation &amp; envoi</div>
+<div style="background:{{ t.stripe }};border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:16px;color:{{ t.fg }}">
+<div><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:8px"><span>Enregistrement de la séance</span><span style="color:#7C3AED">En cours</span></div><div style="height:6px;border-radius:3px;background:{{ t.bd }};position:relative;overflow:hidden"><div style="position:absolute;top:0;bottom:0;width:40%;border-radius:3px;background:linear-gradient(90deg,#8B5CF6,#C4B5FD);animation:ind 1.3s ease-in-out infinite"></div></div></div>
+<div style="display:flex;align-items:center;gap:10px;background:{{ t.sf }};border:1px solid {{ t.bd }};border-radius:16px;padding:12px 14px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ t.wa }};animation:blink 1.4s infinite">cloud_upload</span><div style="flex:1"><div style="font-size:14px;font-weight:700">3 séries en attente</div><div style="font-size:12px;color:{{ t.mu }}">Envoi automatique au retour du réseau</div></div></div>
+<div style="display:flex;align-items:center;gap:10px;background:rgba(22,163,74,.13);border-radius:16px;padding:12px 14px"><span style="font-family:'Material Symbols Rounded';font-size:22px;color:{{ t.ok }}">cloud_done</span><div style="font-size:14px;font-weight:700;color:{{ t.ok }}">Tout est synchronisé</div></div></div></div>
+
+<div style="background:#fff;border-radius:28px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px rgba(40,20,90,.08)">
+<div style="font-size:16px;font-weight:800">Session expirée &amp; maintenance</div>
+<div style="background:{{ t.stripe }};border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ sys }}" as="x" hint-placeholder-count="3"><div style="{{ x.st }}"><div style="width:48px;height:48px;border-radius:16px;background:{{ x.bg }};color:{{ x.c }};display:grid;place-items:center;flex:none"><span style="font-family:'Material Symbols Rounded';font-size:26px">{{ x.i }}</span></div><div style="flex:1"><div style="font-size:15px;font-weight:800">{{ x.t }}</div><div style="font-size:12px;color:{{ x.mu }};margin-top:2px;text-wrap:pretty">{{ x.d }}</div></div></div></sc-for></div></div>
+</div>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { btn: 'idle', ban: true, net: 'offline', toast: '', theme: 'dark' };
+  tm = 0; tt = 0;
+  componentWillUnmount() { clearTimeout(this.tm); clearTimeout(this.tt); }
+  pill(on) { return `border:0;cursor:pointer;height:36px;padding:0 16px;border-radius:999px;font-weight:700;font-size:13px;background:${on ? '#7C3AED' : '#EFE8FF'};color:${on ? '#fff' : '#5B21B6'}`; }
+  go(k, ms) { clearTimeout(this.tm); this.setState({ btn: k }); if (ms) this.tm = setTimeout(() => this.setState({ btn: 'idle' }), ms); }
+  play(r) { clearTimeout(this.tm); this.setState({ btn: 'loading' }); this.tm = setTimeout(() => this.go(r, r === 'locked' ? 0 : 2400), 1200); }
+  renderVals() {
+    const S = this.state, b = S.btn, dk = S.theme === 'dark';
+    const t = dk ? { stage: '#0F0B1E', stripe: 'repeating-linear-gradient(115deg,rgba(124,58,237,.12) 0 2px,transparent 2px 26px),#0F0B1E', sf: '#1A1431', bd: '#2E2650', fg: '#F5F2FF', mu: '#A29BC2', er: '#F87171', ok: '#4ADE80', wa: '#FBBF24', sh: 'rgba(0,0,0,.4)' }
+      : { stage: '#F3F0FA', stripe: 'repeating-linear-gradient(115deg,rgba(124,58,237,.07) 0 2px,transparent 2px 26px),#F3F0FA', sf: '#FFFFFF', bd: '#E3DEF0', fg: '#1B1530', mu: '#6B6485', er: '#DC2626', ok: '#15803D', wa: '#B45309', sh: 'rgba(40,20,90,.14)' };
+    const bg = { idle: 'linear-gradient(180deg,#8B5CF6,#5B21B6)', loading: 'linear-gradient(180deg,#8B5CF6,#5B21B6)', success: '#16A34A', error: '#EF4444', locked: dk ? '#4B4468' : '#9A93B5' }[b];
+    const sh = { idle: 'rgba(124,58,237,.45)', loading: 'rgba(124,58,237,.45)', success: 'rgba(22,163,74,.5)', error: 'rgba(239,68,68,.45)', locked: 'transparent' }[b];
+    const btn = { idle: b === 'idle', loading: b === 'loading', success: b === 'success', error: b === 'error', locked: b === 'locked', hint: b === 'error',
+      st: `height:58px;width:${b === 'success' ? '58px' : '100%'};border:0;border-radius:${b === 'success' ? '29px' : '18px'};background:${bg};box-shadow:0 10px 24px ${sh};color:#fff;font-weight:800;font-size:16px;cursor:${b === 'locked' ? 'not-allowed' : 'pointer'};display:flex;align-items:center;justify-content:center;transition:width .45s cubic-bezier(.7,0,.2,1),border-radius .45s,background .3s;${b === 'error' ? 'animation:sh .5s ease' : b === 'success' ? 'animation:jump .75s cubic-bezier(.3,.7,.4,1) both' : ''}`,
+      bar: `position:absolute;left:-6px;right:-6px;bottom:-9px;height:5px;border-radius:3px;background:${b === 'success' ? '#fff' : 'rgba(124,58,237,.55)'};box-shadow:${b === 'success' ? '0 0 16px rgba(255,255,255,.8)' : 'none'};transition:all .3s ease`,
+      click: () => b === 'idle' && this.play('success') };
+    const btnBtns = [['idle', 'Repos', () => this.go('idle')], ['success', 'Succès', () => this.play('success')], ['error', 'Échec', () => this.play('error')], ['locked', 'Bloqué', () => this.play('locked')]].map(([k, l, on]) => ({ l, on, st: this.pill(b === k) }));
+    const B = [['Connexion impossible', 'Identifiant ou mot de passe incorrect.', '#EF4444', 'error', 'Réessayer'], ['Abonnement bientôt expiré', 'Il se termine dans 5 jours.', '#F59E0B', 'schedule', 'Renouveler'], ['Nouveau programme', 'Ton coach a ajouté « Pull / Push / Legs ».', '#7C3AED', 'bolt', 'Voir'], ['Mot de passe mis à jour', 'Utilise-le à ta prochaine connexion.', '#16A34A', 'check', 'OK']];
+    const banners = B.map(([tt, d, c, i, a], n) => ({ t: tt, d, c, i, a, soft: c + (dk ? '2E' : '22'),
+      st: `background:${t.sf};border:1px solid ${t.bd};border-radius:22px;overflow:hidden;box-shadow:0 10px 28px ${t.sh};animation:sd .5s ${n * .12}s cubic-bezier(.2,.9,.3,1) both`,
+      bar: `height:100%;background:${c};animation:tm 6s ${n * .12 + .4}s linear both` }));
+    const nm = S.net, hid = nm === 'online';
+    const cfg = { offline: ['#F59E0B', 'Hors ligne', 'cloud_off', 'Hors ligne · synchro 14:02'], reconnecting: ['#8B5CF6', 'Reconnexion…', 'sync', 'Reconnexion en cours…'], back: ['#16A34A', 'En ligne', 'check', 'De nouveau en ligne'], online: ['#F59E0B', '', 'cloud_off', ''] }[nm];
+    const col = cfg[0];
+    const dotStyle = `width:8px;height:8px;border-radius:50%;background:${col};flex:none;${nm === 'offline' ? 'animation:blink 1.8s ease-in-out infinite;' : nm === 'reconnecting' ? 'animation:blink .7s ease-in-out infinite;' : ''}`;
+    const mkP = (v, label, desc) => {
+      const a = v === 'A', bb = v === 'B', c = v === 'C';
+      return { label, desc, bg: t.stage, fg: t.fg, mu: t.mu,
+        card: `flex:1;height:84px;border-radius:20px;background:${t.sf};border:1px solid ${t.bd};padding:14px;box-sizing:border-box`,
+        cap: `position:absolute;left:50%;top:50px;z-index:4;display:${a ? 'flex' : 'none'};align-items:center;gap:8px;height:30px;padding:0 14px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.02em;white-space:nowrap;background:${dk ? 'rgba(34,26,66,.88)' : 'rgba(255,255,255,.92)'};border:1px solid ${col}66;box-shadow:0 8px 22px ${t.sh};backdrop-filter:blur(10px);color:${t.fg};opacity:${hid ? 0 : 1};transform:translateX(-50%) translateY(${hid ? '-16px' : '0'}) scale(${hid ? .8 : 1});transition:all .45s cubic-bezier(.2,.9,.3,1)`,
+        capT: cfg[1], dot: dotStyle,
+        line: `position:absolute;left:0;right:0;top:0;height:3px;z-index:4;background:linear-gradient(90deg,transparent,${col},transparent);box-shadow:0 0 14px ${col};opacity:${c && !hid ? 1 : 0};transition:opacity .5s ease`,
+        sub: `font-size:11px;font-weight:700;letter-spacing:.04em;color:${col};overflow:hidden;white-space:nowrap;height:${c && !hid ? '15px' : '0'};opacity:${c && !hid ? 1 : 0};transition:all .4s ease`, subT: cfg[3],
+        av: `width:44px;height:44px;border-radius:50%;background:linear-gradient(160deg,#8B5CF6,#5B21B6);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;flex:none;box-shadow:0 0 0 ${bb && !hid ? 3 : 0}px ${t.stage},0 0 0 ${bb && !hid ? 5 : 0}px ${col};transition:box-shadow .4s ease`,
+        chip: `display:flex;align-items:center;gap:5px;height:28px;border-radius:999px;font-size:11px;font-weight:700;color:${col};background:${col}22;overflow:hidden;white-space:nowrap;padding:0 ${bb && !hid ? 10 : 0}px;max-width:${bb && !hid ? 130 : 0}px;opacity:${bb && !hid ? 1 : 0};transition:all .45s cubic-bezier(.2,.9,.3,1)`,
+        chipI: cfg[2], chipT: cfg[1] };
+    };
+    const phones = [mkP('A', 'A · Capsule flottante', 'Une petite capsule sous la barre d’état. Elle apparaît, puis se replie.'), mkP('B', 'B · Pastille d’en-tête', 'Une pastille près du nom et un anneau sur l’avatar. Aucun espace volé au contenu.'), mkP('C', 'C · Filet lumineux', 'Un filet ambre en haut de l’écran et une ligne de statut sous le titre.')];
+    const netBtns = [['online', 'En ligne'], ['offline', 'Hors ligne'], ['reconnecting', 'Reconnexion'], ['back', 'Retour réseau']].map(([k, l]) => ({ l, st: this.pill(nm === k), on: () => this.setState({ net: k }) }));
+    const T = { ok: ['check_circle', t.ok, 'Séance enregistrée'], err: ['cloud_off', t.er, 'Échec de l’envoi'], warn: ['warning', t.wa, 'Batterie faible : QR hors ligne activé'] }[S.toast];
+    const toast = { on: !!S.toast, off: !S.toast, i: T ? T[0] : '', c: T ? T[1] : '', t: T ? T[2] : '', st: `width:100%;box-sizing:border-box;display:flex;align-items:center;gap:12px;background:${t.sf};border:1px solid ${t.bd};border-radius:18px;padding:13px 14px;color:${t.fg};box-shadow:0 12px 30px ${t.sh};animation:su .35s cubic-bezier(.2,.9,.3,1) both` };
+    const toastBtns = [['ok', 'Succès'], ['err', 'Erreur'], ['warn', 'Alerte']].map(([k, l]) => ({ l, st: this.pill(S.toast === k), on: () => { clearTimeout(this.tt); this.setState({ toast: '' }); setTimeout(() => this.setState({ toast: k }), 30); this.tt = setTimeout(() => this.setState({ toast: '' }), 3000); } }));
+    const sk = `background:linear-gradient(90deg,${dk ? '#1A1431,#3A2D66,#1A1431' : '#E8E3F5,#F8F6FD,#E8E3F5'});background-size:200% 100%;animation:shim 1.6s linear infinite;`;
+    const skels = [0, 1, 2].map(() => ({ a: sk + 'width:48px;height:48px;border-radius:16px;flex:none', b: sk + 'height:12px;border-radius:6px;width:70%', c: sk + 'height:10px;border-radius:5px;width:45%' }));
+    const fld = c => `height:52px;border-radius:16px;background:${t.sf};display:flex;align-items:center;gap:12px;padding:0 14px;box-sizing:border-box;border:1.5px solid ${c}`;
+    const fields = [{ st: fld(t.bd), ic: t.mu, i: 'mail', v: 'Email ou téléphone', s: '', m: '' }, { st: fld('#EF4444') + ';animation:sh .5s ease', ic: t.er, i: 'mail', v: 'karim@', s: 'error', m: 'Adresse email incomplète' }, { st: fld('#16A34A'), ic: t.ok, i: 'mail', v: 'karim.b@email.com', s: 'check_circle', m: 'Adresse valide' }].map(f => ({ ...f, fg: t.fg }));
+    const sys = [['timer_off', '#F59E0B', 'Session expirée', 'Pour ta sécurité, reconnecte-toi.'], ['build', '#7C3AED', 'Maintenance en cours', 'Retour prévu vers 14:30. Ton QR reste valable.'], ['system_update', '#16A34A', 'Mise à jour disponible', 'Version 2.4 · nouveaux programmes.']].map(([i, c, tt, d]) => ({ i, c, t: tt, d, bg: c + '26', mu: t.mu, st: `background:${t.sf};border:1px solid ${t.bd};color:${t.fg};border-radius:20px;padding:16px;display:flex;gap:14px;align-items:center` }));
+    return { t, b: btn, btnBtns, showBan: S.ban, banners, replayBan: () => { this.setState({ ban: false }); setTimeout(() => this.setState({ ban: true }), 60); }, netBtns, phones, toast, toastBtns, skels, fields, sys,
+      themeBtns: [['dark', 'Sombre'], ['light', 'Clair']].map(([k, l]) => ({ l, st: this.pill(S.theme === k), on: () => this.setState({ theme: k }) })) };
+  }
+}
+</script>
+</body>
+</html>
