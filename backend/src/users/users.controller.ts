@@ -99,6 +99,20 @@ export class UsersController {
     return this.usersService.coachMemberView(user.userId, id);
   }
 
+  /** Adhérents bloqués, avec des échecs de connexion récents ou au compte désactivé (accueil et admin). */
+  @Roles(Role.STAFF, Role.ADMIN)
+  @Get('members/login-issues')
+  loginIssues() {
+    return this.usersService.listLoginIssues();
+  }
+
+  /** Lève le blocage de connexion d'un adhérent pour qu'il puisse réessayer. */
+  @Roles(Role.STAFF, Role.ADMIN)
+  @Post('members/:id/unlock-login')
+  unlockLogin(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.unlockLogin(id, user.userId);
+  }
+
   @Roles(Role.STAFF, Role.ADMIN)
   @Get('members/:id')
   findOne(@Param('id') id: string) {

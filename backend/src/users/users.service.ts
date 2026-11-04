@@ -547,6 +547,56 @@ export class UsersService {
     return { password };
   }
 
+  /**
+   * Adhérents dont la connexion pose problème, pour l'accueil et l'admin : bloqués temporairement (trop d'échecs),
+   * avec des échecs récents, ou dont le compte est désactivé. Les blocages sont lus dans `login_attempts` (clé : e-mail
+   * en minuscules) ; seuls les comptes adhérents existants sont listés.
+   */
+  async listLoginIssues() {
+    const now = new Date();
+    const attempts = await this.prisma.loginAttempt.findMany({
+      where: { OR: [{ lockedUntil: { gt: now } }, { failures: { gt: 0 } }, { lockCount: { gt: 0 } }] },
+    });
+    const byEmail = new Map(attempts.map((a) => [a.email, a]));
+    const users = await this.prisma.user.findMany({
+      where: {
+        deletedAt: null,
+        roles: { some: { role: Role.MEMBER }, none: { role: { in: [Role.STAFF, Role.COACH, Role.ADMIN] } } },
+        OR: [
+          { status: 'SUSPENDED' },
+          ...attempts.map((a) => ({ email: { equals: a.email, mode: 'insensitive' as const } })),
+        ],
+      },
+      select: { id: true, firstName: true, lastName: true, email: true, phone: true, memberCode: true, status: true },
+    });
+    const items = users.map((u) => {
+      const attempt = u.email ? byEmail.get(u.email.toLowerCase()) : undefined;
+      const lockedUntil = attempt?.lockedUntil && attempt.lockedUntil > now ? attempt.lockedUntil : null;
+      const reason = lockedUntil ? 'LOCKED' : u.status === 'SUSPENDED' ? 'SUSPENDED' : 'FAILED_ATTEMPTS';
+      return {
+        ...u,
+        reason: reason as 'LOCKED' | 'SUSPENDED' | 'FAILED_ATTEMPTS',
+        failures: attempt?.failures ?? 0,
+        lockCount: attempt?.lockCount ?? 0,
+        lockedUntil,
+        lastAttemptAt: attempt?.updatedAt ?? null,
+      };
+    });
+    const rank = { LOCKED: 0, SUSPENDED: 1, FAILED_ATTEMPTS: 2 } as const;
+    return items.sort((a, b) => rank[a.reason] - rank[b.reason] || (b.lastAttemptAt?.getTime() ?? 0) - (a.lastAttemptAt?.getTime() ?? 0));
+  }
+
+  /** Lève le blocage de connexion d'un adhérent (compteur d'échecs et palier remis à zéro) pour qu'il puisse réessayer. */
+  async unlockLogin(targetId: string, actorId: string) {
+    const target = await this.prisma.user.findFirst({ where: { id: targetId, deletedAt: null }, select: { id: true, email: true } });
+    if (!target) throw new NotFoundException('USER_NOT_FOUND');
+    await this.prisma.$transaction([
+      this.prisma.loginAttempt.deleteMany({ where: { email: (target.email ?? '').toLowerCase() } }),
+      this.prisma.auditLog.create({ data: { actorId, action: 'UNLOCK_LOGIN', entity: 'User', entityId: targetId } }),
+    ]);
+    return { ok: true };
+  }
+
   /** Équipe en poste aujourd'hui, d'après le planning de travail (lundi = 0). */
   async teamOnShift() {
     const dow = (new Date().getDay() + 6) % 7;
