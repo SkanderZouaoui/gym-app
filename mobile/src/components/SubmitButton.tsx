@@ -16,7 +16,7 @@ export type SubmitStatus = 'idle' | 'loading' | 'success' | 'error' | 'locked';
 interface SubmitButtonProps {
   label: string;
   loadingLabel?: string;
-  /** Libellé de l'état d'échec (ex. « Identifiants incorrects »). */
+  /** Libellé accessible de l'état d'échec (le bouton ne montre alors qu'une croix). */
   errorLabel?: string;
   /** Libellé de l'état bloqué (ex. « Réessaie dans 0:30 »). */
   lockedLabel?: string;
@@ -41,12 +41,14 @@ const SUCCESS = '#16A34A';
 const DANGER = '#EF4444';
 /** Longueur du tracé de la coche (2 segments), pour l'animation du trait. */
 const CHECK_LENGTH = 30;
+/** Longueur de chaque trait de la croix d'échec. */
+const CROSS_LENGTH = 17;
 
 /** Bouton d'envoi — maquette « Feedback & états », bloc 01 « Bouton de connexion » :
  * - repos : dégradé violet, lueur, barre « de traction » sous le bouton ;
  * - chargement : spinner et libellé « en cours » ;
  * - succès : le bouton se réduit en cercle vert, saute par-dessus la barre qui s'éclaire, la coche se dessine ;
- * - échec : rouge, icône et message court, secousse ;
+ * - échec : même mouvement, en rouge, avec une croix qui se dessine ;
  * - bloqué : gris, compte à rebours, aucun appui possible.
  * « Réduire les animations » remplace les mouvements par de simples fondus. */
 export function SubmitButton({
@@ -57,7 +59,6 @@ export function SubmitButton({
   const { scheme } = useTheme();
   const [fullWidth, setFullWidth] = useState(0);
   const press = useSharedValue(1);
-  const shake = useSharedValue(0);
   const jumpY = useSharedValue(0);
   const jumpSx = useSharedValue(1);
   const jumpSy = useSharedValue(1);
@@ -66,6 +67,7 @@ export function SubmitButton({
   const errorLayer = useSharedValue(0);
   const lockedLayer = useSharedValue(0);
   const check = useSharedValue(0);
+  const cross = useSharedValue(0);
   const spin = useSharedValue(0);
   const previousStatus = useRef<SubmitStatus>(status);
 
@@ -77,14 +79,17 @@ export function SubmitButton({
     previousStatus.current = status;
     const fade = reduceMotion ? 0 : 300;
 
+    const done = status === 'success' || status === 'error';
     successLayer.value = withTiming(status === 'success' ? 1 : 0, { duration: fade });
     errorLayer.value = withTiming(status === 'error' ? 1 : 0, { duration: fade });
     lockedLayer.value = withTiming(status === 'locked' ? 1 : 0, { duration: fade });
-    morph.value = withTiming(status === 'success' ? 1 : 0, { duration: reduceMotion ? 0 : 450, easing: MORPH_EASE });
+    morph.value = withTiming(done ? 1 : 0, { duration: reduceMotion ? 0 : 450, easing: MORPH_EASE });
 
-    if (status === 'success' && was !== 'success') {
-      void haptics.success();
-      check.value = withDelay(reduceMotion ? 0 : 150, withTiming(1, { duration: reduceMotion ? 0 : 450, easing: Easing.out(Easing.quad) }));
+    if (done && was !== status) {
+      void (status === 'success' ? haptics.success() : haptics.error());
+      const draw = withDelay(reduceMotion ? 0 : 150, withTiming(1, { duration: reduceMotion ? 0 : 450, easing: Easing.out(Easing.quad) }));
+      if (status === 'success') check.value = draw;
+      else cross.value = draw;
       if (!reduceMotion) {
         const ease = Easing.bezier(0.3, 0.7, 0.4, 1);
         const step = (to: number, duration: number) => withTiming(to, { duration, easing: ease });
@@ -92,19 +97,9 @@ export function SubmitButton({
         jumpSx.value = withSequence(step(1.08, 188), step(0.95, 225), step(1.06, 187), step(1, 150));
         jumpSy.value = withSequence(step(0.92, 188), step(1.05, 225), step(0.94, 187), step(1, 150));
       }
-    } else if (status !== 'success') {
-      check.value = 0;
     }
-
-    if (status === 'error' && was !== 'error') {
-      void haptics.error();
-      if (!reduceMotion) {
-        shake.value = withSequence(
-          withTiming(-9, { duration: 100 }), withTiming(8, { duration: 100 }), withTiming(-5, { duration: 100 }),
-          withTiming(3, { duration: 100 }), withTiming(0, { duration: 100 }),
-        );
-      }
-    }
+    if (status !== 'success') check.value = 0;
+    if (status !== 'error') cross.value = 0;
 
     if (status === 'loading' && !reduceMotion) {
       spin.value = 0;
@@ -112,13 +107,12 @@ export function SubmitButton({
     } else {
       spin.value = 0;
     }
-  }, [status, reduceMotion, successLayer, errorLayer, lockedLayer, morph, check, jumpY, jumpSx, jumpSy, shake, spin]);
+  }, [status, reduceMotion, successLayer, errorLayer, lockedLayer, morph, check, cross, jumpY, jumpSx, jumpSy, spin]);
 
   const circle = height;
   const containerStyle = useAnimatedStyle(() => ({
     ...(fullWidth > 0 ? { width: interpolate(morph.value, [0, 1], [fullWidth, circle]) } : {}),
     transform: [
-      { translateX: shake.value },
       { translateY: jumpY.value },
       { scaleX: jumpSx.value * press.value },
       { scaleY: jumpSy.value * press.value },
@@ -127,6 +121,9 @@ export function SubmitButton({
   const clipStyle = useAnimatedStyle(() => ({ borderRadius: interpolate(morph.value, [0, 1], [radius, circle / 2]) }));
   const spinStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${spin.value * 360}deg` }] }));
   const checkProps = useAnimatedProps(() => ({ strokeDashoffset: CHECK_LENGTH * (1 - check.value) }));
+  // Croix : le 1er trait se dessine sur la 1re moitié de l'animation, le 2e sur la seconde.
+  const crossProps1 = useAnimatedProps(() => ({ strokeDashoffset: CROSS_LENGTH * (1 - Math.min(cross.value * 2, 1)) }));
+  const crossProps2 = useAnimatedProps(() => ({ strokeDashoffset: CROSS_LENGTH * (1 - Math.max(Math.min(cross.value * 2 - 1, 1), 0)) }));
   const successStyle = useAnimatedStyle(() => ({ opacity: successLayer.value }));
   const errorStyle = useAnimatedStyle(() => ({ opacity: errorLayer.value }));
   const lockedStyle = useAnimatedStyle(() => ({ opacity: lockedLayer.value }));
@@ -135,7 +132,7 @@ export function SubmitButton({
     status === 'success' ? 'rgba(22,163,74,0.5)' : status === 'error' ? 'rgba(239,68,68,0.45)' : isGray ? 'transparent' : glowColor;
   const off = status !== 'idle' || !!disabled;
   const text = status === 'loading' ? (loadingLabel ?? label) : status === 'error' ? (errorLabel ?? label) : status === 'locked' ? (lockedLabel ?? label) : label;
-  const barColor = status === 'success' ? '#FFFFFF' : 'rgba(124,58,237,0.55)';
+  const barColor = status === 'success' || status === 'error' ? '#FFFFFF' : 'rgba(124,58,237,0.55)';
 
   return (
     <View onLayout={(e: LayoutChangeEvent) => setFullWidth(e.nativeEvent.layout.width)} style={{ alignItems: 'center', marginBottom: 12 }}>
@@ -144,7 +141,7 @@ export function SubmitButton({
         style={[
           styles.bar,
           { backgroundColor: barColor },
-          status === 'success' && { shadowColor: '#FFFFFF', shadowOpacity: 0.8, shadowRadius: 8, shadowOffset: { width: 0, height: 0 } },
+          (status === 'success' || status === 'error') && { shadowColor: '#FFFFFF', shadowOpacity: 0.8, shadowRadius: 8, shadowOffset: { width: 0, height: 0 } },
         ]}
       />
       <Animated.View
@@ -174,12 +171,11 @@ export function SubmitButton({
           <View style={styles.center} pointerEvents="none">
             <Animated.View
               key={status}
-              entering={status === 'idle' ? undefined : status === 'success' ? ZoomIn.springify().damping(11).delay(80) : FadeIn.duration(status === 'error' ? 300 : 170)}
+              entering={status === 'idle' ? undefined : status === 'success' || status === 'error' ? ZoomIn.springify().damping(11).delay(80) : FadeIn.duration(170)}
               exiting={FadeOut.duration(90)}
               style={styles.row}
             >
               {status === 'loading' ? <Animated.View style={[styles.spinner, spinStyle]} /> : null}
-              {status === 'error' ? <MaterialIcons name="error" size={24} color="#FFFFFF" /> : null}
               {status === 'locked' ? <MaterialIcons name="lock-clock" size={22} color="#FFFFFF" /> : null}
               {status === 'success' ? (
                 <Svg width={30} height={30} viewBox="0 0 30 30">
@@ -193,6 +189,11 @@ export function SubmitButton({
                     strokeDasharray={CHECK_LENGTH}
                     animatedProps={checkProps}
                   />
+                </Svg>
+              ) : status === 'error' ? (
+                <Svg width={30} height={30} viewBox="0 0 30 30">
+                  <AnimatedPath d="M9.5 9.5 L20.5 20.5" stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round" fill="none" strokeDasharray={CROSS_LENGTH} animatedProps={crossProps1} />
+                  <AnimatedPath d="M20.5 9.5 L9.5 20.5" stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round" fill="none" strokeDasharray={CROSS_LENGTH} animatedProps={crossProps2} />
                 </Svg>
               ) : (
                 <Text style={[styles.label, { fontSize }]} numberOfLines={1}>{text}</Text>

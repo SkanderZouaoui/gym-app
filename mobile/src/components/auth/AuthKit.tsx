@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { SubmitButton, type SubmitStatus } from '../SubmitButton';
-import Animated, { FadeInDown, FadeOut, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { Banner } from '../ui/Banner';
 
 /** Refonte connexion & mot de passe — Design System/FitZone Login Refonte.dc.html. */
@@ -173,10 +173,8 @@ export function AuthField({ icon, secure, borderColor, action, error, valid, mes
     wasError.current = !!error;
     lastShakeKey.current = shakeKey;
     if (!triggered) return;
-    shake.value = withSequence(
-      withTiming(-9, { duration: 90 }), withTiming(8, { duration: 90 }), withTiming(-5, { duration: 90 }),
-      withTiming(3, { duration: 90 }), withTiming(0, { duration: 90 }),
-    );
+    // Tremblement discret, juste pour attirer l'œil sur le champ.
+    shake.value = withSequence(withTiming(-4, { duration: 70 }), withTiming(3, { duration: 70 }), withTiming(0, { duration: 70 }));
   }, [error, shakeKey, shake]);
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
 
@@ -260,30 +258,20 @@ export function Chip({ icon, label }: { icon: keyof typeof MaterialIcons.glyphMa
 
 /** Bannière de statut des écrans d'authentification — maquette « Erreurs de connexion » : carte à bordure teintée,
  * pastille ronde d'icône, titre et message. Rouge (`danger`) pour une erreur, ambre (`warning`) pour une restriction.
- * Elle tremble à chaque nouvelle tentative (`attempt`). */
+ * Apparition en fondu, rejouée à chaque nouvelle tentative (`attempt`). */
 export function AuthErrorBanner({ tone, icon, title, message, attempt = 0 }: {
   tone: 'danger' | 'warning'; icon: keyof typeof MaterialIcons.glyphMap; title: string; message: string; attempt?: number;
 }) {
   const p = useAuthPalette();
   const c = tone === 'danger' ? '#EF4444' : '#F59E0B';
-  const shake = useSharedValue(0);
-  useEffect(() => {
-    shake.value = withSequence(
-      withTiming(-9, { duration: 90 }), withTiming(8, { duration: 90 }), withTiming(-5, { duration: 90 }),
-      withTiming(3, { duration: 90 }), withTiming(0, { duration: 90 }),
-    );
-  }, [attempt, shake]);
-  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
   return (
     <Animated.View
-      entering={FadeInDown.duration(240)}
+      key={attempt}
+      entering={FadeIn.duration(220)}
       exiting={FadeOut.duration(140)}
       accessibilityRole="alert"
       accessibilityLiveRegion="polite"
-      style={[
-        { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 20, backgroundColor: p.sf, borderWidth: 1, borderColor: `${c}66` },
-        shakeStyle,
-      ]}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 20, backgroundColor: p.sf, borderWidth: 1, borderColor: `${c}66` }}
     >
       <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: `${c}26`, alignItems: 'center', justifyContent: 'center' }}>
         <MaterialIcons name={icon} size={22} color={c} />

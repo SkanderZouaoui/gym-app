@@ -24,6 +24,8 @@ const ERROR_FLASH_MS = 2400;
 /** Délai de repli quand le serveur bloque les essais sans préciser la durée. */
 const DEFAULT_LOCK_SECONDS = 60;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+/** Longueur minimale du mot de passe (même règle que le serveur) : en dessous, le bouton reste inactif. */
+const PASSWORD_MIN_LENGTH = 8;
 
 type FailureKind = 'credentials' | 'format' | 'rate' | 'disabled' | 'server' | 'network' | 'unknown';
 interface LoginFailure {
@@ -69,7 +71,6 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [failure, setFailure] = useState<LoginFailure | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [credentialsInvalid, setCredentialsInvalid] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [lockUntil, setLockUntil] = useState<number | null>(null);
@@ -128,27 +129,16 @@ export default function LoginScreen() {
 
   const editing = () => {
     if (expiredGate) switchAccount();
-    setFieldErrors({});
     setCredentialsInvalid(false);
     // Un blocage temporaire ne se lève pas en modifiant les champs ; les autres messages, si.
     setFailure((f) => (f?.kind === 'rate' ? f : null));
   };
 
   const handleLogin = async () => {
-    if (status !== 'idle') return;
     const emailTrimmed = email.trim();
-    const errors: { email?: string; password?: string } = {};
-    if (!emailTrimmed) errors.email = t('auth.field_email_required');
-    else if (!EMAIL_RE.test(emailTrimmed)) errors.email = t('auth.field_email_incomplete');
-    if (!password) errors.password = t('auth.field_password_required');
-    if (errors.email || errors.password) {
-      setFieldErrors(errors);
-      setFailure(null);
-      setAttempt((n) => n + 1);
-      return;
-    }
+    // Le bouton est inactif tant que le format n'est pas valide ; ce garde-fou couvre la touche « Entrée » du clavier.
+    if (status !== 'idle' || !EMAIL_RE.test(emailTrimmed) || password.length < PASSWORD_MIN_LENGTH) return;
 
-    setFieldErrors({});
     setFailure(null);
     setCredentialsInvalid(false);
     setStatus('loading');
@@ -212,6 +202,7 @@ export default function LoginScreen() {
 
   const time = formatCountdown(remaining);
   const accountDisabled = failure?.kind === 'disabled';
+  const formValid = EMAIL_RE.test(email.trim()) && password.length >= PASSWORD_MIN_LENGTH;
   const retryMode = failure?.kind === 'network' && status === 'idle';
 
   return (
@@ -249,8 +240,7 @@ export default function LoginScreen() {
               keyboardType="email-address"
               placeholder={t('auth.id_placeholder')}
               autoComplete="email"
-              error={credentialsInvalid || !!fieldErrors.email}
-              message={fieldErrors.email}
+              error={credentialsInvalid}
               shakeKey={attempt}
             />
             <AuthField
@@ -260,8 +250,7 @@ export default function LoginScreen() {
               onChangeText={(v) => { setPassword(v); editing(); }}
               placeholder={t('common.mot_de_passe')}
               onSubmitEditing={handleLogin}
-              error={credentialsInvalid || !!fieldErrors.password}
-              message={fieldErrors.password}
+              error={credentialsInvalid}
               shakeKey={attempt}
             />
           </View>
@@ -280,7 +269,7 @@ export default function LoginScreen() {
           lockedLabel={t('auth.btn_locked', { time })}
           status={status}
           onPress={expiredGate ? expiredGate.proceed : handleLogin}
-          disabled={accountDisabled}
+          disabled={accountDisabled || (!formValid && !expiredGate)}
           icon={retryMode ? 'refresh' : 'arrow-forward'}
         />
         {expiredGate ? (
