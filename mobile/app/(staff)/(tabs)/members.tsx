@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { useMembers } from '../../../src/hooks/useStaff';
+import { useLoginIssues, useMembers } from '../../../src/hooks/useStaff';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { FilterDropdown, ScreenTitle, SkeletonList } from '../../../src/components/ui';
@@ -71,6 +71,8 @@ export default function StaffMembersScreen() {
     ),
   );
   const { data: members, refetch, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useMembers(query.trim());
+  const { data: loginIssues } = useLoginIssues();
+  const lockedNow = (loginIssues ?? []).filter((i) => i.reason === 'LOCKED').length;
   const { refreshing, onRefresh } = useOfflineAwareRefresh(refetch);
 
   const plans = useMemo(
@@ -132,6 +134,22 @@ export default function StaffMembersScreen() {
             autoCapitalize="none"
           />
         </View>
+        {loginIssues && loginIssues.length > 0 ? (
+          <Pressable
+            onPress={() => router.push(routes.lockedAccounts)}
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.lockedCard, { borderColor: lockedNow > 0 ? colors.danger : colors.warning }, pressed && { opacity: 0.85 }]}
+          >
+            <View style={[styles.lockedIcon, { backgroundColor: lockedNow > 0 ? colors.dangerSoft : colors.warningSoft }]}>
+              <MaterialIcons name="lock-person" size={22} color={lockedNow > 0 ? colors.dangerInk : colors.warningInk} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.lockedTitle}>{t('staff.locked_title')}</Text>
+              <Text style={styles.lockedText}>{t('staff.locked_entry_text', { count: loginIssues.length })}</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
+          </Pressable>
+        ) : null}
         <View style={styles.filterRow}>
           <FilterDropdown
             title={t('staff.statut')}
@@ -230,6 +248,13 @@ function badgeFor(m: MemberSearchResult) {
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
+    lockedCard: {
+      flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface, borderWidth: 1.5,
+      borderRadius: radii.lg, paddingVertical: 10, paddingHorizontal: 12,
+    },
+    lockedIcon: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+    lockedTitle: { fontFamily: fonts.headSemiBold, fontSize: 15, color: colors.text },
+    lockedText: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
     header: { paddingHorizontal: spacing.lg, gap: 8, paddingBottom: spacing.sm },
     addShadow: {
       borderRadius: 18, shadowColor: colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5, marginBottom: 6,

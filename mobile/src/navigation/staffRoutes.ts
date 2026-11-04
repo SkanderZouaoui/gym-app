@@ -10,6 +10,7 @@ export function useStaffRoutes() {
     cash: (admin ? '/(admin)/cash' : '/(staff)/(tabs)/cash') as never,
     member: (id: string) => `${base}/member/${id}` as never,
     memberCreate: `${base}/member-create` as never,
+    lockedAccounts: `${base}/locked-accounts` as never,
     cashSelect: `${base}/cash-select` as never,
     cashSell: `${base}/cash-sell` as never,
     cashReceipt: `${base}/cash-receipt` as never,

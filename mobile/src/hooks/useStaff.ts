@@ -205,6 +205,40 @@ export function useMemberPayments(memberships: StaffMembership[] | undefined) {
   });
 }
 
+/** Adhérent dont la connexion pose problème : bloqué temporairement (trop d'échecs), échecs récents ou compte désactivé. */
+export interface LoginIssue {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  memberCode: string | null;
+  status: 'ACTIVE' | 'SUSPENDED' | 'DELETED';
+  reason: 'LOCKED' | 'FAILED_ATTEMPTS' | 'SUSPENDED';
+  failures: number;
+  lockCount: number;
+  lockedUntil: string | null;
+  lastAttemptAt: string | null;
+}
+
+/** Comptes adhérents bloqués ou en difficulté de connexion (accueil et admin), rafraîchis régulièrement. */
+export function useLoginIssues() {
+  return useQuery({
+    queryKey: ['members', 'login-issues'],
+    queryFn: () => apiRequest<LoginIssue[]>('/v1/members/login-issues'),
+    refetchInterval: 20_000,
+  });
+}
+
+/** Lève le blocage de connexion d'un adhérent pour qu'il puisse réessayer tout de suite. */
+export function useUnlockLogin() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<{ ok: true }>(`/v1/members/${id}/unlock-login`, { method: 'POST' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members', 'login-issues'] }),
+  });
+}
+
 /** Réinitialisation du mot de passe d'un adhérent (accueil ou admin) : renvoie le mot de passe provisoire. */
 export function resetMemberPassword(id: string) {
   return apiRequest<{ password: string }>(`/v1/members/${id}/reset-password`, { method: 'POST' });
