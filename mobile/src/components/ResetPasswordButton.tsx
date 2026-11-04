@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Share, StyleSheet, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { fonts, radii, spacing } from '../theme/tokens';
@@ -15,10 +15,12 @@ interface Props {
   /** Appelle l'API et renvoie le mot de passe provisoire généré. */
   reset: () => Promise<{ password: string }>;
   label?: string;
+  /** Déclencheur personnalisé (par défaut : bouton plein largeur) ; `open` lance la confirmation. */
+  renderTrigger?: (open: () => void) => ReactNode;
 }
 
 /** Réinitialisation du mot de passe : confirmation, puis affichage unique du mot de passe provisoire (copier / partager). */
-export function ResetPasswordButton({ name, email, reset, label }: Props) {
+export function ResetPasswordButton({ name, email, reset, label, renderTrigger }: Props) {
   const { t } = useTranslation();
   const buttonLabel = label ?? t('common.reinitialiser_le_mot_de_passe_2');
   const { colors } = useTheme();
@@ -53,7 +55,11 @@ export function ResetPasswordButton({ name, email, reset, label }: Props) {
   return (
     <>
       {error ? <Banner tone="danger" icon="error" text={error} /> : null}
-      <Button label={buttonLabel} variant="outline" onPress={() => { setError(null); setConfirm(true); }} />
+      {renderTrigger ? (
+        renderTrigger(() => { setError(null); setConfirm(true); })
+      ) : (
+        <Button label={buttonLabel} variant="outline" onPress={() => { setError(null); setConfirm(true); }} />
+      )}
 
       <BottomSheet visible={confirm} onClose={() => setConfirm(false)}>
         <Text style={styles.title}>{t('common.reinitialiser_le_mot_de_passe', { name })}</Text>

@@ -12,7 +12,7 @@ import { useMe } from '../../../src/hooks/useMe';
 import { useAdminDashboard, useDailyAttendance, useExpiringMemberships, useReviewPrograms, useSetupAlerts, useTeamOnShift } from '../../../src/hooks/useAdmin';
 import { useOpenReports } from '../../../src/hooks/useModeration';
 import { usePayments } from '../../../src/hooks/usePayments';
-import { useStaffToday } from '../../../src/hooks/useStaff';
+import { useLoginIssues, useStaffToday } from '../../../src/hooks/useStaff';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { BottomSheet, ProgressBar, SkeletonBlock, SkeletonList } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
@@ -41,6 +41,8 @@ export default function AdminDashboardScreen() {
   const { refetch: refetchDaily } = useDailyAttendance();
   const { data: expiring, isLoading: expiringLoading } = useExpiringMemberships();
   const { data: reports } = useOpenReports();
+  const { data: loginIssues } = useLoginIssues();
+  const lockedNow = (loginIssues ?? []).filter((i) => i.reason === 'LOCKED').length;
   const { data: setupAlerts, refetch: refetchSetup } = useSetupAlerts();
   // Revenir sur l'accueil après avoir corrigé une configuration met la liste à jour.
   useFocusEffect(useCallback(() => { void refetchSetup(); }, [refetchSetup]));
@@ -83,6 +85,15 @@ export default function AdminDashboardScreen() {
   }, [payments]);
 
   const alerts = [
+    lockedNow > 0
+      ? {
+          icon: 'lock-person' as const,
+          tone: 'danger' as const,
+          title: lockedNow === 1 ? i18n.t('staff.locked_alert_title_one') : i18n.t('staff.locked_alert_title_many', { count: lockedNow }),
+          sub: i18n.t('staff.locked_alert_text'),
+          onPress: () => router.push('/(admin)/locked-accounts'),
+        }
+      : null,
     staffToday && staffToday.sessions.some((s) => s.fillRate < 30)
       ? { icon: 'trending-down' as const, tone: 'danger' as const, title: i18n.t('admin.cours_sous_rempli'), sub: i18n.t('admin.remplissage_inferieur_a_30'), onPress: () => router.push('/(admin)/(tabs)/planning') }
       : null,

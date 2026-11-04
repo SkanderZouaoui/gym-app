@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { NotificationBell } from '../../../src/components/NotificationBell';
 import { RoleAnnouncements, RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
+import { LockedAccountsCard } from '../../../src/components/staff/LockedAccountsCard';
 import { OccupancyCard } from '../../../src/components/staff/OccupancyCard';
 
 /** Accueil de l'espace staff : chiffres du jour, raccourcis, cours du jour et derniers encaissements. */
@@ -63,6 +64,8 @@ export default function StaffHomeScreen() {
           </View>
           <NotificationBell onPress={() => router.push('/(staff)/notifications')} />
         </View>
+
+        <LockedAccountsCard variant="alert" />
 
         <RoleNotices />
 
