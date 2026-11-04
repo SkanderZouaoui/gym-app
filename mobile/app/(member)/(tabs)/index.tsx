@@ -1,3 +1,4 @@
+import { SyncStatusCard } from '../../../src/components/SyncStatusCard';
 import { useEffect, useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -140,6 +141,8 @@ export default function HomeScreen() {
           hasUnreadNotification={unreadCount > 0}
           onPressNotifications={() => router.push('/(member)/notifications')}
         />
+
+        <SyncStatusCard />
 
         <NoticeList items={alertNotices} format={alertFormat === 'Pop-up' ? 'Bandeau' : alertFormat} onDismiss={dismissNotice} />
         {announcementFormat === 'Bandeau' ? <NoticeList items={announcementNotices} format="Bandeau" onDismiss={dismissNotice} /> : null}

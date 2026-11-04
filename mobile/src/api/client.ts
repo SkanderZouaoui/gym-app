@@ -39,6 +39,18 @@ async function refreshTokens(): Promise<void> {
   await tokenStorage.setTokens(data.accessToken, data.refreshToken);
 }
 
+/** Délai avant de pouvoir réessayer (secondes), lu dans les en-têtes `Retry-After*` d'une réponse 429 (le serveur les
+ * suffixe du nom de la limite touchée : `Retry-After-auth-account`…). Le plus long l'emporte. */
+function readRetryAfterSeconds(res: Response): number | undefined {
+  let max = 0;
+  res.headers.forEach((value, name) => {
+    if (!name.toLowerCase().startsWith('retry-after')) return;
+    const seconds = Number(value);
+    if (Number.isFinite(seconds) && seconds > max) max = seconds;
+  });
+  return max > 0 ? max : undefined;
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = true } = options;
 
@@ -67,7 +79,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!res.ok) {
     const payload = await res.json().catch(() => ({ code: 'UNKNOWN', message: res.statusText }));
-    throw new ApiError(payload.code ?? 'UNKNOWN', payload.message ?? res.statusText, res.status, payload.details);
+    const retryAfterSeconds = res.status === 429 ? readRetryAfterSeconds(res) : undefined;
+    const details = payload.details ?? (retryAfterSeconds ? { retryAfterSeconds } : undefined);
+    throw new ApiError(payload.code ?? 'UNKNOWN', payload.message ?? res.statusText, res.status, details);
   }
 
   if (res.status === 204) return undefined as T;

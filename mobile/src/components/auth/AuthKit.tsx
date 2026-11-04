@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, KeyboardAvoidingView, Platform, type TextInputProps } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
-import { SubmitButton } from '../SubmitButton';
+import { SubmitButton, type SubmitStatus } from '../SubmitButton';
+import Animated, { FadeInDown, FadeOut, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { Banner } from '../ui/Banner';
 
 /** Refonte connexion & mot de passe — Design System/FitZone Login Refonte.dc.html. */
@@ -144,60 +145,104 @@ interface AuthFieldProps extends Omit<TextInputProps, 'style'> {
   /** Petit bouton d'action à droite du champ (ex. coller le code). */
   action?: { icon: keyof typeof MaterialIcons.glyphMap; label: string; onPress: () => void };
   borderColor?: string;
+  /** Champ en erreur : bordure et icône rouges, secousse à l'apparition, message court dessous. */
+  error?: boolean;
+  /** Champ valide : bordure et icône vertes, coche à droite. */
+  valid?: boolean;
+  /** Message sous le champ (rouge en erreur, vert si valide). */
+  message?: string;
+  /** À incrémenter pour rejouer la secousse d'un champ déjà en erreur (nouvelle tentative). */
+  shakeKey?: number;
 }
 
-/** Champ arrondi de la refonte : icône, saisie, œil pour les mots de passe. */
-export function AuthField({ icon, secure, borderColor, action, ...input }: AuthFieldProps) {
+const FIELD_RED = '#EF4444';
+const FIELD_GREEN = '#16A34A';
+
+/** Champ arrondi de la refonte : icône, saisie, œil pour les mots de passe — et les états de la maquette
+ * « Champs : erreur & validation » (bordure rouge + secousse + message, ou bordure verte + coche). */
+export function AuthField({ icon, secure, borderColor, action, error, valid, message, shakeKey, ...input }: AuthFieldProps) {
   const p = useAuthPalette();
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
+  const shake = useSharedValue(0);
+  const wasError = useRef(false);
+  const lastShakeKey = useRef(shakeKey);
+
+  useEffect(() => {
+    const triggered = (error && !wasError.current) || (error && shakeKey !== lastShakeKey.current);
+    wasError.current = !!error;
+    lastShakeKey.current = shakeKey;
+    if (!triggered) return;
+    shake.value = withSequence(
+      withTiming(-9, { duration: 90 }), withTiming(8, { duration: 90 }), withTiming(-5, { duration: 90 }),
+      withTiming(3, { duration: 90 }), withTiming(0, { duration: 90 }),
+    );
+  }, [error, shakeKey, shake]);
+  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
+
+  const accent = error ? FIELD_RED : valid ? FIELD_GREEN : null;
+  const messageColor = error ? (p.dark ? '#F87171' : '#DC2626') : p.dark ? '#4ADE80' : '#15803D';
   return (
-    <View style={{ height: 56, borderRadius: 18, backgroundColor: p.sf, borderWidth: 1.5, borderColor: borderColor ?? p.bd, flexDirection: 'row', alignItems: 'center', gap: 12, paddingStart: 16, paddingEnd: secure || action ? 8 : 16 }}>
-      <MaterialIcons name={icon} size={22} color={p.mu} />
-      <TextInput
-        {...input}
-        secureTextEntry={secure && !show}
-        placeholderTextColor={p.mu}
-        autoCapitalize={input.autoCapitalize ?? 'none'}
-        style={{ flex: 1, height: '100%', minWidth: 0, fontFamily: fonts.body, fontSize: 16, color: p.fg }}
-      />
-      {action ? (
-        <Pressable onPress={action.onPress} hitSlop={8} accessibilityRole="button" accessibilityLabel={action.label} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: p.prs, alignItems: 'center', justifyContent: 'center' }}>
-          <MaterialIcons name={action.icon} size={22} color={p.accent} />
-        </Pressable>
-      ) : null}
-      {secure ? (
-        <Pressable onPress={() => setShow((v) => !v)} hitSlop={8} accessibilityLabel={t(show ? 'auth.hide_password' : 'auth.show_password')} style={{ padding: 6 }}>
-          <MaterialIcons name={show ? 'visibility-off' : 'visibility'} size={22} color={p.mu} />
-        </Pressable>
+    <View>
+      <Animated.View
+        style={[
+          { height: 56, borderRadius: 18, backgroundColor: p.sf, borderWidth: 1.5, borderColor: accent ?? borderColor ?? p.bd, flexDirection: 'row', alignItems: 'center', gap: 12, paddingStart: 16, paddingEnd: secure || action ? 8 : 16 },
+          shakeStyle,
+        ]}
+      >
+        <MaterialIcons name={icon} size={22} color={accent ?? p.mu} />
+        <TextInput
+          {...input}
+          secureTextEntry={secure && !show}
+          placeholderTextColor={p.mu}
+          autoCapitalize={input.autoCapitalize ?? 'none'}
+          style={{ flex: 1, height: '100%', minWidth: 0, fontFamily: fonts.body, fontSize: 16, color: p.fg }}
+        />
+        {action ? (
+          <Pressable onPress={action.onPress} hitSlop={8} accessibilityRole="button" accessibilityLabel={action.label} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: p.prs, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialIcons name={action.icon} size={22} color={p.accent} />
+          </Pressable>
+        ) : null}
+        {secure ? (
+          <Pressable onPress={() => setShow((v) => !v)} hitSlop={8} accessibilityLabel={t(show ? 'auth.hide_password' : 'auth.show_password')} style={{ padding: 6 }}>
+            <MaterialIcons name={show ? 'visibility-off' : 'visibility'} size={22} color={p.mu} />
+          </Pressable>
+        ) : !action && (error || valid) ? (
+          <MaterialIcons name={error ? 'error' : 'check-circle'} size={22} color={accent ?? p.mu} />
+        ) : null}
+      </Animated.View>
+      {message ? (
+        <Animated.Text entering={FadeInDown.duration(180)} style={{ fontFamily: fonts.bodySemiBold, fontSize: 12, color: messageColor, marginTop: 6, marginStart: 4 }}>
+          {message}
+        </Animated.Text>
       ) : null}
     </View>
   );
 }
 
-/** Bouton principal en dégradé violet (grisé tant que le formulaire n'est pas valide). */
+/** Bouton principal des écrans d'authentification (voir SubmitButton pour les états : repos, chargement, succès, échec,
+ * bloqué). `loading` et `success` restent acceptés pour les écrans qui n'ont que ces deux états. */
 export function AuthButton({
-  label, onPress, loading, disabled, icon = 'arrow-forward', success, successLabel, shakeTrigger,
+  label, onPress, loading, success, status, loadingLabel, errorLabel, lockedLabel, disabled, icon = 'arrow-forward',
 }: {
-  label: string; onPress: () => void; loading?: boolean; disabled?: boolean; icon?: keyof typeof MaterialIcons.glyphMap;
-  /** Affiche l'animation de réussite (coche verte) ; `successLabel` remplace alors le libellé. */
-  success?: boolean; successLabel?: string;
-  /** À incrémenter pour secouer le bouton après un échec. */
-  shakeTrigger?: number;
+  label: string; onPress: () => void; loading?: boolean; success?: boolean; status?: SubmitStatus;
+  loadingLabel?: string; errorLabel?: string; lockedLabel?: string;
+  disabled?: boolean; icon?: keyof typeof MaterialIcons.glyphMap;
 }) {
   return (
     <SubmitButton
       label={label}
-      successLabel={successLabel}
-      status={success ? 'success' : loading ? 'loading' : 'idle'}
+      loadingLabel={loadingLabel}
+      errorLabel={errorLabel}
+      lockedLabel={lockedLabel}
+      status={status ?? (success ? 'success' : loading ? 'loading' : 'idle')}
       onPress={onPress}
       disabled={disabled}
       icon={icon}
       colors={['#8B5CF6', VIOLET_DARK]}
-      glowColor={VIOLET}
+      glowColor="rgba(124,58,237,0.45)"
       height={58}
       fontSize={17}
-      shakeTrigger={shakeTrigger}
     />
   );
 }
@@ -213,13 +258,42 @@ export function Chip({ icon, label }: { icon: keyof typeof MaterialIcons.glyphMa
   );
 }
 
-/** Bannière d'erreur des écrans d'authentification : la bannière de l'app (même style que partout ailleurs).
- * `danger` pour un refus (identifiants, serveur), `warning` pour un problème de réseau ; changer `attempt` rejoue
- * son apparition à chaque nouvel échec. */
+/** Bannière de statut des écrans d'authentification — maquette « Erreurs de connexion » : carte à bordure teintée,
+ * pastille ronde d'icône, titre et message. Rouge (`danger`) pour une erreur, ambre (`warning`) pour une restriction.
+ * Elle tremble à chaque nouvelle tentative (`attempt`). */
 export function AuthErrorBanner({ tone, icon, title, message, attempt = 0 }: {
   tone: 'danger' | 'warning'; icon: keyof typeof MaterialIcons.glyphMap; title: string; message: string; attempt?: number;
 }) {
-  return <Banner key={attempt} tone={tone} icon={icon} title={title} text={message} />;
+  const p = useAuthPalette();
+  const c = tone === 'danger' ? '#EF4444' : '#F59E0B';
+  const shake = useSharedValue(0);
+  useEffect(() => {
+    shake.value = withSequence(
+      withTiming(-9, { duration: 90 }), withTiming(8, { duration: 90 }), withTiming(-5, { duration: 90 }),
+      withTiming(3, { duration: 90 }), withTiming(0, { duration: 90 }),
+    );
+  }, [attempt, shake]);
+  const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(240)}
+      exiting={FadeOut.duration(140)}
+      accessibilityRole="alert"
+      accessibilityLiveRegion="polite"
+      style={[
+        { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 20, backgroundColor: p.sf, borderWidth: 1, borderColor: `${c}66` },
+        shakeStyle,
+      ]}
+    >
+      <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: `${c}26`, alignItems: 'center', justifyContent: 'center' }}>
+        <MaterialIcons name={icon} size={22} color={c} />
+      </View>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={{ fontFamily: fonts.bodyBold, fontSize: 14, color: p.fg }}>{title}</Text>
+        <Text style={{ fontFamily: fonts.body, fontSize: 13, color: p.mu, marginTop: 2 }}>{message}</Text>
+      </View>
+    </Animated.View>
+  );
 }
 
 export function ErrorLine({ text }: { text: string }) {

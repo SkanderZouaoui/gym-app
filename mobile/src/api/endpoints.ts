@@ -20,6 +20,12 @@ export const configApi = {
     }),
 };
 
+/** Coordonnées de la salle lisibles sans être connecté (écran de connexion), si l'admin les a rendues visibles. */
+export const publicApi = {
+  getVenueContact: () =>
+    apiRequest<{ name: string; phone: string | null; email: string | null }>('/v1/venue-contact', { auth: false }),
+};
+
 export const authApi = {
   login: (email: string, password: string) =>
     apiRequest<TokenPair & { roles: Role[] }>('/v1/auth/login', {

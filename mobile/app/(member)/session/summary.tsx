@@ -13,6 +13,7 @@ import { clearSessionDraft } from '../../../src/hooks/useSessionDraft';
 import { rememberSessionWeights } from '../../../src/hooks/lastWeights';
 import { SubmitButton } from '../../../src/components/SubmitButton';
 import { formatClock } from '../../../src/utils/duration';
+import { onlineManager } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 
@@ -55,7 +56,7 @@ export default function SessionSummaryScreen() {
   const [feeling, setFeeling] = useState<string>('OK');
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const [shakeTrigger, setShakeTrigger] = useState(0);
+  const [errorFlash, setErrorFlash] = useState(false);
 
   const totalSeconds = Number(elapsedSeconds ?? 0);
   const minutes = Math.round(totalSeconds / 60);
@@ -91,36 +92,44 @@ export default function SessionSummaryScreen() {
   }, [history, sets]);
   const recordExerciseIds = useMemo(() => new Set(records.map((r) => r.exerciseId)), [records]);
 
+  // Séance acceptée (par le serveur, ou mise en file d'attente hors ligne) : le bouton passe au succès pendant un
+  // court instant, puis on repart de l'onglet Entraînement avec une pile propre (le bouton retour ne ramène pas
+  // sur la séance ou le programme, dont les jours ont pu changer).
+  const finishSave = () => {
+    rememberSessionWeights(sets);
+    if (programId && dayId) clearSessionDraft(programId, dayId);
+    setSaved(true);
+    setTimeout(() => {
+      if (router.canDismiss()) router.dismissAll();
+      router.replace('/(member)/(tabs)/training');
+    }, 1400);
+  };
+
   const handleSave = () => {
     setError(null);
-    createWorkout.mutate(
-      {
-        programId,
-        dayId,
-        feeling,
-        durationMinutes: minutes,
-        durationSeconds: totalSeconds,
-        sets: sets.map((s) => ({ exerciseId: s.exerciseId, setNumber: s.setNumber, weightKg: s.weightKg, reps: s.reps })),
+    const payload = {
+      programId,
+      dayId,
+      feeling,
+      durationMinutes: minutes,
+      durationSeconds: totalSeconds,
+      sets: sets.map((s) => ({ exerciseId: s.exerciseId, setNumber: s.setNumber, weightKg: s.weightKg, reps: s.reps })),
+    };
+    if (!onlineManager.isOnline()) {
+      // Hors ligne : la mutation est conservée et envoyée au retour du réseau (voir la carte de synchronisation).
+      createWorkout.mutate(payload);
+      finishSave();
+      return;
+    }
+    createWorkout.mutate(payload, {
+      onSuccess: finishSave,
+      onError: () => {
+        setError(t('member.erreur_lors_de_lenregistrement_de'));
+        // Le bouton devient rouge un court instant (« Échec de l'envoi »), puis redevient utilisable.
+        setErrorFlash(true);
+        setTimeout(() => setErrorFlash(false), 2400);
       },
-      {
-        onSuccess: () => {
-          rememberSessionWeights(sets);
-          if (programId && dayId) clearSessionDraft(programId, dayId);
-          // Le bouton passe au vert (coche, onde) pendant un court instant avant de quitter l'écran.
-          setSaved(true);
-          setTimeout(() => {
-            // On repart de l'onglet Entraînement avec une pile propre : le bouton retour ne ramène pas
-            // sur la séance ou le programme (dont les jours ont pu changer).
-            if (router.canDismiss()) router.dismissAll();
-            router.replace('/(member)/(tabs)/training');
-          }, 1400);
-        },
-        onError: () => {
-          setError(t('member.erreur_lors_de_lenregistrement_de'));
-          setShakeTrigger((n) => n + 1);
-        },
-      },
-    );
+    });
   };
 
   return (
@@ -228,13 +237,12 @@ export default function SessionSummaryScreen() {
         <SubmitButton
           label={t('member.enregistrer_la_seance')}
           loadingLabel={t('common.enregistrement')}
-          successLabel={t('member.seance_enregistree')}
-          status={saved ? 'success' : createWorkout.isPending ? 'loading' : 'idle'}
+          errorLabel={t('common.echec_envoi')}
+          status={saved ? 'success' : errorFlash ? 'error' : createWorkout.isPending ? 'loading' : 'idle'}
           onPress={handleSave}
           icon="check"
           colors={[colors.primary, colors.primaryPressed]}
           glowColor={colors.primary}
-          shakeTrigger={shakeTrigger}
         />
       </View>
     </SafeAreaView>

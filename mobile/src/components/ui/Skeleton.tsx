@@ -1,31 +1,46 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Animated as RNAnimated, Easing as RNEasing, StyleSheet, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { Easing, interpolate, useAnimatedStyle, useReducedMotion, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 
+/** Squelette — maquette « Feedback & états », « Chargement » : un reflet violet clair traverse le bloc pendant la
+ * récupération des données (sans reflet si « réduire les animations » est actif). */
 export function SkeletonBlock({ height, width, radius = radii.md, style }: { height: number; width?: number | `${number}%`; radius?: number; style?: ViewStyle }) {
-  const { colors } = useTheme();
-  const [opacity] = useState(() => new Animated.Value(1));
+  const { scheme } = useTheme();
+  const dark = scheme === 'dark';
+  const reduceMotion = useReducedMotion();
+  const [blockWidth, setBlockWidth] = useState(0);
+  const sweep = useSharedValue(0);
 
   useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.45, duration: 800, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [opacity]);
+    if (reduceMotion) return;
+    sweep.value = 0;
+    sweep.value = withRepeat(withTiming(1, { duration: 1600, easing: Easing.linear }), -1, false);
+  }, [reduceMotion, sweep]);
+
+  const bandWidth = Math.max(blockWidth * 0.6, 1);
+  const bandStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(sweep.value, [0, 1], [-bandWidth, blockWidth]) }],
+  }));
 
   return (
-    <Animated.View
-      style={[
-        { height, width: width ?? '100%', borderRadius: radius, backgroundColor: colors.surface2, opacity },
-        style,
-      ]}
-    />
+    <View
+      onLayout={(e: LayoutChangeEvent) => setBlockWidth(e.nativeEvent.layout.width)}
+      style={[{ height, width: width ?? '100%', borderRadius: radius, backgroundColor: dark ? '#1A1431' : '#E8E3F5', overflow: 'hidden' }, style]}
+    >
+      {!reduceMotion ? (
+        <Animated.View style={[StyleSheet.absoluteFill, { width: bandWidth }, bandStyle]}>
+          <LinearGradient
+            colors={dark ? ['rgba(58,45,102,0)', '#3A2D66', 'rgba(58,45,102,0)'] : ['rgba(248,246,253,0)', '#F8F6FD', 'rgba(248,246,253,0)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </Animated.View>
+      ) : null}
+    </View>
   );
 }
 
@@ -89,12 +104,12 @@ export function DetailSkeleton() {
 export function SkeletonShimmer({ radius = 0, dark = false }: { radius?: number; dark?: boolean }) {
   const { colors, scheme } = useTheme();
   const [width, setWidth] = useState(0);
-  const [progress] = useState(() => new Animated.Value(0));
+  const [progress] = useState(() => new RNAnimated.Value(0));
 
   useEffect(() => {
     if (width === 0) return;
     progress.setValue(0);
-    const loop = Animated.loop(Animated.timing(progress, { toValue: 1, duration: 1300, easing: Easing.inOut(Easing.quad), useNativeDriver: true }));
+    const loop = RNAnimated.loop(RNAnimated.timing(progress, { toValue: 1, duration: 1300, easing: RNEasing.inOut(RNEasing.quad), useNativeDriver: true }));
     loop.start();
     return () => loop.stop();
   }, [width, progress]);
@@ -111,9 +126,9 @@ export function SkeletonShimmer({ radius = 0, dark = false }: { radius?: number;
       accessibilityState={{ busy: true }}
     >
       {width > 0 ? (
-        <Animated.View style={[StyleSheet.absoluteFill, { width, transform: [{ translateX }] }]}>
+        <RNAnimated.View style={[StyleSheet.absoluteFill, { width, transform: [{ translateX }] }]}>
           <LinearGradient colors={['transparent', light, 'transparent']} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={{ flex: 1 }} />
-        </Animated.View>
+        </RNAnimated.View>
       ) : null}
     </View>
   );

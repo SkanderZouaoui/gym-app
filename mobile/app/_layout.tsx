@@ -24,6 +24,7 @@ import { ApiError } from '../src/api/client';
 import { queryPersister, QUERY_CACHE_VERSION } from '../src/api/queryStorage';
 import { usePreferencesStore } from '../src/store/preferences';
 import { NetworkStatusProvider } from '../src/hooks/NetworkStatusContext';
+import { createWorkoutLogRequest, updateOwnProgramRequest } from '../src/hooks/useCoaching';
 import { OfflineIndicator } from '../src/components/OfflineIndicator';
 import { useSessionStore } from '../src/store/session';
 import { Platform, View } from 'react-native';
@@ -53,6 +54,21 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: { retry: 1, staleTime: 30_000 },
     mutations: { networkMode: 'offlineFirst' },
+  },
+});
+
+// Mutations qui doivent survivre à un redémarrage hors ligne : sans mutationFn enregistrée ici, une mutation restaurée
+// depuis le disque ne pourrait pas être renvoyée au retour du réseau.
+queryClient.setMutationDefaults(['createWorkout'], {
+  mutationFn: createWorkoutLogRequest,
+  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'workouts'] }),
+});
+queryClient.setMutationDefaults(['updateOwnProgram'], {
+  mutationFn: updateOwnProgramRequest,
+  onSuccess: (_data, variables) => {
+    const { id } = variables as { id: string };
+    void queryClient.invalidateQueries({ queryKey: ['me', 'programs'] });
+    void queryClient.invalidateQueries({ queryKey: ['programs', id] });
   },
 });
 
@@ -147,7 +163,11 @@ export default function RootLayout() {
       <PersistQueryClientProvider
         client={queryClient}
         persistOptions={persistOptions}
-        onSuccess={() => setCacheRestored(true)}
+        onSuccess={() => {
+          setCacheRestored(true);
+          // Mutations en attente restaurées du disque : on les renvoie dès que le réseau est là.
+          if (onlineManager.isOnline()) void queryClient.resumePausedMutations();
+        }}
         onError={() => setCacheRestored(true)}
       >
         {!fontsLoaded || !bootstrapped ? null : (

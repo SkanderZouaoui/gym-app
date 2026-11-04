@@ -1,3 +1,4 @@
+import { SyncStatusCard } from '../../../src/components/SyncStatusCard';
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -33,6 +34,7 @@ export default function TrainingScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenTitle title={t('training.title')} />
+        <SyncStatusCard />
 
         <TrainingTabs value={tab} onChange={setTab} />
 

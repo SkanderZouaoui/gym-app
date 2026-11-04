@@ -109,10 +109,17 @@ export interface CreateWorkoutLogInput {
   sets: CreateWorkoutSetInput[];
 }
 
+export const createWorkoutLogRequest = (payload: CreateWorkoutLogInput) =>
+  apiRequest<WorkoutLog>('/v1/me/workouts', { method: 'POST', body: payload });
+
+/** Enregistrement d'une séance. `networkMode: 'online'` : hors ligne, la mutation est mise en pause et conservée
+ * (y compris après un redémarrage, voir setMutationDefaults dans app/_layout.tsx), puis envoyée au retour du réseau. */
 export function useCreateWorkoutLog() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateWorkoutLogInput) => apiRequest<WorkoutLog>('/v1/me/workouts', { method: 'POST', body: payload }),
+    mutationKey: ['createWorkout'],
+    networkMode: 'online',
+    mutationFn: createWorkoutLogRequest,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me', 'workouts'] }),
   });
 }
@@ -197,12 +204,15 @@ export function useCreateOwnProgram() {
   });
 }
 
+export const updateOwnProgramRequest = ({ id, payload }: { id: string; payload: CreateOwnProgramInput }) =>
+  apiRequest<Program>(`/v1/me/programs/${id}`, { method: 'PATCH', body: payload });
+
 export function useUpdateOwnProgram() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ['updateOwnProgram'],
-    mutationFn: ({ id, payload }: { id: string; payload: CreateOwnProgramInput }) =>
-      apiRequest<Program>(`/v1/me/programs/${id}`, { method: 'PATCH', body: payload }),
+    networkMode: 'online',
+    mutationFn: updateOwnProgramRequest,
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['me', 'programs'] });
       queryClient.invalidateQueries({ queryKey: ['programs', variables.id] });
