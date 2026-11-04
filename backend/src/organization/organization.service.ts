@@ -189,4 +189,19 @@ export class OrganizationService {
       gallery: await this.gallery.withUrls({ galleryKeys: settings.galleryKeys, galleryMeta: settings.galleryMeta }),
     };
   }
+
+  /**
+   * Coordonnées affichées sur l'écran de connexion (« Contacter l'accueil »), avant toute authentification : uniquement
+   * le nom, le téléphone et l'e-mail, et seulement si l'admin les a rendus visibles aux adhérents.
+   */
+  async getPublicContact() {
+    const settings = await this.getSettings();
+    const config = mergeConfig(settings.config);
+    const visible = config.contact.visibleToMembers;
+    return {
+      name: config.contact.name.trim() || settings.name,
+      phone: visible && config.contact.phone.trim() ? config.contact.phone.trim() : null,
+      email: visible && config.contact.email.trim() ? config.contact.email.trim() : null,
+    };
+  }
 }

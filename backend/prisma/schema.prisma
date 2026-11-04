@@ -200,6 +200,17 @@ enum OtpPurpose {
  * expiresAt/consumedAt, même convention que RefreshToken/UsedQrToken : pas de
  * cron de nettoyage.
  */
+/// Échecs de connexion consécutifs par e-mail (compte existant ou non, pour ne rien révéler) : au bout de
+/// LOGIN_MAX_ATTEMPTS la connexion est bloquée temporairement ; une connexion réussie remet le compteur à zéro.
+model LoginAttempt {
+  email       String    @id
+  failures    Int       @default(0)
+  lockedUntil DateTime? @map("locked_until")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("login_attempts")
+}
+
 model OtpCode {
   id         String     @id @default(uuid())
   userId     String     @map("user_id")

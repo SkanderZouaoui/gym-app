@@ -3,6 +3,8 @@ import { generateMemberCode } from '../users/member-code.js';
 import {
   ConflictException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -23,6 +25,11 @@ export interface TokenPair {
   accessToken: string;
   refreshToken: string;
 }
+
+/** Échecs de connexion autorisés (par e-mail) avant un blocage temporaire. */
+export const LOGIN_MAX_ATTEMPTS = 5;
+/** Durée du blocage temporaire après LOGIN_MAX_ATTEMPTS échecs. */
+export const LOGIN_LOCK_SECONDS = 15 * 60;
 
 @Injectable()
 export class AuthService {
@@ -67,18 +74,30 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<TokenPair & { roles: Role[] }> {
+    const attemptKey = dto.email.trim().toLowerCase();
+    await this.assertNotLocked(attemptKey);
+
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
       include: { roles: true },
     });
-    if (!user || user.status !== 'ACTIVE') {
-      throw new UnauthorizedException('INVALID_CREDENTIALS');
+    // Un compte supprimé est traité comme inexistant ; un compte suspendu n'est révélé qu'à qui connaît son mot de
+    // passe (« Compte désactivé » côté app), sans permettre de deviner quelles adresses existent.
+    if (!user || user.status === 'DELETED') {
+      throw await this.registerFailedLogin(attemptKey);
     }
 
     const passwordValid = await argon2.verify(user.passwordHash, dto.password);
     if (!passwordValid) {
-      throw new UnauthorizedException('INVALID_CREDENTIALS');
+      throw await this.registerFailedLogin(attemptKey);
     }
+
+    if (user.status !== 'ACTIVE') {
+      throw new ForbiddenException('ACCOUNT_DISABLED');
+    }
+
+    // Connexion réussie : le compteur d'échecs repart de zéro.
+    await this.prisma.loginAttempt.deleteMany({ where: { email: attemptKey } });
 
     const roles: Role[] = user.roles.map((r) => r.role as Role);
 
@@ -88,6 +107,39 @@ export class AuthService {
 
     const tokens = await this.issueTokens(user.id, defaultRole, roles);
     return { ...tokens, roles };
+  }
+
+  /** Refuse la tentative si l'e-mail est bloqué (trop d'échecs) : 429 avec le délai restant en secondes. */
+  private async assertNotLocked(email: string): Promise<void> {
+    const attempt = await this.prisma.loginAttempt.findUnique({ where: { email } });
+    if (!attempt?.lockedUntil || attempt.lockedUntil <= new Date()) return;
+    const retryAfterSeconds = Math.ceil((attempt.lockedUntil.getTime() - Date.now()) / 1000);
+    throw new HttpException({ code: 'LOGIN_LOCKED', message: 'LOGIN_LOCKED', details: { retryAfterSeconds } }, HttpStatus.TOO_MANY_REQUESTS);
+  }
+
+  /** Compte un échec de connexion. Tant que la limite n'est pas atteinte : 401 avec le nombre d'essais restants ;
+   * au LOGIN_MAX_ATTEMPTS-ième échec : blocage temporaire (429) et compteur remis à zéro pour la fois suivante. */
+  private async registerFailedLogin(email: string): Promise<HttpException> {
+    const attempt = await this.prisma.loginAttempt.upsert({
+      where: { email },
+      create: { email, failures: 1 },
+      update: { failures: { increment: 1 } },
+    });
+    if (attempt.failures >= LOGIN_MAX_ATTEMPTS) {
+      await this.prisma.loginAttempt.update({
+        where: { email },
+        data: { failures: 0, lockedUntil: new Date(Date.now() + LOGIN_LOCK_SECONDS * 1000) },
+      });
+      return new HttpException(
+        { code: 'LOGIN_LOCKED', message: 'LOGIN_LOCKED', details: { retryAfterSeconds: LOGIN_LOCK_SECONDS } },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    return new UnauthorizedException({
+      code: 'INVALID_CREDENTIALS',
+      message: 'INVALID_CREDENTIALS',
+      details: { attemptsRemaining: LOGIN_MAX_ATTEMPTS - attempt.failures },
+    });
   }
 
   /** Changement de rôle actif depuis le profil (section 3 : sélecteur de rôle). */

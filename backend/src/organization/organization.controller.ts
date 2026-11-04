@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Role } from '@muscleup/shared';
 import { OrganizationService } from './organization.service.js';
 import { Roles } from '../auth/decorators/roles.decorator.js';
+import { Public } from '../auth/decorators/public.decorator.js';
 import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
 import { RequestUploadUrlDto } from '../storage/dto/request-upload-url.dto.js';
@@ -114,5 +115,18 @@ export class VenueController {
   @Get()
   get(@CurrentUser() user: AuthenticatedUser) {
     return this.organizationService.getVenue(user.activeRole);
+  }
+}
+
+/** Coordonnées de la salle lisibles sans être connecté (écran de connexion : « Contacter l'accueil »). */
+@ApiTags('organization')
+@Controller('v1/venue-contact')
+export class VenueContactController {
+  constructor(private readonly organizationService: OrganizationService) {}
+
+  @Public()
+  @Get()
+  get() {
+    return this.organizationService.getPublicContact();
   }
 }
