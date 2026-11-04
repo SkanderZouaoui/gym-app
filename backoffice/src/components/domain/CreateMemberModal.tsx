@@ -8,7 +8,7 @@ import { MethodPicker, PlanPicker } from './PlanPicker'
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
-function CopyRow({ label, value, secret }: { label: string; value: string; secret?: boolean }) {
+export function CopyRow({ label, value, secret }: { label: string; value: string; secret?: boolean }) {
   const toast = useToast()
   const [shown, setShown] = useState(!secret)
   return (

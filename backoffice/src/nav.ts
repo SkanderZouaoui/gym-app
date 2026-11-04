@@ -18,6 +18,7 @@ export const NAV: NavGroup[] = [
     items: [
       { to: '/', label: 'Accueil', icon: 'home' },
       { to: '/members', label: 'Adhérents', icon: 'groups' },
+      { to: '/locked-accounts', label: 'Comptes bloqués', icon: 'lock_person' },
       { to: '/cash', label: 'Caisse', icon: 'payments' },
       { to: '/planning', label: 'Planning', icon: 'calendar_month' },
       { to: '/notifications', label: 'Notifications', icon: 'notifications' },

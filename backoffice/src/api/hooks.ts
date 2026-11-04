@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client'
-import type { AdminDashboard, Member, Membership, Payment, Plan, RosterEntry, SessionSummary, StaffToday } from './types'
+import type { AdminDashboard, LoginIssue, Member, Membership, Payment, Plan, RosterEntry, SessionSummary, StaffToday } from './types'
 import type { PaymentMethod } from '../lib/format'
 
 const get = async <T>(url: string, params?: Record<string, unknown>) => (await api.get<T>(url, { params })).data
@@ -195,6 +195,22 @@ function useInvalidateMember() {
 }
 
 /** Suspend ou réactive le compte d'un adhérent. */
+/** Adhérents bloqués ou en difficulté de connexion (accueil et admin), rafraîchis toutes les 20 s. */
+export const useLoginIssues = () =>
+  useQuery({ queryKey: ['members', 'login-issues'], queryFn: () => get<LoginIssue[]>('/v1/members/login-issues'), refetchInterval: 20_000 })
+
+/** Lève le blocage de connexion d'un adhérent pour qu'il puisse réessayer tout de suite. */
+export function useUnlockLogin() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => (await api.post<{ ok: true }>(`/v1/members/${id}/unlock-login`)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members', 'login-issues'] }),
+  })
+}
+
+/** Réinitialise le mot de passe d'un adhérent et renvoie le mot de passe provisoire (à communiquer une seule fois). */
+export const resetMemberPassword = async (id: string) => (await api.post<{ password: string }>(`/v1/members/${id}/reset-password`)).data
+
 export function useSetMemberStatus() {
   const done = useInvalidateMember()
   return useMutation({ mutationFn: async ({ id, suspended }: { id: string; suspended: boolean }) => (await api.patch(`/v1/members/${id}/${suspended ? 'suspend' : 'reactivate'}`)).data, onSuccess: done })

@@ -89,3 +89,19 @@ export interface AdminDashboard {
   avgFillRate: number
   alerts: { expiringMemberships: number; underfilledClasses: number }
 }
+
+/** Adhérent dont la connexion pose problème : bloqué temporairement, échecs récents ou compte désactivé. */
+export interface LoginIssue {
+  id: string
+  firstName: string
+  lastName: string
+  email: string | null
+  phone: string | null
+  memberCode: string | null
+  status: string
+  reason: 'LOCKED' | 'FAILED_ATTEMPTS' | 'SUSPENDED'
+  failures: number
+  lockCount: number
+  lockedUntil: string | null
+  lastAttemptAt: string | null
+}

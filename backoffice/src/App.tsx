@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { LockedAccountsPage } from './pages/LockedAccountsPage'
 import { MembersPage } from './pages/MembersPage'
 import { CashPage } from './pages/CashPage'
 import { PlanningPage } from './pages/PlanningPage'
@@ -29,6 +30,7 @@ function App() {
       >
         <Route path="/" element={<DashboardPage />} />
         <Route path="/members" element={<MembersPage />} />
+        <Route path="/locked-accounts" element={<LockedAccountsPage />} />
         <Route path="/cash" element={<CashPage />} />
         <Route path="/planning" element={<PlanningPage />} />
         <Route path="/plans" element={<RequireRole roles={['ADMIN']}><PlansPage /></RequireRole>} />
