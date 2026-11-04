@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useAdminDashboard, useExpiringMemberships, usePayments, useStaffToday } from '../api/hooks'
+import { useAdminDashboard, useExpiringMemberships, useLoginIssues, usePayments, useStaffToday } from '../api/hooks'
 import { useDailyAttendance, useSetupAlerts, webRoute } from '../api/admin'
 import { useAuth } from '../store/auth'
 import { daysLeft, formatDate, formatMoney, formatTime, greeting, METHOD_ICON, METHOD_LABEL, sameDay } from '../lib/format'
@@ -19,6 +19,7 @@ export function DashboardPage() {
   const expiring = useExpiringMemberships(isAdmin)
   const attendance = useDailyAttendance(isAdmin)
   const setup = useSetupAlerts(isAdmin)
+  const lockedNow = (useLoginIssues().data ?? []).filter((i) => i.reason === 'LOCKED').length
 
   const todayPayments = useMemo(() => (payments.data ?? []).filter((p) => sameDay(new Date(p.recordedAt), new Date(now))), [payments.data, now])
   const collectedToday = isAdmin && dashboard.data ? Number(dashboard.data.revenueToday) : todayPayments.reduce((n, p) => n + Number(p.amount), 0)
@@ -27,6 +28,20 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {lockedNow > 0 ? (
+        <Link to="/locked-accounts" className="flex items-center gap-4 rounded-2xl border border-danger/25 bg-surface px-5 py-4 shadow-sm transition hover:bg-surface-2/60">
+          <span className="relative grid size-11 shrink-0 place-items-center rounded-xl bg-surface-2 text-text">
+            <Icon name="lock_person" size={22} />
+            <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-surface bg-danger" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-bold">{lockedNow === 1 ? '1 compte bloqué' : `${lockedNow} comptes bloqués`}</div>
+            <div className="text-[13px] text-muted">Des adhérents n’arrivent plus à se connecter.</div>
+          </div>
+          <span className="text-sm font-bold text-primary">Traiter</span>
+          <Icon name="chevron_right" size={20} className="text-muted" />
+        </Link>
+      ) : null}
       <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#8B5CF6] via-primary to-[#3b1764] p-7 text-white shadow-primary sm:p-9">
         <div className="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -bottom-24 right-40 size-56 rounded-full bg-white/5" />

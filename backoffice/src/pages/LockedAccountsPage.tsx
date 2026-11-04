@@ -5,11 +5,18 @@ import { resetMemberPassword, useLoginIssues, useSetMemberStatus, useUnlockLogin
 import type { LoginIssue } from '../api/types'
 import { useAuth } from '../store/auth'
 import { formatDateTime } from '../lib/format'
-import { Avatar, Badge, Button, Card, ConfirmDialog, EmptyState, ErrorState, Modal, PageHeader, Skeleton, Tabs, useToast } from '../components/ui'
+import { Avatar, Button, Card, ConfirmDialog, EmptyState, ErrorState, Modal, PageHeader, Skeleton, Tabs, useToast } from '../components/ui'
 import { CopyRow } from '../components/domain/CreateMemberModal'
 
 type Filter = 'all' | 'locked' | 'failed' | 'disabled'
 const REASON: Record<Exclude<Filter, 'all'>, LoginIssue['reason']> = { locked: 'LOCKED', failed: 'FAILED_ATTEMPTS', disabled: 'SUSPENDED' }
+
+const EMPTY: Record<Filter, { title: string; hint: string }> = {
+  all: { title: 'Aucun compte bloqué', hint: 'Tous les adhérents peuvent se connecter.' },
+  locked: { title: 'Aucun compte bloqué', hint: 'Aucun adhérent n’est bloqué en ce moment.' },
+  failed: { title: 'Aucun échec récent', hint: 'Aucune tentative de connexion échouée à signaler.' },
+  disabled: { title: 'Aucun compte désactivé', hint: 'Tous les comptes adhérents sont actifs.' },
+}
 
 const countdown = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 
@@ -90,7 +97,11 @@ export function LockedAccountsPage() {
         ) : isError ? (
           <ErrorState onRetry={() => void refetch()} />
         ) : shown.length === 0 ? (
-          <EmptyState icon="lock_open" title="Aucun compte bloqué" hint="Tous les adhérents peuvent se connecter." />
+          <EmptyState
+            icon={filter === 'disabled' ? 'person_off' : filter === 'failed' ? 'check_circle' : 'lock_open'}
+            title={EMPTY[filter].title}
+            hint={EMPTY[filter].hint}
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -118,13 +129,10 @@ export function LockedAccountsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      {locked ? (
-                        <Badge tone="danger" dot>Bloqué · {countdown(seconds)}</Badge>
-                      ) : m.reason === 'SUSPENDED' ? (
-                        <Badge tone="muted" dot>Compte désactivé</Badge>
-                      ) : (
-                        <Badge tone="warning" dot>{m.failures || m.lockCount} échec{(m.failures || m.lockCount) > 1 ? 's' : ''}</Badge>
-                      )}
+                      <span className="inline-flex items-center gap-2 text-[13px] font-semibold">
+                        <span className={`size-2 rounded-full ${locked ? 'bg-danger' : m.reason === 'SUSPENDED' ? 'bg-muted' : 'bg-warning'}`} />
+                        {locked ? <>Bloqué · <span className="tabular-nums">{countdown(seconds)}</span></> : m.reason === 'SUSPENDED' ? 'Compte désactivé' : `${m.failures || m.lockCount} échec${(m.failures || m.lockCount) > 1 ? 's' : ''}`}
+                      </span>
                     </td>
                     <td className="hidden px-4 py-3 text-muted lg:table-cell">
                       {locked
@@ -143,7 +151,7 @@ export function LockedAccountsPage() {
                           </Button>
                         ) : null}
                         {isAdmin && m.reason === 'SUSPENDED' ? (
-                          <Button size="sm" variant="soft" icon="how_to_reg" loading={setStatus.isPending && setStatus.variables?.id === m.id} onClick={() => setStatus.mutate({ id: m.id, suspended: false }, { onSuccess: () => { toast('Compte réactivé'); void refetch() }, onError: fail })}>
+                          <Button size="sm" variant="outline" icon="how_to_reg" loading={setStatus.isPending && setStatus.variables?.id === m.id} onClick={() => setStatus.mutate({ id: m.id, suspended: false }, { onSuccess: () => { toast('Compte réactivé'); void refetch() }, onError: fail })}>
                             Réactiver
                           </Button>
                         ) : null}

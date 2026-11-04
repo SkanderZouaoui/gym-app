@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { useMembers } from '../api/hooks'
+import { Link, useSearchParams } from 'react-router-dom'
+import { useLoginIssues, useMembers } from '../api/hooks'
 import { useDebounce } from '../lib/hooks'
 import { formatDate } from '../lib/format'
 import { membershipBadge, membershipState, type MembershipState } from '../lib/membership'
@@ -18,6 +18,8 @@ export function MembersPage() {
   const [creating, setCreating] = useState(false)
   const [selling, setSelling] = useState(false)
   const debounced = useDebounce(query.trim(), 300)
+  const issues = useLoginIssues().data ?? []
+  const lockedNow = issues.filter((i) => i.reason === 'LOCKED').length
   const { members, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } = useMembers(debounced)
   const selected = params.get('id')
   const sentinel = useRef<HTMLDivElement>(null)
@@ -52,6 +54,16 @@ export function MembersPage() {
         subtitle="Rechercher, consulter et créer un compte."
         actions={
           <>
+            {issues.length > 0 ? (
+              <Link to="/locked-accounts" className="inline-flex h-11 items-center gap-2 rounded-full border border-border-strong bg-surface px-5 text-sm font-bold text-text transition hover:bg-surface-2 active:scale-[0.98]">
+                <span className="relative inline-flex">
+                  <Icon name="lock_person" size={20} />
+                  {lockedNow > 0 ? <span className="absolute -right-1 -top-0.5 size-2.5 rounded-full border-2 border-surface bg-danger" /> : null}
+                </span>
+                Comptes bloqués
+                <span className="grid h-6 min-w-6 place-items-center rounded-full bg-surface-2 px-1.5 text-xs font-extrabold">{issues.length}</span>
+              </Link>
+            ) : null}
             <Button variant="outline" icon="payments" onClick={() => setSelling(true)}>Nouvelle vente</Button>
             <Button icon="person_add" onClick={() => setCreating(true)}>Nouvel adhérent</Button>
           </>
