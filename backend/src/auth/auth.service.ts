@@ -26,10 +26,15 @@ export interface TokenPair {
   refreshToken: string;
 }
 
-/** Échecs de connexion autorisés (par e-mail) avant un blocage temporaire. */
-export const LOGIN_MAX_ATTEMPTS = 5;
-/** Durée du blocage temporaire après LOGIN_MAX_ATTEMPTS échecs. */
-export const LOGIN_LOCK_SECONDS = 15 * 60;
+/** Blocages temporaires progressifs de la connexion (par e-mail) : `attempts` échecs depuis le blocage précédent
+ * déclenchent un blocage de `lockSeconds`. 1er blocage : 5 échecs → 30 s ; 2e : 2 échecs → 5 min ; 3e : 3 échecs → 15 min. */
+export const LOGIN_LOCK_STAGES = [
+  { attempts: 5, lockSeconds: 30 },
+  { attempts: 2, lockSeconds: 5 * 60 },
+  { attempts: 3, lockSeconds: 15 * 60 },
+] as const;
+/** Au-delà du dernier palier : tous les 2 échecs, on garde le blocage de 15 min. */
+export const LOGIN_REPEAT_STAGE = { attempts: 2, lockSeconds: 15 * 60 } as const;
 
 @Injectable()
 export class AuthService {
@@ -117,28 +122,29 @@ export class AuthService {
     throw new HttpException({ code: 'LOGIN_LOCKED', message: 'LOGIN_LOCKED', details: { retryAfterSeconds } }, HttpStatus.TOO_MANY_REQUESTS);
   }
 
-  /** Compte un échec de connexion. Tant que la limite n'est pas atteinte : 401 avec le nombre d'essais restants ;
-   * au LOGIN_MAX_ATTEMPTS-ième échec : blocage temporaire (429) et compteur remis à zéro pour la fois suivante. */
+  /** Compte un échec de connexion. Tant que le seuil du palier courant n'est pas atteint : 401 avec le nombre d'essais
+   * restants ; à l'atteinte du seuil : blocage temporaire (429) de la durée du palier, puis palier suivant. */
   private async registerFailedLogin(email: string): Promise<HttpException> {
     const attempt = await this.prisma.loginAttempt.upsert({
       where: { email },
       create: { email, failures: 1 },
       update: { failures: { increment: 1 } },
     });
-    if (attempt.failures >= LOGIN_MAX_ATTEMPTS) {
+    const stage = LOGIN_LOCK_STAGES[attempt.lockCount] ?? LOGIN_REPEAT_STAGE;
+    if (attempt.failures >= stage.attempts) {
       await this.prisma.loginAttempt.update({
         where: { email },
-        data: { failures: 0, lockedUntil: new Date(Date.now() + LOGIN_LOCK_SECONDS * 1000) },
+        data: { failures: 0, lockCount: { increment: 1 }, lockedUntil: new Date(Date.now() + stage.lockSeconds * 1000) },
       });
       return new HttpException(
-        { code: 'LOGIN_LOCKED', message: 'LOGIN_LOCKED', details: { retryAfterSeconds: LOGIN_LOCK_SECONDS } },
+        { code: 'LOGIN_LOCKED', message: 'LOGIN_LOCKED', details: { retryAfterSeconds: stage.lockSeconds } },
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
     return new UnauthorizedException({
       code: 'INVALID_CREDENTIALS',
       message: 'INVALID_CREDENTIALS',
-      details: { attemptsRemaining: LOGIN_MAX_ATTEMPTS - attempt.failures },
+      details: { attemptsRemaining: stage.attempts - attempt.failures },
     });
   }
 
