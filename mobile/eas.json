@@ -27,6 +27,10 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_URL": "https://muscleup-api-8a6p.onrender.com"
+      },
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "m-medium"
       }
     }
   },

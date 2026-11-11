@@ -14,7 +14,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.muscleup.app",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "MuscleUP utilise Face ID pour vous connecter rapidement et en toute sécurité."
+        "NSFaceIDUsageDescription": "MuscleUP utilise Face ID pour vous connecter rapidement et en toute sécurité.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
