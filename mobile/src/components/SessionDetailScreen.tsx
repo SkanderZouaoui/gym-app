@@ -140,7 +140,7 @@ export function SessionDetailScreen({ fallbackHref, scannerRoute, memberRoute, e
       <ScreenHeader title={t('coach.detail_title')} fallbackHref={fallbackHref} />
       <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTop}>
               <Text style={styles.heroKicker}>{dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1)}</Text>

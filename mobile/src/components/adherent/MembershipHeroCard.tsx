@@ -34,7 +34,7 @@ export function MembershipHeroCard({ planName, periodLabel, daysLeft, remainingR
 
   return (
     <View style={styles.shadow}>
-      <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
+      <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
         <View style={styles.topRow}>
           <Text style={styles.label}>{expired ? t('home.heroLabelInactive') : t('home.heroLabel')}</Text>
           <View style={styles.status}>

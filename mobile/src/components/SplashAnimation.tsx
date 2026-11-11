@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Animated, Easing, Image, StyleSheet, Text, View, useColorScheme, useWindowDimensions } from 'react-native';
 import Svg, { Circle, Defs, Line, Polyline, RadialGradient, Stop, Text as SvgText } from 'react-native-svg';
 import i18n from '../i18n';
+
+const LOGO_MARK = require('../../assets/brand/logo-mark.png');
+const LOGO_WORD = require('../../assets/brand/logo-word.png');
+const MARK_W = 340;
+const MARK_H = Math.round((MARK_W * 139) / 406);
+const WORD_H = Math.round((MARK_W * 38) / 406);
 
 /**
  * Splash animé « Le mouvement » — Design System/FitZone Splash v2.dc.html.
@@ -40,7 +45,7 @@ export function SplashAnimation({ ready, onFinish }: { ready: boolean; onFinish:
   const out = useState(() => new Animated.Value(1))[0];
   const muscleX = useState(() => new Animated.Value(-16))[0];
   const barScale = useState(() => new Animated.Value(0))[0];
-  const upY = useState(() => new Animated.Value(150))[0];
+  const upY = useState(() => new Animated.Value(64))[0];
   const fill = useState(() => new Animated.Value(0))[0];
   const fillWidth = fill.interpolate({ inputRange: [0, 1], outputRange: [0, 140] });
 
@@ -100,9 +105,7 @@ export function SplashAnimation({ ready, onFinish }: { ready: boolean; onFinish:
 
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: out, zIndex: 100 }]}>
-      {dark ? <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0F0B1E' }]} /> : (
-        <LinearGradient colors={['#8B5CF6', '#6D28D9', '#2E1065']} locations={[0, 0.45, 1]} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
-      )}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#000000' }]} />
       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
         {Array.from({ length: Math.ceil((width + height) / 26) + 1 }, (_, i) => (
           <Line key={i} x1={i * 26} y1={0} x2={i * 26 - height * 0.47} y2={height} stroke="rgba(255,255,255,0.05)" strokeWidth={2} />
@@ -121,26 +124,21 @@ export function SplashAnimation({ ready, onFinish }: { ready: boolean; onFinish:
           </Svg>
         </Fade>
 
-        <Animated.View style={{ position: 'absolute', left: 0, top: 262, width: W, height: 90, alignItems: 'center', opacity: ph >= 2 ? 1 : 0, transform: [{ translateX: muscleX }] }}>
-          <Svg width={W} height={90}>
-            <SvgText x={W / 2} y={66} fontSize={68} fontWeight="900" fontStyle="italic" fill="none" stroke="#fff" strokeWidth={2} textAnchor="middle">MUSCLE</SvgText>
-          </Svg>
+        <Animated.View style={{ position: 'absolute', left: 0, top: 214, width: W, height: MARK_H, alignItems: 'center', opacity: ph >= 2 ? 1 : 0, transform: [{ translateX: muscleX }] }}>
+          <Image source={LOGO_MARK} style={{ width: MARK_W, height: MARK_H }} resizeMode="contain" accessibilityLabel="Muscle UP" />
         </Animated.View>
 
         {/* Barre de traction pleine largeur, puis barre arrondie qui se déploie. */}
         <Fade visible={ph < 1} duration={400} style={{ position: 'absolute', left: -(extra - W) / 2, width: extra, top: 340, height: 12, backgroundColor: '#fff', shadowColor: '#C4B5FD', shadowOpacity: 0.8, shadowRadius: 9 }} />
         <Animated.View style={{ position: 'absolute', left: 20, width: 350, top: 340, height: 12, borderRadius: 6, backgroundColor: '#fff', shadowColor: '#C4B5FD', shadowOpacity: 0.7, shadowRadius: 15, transform: [{ translateX: -175 }, { scaleX: barScale }, { translateX: 175 }] }} />
 
-        <View style={{ position: 'absolute', left: 0, top: 362, width: W, height: 130, overflow: 'hidden', alignItems: 'center' }}>
+        <View style={{ position: 'absolute', left: 0, top: 364, width: W, height: WORD_H + 8, overflow: 'hidden', alignItems: 'center' }}>
           <Animated.View style={{ transform: [{ translateY: upY }] }}>
-            {/* En SVG : l'italique déborde à droite de la boîte du texte et serait rogné par un Text natif. */}
-            <Svg width={W} height={130} viewBox={`0 0 ${W} 130`}>
-              <SvgText x={W / 2} y={122} fontSize={150} fontWeight="900" fontStyle="italic" letterSpacing={-9} fill="#fff" textAnchor="middle">UP</SvgText>
-            </Svg>
+            <Image source={LOGO_WORD} style={{ width: MARK_W, height: WORD_H }} resizeMode="contain" />
           </Animated.View>
         </View>
 
-        <Fade visible={ph >= 5} duration={500} style={{ position: 'absolute', left: 0, width: W, top: 510, alignItems: 'center' }}>
+        <Fade visible={ph >= 5} duration={500} style={{ position: 'absolute', left: 0, width: W, top: 420, alignItems: 'center' }}>
           <Text style={{ fontSize: 16, fontWeight: '500', color: 'rgba(255,255,255,0.9)' }}>{i18n.t('splash.tagline')}</Text>
         </Fade>
 

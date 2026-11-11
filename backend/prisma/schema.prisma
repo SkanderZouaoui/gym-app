@@ -89,6 +89,10 @@ model User {
   status             UserStatus @default(ACTIVE)
   consents           Json       @default("{}")
   /**
+   * Préférences de notification : { expiryAlert, classReminder } (vrai par défaut).
+   */
+  notificationPrefs  Json       @default("{}") @map("notification_prefs")
+  /**
    * Fin de l'onboarding adhérent (objectif, profil physique) ; null tant qu'il n'est pas rempli.
    */
   onboardedAt        DateTime?  @map("onboarded_at")
@@ -167,6 +171,7 @@ model DeviceToken {
   userId    String   @map("user_id")
   token     String   @unique
   platform  String
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -664,11 +669,14 @@ model Notification {
   body      String
   data      Json?
   readAt    DateTime?        @map("read_at")
+  /// Envoi push (Expo) tenté ; null tant que le worker n'est pas passé.
+  pushedAt  DateTime?        @map("pushed_at")
   createdAt DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([pushedAt])
   @@map("notifications")
 }
 

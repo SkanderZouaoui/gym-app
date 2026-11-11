@@ -1013,6 +1013,8 @@
     "err_unknown_title": "Connexion impossible",
     "err_unknown_text": "Une erreur est survenue. Réessaie dans un instant.",
     "login_subtitle": "Connectez-vous à votre espace.",
+    "login_headline": "Prêt à dépasser\ntes limites ?",
+    "connexion_titre": "Connexion",
     "id_placeholder": "Adresse e-mail",
     "no_self_signup": "Pas d’auto-inscription : votre compte est créé par l’admin ou l’accueil.",
     "show_password": "Afficher le mot de passe",
@@ -1897,5 +1899,24 @@
     "default_exceeds_max": "La durée par défaut dépasse la durée maximale.",
     "title": "Fréquentation",
     "settings_link": "Réglages"
+  },
+  "biometric": {
+    "generic_name": "Face ID / empreinte",
+    "setting_title": "Connexion {{name}}",
+    "setting_sub": "Se connecter sans saisir le mot de passe",
+    "enable_title": "Activer {{name}}",
+    "enable_text": "Saisissez votre mot de passe pour l'enregistrer de façon sécurisée sur cet appareil.",
+    "enable_confirm": "Activer",
+    "prompt_enable": "Confirmez pour activer la connexion biométrique",
+    "prompt_login": "Connectez-vous à MuscleUP",
+    "wrong_password": "Mot de passe incorrect.",
+    "enabled_toast": "Connexion biométrique activée",
+    "disabled_toast": "Connexion biométrique désactivée",
+    "error": "Impossible d'activer pour l'instant.",
+    "expired": "Votre mot de passe a changé : reconnectez-vous avec votre mot de passe.",
+    "use_button": "Se connecter avec {{name}}"
+  },
+  "push": {
+    "channel": "Général"
   }
 }

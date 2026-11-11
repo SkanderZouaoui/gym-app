@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { fonts } from '../../src/theme/tokens';
-import { AuthButton, AuthField, AuthScreen, Chip, DoneView, ErrorLine, HeroButton, LogoTile, PasswordRules, passwordChecks, useAuthPalette } from '../../src/components/auth/AuthKit';
+import { AuthButton, AuthField, AuthScreen, Chip, DoneView, ErrorLine, HeroButton, PasswordRules, passwordChecks, useAuthPalette } from '../../src/components/auth/AuthKit';
 import { authApi } from '../../src/api/endpoints';
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
@@ -73,7 +73,7 @@ export default function ForgotPasswordScreen() {
   const back = () => (step === 'code' && !success ? setStep('email') : router.canGoBack() ? router.back() : router.replace('/(auth)/login'));
 
   return (
-    <AuthScreen compact topLeft={<HeroButton icon="arrow-back" onPress={back} />} topRight={<LogoTile />}>
+    <AuthScreen compact topLeft={<HeroButton icon="arrow-back" onPress={back} />}>
       {success ? (
         <DoneView title={t('auth.mot_de_passe_mis_a')} text={t('auth.vous_pouvez_maintenant_vous_connecter')} button={t('auth.se_connecter')} onPress={() => router.replace('/(auth)/login')} />
       ) : step === 'email' ? (

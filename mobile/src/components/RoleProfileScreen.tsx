@@ -16,6 +16,7 @@ import { useMySchedule } from '../hooks/useAdmin';
 import { MyWorkSchedule } from './profile/MyWorkSchedule';
 import { useUpdateProfile } from '../hooks/useProfile';
 import { useSessionStore } from '../store/session';
+import { unregisterPush } from '../notifications/push';
 import { tokenStorage } from '../api/storage';
 import { authApi } from '../api/endpoints';
 import { BottomSheet, Toast } from './ui';
@@ -27,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSheet } from './LanguageSheet';
 import { LANGUAGE_LABELS } from '../i18n';
 import { useProfilePhoto } from '../hooks/useProfilePhoto';
+import { useBiometricSetting } from '../hooks/useBiometricSetting';
 import { useOfflineAwareRefresh } from '../hooks/useOfflineAwareRefresh';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
@@ -40,6 +42,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: user, refetch: refetchMe } = useMe();
   const updateProfile = useUpdateProfile();
+  const biometric = useBiometricSetting();
   const { data: mySchedule, refetch: refetchSchedule } = useMySchedule();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetchMe(), refetchSchedule()]));
   const workingDays = (mySchedule ?? []).filter((d) => d.working);
@@ -101,6 +104,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
     setLogoutVisible(false);
     const refreshToken = await tokenStorage.getRefreshToken();
     if (refreshToken) await authApi.logout(refreshToken).catch(() => {});
+    await unregisterPush();
     await tokenStorage.clear();
     clearSession();
     router.replace('/(auth)/login');
@@ -212,6 +216,8 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
           ]}
         />
 
+        {biometric.row ? <SettingsGroup title={t('member.confidentialite')} rows={[biometric.row]} /> : null}
+
         <SettingsGroup
           title={t('common.compte')}
           rows={[
@@ -244,6 +250,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         </View>
       </BottomSheet>
 
+      {biometric.overlay}
       {offlineToastVisible ? <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} /> : null}
       {toast ? <Toast icon={toast.ok ? 'check-circle' : 'error'} text={toast.text} iconColor={toast.ok ? colors.success : colors.danger} /> : null}
     </SafeAreaView>

@@ -1013,6 +1013,8 @@
     "err_unknown_title": "Unable to sign in",
     "err_unknown_text": "Something went wrong. Please try again in a moment.",
     "login_subtitle": "Sign in to your space.",
+    "login_headline": "Ready to push\nyour limits?",
+    "connexion_titre": "Sign in",
     "id_placeholder": "Email address",
     "no_self_signup": "No self sign-up: your account is created by the admin or the front desk.",
     "show_password": "Show password",
@@ -1897,5 +1899,24 @@
     "default_exceeds_max": "The default duration exceeds the maximum duration.",
     "title": "Occupancy",
     "settings_link": "Settings"
+  },
+  "biometric": {
+    "generic_name": "Face ID / fingerprint",
+    "setting_title": "{{name}} login",
+    "setting_sub": "Sign in without typing your password",
+    "enable_title": "Enable {{name}}",
+    "enable_text": "Enter your password to store it securely on this device.",
+    "enable_confirm": "Enable",
+    "prompt_enable": "Confirm to enable biometric login",
+    "prompt_login": "Sign in to MuscleUP",
+    "wrong_password": "Wrong password.",
+    "enabled_toast": "Biometric login enabled",
+    "disabled_toast": "Biometric login disabled",
+    "error": "Couldn't enable it right now.",
+    "expired": "Your password has changed: sign in with your password.",
+    "use_button": "Sign in with {{name}}"
+  },
+  "push": {
+    "channel": "General"
   }
 }

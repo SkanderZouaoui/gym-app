@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { fonts } from '../src/theme/tokens';
-import { AuthButton, AuthField, AuthScreen, Chip, DoneView, ErrorLine, LogoTile, PasswordRules, passwordChecks, useAuthPalette } from '../src/components/auth/AuthKit';
+import { AuthButton, AuthField, AuthScreen, Chip, DoneView, ErrorLine, PasswordRules, passwordChecks, useAuthPalette } from '../src/components/auth/AuthKit';
 import { useChangePassword } from '../src/hooks/useProfile';
 import { useSessionStore } from '../src/store/session';
 import { pendingPassword } from '../src/auth/pendingPassword';
@@ -68,7 +68,7 @@ export default function ForcePasswordScreen() {
   };
 
   return (
-    <AuthScreen compact topRight={<LogoTile />}>
+    <AuthScreen compact>
       {done ? (
         <DoneView title={t('auth.account_activated')} text={t('auth.account_activated_text')} button={t('auth.go_to_space')} onPress={enter} />
       ) : (

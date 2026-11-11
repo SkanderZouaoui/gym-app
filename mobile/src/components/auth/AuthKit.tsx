@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, KeyboardAvoidingView, Platform, type TextInputProps } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions, KeyboardAvoidingView, Platform, type TextInputProps } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
-import Svg, { G, Line, Path, Polyline, Rect, Text as SvgText, Circle } from 'react-native-svg';
+import Svg, { Line } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '../../theme/tokens';
@@ -12,102 +12,101 @@ import { SubmitButton, type SubmitStatus } from '../SubmitButton';
 import Animated, { FadeIn, FadeInDown, FadeOut, useAnimatedStyle, useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 import { Banner } from '../ui/Banner';
 
-/** Refonte connexion & mot de passe — Design System/FitZone Login Refonte.dc.html. */
+const LOGO_MARK = require('../../../assets/brand/logo-mark.png');
+const LOGO_WORD = require('../../../assets/brand/logo-word.png');
+
+/** Refonte connexion — Design System/MuscleUP Login Redesign.dc.html (variante « néon »). */
 export const VIOLET = '#7C3AED';
 export const VIOLET_DARK = '#5B21B6';
 
 export function useAuthPalette() {
   const { scheme } = useTheme();
   return scheme === 'dark'
-    ? { bg: '#0F0B1E', fg: '#F5F2FF', sf: '#1A1431', bd: '#2E2650', mu: '#A29BC2', prs: 'rgba(124,58,237,0.2)', accent: '#A78BFA', dark: true }
-    : { bg: '#FFFFFF', fg: '#1B1530', sf: '#F5F3FB', bd: '#E3DEF0', mu: '#6B6485', prs: '#EFE8FF', accent: VIOLET, dark: false };
+    ? { bg: '#0B0B0F', fg: '#F5F5F7', sf: '#16161D', bd: 'rgba(255,255,255,0.14)', mu: '#A1A1AA', prs: 'rgba(124,58,237,0.2)', accent: '#A78BFA', dark: true }
+    : { bg: '#FFFFFF', fg: '#0B0B0F', sf: '#FFFFFF', bd: '#E2DDF0', mu: '#5B5866', prs: '#EFE8FF', accent: VIOLET, dark: false };
 }
 export type AuthPalette = ReturnType<typeof useAuthPalette>;
 
-function Hero({ compact, width, height }: { compact?: boolean; width: number; height: number }) {
+/** Hauteur du haut de page (logo + accroche) avant le formulaire, en plus de la zone de la barre d'état. */
+const FORM_TOP = 290;
+
+/** Photo d'ambiance : en attendant `athlete.jpg`, rayures violettes sombres comme dans la maquette, puis dégradé vers le noir. */
+function Hero({ compact, width, height, insetTop, dark }: { compact?: boolean; width: number; height: number; insetTop: number; dark: boolean }) {
   const { t } = useTranslation();
-  const stripes = Array.from({ length: Math.ceil((width + height) / 26) + 1 }, (_, i) => i * 26);
+  const stripes = Array.from({ length: Math.ceil((width + height) / 32) + 1 }, (_, i) => i * 32);
+  const shade: [string, string, ...string[]] = compact
+    ? ['rgba(11,11,15,0.5)', 'rgba(11,11,15,0.84)']
+    : dark
+      ? ['rgba(11,11,15,0.4)', 'rgba(11,11,15,0.62)', '#0B0B0F']
+      : ['rgba(11,11,15,0.5)', 'rgba(46,22,92,0.78)'];
+  const locations = !compact && dark ? ([0, 0.3, 0.64] as const) : undefined;
   return (
     <View style={{ position: 'absolute', left: 0, right: 0, top: 0, height, overflow: 'hidden' }}>
-      <LinearGradient colors={['#8B5CF6', '#6D28D9', '#2E1065']} locations={[0, 0.45, 1]} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={StyleSheet.absoluteFill} />
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1B1432' }]} />
       <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={StyleSheet.absoluteFill}>
         {stripes.map((x) => (
-          <Line key={x} x1={x} y1={0} x2={x - 140} y2={420} stroke="rgba(255,255,255,0.05)" strokeWidth={2} />
+          <Line key={x} x1={x} y1={0} x2={x - height} y2={height} stroke="#271C44" strokeWidth={16} />
         ))}
-        {compact ? (
-          <>
-            <Rect x={0} y={122} width={width} height={8} fill="#fff" />
-            <Rect x={0} y={113} width={12} height={26} rx={4} fill="#fff" />
-            <Rect x={width - 12} y={113} width={12} height={26} rx={4} fill="#fff" />
-            <SvgText x={26} y={114} fontSize={72} fontWeight="900" fontStyle="italic" fill="#fff">UP</SvgText>
-            <SvgText x={28} y={174} fontSize={38} fontWeight="900" fontStyle="italic" fill="none" stroke="#fff" strokeWidth={1.4}>MUSCLE</SvgText>
-            <G transform={`translate(${width - 390} 0)`}>
-              <Path d="M330 190 L330 60" fill="none" stroke="#DDD6FE" strokeWidth={3} strokeDasharray="2 9" strokeLinecap="round" />
-              <Polyline points="317,76 330,58 343,76" fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
-            </G>
-          </>
-        ) : (
-          <>
-            <Rect x={0} y={130} width={width} height={9} fill="#fff" />
-            <Rect x={0} y={120} width={14} height={29} rx={4} fill="#fff" />
-            <Rect x={width - 14} y={120} width={14} height={29} rx={4} fill="#fff" />
-            <SvgText x={28} y={116} fontSize={54} fontWeight="900" fontStyle="italic" fill="none" stroke="#fff" strokeWidth={1.6}>MUSCLE</SvgText>
-            <SvgText x={26} y={218} fontSize={88} fontWeight="900" fontStyle="italic" fill="#fff">UP</SvgText>
-            <G transform={`translate(${width - 390} 0)`}>
-            <Path d="M318 252 C318 222 276 206 288 176 S308 150 300 80" fill="none" stroke="#DDD6FE" strokeWidth={3} strokeDasharray="2 9" strokeLinecap="round" />
-            <Polyline points="287,94 300,76 313,94" fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
-            <Circle cx={318} cy={252} r={11} fill="#fff" />
-            <Circle cx={288} cy={182} r={11} fill="#fff" />
-            <Circle cx={302} cy={112} r={11} fill="#fff" />
-            <SvgText x={318} y={257} fontSize={13} fontWeight="800" fill={VIOLET_DARK} textAnchor="middle">1</SvgText>
-            <SvgText x={288} y={187} fontSize={13} fontWeight="800" fill={VIOLET_DARK} textAnchor="middle">2</SvgText>
-            <SvgText x={302} y={117} fontSize={13} fontWeight="800" fill={VIOLET_DARK} textAnchor="middle">3</SvgText>
-            </G>
-            <SvgText x={28} y={248} fontSize={15} fontWeight="500" fill="#fff" opacity={0.92}>{t('auth.hero_tagline')}</SvgText>
-            <SvgText x={28} y={276} fontSize={12} fontWeight="700" letterSpacing={1} fill="#DDD6FE">{t('auth.hero_steps')}</SvgText>
-          </>
-        )}
       </Svg>
+      <LinearGradient colors={shade} locations={locations} style={StyleSheet.absoluteFill} />
+      <View style={{ position: 'absolute', left: 0, right: 0, top: insetTop + 8, alignItems: 'center' }}>
+        <Image source={LOGO_MARK} resizeMode="contain" style={{ width: 132, height: 45 }} accessibilityLabel="Muscle UP" />
+        <Image source={LOGO_WORD} resizeMode="contain" style={{ width: 132, height: 12, marginTop: 4 }} />
+      </View>
+      {compact ? null : (
+        <Animated.Text
+          entering={FadeInDown.duration(600)}
+          style={{ position: 'absolute', left: 24, right: 24, top: insetTop + 96, fontFamily: fonts.display, fontSize: 58, lineHeight: 54, letterSpacing: 0.3, textTransform: 'uppercase', color: '#fff' }}
+        >
+          {t('auth.login_headline')}
+        </Animated.Text>
+      )}
     </View>
   );
 }
 
-/** Page d'authentification : bandeau violet (grand pour la connexion, compact pour les mots de passe) + feuille arrondie. */
+/** Page d'authentification : photo en haut (plein écran pour la connexion, bandeau pour les mots de passe) + formulaire. */
 export function AuthScreen({ compact, topLeft, topRight, children }: { compact?: boolean; topLeft?: ReactNode; topRight?: ReactNode; children: ReactNode }) {
   const p = useAuthPalette();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
-  const heroH = (compact ? 220 : 330) + insets.top * 0.4;
-  const overlap = compact ? 32 : 54;
-  const top = heroH - overlap;
+  // Connexion : photo plein écran. Formulaire sur la photo en sombre, sur une feuille claire en clair.
+  const full = !compact;
+  const heroH = full ? height : 220 + insets.top * 0.4;
+  const top = full ? insets.top + FORM_TOP : heroH - 32;
+  const sheet = !full || !p.dark;
   return (
     <View style={{ flex: 1, backgroundColor: p.bg }}>
       <StatusBar style="light" />
-      <Hero compact={compact} width={width} height={heroH} />
+      <Hero compact={compact} width={width} height={heroH} insetTop={insets.top} dark={p.dark} />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: top, flexGrow: 1 }}>
           <View
-            style={{
-              flexGrow: 1,
-              minHeight: height - top,
-              backgroundColor: p.bg,
-              borderTopLeftRadius: 34,
-              borderTopRightRadius: 34,
-              paddingHorizontal: 24,
-              paddingTop: compact ? 22 : 24,
-              paddingBottom: Math.max(insets.bottom, 16) + 16,
-              shadowColor: '#140838',
-              shadowOpacity: 0.25,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: -12 },
-              elevation: 12,
-            }}
+            style={[
+              {
+                flexGrow: 1,
+                minHeight: height - top,
+                paddingHorizontal: 24,
+                paddingTop: compact ? 22 : 24,
+                paddingBottom: Math.max(insets.bottom, 16) + 16,
+              },
+              sheet && {
+                backgroundColor: p.bg,
+                borderTopLeftRadius: 30,
+                borderTopRightRadius: 30,
+                shadowColor: '#1E0A46',
+                shadowOpacity: 0.28,
+                shadowRadius: 25,
+                shadowOffset: { width: 0, height: -18 },
+                elevation: 12,
+              },
+            ]}
           >
             {children}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      {/* Au-dessus du défilement pour rester cliquables (retour, logo). */}
+      {/* Au-dessus du défilement pour rester cliquables (retour). */}
       <View pointerEvents="box-none" style={{ position: 'absolute', left: 20, right: 20, top: insets.top + 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <View>{topLeft}</View>
         <View>{topRight}</View>
@@ -123,19 +122,6 @@ export function HeroButton({ icon, label, onPress }: { icon: keyof typeof Materi
       <MaterialIcons name={icon} size={20} color="#fff" />
       {label ? <Text style={{ fontFamily: fonts.bodyBold, fontSize: 13, color: '#fff' }}>{label}</Text> : null}
     </Pressable>
-  );
-}
-
-/** Logo (haltère) en tuile blanche, en haut à droite du bandeau. */
-export function LogoTile() {
-  return (
-    <View style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-      <View style={{ width: 5, height: 18, borderRadius: 2, backgroundColor: VIOLET_DARK }} />
-      <View style={{ width: 5, height: 12, borderRadius: 2, backgroundColor: VIOLET_DARK, marginLeft: 2 }} />
-      <View style={{ width: 10, height: 4, backgroundColor: VIOLET_DARK }} />
-      <View style={{ width: 5, height: 12, borderRadius: 2, backgroundColor: VIOLET_DARK }} />
-      <View style={{ width: 5, height: 18, borderRadius: 2, backgroundColor: VIOLET_DARK, marginLeft: 2 }} />
-    </View>
   );
 }
 
@@ -164,6 +150,7 @@ export function AuthField({ icon, secure, borderColor, action, error, valid, mes
   const p = useAuthPalette();
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState(false);
   const shake = useSharedValue(0);
   const wasError = useRef(false);
   const lastShakeKey = useRef(shakeKey);
@@ -184,13 +171,16 @@ export function AuthField({ icon, secure, borderColor, action, error, valid, mes
     <View>
       <Animated.View
         style={[
-          { height: 56, borderRadius: 18, backgroundColor: p.sf, borderWidth: 1.5, borderColor: accent ?? borderColor ?? p.bd, flexDirection: 'row', alignItems: 'center', gap: 12, paddingStart: 16, paddingEnd: secure || action ? 8 : 16 },
+          { height: 56, borderRadius: 16, backgroundColor: p.sf, borderWidth: 1.5, borderColor: accent ?? (focused ? VIOLET : borderColor ?? p.bd), flexDirection: 'row', alignItems: 'center', gap: 12, paddingStart: 16, paddingEnd: secure || action ? 8 : 16 },
+          focused && !accent && { shadowColor: VIOLET, shadowOpacity: 0.55, shadowRadius: 12, shadowOffset: { width: 0, height: 0 }, elevation: 4 },
           shakeStyle,
         ]}
       >
         <MaterialIcons name={icon} size={22} color={accent ?? p.mu} />
         <TextInput
           {...input}
+          onFocus={(e) => { setFocused(true); input.onFocus?.(e); }}
+          onBlur={(e) => { setFocused(false); input.onBlur?.(e); }}
           secureTextEntry={secure && !show}
           placeholderTextColor={p.mu}
           autoCapitalize={input.autoCapitalize ?? 'none'}
@@ -237,10 +227,11 @@ export function AuthButton({
       onPress={onPress}
       disabled={disabled}
       icon={icon}
-      colors={['#8B5CF6', VIOLET_DARK]}
-      glowColor="rgba(124,58,237,0.45)"
-      height={58}
-      fontSize={17}
+      colors={[VIOLET, VIOLET]}
+      glowColor="rgba(124,58,237,0.55)"
+      height={60}
+      radius={16}
+      fontSize={16}
     />
   );
 }

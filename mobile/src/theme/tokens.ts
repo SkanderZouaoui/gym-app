@@ -1,12 +1,16 @@
 /** Tokens de design — alignés sur Design System/Muscle UP Design System v2.dc.html */
 export const colors = {
-  bg: '#F7F6FA',
+  bg: '#F5F5F6',
   surface: '#FFFFFF',
-  surface2: '#F0EFF5',
-  text: '#0E0D12',
-  muted: '#5C5B69',
-  border: '#E7E5EF',
-  borderStrong: '#CFC9E2',
+  surface2: '#EEEEF0',
+  text: '#0A0A0A',
+  muted: '#5F5F66',
+  border: '#E4E4E7',
+  borderStrong: '#CFCFD4',
+
+  /** Cartes héros : noir neutre (dégradé hero → hero2), indépendant du branding. */
+  hero: '#0A0A0A',
+  hero2: '#232323',
 
   primary: '#7C3AED',
   primaryHover: '#7033D6',
@@ -78,6 +82,8 @@ export const fonts = {
   bodyMedium: 'DMSans_500Medium',
   bodySemiBold: 'DMSans_600SemiBold',
   bodyBold: 'DMSans_700Bold',
+  /** Titres d'accroche condensés (écran de connexion). */
+  display: 'BarlowCondensed_800ExtraBold',
 } as const;
 
 /** Échelle typographique v2 (pt) — titres serrés, chiffres clés grands. */
@@ -92,7 +98,7 @@ export const typography = {
 
 /** Ombre de carte : douce à deux couches en clair, aucune en sombre (bordure 1 px à la place). */
 export const cardShadow = {
-  shadowColor: '#140A28',
+  shadowColor: '#000000',
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.07,
   shadowRadius: 14,

@@ -110,7 +110,7 @@ export function MemberProfileScreen() {
 
         {current ? (
           <View style={styles.heroShadow}>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
               <View style={styles.heroDecor} />
               <Text style={styles.heroKicker} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('staff.abonnement')}</Text>
               <Text style={styles.heroTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{current.plan.name}</Text>

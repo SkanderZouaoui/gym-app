@@ -18,7 +18,13 @@ export class NotificationCampaignsService {
   // --- Audiences -------------------------------------------------------------
 
   private audienceWhere(audience: AudienceKey, now = new Date()): Prisma.UserWhereInput {
-    const base: Prisma.UserWhereInput = { deletedAt: null, status: 'ACTIVE', roles: { some: { role: 'MEMBER' } } };
+    const active: Prisma.UserWhereInput = { deletedAt: null, status: 'ACTIVE' };
+    // Équipe : accueil, coachs et admins (ADMIN inclus pour les messages internes).
+    if (audience === 'TEAM') return { ...active, roles: { some: { role: { in: ['STAFF', 'COACH', 'ADMIN'] } } } };
+    if (audience === 'ROLE:COACH' || audience === 'ROLE:STAFF' || audience === 'ROLE:ADMIN') return { ...active, roles: { some: { role: audience.slice(5) as 'COACH' | 'STAFF' | 'ADMIN' } } };
+    // Une seule personne (adhérent ou membre de l'équipe).
+    if (audience.startsWith('USER:')) return { ...active, id: audience.slice(5) };
+    const base: Prisma.UserWhereInput = { ...active, roles: { some: { role: 'MEMBER' } } };
     const valid: Prisma.MembershipWhereInput = { status: 'ACTIVE', endDate: { gte: now } };
     if (audience === 'ACTIVE') return { ...base, memberships: { some: valid } };
     if (audience === 'EXPIRING') {
@@ -63,6 +69,10 @@ export class NotificationCampaignsService {
       { key: 'ACTIVE', label: 'Actifs' },
       { key: 'EXPIRING', label: 'Expirent bientôt' },
       { key: 'EXPIRED', label: 'Expirés' },
+      { key: 'TEAM', label: 'Toute l’équipe' },
+      { key: 'ROLE:COACH', label: 'Coachs' },
+      { key: 'ROLE:STAFF', label: 'Accueil' },
+      { key: 'ROLE:ADMIN', label: 'Administrateurs' },
       ...plans.map((p) => ({ key: `PLAN:${p.id}`, label: `Forfait ${p.name}` })),
     ];
     return Promise.all(entries.map(async (e) => ({ ...e, count: await this.prisma.user.count({ where: this.audienceWhere(e.key) }) })));

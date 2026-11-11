@@ -4,13 +4,16 @@ type ColorPalette = { [K in keyof typeof colors]: string };
 
 /** Palette sombre — même forme que `colors` (drop-in), cf. moteur de thème (ThemeContext). */
 export const darkColors: ColorPalette = {
-  bg: '#0B0B0F',
-  surface: '#16161C',
-  surface2: '#202029',
+  bg: '#000000',
+  surface: '#121212',
+  surface2: '#1C1C1C',
   text: '#FFFFFF',
-  muted: '#A3A3B2',
-  border: '#272731',
-  borderStrong: '#3A3A47',
+  muted: '#A1A1AA',
+  border: '#262626',
+  borderStrong: '#3A3A3A',
+
+  hero: '#1C1C1C',
+  hero2: '#0A0A0A',
 
   primary: '#7C3AED',
   primaryHover: '#8A4FF0',

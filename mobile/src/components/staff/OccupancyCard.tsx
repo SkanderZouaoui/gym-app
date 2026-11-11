@@ -46,7 +46,7 @@ export function OccupancyCard({ settingsHref }: { settingsHref?: string }) {
         onAction={settingsHref ? () => router.push(settingsHref as never) : undefined}
       />
       <View style={[styles.card, cardShadow]}>
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+        <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
           <View style={styles.decor} pointerEvents="none" />
           <Text style={styles.kicker}>{t('occupancy.kicker')}</Text>
           <View style={styles.valueRow} accessibilityRole="header" accessibilityLabel={data.estimate === 1 ? t('occupancy.estimate_single') : t('occupancy.estimate_many', { count: data.estimate })}>

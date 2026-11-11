@@ -1013,6 +1013,8 @@
     "err_unknown_title": "تعذّر تسجيل الدخول",
     "err_unknown_text": "حدث خطأ ما. أعد المحاولة بعد قليل.",
     "login_subtitle": "سجّل الدخول إلى فضائك.",
+    "login_headline": "مستعد لتجاوز\nحدودك؟",
+    "connexion_titre": "تسجيل الدخول",
     "id_placeholder": "البريد الإلكتروني",
     "no_self_signup": "لا يوجد تسجيل ذاتي: يُنشئ المسؤول أو الاستقبال حسابك.",
     "show_password": "إظهار كلمة المرور",
@@ -1897,5 +1899,24 @@
     "default_exceeds_max": "المدة الافتراضية تتجاوز المدة القصوى.",
     "title": "الحضور في النادي",
     "settings_link": "الإعدادات"
+  },
+  "biometric": {
+    "generic_name": "بصمة الوجه / الإصبع",
+    "setting_title": "الدخول بـ {{name}}",
+    "setting_sub": "سجّل الدخول دون كتابة كلمة المرور",
+    "enable_title": "تفعيل {{name}}",
+    "enable_text": "أدخل كلمة المرور لحفظها بأمان على هذا الجهاز.",
+    "enable_confirm": "تفعيل",
+    "prompt_enable": "أكّد لتفعيل الدخول البيومتري",
+    "prompt_login": "سجّل الدخول إلى MuscleUP",
+    "wrong_password": "كلمة المرور غير صحيحة.",
+    "enabled_toast": "تم تفعيل الدخول البيومتري",
+    "disabled_toast": "تم إيقاف الدخول البيومتري",
+    "error": "تعذّر التفعيل حاليًا.",
+    "expired": "تغيّرت كلمة المرور: سجّل الدخول بها.",
+    "use_button": "الدخول بـ {{name}}"
+  },
+  "push": {
+    "channel": "عام"
   }
 }

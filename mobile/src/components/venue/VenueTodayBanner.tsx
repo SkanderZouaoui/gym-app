@@ -46,7 +46,7 @@ export function VenueTodayBanner({ href }: { href: Href }) {
           <MaterialIcons name="chevron-right" size={24} color={colors.muted} />
         </Pressable>
 
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hoursBox}>
+        <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hoursBox}>
           <View style={styles.decor} pointerEvents="none" />
           <View style={styles.hoursTop}>
             <View style={{ flex: 1, minWidth: 0 }}>

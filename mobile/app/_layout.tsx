@@ -18,6 +18,7 @@ import {
   DMSans_600SemiBold,
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans';
+import { BarlowCondensed_800ExtraBold } from '@expo-google-fonts/barlow-condensed';
 import { tokenStorage } from '../src/api/storage';
 import { meApi } from '../src/api/endpoints';
 import { ApiError } from '../src/api/client';
@@ -34,6 +35,7 @@ import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import { RemoteConfigProvider } from '../src/config/RemoteConfigContext';
 import { LanguageProvider } from '../src/i18n/LanguageContext';
 import '../src/i18n';
+import { usePushNotifications } from '../src/notifications/usePushNotifications';
 import { SplashAnimation } from '../src/components/SplashAnimation';
 
 SplashScreen.preventAutoHideAsync();
@@ -110,6 +112,7 @@ export default function RootLayout() {
     DMSans_500Medium,
     DMSans_600SemiBold,
     DMSans_700Bold,
+    BarlowCondensed_800ExtraBold,
   });
   const [bootstrapped, setBootstrapped] = useState(false);
   const [cacheRestored, setCacheRestored] = useState(false);
@@ -196,6 +199,7 @@ function AndroidInsetsFrame({ children }: { children: React.ReactNode }) {
 
 function RootLayoutInner() {
   const { scheme } = useTheme();
+  usePushNotifications();
   const isAuthenticated = useSessionStore((s) => s.isAuthenticated);
   const isDegraded = useSessionStore((s) => s.isDegraded);
   const setSession = useSessionStore((s) => s.setSession);

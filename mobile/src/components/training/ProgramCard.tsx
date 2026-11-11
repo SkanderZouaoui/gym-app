@@ -31,7 +31,7 @@ export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCo
   if (highlighted) {
     return (
       <Pressable style={styles.heroShadow} onPress={onPress}>
-       <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroCard}>
+       <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroCard}>
         <View style={styles.heroDecor} />
         <View style={styles.heroHeaderRow}>
           <Text style={styles.heroLabel}>{kicker ?? t('common.en_cours_2')}</Text>

@@ -30,7 +30,7 @@ export function WorkoutHeroCard({ duration, progress, ringLabel, volume, sets }:
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.shadow}>
-      <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
+      <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.card}>
         <View style={styles.row}>
           <View>
             <Text style={styles.kicker}>{t('member.duree')}</Text>

@@ -9,6 +9,8 @@ import { Button } from '../../src/components/Button';
 import { fonts, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useDeleteAccount } from '../../src/hooks/useProfile';
+import { disableBiometricLogin } from '../../src/auth/biometric';
+import { unregisterPush } from '../../src/notifications/push';
 import { tokenStorage } from '../../src/api/storage';
 import { authApi } from '../../src/api/endpoints';
 import { useSessionStore } from '../../src/store/session';
@@ -30,6 +32,8 @@ export default function AccountDeleteScreen() {
       onSuccess: async () => {
         const refreshToken = await tokenStorage.getRefreshToken();
         if (refreshToken) await authApi.logout(refreshToken).catch(() => {});
+        await unregisterPush();
+        await disableBiometricLogin();
         await tokenStorage.clear();
         clearSession();
         router.replace('/(auth)/login');

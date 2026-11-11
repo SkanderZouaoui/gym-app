@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
+import { unregisterPush } from '../../../src/notifications/push';
 import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { useSessionStore } from '../../../src/store/session';
@@ -71,6 +72,7 @@ export default function AdminMoreScreen() {
     setLogoutVisible(false);
     const refreshToken = await tokenStorage.getRefreshToken();
     if (refreshToken) await authApi.logout(refreshToken).catch(() => {});
+    await unregisterPush();
     await tokenStorage.clear();
     clearSession();
     router.replace('/(auth)/login');

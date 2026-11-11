@@ -9,12 +9,15 @@ import { useTheme } from '../../../src/theme/ThemeContext';
 import { useLanguage } from '../../../src/i18n/LanguageContext';
 import { useMe, useMyBookings, useMyMemberships } from '../../../src/hooks/useMe';
 import { useNotifications } from '../../../src/hooks/useProfile';
+import { unregisterPush } from '../../../src/notifications/push';
 import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { goalTarget } from '../../../src/hooks/useWeeklyGoal';
 import { useSessionStore } from '../../../src/store/session';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
 import { Banner, BottomSheet, Toast } from '../../../src/components/ui';
+import { useNotificationPrefs } from '../../../src/hooks/useNotificationPrefs';
+import { useBiometricSetting } from '../../../src/hooks/useBiometricSetting';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { Button } from '../../../src/components/Button';
 import { ProfileHeader } from '../../../src/components/adherent/ProfileHeader';
@@ -52,6 +55,8 @@ export default function ProfileScreen() {
   const isDegraded = useSessionStore((s) => s.isDegraded);
   const setActiveRole = useSessionStore((s) => s.setActiveRole);
   const clearSession = useSessionStore((s) => s.clear);
+  const biometric = useBiometricSetting();
+  const notifPrefs = useNotificationPrefs();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(() =>
     Promise.all([
       refetchMe(),
@@ -145,6 +150,7 @@ export default function ProfileScreen() {
     if (refreshToken) {
       await authApi.logout(refreshToken).catch(() => {});
     }
+    await unregisterPush();
     await tokenStorage.clear();
     clearSession();
     router.replace('/(auth)/login');
@@ -228,16 +234,16 @@ export default function ProfileScreen() {
               icon: 'notifications-active',
               title: t('member.alerte_dexpiration'),
               sub: t('member.7_jours_avant_lecheance'),
-              value: prefs.expiryAlert,
-              onChange: (v) => prefs.set({ expiryAlert: v }),
+              value: notifPrefs.expiryAlert,
+              onChange: (v) => notifPrefs.setPref({ expiryAlert: v }),
             },
             {
               kind: 'switch',
               icon: 'event',
               title: t('member.rappels_de_cours'),
               sub: t('member.1_heure_avant'),
-              value: prefs.classReminder,
-              onChange: (v) => prefs.set({ classReminder: v }),
+              value: notifPrefs.classReminder,
+              onChange: (v) => notifPrefs.setPref({ classReminder: v }),
             },
             {
               kind: 'nav',
@@ -248,6 +254,8 @@ export default function ProfileScreen() {
             },
           ]}
         />
+
+        {biometric.row ? <SettingsGroup title={t('member.confidentialite')} rows={[biometric.row]} /> : null}
 
         <SettingsGroup
           title={t('member.accessibilite')}
@@ -308,6 +316,7 @@ export default function ProfileScreen() {
         <Button label={t('common.cancel')} onPress={() => setLogoutVisible(false)} variant="outline" />
       </BottomSheet>
 
+      {biometric.overlay}
       {offlineToastVisible ? (
         <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} />
       ) : null}

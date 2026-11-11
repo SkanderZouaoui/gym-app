@@ -4,7 +4,8 @@ import {
   useAudiences, useCancelScheduledNotification, useCreateNotificationRule, useDeleteNotificationRule, useNotificationHistory, useNotificationRules, useScheduledNotifications, useSendNotification, useToggleNotificationRule,
   type RuleCondition,
 } from '../../api/content'
-import { useNow } from '../../lib/hooks'
+import { useMembers } from '../../api/hooks'
+import { useDebounce, useNow } from '../../lib/hooks'
 import { Badge, Button, Card, ConfirmDialog, EmptyState, Field, Icon, IconButton, SectionHeader, SelectField, Skeleton, Tabs, TextArea, useToast, cn } from '../../components/ui'
 
 const KINDS = ['Annonce', 'Rappel', 'Offre']
@@ -33,13 +34,17 @@ function Compose() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [audience, setAudience] = useState('ALL')
+  const [search, setSearch] = useState('')
+  const [person, setPerson] = useState<{ id: string; name: string } | null>(null)
+  const { members } = useMembers(useDebounce(audience === 'USER' ? search.trim() : '', 300))
   const [later, setLater] = useState(false)
   const [sendAt, setSendAt] = useState('')
   const [error, setError] = useState<string | null>(null)
   const audiences = aud?.audiences ?? []
+  const target = audience === 'USER' ? (person ? `USER:${person.id}` : '') : audience
   const current = audiences.find((a) => a.key === audience)
   const now = useNow()
-  const valid = title.trim() && body.trim() && (!later || (sendAt && new Date(sendAt).getTime() > now))
+  const valid = title.trim() && body.trim() && target && (!later || (sendAt && new Date(sendAt).getTime() > now))
 
   return (
     <div className="grid gap-6 xl:grid-cols-5">
@@ -51,9 +56,35 @@ function Compose() {
         </div>
         <Field label="Titre" icon="title" placeholder="Titre de la notification" value={title} onChange={(e) => setTitle(e.target.value)} />
         <TextArea label="Message" icon="notes" placeholder="Votre message" value={body} onChange={(e) => setBody(e.target.value)} />
-        <SelectField label="Destinataires" icon="groups" value={audience} onChange={(e) => setAudience(e.target.value)}>
+        <SelectField label="Destinataires" icon="groups" value={audience} onChange={(e) => { setAudience(e.target.value); setPerson(null); setSearch('') }}>
           {audiences.map((a) => <option key={a.key} value={a.key}>{a.label} ({a.count})</option>)}
+          <option value="USER">Une personne précise…</option>
         </SelectField>
+        {audience === 'USER' ? (
+          <div className="space-y-2">
+            {person ? (
+              <div className="flex items-center justify-between rounded-2xl bg-primary-soft px-4 py-3 text-sm font-bold text-primary-ink">
+                {person.name}
+                <IconButton icon="close" label="Changer de destinataire" onClick={() => setPerson(null)} />
+              </div>
+            ) : (
+              <>
+                <Field label="Rechercher un adhérent" icon="search" placeholder="Nom, e-mail ou téléphone" value={search} onChange={(e) => setSearch(e.target.value)} />
+                {search.trim() ? (
+                  <div className="overflow-hidden rounded-2xl border border-border">
+                    {members.slice(0, 6).map((m) => (
+                      <button key={m.id} type="button" onClick={() => setPerson({ id: m.id, name: `${m.firstName} ${m.lastName}` })} className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm hover:bg-surface-2">
+                        <span className="font-bold">{m.firstName} {m.lastName}</span>
+                        <span className="text-xs text-muted">{m.email ?? m.phone ?? ''}</span>
+                      </button>
+                    ))}
+                    {members.length === 0 ? <div className="px-4 py-3 text-sm text-muted">Aucun résultat</div> : null}
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        ) : null}
         <div className="space-y-2">
           <div className="px-1 text-[11.5px] font-bold uppercase tracking-wider text-muted">Envoi</div>
           <div className="flex flex-wrap items-center gap-2">
@@ -69,7 +100,7 @@ function Compose() {
             loading={send.isPending}
             onClick={() =>
               send.mutate(
-                { kind, title: title.trim(), body: body.trim(), audience, sendAt: later ? new Date(sendAt).toISOString() : undefined },
+                { kind, title: title.trim(), body: body.trim(), audience: target, sendAt: later ? new Date(sendAt).toISOString() : undefined },
                 {
                   onSuccess: () => { toast(later ? `Notification programmée pour le ${when(new Date(sendAt).toISOString())}` : 'Notification envoyée'); setTitle(''); setBody(''); setLater(false); setSendAt(''); setError(null) },
                   onError: (e) => setError(apiErrorMessage(e, "La notification n'a pas pu être envoyée.")),
@@ -88,7 +119,7 @@ function Compose() {
           <div className="flex items-center gap-2 text-xs text-white/70"><span className="grid size-5 place-items-center rounded-md bg-primary"><Icon name="exercise" size={13} /></span>MuscleUP · {later && sendAt ? when(new Date(sendAt).toISOString()) : 'maintenant'}</div>
           <div className="mt-2 font-head text-base font-bold">{title || 'Titre de la notification'}</div>
           <div className="mt-0.5 text-sm text-white/85">{body || 'Le message apparaîtra ici.'}</div>
-          <div className="mt-3 text-xs text-white/60">Sera envoyée à {current?.count ?? 0} personne{(current?.count ?? 0) > 1 ? 's' : ''} · {current?.label ?? '—'}</div>
+          <div className="mt-3 text-xs text-white/60">{audience === 'USER' ? `Sera envoyée à ${person?.name ?? '—'}` : `Sera envoyée à ${current?.count ?? 0} personne${(current?.count ?? 0) > 1 ? 's' : ''} · ${current?.label ?? '—'}`}</div>
         </div>
       </div>
     </div>
@@ -111,7 +142,7 @@ function Scheduled() {
             <div className="min-w-0 flex-1">
               <div className="truncate font-bold">{n.title}</div>
               <div className="truncate text-sm text-muted">{n.body}</div>
-              <div className="mt-0.5 text-xs text-muted">{when(n.sendAt)} · {n.audience}</div>
+              <div className="mt-0.5 text-xs text-muted">{when(n.sendAt)} · {n.audience.startsWith('USER:') ? 'Une personne' : n.audience}</div>
             </div>
             <Button size="sm" variant="danger" icon="close" onClick={() => setTarget(n.id)}>Annuler l’envoi</Button>
           </div>
@@ -133,7 +164,7 @@ function History() {
           <div className="min-w-0 flex-1">
             <div className="truncate font-bold">{n.title}</div>
             <div className="truncate text-sm text-muted">{n.body}</div>
-            <div className="mt-0.5 text-xs text-muted">{n.sentAt ? when(n.sentAt) : when(n.sendAt)} · {n.audience}</div>
+            <div className="mt-0.5 text-xs text-muted">{n.sentAt ? when(n.sentAt) : when(n.sendAt)} · {n.audience.startsWith('USER:') ? 'Une personne' : n.audience}</div>
           </div>
           <div className="text-right text-xs"><div className="font-bold">{n.sentCount} envoi{n.sentCount > 1 ? 's' : ''}</div><div className="font-bold text-success-ink">{n.openRate} % ouvertes</div></div>
         </div>

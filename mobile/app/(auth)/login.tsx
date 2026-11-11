@@ -5,7 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '../../src/theme/tokens';
-import { AuthButton, AuthErrorBanner, AuthField, AuthScreen, LogoTile, useAuthPalette } from '../../src/components/auth/AuthKit';
+import { AuthButton, AuthErrorBanner, AuthField, AuthScreen, useAuthPalette } from '../../src/components/auth/AuthKit';
 import type { SubmitStatus } from '../../src/components/SubmitButton';
 import { authApi, meApi, publicApi } from '../../src/api/endpoints';
 import { tokenStorage } from '../../src/api/storage';
@@ -17,6 +17,7 @@ import { rootRouteForRole } from '../../src/navigation/roleRoutes';
 import i18n, { LANGUAGE_LABELS, dateLocale } from '../../src/i18n';
 import { LanguageSheet } from '../../src/components/LanguageSheet';
 import { useLanguage } from '../../src/i18n/LanguageContext';
+import { biometricAvailable, biometricName, disableBiometricLogin, isBiometricLoginEnabled, unlockBiometricCredentials } from '../../src/auth/biometric';
 import { useNetworkStatusContext } from '../../src/hooks/NetworkStatusContext';
 
 /** Durée pendant laquelle le bouton reste rouge après un échec, avant de revenir à son état normal. */
@@ -68,7 +69,7 @@ export default function LoginScreen() {
   const { language } = useLanguage();
   const [languageOpen, setLanguageOpen] = useState(false);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [passwordInput, setPassword] = useState('');
   const [status, setStatus] = useState<SubmitStatus>('idle');
   const [failure, setFailure] = useState<LoginFailure | null>(null);
   const [credentialsInvalid, setCredentialsInvalid] = useState(false);
@@ -79,6 +80,9 @@ export default function LoginScreen() {
   const setSession = useSessionStore((s) => s.setSession);
   const queryClient = useQueryClient();
   const { isOnline } = useNetworkStatusContext();
+  const [bioReady, setBioReady] = useState(false);
+  const [bioName, setBioName] = useState('Face ID');
+  const autoPrompted = useRef(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // « Contacter l'accueil » : seulement quand c'est utile (blocage, compte désactivé) et si la salle a publié un contact.
@@ -120,6 +124,29 @@ export default function LoginScreen() {
     wasOnline.current = isOnline;
   }, [isOnline]);
 
+  // Connexion biométrique : proposée si l'appareil la gère et qu'elle a été activée depuis les réglages.
+  useEffect(() => {
+    void (async () => {
+      if (!(await biometricAvailable()) || !(await isBiometricLoginEnabled())) return;
+      setBioName(await biometricName());
+      setBioReady(true);
+    })();
+  }, []);
+
+  const loginWithBiometric = async () => {
+    if (status !== 'idle') return;
+    const creds = await unlockBiometricCredentials(t('biometric.prompt_login'));
+    if (creds) await handleLogin(creds);
+  };
+
+  // Au premier affichage, on lance la biométrie directement.
+  useEffect(() => {
+    if (!bioReady || autoPrompted.current) return;
+    autoPrompted.current = true;
+    void loginWithBiometric();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bioReady]);
+
   const switchAccount = () => {
     void tokenStorage.clear();
     queryClient.clear();
@@ -134,8 +161,9 @@ export default function LoginScreen() {
     setFailure((f) => (f?.kind === 'rate' ? f : null));
   };
 
-  const handleLogin = async () => {
-    const emailTrimmed = email.trim();
+  const handleLogin = async (creds?: { email: string; password: string }) => {
+    const emailTrimmed = (creds?.email ?? email).trim();
+    const password = creds?.password ?? passwordInput;
     // Le bouton est inactif tant que le format n'est pas valide ; ce garde-fou couvre la touche « Entrée » du clavier.
     if (status !== 'idle' || !EMAIL_RE.test(emailTrimmed) || password.length < PASSWORD_MIN_LENGTH) return;
 
@@ -186,6 +214,11 @@ export default function LoginScreen() {
       await enterApp();
     } catch (e) {
       const f = classifierEchec(e);
+      // Mot de passe changé depuis l'activation : les identifiants gardés ne valent plus rien.
+      if (creds && f.kind === 'credentials') {
+        void disableBiometricLogin();
+        setBioReady(false);
+      }
       setFailure(f);
       setAttempt((n) => n + 1);
       setCredentialsInvalid(f.kind === 'credentials');
@@ -202,14 +235,13 @@ export default function LoginScreen() {
 
   const time = formatCountdown(remaining);
   const accountDisabled = failure?.kind === 'disabled';
-  const formValid = EMAIL_RE.test(email.trim()) && password.length >= PASSWORD_MIN_LENGTH;
+  const formValid = EMAIL_RE.test(email.trim()) && passwordInput.length >= PASSWORD_MIN_LENGTH;
   const retryMode = failure?.kind === 'network' && status === 'idle';
 
   return (
     <>
-      <AuthScreen topRight={<LogoTile />}>
-        <Text style={{ fontFamily: fonts.head, fontSize: 28, letterSpacing: -0.8, lineHeight: 30, color: pal.fg }}>{t('auth.bon_retour')}</Text>
-        <Text style={{ fontFamily: fonts.body, fontSize: 14, color: pal.mu, marginTop: 6 }}>{t('auth.login_subtitle')}</Text>
+      <AuthScreen>
+        <Text accessibilityRole="header" style={{ fontFamily: fonts.bodyBold, fontSize: 15, letterSpacing: 2.1, textTransform: 'uppercase', color: pal.accent }}>{t('auth.connexion_titre')}</Text>
 
         <View style={{ gap: 12, marginTop: 16 }}>
           {expiredGate ? (
@@ -246,10 +278,10 @@ export default function LoginScreen() {
             <AuthField
               icon="lock"
               secure
-              value={password}
+              value={passwordInput}
               onChangeText={(v) => { setPassword(v); editing(); }}
               placeholder={t('common.mot_de_passe')}
-              onSubmitEditing={handleLogin}
+              onSubmitEditing={() => void handleLogin()}
               error={credentialsInvalid}
               shakeKey={attempt}
             />
@@ -262,16 +294,30 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        <AuthButton
-          label={expiredGate ? t('auth.btn_see_plans') : retryMode ? t('auth.btn_retry') : t('auth.se_connecter')}
-          loadingLabel={t('auth.connexion')}
-          errorLabel={failure?.title}
-          lockedLabel={t('auth.btn_locked', { time })}
-          status={status}
-          onPress={expiredGate ? expiredGate.proceed : handleLogin}
-          disabled={accountDisabled || (!formValid && !expiredGate)}
-          icon={retryMode ? 'refresh' : 'arrow-forward'}
-        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <View style={{ flex: 1 }}>
+          <AuthButton
+            label={expiredGate ? t('auth.btn_see_plans') : retryMode ? t('auth.btn_retry') : t('auth.se_connecter')}
+            loadingLabel={t('auth.connexion')}
+            errorLabel={failure?.title}
+            lockedLabel={t('auth.btn_locked', { time })}
+            status={status}
+            onPress={expiredGate ? expiredGate.proceed : () => void handleLogin()}
+            disabled={accountDisabled || (!formValid && !expiredGate)}
+            icon={retryMode ? 'refresh' : 'arrow-forward'}
+          />
+          </View>
+          {bioReady && !expiredGate && status === 'idle' ? (
+            <Pressable
+              onPress={() => void loginWithBiometric()}
+              accessibilityRole="button"
+              accessibilityLabel={t('biometric.use_button', { name: bioName })}
+              style={({ pressed }) => [{ width: 60, height: 60, borderRadius: 16, borderWidth: 1.5, borderColor: pal.bd, backgroundColor: pal.sf, alignItems: 'center', justifyContent: 'center' }, pressed && { opacity: 0.7 }]}
+            >
+              <MaterialIcons name="face" size={28} color={pal.accent} />
+            </Pressable>
+          ) : null}
+        </View>
         {expiredGate ? (
           <Pressable onPress={switchAccount} hitSlop={6} style={{ alignSelf: 'center', paddingVertical: 8 }}>
             <Text style={{ fontFamily: fonts.bodySemiBold, fontSize: 14, color: pal.accent }}>{t('auth.use_other_account')}</Text>
