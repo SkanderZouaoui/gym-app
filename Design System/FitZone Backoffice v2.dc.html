@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&amp;display=block" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#F7F6FB;-webkit-font-smoothing:antialiased}
+body{margin:0;background:#F5F5F6;-webkit-font-smoothing:antialiased}
 a{color:var(--primary-ink);text-decoration:none}
 a:hover{color:var(--primary-pressed);text-decoration:underline}
 input,button,select,textarea{font:inherit;color:inherit}
@@ -953,7 +953,7 @@ class Component extends DCLogic {
     const boDark=P.theme==='Sombre';const boCompact=P.density==='Compacte';
     const cur=P.currency==='€'?'€':'DT';
     const BOA=P.accent||'#7C3AED';
-    const rootStyle={...tok({primary:BOA,primaryContrast:'#FFFFFF',secondary:'#1A1033',accent:'#D946EF',info:'#6366F1',bgLight:'#F7F6FB',bgDark:'#0C0A14',surfaceDark:'#16131F'},boDark,16,['Geist','Geist'],boCompact),'--sh1':boDark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(26,16,51,.04),0 2px 8px rgba(26,16,51,.04)',display:'flex',minHeight:'100vh',background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',fontSize:'15px',lineHeight:1.5};
+    const rootStyle={...tok({primary:BOA,primaryContrast:'#FFFFFF',secondary:'#1A1033',accent:'#D946EF',info:'#6366F1',bgLight:'#F5F5F6',bgDark:'#0C0A14',surfaceDark:'#16131F'},boDark,16,['Geist','Geist'],boCompact),'--sh1':boDark?'0 1px 2px rgba(0,0,0,.4)':'0 1px 2px rgba(26,16,51,.04),0 2px 8px rgba(26,16,51,.04)',display:'flex',minHeight:'100vh',background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',fontSize:'15px',lineHeight:1.5};
     const fp=FONTS[cfg.font]||FONTS['Géométrique'];
     const pvStyle={...tok(cfg,S.pvDark,+cfg.radius,fp,cfg.density==='Compacte'),position:'relative',width:'100%',height:'100%',borderRadius:'41px',overflow:'hidden',background:'var(--bg)',color:'var(--text)',fontFamily:'var(--f-body)',fontSize:'14px',lineHeight:1.45,display:'flex',flexDirection:'column'};
     const caps=(cfg.brand||'').match(/[A-Z]/g);const b=(cfg.brand||'FZ').trim()||'FZ';const mono=(caps&&caps.length>=2?caps.slice(0,2).join(''):b.slice(0,2)).toUpperCase();
