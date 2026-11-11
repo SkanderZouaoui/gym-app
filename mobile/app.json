@@ -12,7 +12,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.muscleup.app",
+      "bundleIdentifier": "com.torealco.muscleup",
       "infoPlist": {
         "NSFaceIDUsageDescription": "MuscleUP utilise Face ID pour vous connecter rapidement et en toute sécurité.",
         "ITSAppUsesNonExemptEncryption": false
