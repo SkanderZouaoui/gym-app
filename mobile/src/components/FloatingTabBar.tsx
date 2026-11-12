@@ -46,8 +46,10 @@ export interface FloatingTabBarProps {
 }
 
 export const BAR_HEIGHT = 68;
-const INDICATOR_W = 50;
 const INDICATOR_H = 56;
+/** Pastille de l'onglet actif : cercle. */
+const INDICATOR_BOX_H = 60;
+const INDICATOR_RADIUS = INDICATOR_BOX_H / 2;
 const SPRING = { damping: 14, stiffness: 180 };
 const EASE_OUT = Easing.bezier(0.32, 0.72, 0, 1);
 
@@ -90,15 +92,17 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
 
   const [rowWidth, setRowWidth] = useState(0);
   const slot = tabs.length > 0 ? (rowWidth - 12) / tabs.length : 0;
+  // Cercle parfait : largeur = hauteur.
+  const indicatorW = INDICATOR_BOX_H;
   const indicatorX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const offset = BAR_HEIGHT + Math.max(bottomInset - 6, 10) + 24;
 
   useEffect(() => {
     if (activeIndex < 0 || slot === 0) return;
-    const target = activeIndex * slot + (slot - INDICATOR_W) / 2;
+    const target = activeIndex * slot + (slot - indicatorW) / 2;
     indicatorX.value = reduceMotion ? withTiming(target, { duration: 120 }) : withSpring(target, SPRING);
-  }, [activeIndex, slot, reduceMotion, indicatorX]);
+  }, [activeIndex, slot, indicatorW, reduceMotion, indicatorX]);
 
   useEffect(() => {
     translateY.value = withTiming(hidden || keyboardHeight > 0 ? offset : 0, { duration: reduceMotion ? 120 : 450, easing: EASE_OUT });
@@ -120,7 +124,9 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
             style={styles.row}
             onLayout={(e: LayoutChangeEvent) => setRowWidth(e.nativeEvent.layout.width)}
           >
-            {slot > 0 && activeIndex >= 0 ? <Animated.View style={[styles.indicator, indicatorStyle]} /> : null}
+            {slot > 0 && activeIndex >= 0 ? (
+              <Animated.View style={[styles.indicator, { width: indicatorW }, indicatorStyle]} />
+            ) : null}
             {tabs.map((route) => {
               const { options } = descriptors[route.key];
               const focused = route.key === activeKey;
@@ -162,6 +168,11 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
   );
 }
 
+/** Chaque onglet n'a qu'une cinquantaine de pixels : au-delà de 9 caractères, le libellé est abrégé (« Entraînement » → « Entraîn. »).
+ * Le nom complet reste lu par les lecteurs d'écran (accessibilityLabel). */
+const MAX_LABEL_CHARS = 9;
+const shortLabel = (label: string) => (label.length > MAX_LABEL_CHARS ? `${label.slice(0, MAX_LABEL_CHARS - 2).trimEnd()}.` : label);
+
 interface TabItemProps {
   label: string;
   focused: boolean;
@@ -200,7 +211,7 @@ function TabItem({ label, focused, reduceMotion, color, icon, onPress, styles }:
     >
       <Animated.View style={iconStyle}>{icon?.({ focused, color, size: 24 })}</Animated.View>
       <Animated.Text style={[styles.label, { color }, labelStyle]} numberOfLines={1}>
-        {label}
+        {shortLabel(label)}
       </Animated.Text>
     </Pressable>
   );
@@ -237,21 +248,17 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], dark: boolean
       borderColor: colors.glassBorder,
     },
     row: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6 },
+    // Pastille discrète : simple fond violet très pâle, sans bordure, ombre ni aplat.
     indicator: {
       position: 'absolute',
       left: 6,
-      top: (BAR_HEIGHT - 2 - INDICATOR_H) / 2,
-      width: INDICATOR_W,
-      height: INDICATOR_H,
-      borderRadius: INDICATOR_H / 2,
+      top: (BAR_HEIGHT - 2 - INDICATOR_BOX_H) / 2,
+      height: INDICATOR_BOX_H,
+      borderRadius: INDICATOR_RADIUS,
       backgroundColor: colors.primarySoft,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: dark ? 0.5 : 0.3,
-      shadowRadius: 9,
     },
     item: { flex: 1, height: INDICATOR_H, alignItems: 'center', justifyContent: 'center' },
-    label: { position: 'absolute', bottom: 6, left: 0, right: 0, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 10.5 },
+    label: { position: 'absolute', bottom: 7, left: 2, right: 2, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 9.5, letterSpacing: -0.1 },
     actionShadow: {
       width: BAR_HEIGHT,
       height: BAR_HEIGHT,
