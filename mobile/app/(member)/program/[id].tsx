@@ -16,6 +16,8 @@ import { summarizeExercise, useLastSessionValues } from '../../../src/hooks/useL
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import { WEEKDAYS_LONG_SUN } from '../../../src/i18n/labels';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
+import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 
 const DAY_LABELS = WEEKDAYS_LONG_SUN;
 
@@ -123,24 +125,25 @@ export default function ProgramDetailScreen() {
           </ScrollView>
         ) : null}
 
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statValue}>{day?.exercises.length ?? 0}</Text>
-            <Text style={styles.statLabel}>{t('common.exercices')}</Text>
-          </View>
-          <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statValue}>{totalSets}</Text>
-            <Text style={styles.statLabel}>{t('common.series')}</Text>
-          </View>
-          <View style={[styles.statCard, cardShadow]}>
-            <Text style={styles.statValue}>{t('member.min', { estimatedMinutes })}</Text>
-            <Text style={styles.statLabel}>{t('common.duree')}</Text>
-          </View>
+        <View style={[styles.statsCard, cardShadow]}>
+          {[
+            { value: String(day?.exercises.length ?? 0), unit: '', label: t('common.exercices') },
+            { value: String(totalSets), unit: '', label: t('common.series') },
+            { value: String(estimatedMinutes), unit: t('member.min', { estimatedMinutes: '' }).trim(), label: t('common.duree') },
+          ].map((st, i) => (
+            <View key={st.label} style={[styles.statCol, i > 0 && styles.statColDivider]}>
+              <Text style={styles.statLabel} numberOfLines={1}>{st.label}</Text>
+              <Text style={styles.statValue} numberOfLines={1}>
+                {st.value}
+                {st.unit ? <Text style={styles.statUnit}> {st.unit}</Text> : null}
+              </Text>
+            </View>
+          ))}
         </View>
 
         {muscles.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>{t('common.muscles_cibles')}</Text>
+            <SectionHeader title={t('common.muscles_cibles')} style={{ marginBottom: 10 }} />
             <View style={styles.chipsRow}>
               {muscles.map((m) => (
                 <View key={m} style={styles.muscleChip}>
@@ -152,7 +155,7 @@ export default function ProgramDetailScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
+          <SectionHeader title={t('common.exercices')} style={{ marginBottom: 10 }} />
           <View style={{ gap: 10 }}>
             {day?.exercises.map((ex, i) => {
               const summary = summarizeExercise(ex, lastSession.get(ex.exercise.id));
@@ -167,8 +170,11 @@ export default function ProgramDetailScreen() {
                     })
                   }
                 >
-                  <View style={styles.indexBadge}>
-                    <Text style={styles.indexBadgeText}>{i + 1}</Text>
+                  <View style={styles.thumb}>
+                    <ExerciseGif uri={ex.exercise.mediaKey} size={60} />
+                    <View style={styles.indexBadge}>
+                      <Text style={styles.indexBadgeText}>{i + 1}</Text>
+                    </View>
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.exerciseName} numberOfLines={2}>{ex.exercise.name}</Text>
@@ -201,33 +207,39 @@ export default function ProgramDetailScreen() {
       </View>
 
       <BottomSheet visible={menuOpen} onClose={() => setMenuOpen(false)}>
-        <Pressable
-          style={styles.menuItem}
-          onPress={() => {
-            setMenuOpen(false);
-            router.push({ pathname: '/(member)/program-builder', params: { programId: program.id } });
-          }}
-        >
-          <MaterialIcons name="edit" size={20} color={colors.text} />
-          <Text style={styles.menuItemText}>{t('member.modifier_le_programme')}</Text>
-        </Pressable>
-        <Pressable
-          style={styles.menuItem}
-          onPress={() => {
-            setMenuOpen(false);
-            setConfirmDelete(true);
-          }}
-        >
-          <MaterialIcons name="delete-outline" size={20} color={colors.dangerInk} />
-          <Text style={[styles.menuItemText, { color: colors.dangerInk }]}>{t('member.supprimer_le_programme')}</Text>
-        </Pressable>
+        <View style={styles.menuList}>
+          <Pressable
+            style={({ pressed }) => [styles.menuItem, pressed && { opacity: 0.6 }]}
+            onPress={() => {
+              setMenuOpen(false);
+              router.push({ pathname: '/(member)/program-builder', params: { programId: program.id } });
+            }}
+          >
+            <MaterialIcons name="edit" size={22} color={colors.text} />
+            <Text style={styles.menuItemText}>{t('member.modifier_le_programme')}</Text>
+          </Pressable>
+          <View style={styles.menuDivider} />
+          <Pressable
+            style={({ pressed }) => [styles.menuItem, pressed && { opacity: 0.6 }]}
+            onPress={() => {
+              setMenuOpen(false);
+              setConfirmDelete(true);
+            }}
+          >
+            <MaterialIcons name="delete-outline" size={22} color={colors.dangerInk} />
+            <Text style={[styles.menuItemText, { color: colors.dangerInk }]}>{t('member.supprimer_le_programme')}</Text>
+          </Pressable>
+        </View>
       </BottomSheet>
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
+        <View style={styles.confirmIcon}>
+          <MaterialIcons name="delete-outline" size={30} color={colors.dangerInk} />
+        </View>
         <Text style={styles.sheetTitle}>{t('common.supprimer_2', { name: program.name })}</Text>
         <Text style={styles.sheetText}>{t('member.cette_action_est_definitive_et')}</Text>
-        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
-          <Button label={t('member.supprimer')} onPress={handleDelete} variant="secondary" loading={deleteProgram.isPending} />
+        <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+          <Button label={t('member.supprimer')} onPress={handleDelete} variant="danger" loading={deleteProgram.isPending} />
           <Button label={t('common.annuler')} onPress={() => setConfirmDelete(false)} variant="outline" />
         </View>
       </BottomSheet>
@@ -247,7 +259,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 },
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
     headerActionButton: {
-      width: 40, height: 40, borderRadius: 14, borderWidth: 1, borderColor: colors.border,
+      width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: colors.border,
       backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
     },
     heroShadow: {
@@ -257,7 +269,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     heroDecor: { position: 'absolute', right: -40, top: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.12)' },
     heroTag: { alignSelf: 'flex-start', backgroundColor: 'rgba(255,255,255,0.22)', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 999 },
     heroTagText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
-    heroTitle: { fontFamily: fonts.head, fontSize: 28, lineHeight: 32, letterSpacing: -1, color: '#FFFFFF' },
+    heroTitle: { fontFamily: fonts.display, fontSize: 26, lineHeight: 30, letterSpacing: -0.5, textTransform: 'uppercase', color: '#FFFFFF' },
     heroSub: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: 'rgba(255,255,255,0.92)' },
     dayTabs: { gap: 8 },
     dayTab: {
@@ -267,11 +279,14 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     dayTabText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
     dayTabTextActive: { color: colors.primaryContrast },
     statsRow: { flexDirection: 'row', gap: 10 },
-    statCard: {
-      flex: 1, padding: 14, gap: 2, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
+    statsCard: {
+      flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, paddingVertical: 16,
     },
-    statValue: { fontFamily: fonts.head, fontSize: 24, lineHeight: 28, letterSpacing: -0.8, color: colors.text },
-    statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    statCol: { flex: 1, minWidth: 0, paddingHorizontal: 16, gap: 6 },
+    statColDivider: { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: colors.borderStrong },
+    statLabel: { fontFamily: fonts.bodyBold, fontSize: 10.5, letterSpacing: 1.3, textTransform: 'uppercase', color: colors.muted },
+    statValue: { fontFamily: fonts.display, fontSize: 30, lineHeight: 34, letterSpacing: -1, color: colors.text },
+    statUnit: { fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 0, color: colors.muted },
     sectionTitle: { fontFamily: fonts.headBold, fontSize: 17, letterSpacing: -0.3, color: colors.text, marginBottom: 10 },
     chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     muscleChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primarySoft },
@@ -280,9 +295,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, backgroundColor: colors.surface,
       borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
     },
-    indexBadge: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-    indexBadgeText: { fontFamily: fonts.head, fontSize: 14, color: colors.primaryInk },
-    exerciseName: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, textTransform: 'capitalize' },
+    thumb: { width: 64, height: 64, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
+    indexBadge: { position: 'absolute', top: -6, left: -6, minWidth: 22, height: 22, borderRadius: 11, paddingHorizontal: 5, backgroundColor: colors.deep, borderWidth: 2, borderColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
+    indexBadgeText: { fontFamily: fonts.head, fontSize: 11, color: '#FFFFFF' },
+    exerciseName: { fontFamily: fonts.headBold, fontSize: 15.5, letterSpacing: -0.2, color: colors.text, textTransform: 'capitalize' },
     exerciseMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
     exerciseRight: { alignItems: 'flex-end' },
     exerciseSets: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
@@ -295,9 +311,12 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     },
     startButton: { minHeight: 56, borderRadius: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
     startButtonText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.primaryContrast },
-    sheetTitle: { fontFamily: fonts.headBold, fontSize: 18, color: colors.text },
-    sheetText: { fontFamily: fonts.body, fontSize: 13.5, color: colors.muted, lineHeight: 19 },
-    menuItem: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 50, paddingHorizontal: spacing.xs },
-    menuItemText: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.text },
+    sheetTitle: { fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.3, color: colors.text, textAlign: 'center' },
+    sheetText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, lineHeight: 20, textAlign: 'center', marginTop: 6 },
+    confirmIcon: { width: 64, height: 64, borderRadius: 32, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.dangerSoft, marginBottom: 14 },
+    menuList: { marginTop: 4, marginBottom: 4 },
+    menuItem: { flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 58, paddingHorizontal: 4 },
+    menuItemText: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
+    menuDivider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.borderStrong, marginLeft: 38 },
   });
 }

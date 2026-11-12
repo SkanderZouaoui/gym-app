@@ -13,7 +13,7 @@ import { useOfflineAwareRefresh } from '../../hooks/useOfflineAwareRefresh';
 import { haptics } from '../../utils/haptics';
 import { weekdayIndex } from '../../utils/openingHours';
 import { WEEKDAYS_LONG_MON } from '../../i18n/labels';
-import { Banner, SkeletonBlock, Toast } from '../ui';
+import { Banner, SectionHeader, SkeletonBlock, Toast } from '../ui';
 import { SessionGallery } from '../gallery/SessionGallery';
 import { photosOf } from '../gallery/photos';
 import { VenueLogo } from './VenueLogo';
@@ -86,7 +86,7 @@ export function VenueScreen() {
               onCopy={copyPhone}
             />
 
-            <Text style={styles.section}>{t('venue.hours')}</Text>
+            <SectionHeader title={t('venue.hours')} style={{ marginTop: 6 }} />
             <View style={[styles.card, cardShadow]}>
               {venue.hours.map((h, i) => (
                 <View key={i} style={[styles.hourRow, i === today && styles.hourToday, i > 0 && styles.hourBorder]}>
@@ -127,7 +127,7 @@ function ContactBlock({
 
   return (
     <>
-      <Text style={styles.section}>{t('venue.contact')}</Text>
+      <SectionHeader title={t('venue.contact')} style={{ marginTop: 6 }} />
       {hasPosition ? <VenueMap latitude={contact.latitude!} longitude={contact.longitude!} width={mapWidth} /> : null}
       <View style={[styles.card, cardShadow]}>
         {contact.phone ? (

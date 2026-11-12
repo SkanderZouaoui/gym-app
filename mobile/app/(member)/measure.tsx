@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Dimensions, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
@@ -33,34 +33,55 @@ export default function MeasureScreen() {
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { data: metrics } = useBodyMetrics();
   const createMetric = useCreateBodyMetric();
-  const [type, setType] = useState<MeasureType>('weight');
-  const [value, setValue] = useState('');
   const [isToday, setIsToday] = useState(true);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const config = TYPES.find((t) => t.value === type)!;
-  const lastMetric = metrics?.find((m) => (type === 'weight' ? m.weightKg : m.measurements?.[type]));
-  const lastValue = type === 'weight' ? lastMetric?.weightKg : lastMetric?.measurements?.[type];
+  // Dernière valeur connue de chaque mesure (les enregistrements peuvent n'en contenir qu'une partie).
+  const last = useMemo(() => {
+    const out: Record<MeasureType, string> = { weight: '', waist: '', arm: '', bodyFat: '' };
+    for (const m of metrics ?? []) {
+      if (!out.weight && m.weightKg) out.weight = String(Number(m.weightKg));
+      for (const k of ['waist', 'arm', 'bodyFat'] as const) if (!out[k] && m.measurements?.[k] != null) out[k] = String(m.measurements[k]);
+    }
+    return out;
+  }, [metrics]);
+
+  // Champs préremplis avec les dernières mesures ; seules les valeurs modifiées par l'utilisateur l'emportent.
+  const [edited, setEdited] = useState<Partial<Record<MeasureType, string>>>({});
+  const valueOf = (t: MeasureType) => edited[t] ?? last[t];
 
   const selectedDate = new Date();
   if (!isToday) selectedDate.setDate(selectedDate.getDate() - 1);
 
-  const handleClose = () => router.navigate('/(member)/(tabs)/training');
+  const handleClose = () => router.navigate('/(member)/(tabs)/progress');
 
   const handleSave = () => {
-    const num = Number(value.replace(',', '.'));
-    if (!num || num < config.min || num > config.max) {
-      setError(i18n.t('member.valeur_hors_plage_a', { min: config.min, max: config.max, unit: config.unit }));
+    const parsed: Partial<Record<MeasureType, number>> = {};
+    for (const cfg of TYPES) {
+      const raw = valueOf(cfg.value).trim();
+      if (!raw) continue;
+      const num = Number(raw.replace(',', '.'));
+      if (!num || num < cfg.min || num > cfg.max) {
+        setError(i18n.t('member.valeur_hors_plage_a', { min: cfg.min, max: cfg.max, unit: cfg.unit }) + ` (${cfg.label})`);
+        return;
+      }
+      parsed[cfg.value] = num;
+    }
+    if (Object.keys(parsed).length === 0) {
+      setError(i18n.t('member.measure_need_one'));
       return;
     }
     setError(null);
+    // Toutes les valeurs (modifiées ou reprises) sont enregistrées ensemble : les mesures non touchées ne repartent pas de zéro.
+    const { weight, ...rest } = parsed;
     createMetric.mutate(
       {
         date: selectedDate.toISOString(),
-        ...(type === 'weight' ? { weightKg: num } : { measurements: { [type]: num } }),
+        ...(weight !== undefined ? { weightKg: weight } : {}),
+        ...(Object.keys(rest).length ? { measurements: rest as Record<string, number> } : {}),
       },
-      { onSuccess: () => router.navigate('/(member)/(tabs)/training') },
+      { onSuccess: () => router.navigate('/(member)/(tabs)/progress') },
     );
   };
 
@@ -80,32 +101,38 @@ export default function MeasureScreen() {
             </Pressable>
           </View>
 
-          <View style={styles.content}>
-            <View style={styles.typeGrid}>
-              {TYPES.map((t) => (
-                <Pressable key={t.value} style={[styles.typeChip, type === t.value && styles.typeChipActive]} onPress={() => { setType(t.value); setValue(''); setError(null); }}>
-                  <MaterialIcons name={t.icon} size={20} color={type === t.value ? colors.onSecondary : colors.text} />
-                  <Text style={[styles.typeChipText, type === t.value && styles.typeChipTextActive]}>{t.label}</Text>
-                </Pressable>
-              ))}
-            </View>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ maxHeight: Dimensions.get('window').height * 0.7 }}>
+            <Text style={styles.helpText}>{i18n.t('member.measure_hint_keep')}</Text>
 
             {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-            <Text style={styles.fieldLabel}>{config.label} ({config.unit})</Text>
-            <View style={styles.valueRow}>
-              <TextInput
-                value={value}
-                onChangeText={setValue}
-                keyboardType="decimal-pad"
-                placeholder="0"
-                placeholderTextColor={colors.muted}
-                style={[styles.valueInput, error && styles.valueInputError]}
-              />
-              <Text style={styles.unit}>{config.unit}</Text>
+            <View style={styles.fields}>
+              {TYPES.map((cfg) => {
+                const value = valueOf(cfg.value);
+                const changed = edited[cfg.value] !== undefined && edited[cfg.value] !== last[cfg.value];
+                return (
+                  <View key={cfg.value} style={[styles.field, changed && styles.fieldChanged]}>
+                    <View style={styles.fieldIcon}>
+                      <MaterialIcons name={cfg.icon} size={20} color="#FFFFFF" />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.fieldLabel}>{cfg.label}</Text>
+                      {last[cfg.value] ? <Text style={styles.fieldPrev}>{i18n.t('member.measure_prev', { value: last[cfg.value], unit: cfg.unit })}</Text> : null}
+                    </View>
+                    <TextInput
+                      value={value}
+                      onChangeText={(v) => { setEdited((e) => ({ ...e, [cfg.value]: v })); setError(null); }}
+                      keyboardType="decimal-pad"
+                      placeholder="—"
+                      placeholderTextColor={colors.muted}
+                      selectTextOnFocus
+                      style={styles.fieldInput}
+                    />
+                    <Text style={styles.unit}>{cfg.unit}</Text>
+                  </View>
+                );
+              })}
             </View>
-
-            {lastValue ? <Text style={styles.helpText}>{i18n.t('member.derniere_mesure', { lastValue, unit: config.unit })}</Text> : null}
 
             <Pressable style={styles.dateRow} onPress={() => setShowDatePicker(true)}>
               <MaterialIcons name="calendar-today" size={16} color={colors.text} />
@@ -119,7 +146,7 @@ export default function MeasureScreen() {
             </View>
 
             <Button label={createMetric.isPending ? i18n.t('common.enregistrement') : i18n.t('member.enregistrer')} onPress={handleSave} loading={createMetric.isPending} />
-          </View>
+          </ScrollView>
         </View>
       </SafeAreaView>
 
@@ -148,23 +175,18 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
   title: { fontFamily: fonts.headSemiBold, fontSize: 19, color: colors.text },
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, gap: spacing.md },
-  typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  typeChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, height: 42,
-    borderRadius: 999, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+  fields: { gap: 10 },
+  field: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.lg,
+    borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface,
   },
-  typeChipActive: { backgroundColor: colors.secondary, borderColor: colors.secondary },
-  typeChipText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
-  typeChipTextActive: { color: colors.onSecondary },
-  fieldLabel: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.muted },
-  valueRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  valueInput: {
-    flex: 1, height: 64, borderRadius: radii.sm, borderWidth: 1.5, borderColor: colors.borderStrong,
-    paddingHorizontal: 16, fontFamily: fonts.head, fontSize: 32, color: colors.text, backgroundColor: colors.surface,
-  },
-  valueInputError: { borderColor: colors.danger },
-  unit: { fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.muted },
-  helpText: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
+  fieldChanged: { borderColor: colors.deep },
+  fieldIcon: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.deep },
+  fieldLabel: { fontFamily: fonts.bodyBold, fontSize: 14.5, color: colors.text },
+  fieldPrev: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, marginTop: 1 },
+  fieldInput: { minWidth: 70, maxWidth: 110, height: 46, textAlign: 'right', fontFamily: fonts.head, fontSize: 24, color: colors.text, paddingHorizontal: 4 },
+  unit: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.muted, width: 24 },
+  helpText: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
   dateRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingHorizontal: 14,
     borderRadius: radii.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignSelf: 'flex-start',

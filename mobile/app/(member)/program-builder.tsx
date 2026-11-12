@@ -7,12 +7,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { Button } from '../../src/components/Button';
-import { Banner, BottomSheet, EmptyState, ScreenTitle } from '../../src/components/ui';
+import { Banner, BottomSheet, EmptyState, ScreenTitle, SectionHeader } from '../../src/components/ui';
 import { ExerciseEditorCard } from '../../src/components/training/ExerciseEditorCard';
+import { ReorderList } from '../../src/components/training/ReorderList';
 import type { SetDraft } from '../../src/components/training/SetRow';
 import {
   useCreateOwnProgram,
   useUpdateOwnProgram,
+  useExercises,
   type ProgramDayInput,
   type ProgramExerciseInput,
 } from '../../src/hooks/useCoaching';
@@ -24,7 +26,9 @@ import { WEEKDAYS_SHORT_MON } from '../../src/i18n/labels';
 
 const DAY_LABELS = WEEKDAYS_SHORT_MON;
 
-type DraftExercise = { exerciseId: string; name: string; sets: SetDraft[] };
+type DraftExercise = { uid: string; exerciseId: string; name: string; sets: SetDraft[] };
+let uidCounter = 0;
+const newUid = () => `ex-${++uidCounter}`;
 type DraftDay = { dayOfWeek: number; label: string; exercises: DraftExercise[] };
 
 function summarizeReps(sets: SetDraft[]): string {
@@ -59,6 +63,10 @@ export default function ProgramBuilderScreen() {
   const [error, setError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [renamingDay, setRenamingDay] = useState(false);
+  const [reordering, setReordering] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<{ day: number; index: number } | null>(null);
+  const { data: library } = useExercises();
+  const mediaOf = useMemo(() => new Map((library ?? []).map((e) => [e.id, e.mediaKey])), [library]);
   const [dayNameDraft, setDayNameDraft] = useState('');
   const createProgram = useCreateOwnProgram();
   const updateProgram = useUpdateOwnProgram();
@@ -72,6 +80,7 @@ export default function ProgramBuilderScreen() {
         dayOfWeek: d.dayOfWeek,
         label: d.label ?? DAY_LABELS[d.dayOfWeek],
         exercises: d.exercises.map((ex) => ({
+          uid: newUid(),
           exerciseId: ex.exercise.id,
           name: ex.exercise.name,
           sets: ex.setDetails.length > 0
@@ -103,7 +112,7 @@ export default function ProgramBuilderScreen() {
     }
     if (!incoming) return;
     const targetDay = incoming.dayIndex ?? activeDay;
-    const newExercise: DraftExercise = { exerciseId: incoming.exerciseId, name: incoming.name, sets: incoming.sets };
+    const newExercise: DraftExercise = { uid: newUid(), exerciseId: incoming.exerciseId, name: incoming.name, sets: incoming.sets };
     const editIndex = incoming.editingIndex ?? null;
 
     setDays((prev) =>
@@ -137,6 +146,19 @@ export default function ProgramBuilderScreen() {
   const removeExercise = (dayIndex: number, exerciseIndex: number) => {
     setDays((prev) =>
       prev.map((day, i) => (i === dayIndex ? { ...day, exercises: day.exercises.filter((_, j) => j !== exerciseIndex) } : day)),
+    );
+  };
+
+  /** Replace l'exercice `from` à la position `to` dans le jour (glisser-déposer). */
+  const reorderExercise = (dayIndex: number, from: number, to: number) => {
+    setDays((prev) =>
+      prev.map((day, i) => {
+        if (i !== dayIndex) return day;
+        const exercises = [...day.exercises];
+        const [moved] = exercises.splice(from, 1);
+        exercises.splice(to, 0, moved);
+        return { ...day, exercises };
+      }),
     );
   };
 
@@ -229,20 +251,32 @@ export default function ProgramBuilderScreen() {
 
         {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-        <TextInput value={name} onChangeText={setName} style={styles.nameInput} placeholder={t('common.nom_du_programme')} placeholderTextColor={colors.muted} />
-
-        <View style={[styles.summary, cardShadow]}>
-          <View>
-            <Text style={styles.summaryValue}>
-              {totalSets}
-              <Text style={styles.summaryUnit}>{t('common.series_2')}</Text>
-            </Text>
-            <Text style={styles.summaryMeta}>{t('member.exercice_min', { totalExercises, v2: totalExercises > 1 ? 's' : '', estimatedMinutes })}</Text>
-          </View>
-          <View style={styles.summaryTag}>
-            <Text style={styles.summaryTagText}>{t('member.perso')}</Text>
+        <View style={[styles.nameCard, cardShadow]}>
+          <Text style={styles.fieldLabel}>{t('member.builder_name_label')}</Text>
+          <View style={styles.nameRow}>
+            <TextInput value={name} onChangeText={setName} style={styles.nameInput} placeholder={t('common.nom_du_programme')} placeholderTextColor={colors.muted} selectTextOnFocus />
+            <View style={styles.nameEditIcon} pointerEvents="none">
+              <MaterialIcons name="edit" size={18} color={colors.primaryInk} />
+            </View>
           </View>
         </View>
+
+        <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.summary}>
+          <View style={styles.summaryDeco} />
+          {[
+            { label: t('member.builder_summary_exercises'), value: String(totalExercises), unit: '' },
+            { label: t('member.builder_summary_series'), value: String(totalSets), unit: '' },
+            { label: t('member.builder_summary_duration'), value: String(estimatedMinutes), unit: 'min' },
+          ].map((st, i) => (
+            <View key={st.label} style={[styles.summaryCol, i > 0 && styles.summaryColDivider]}>
+              <Text style={styles.summaryLabel}>{st.label}</Text>
+              <Text style={styles.summaryValue}>
+                {st.value}
+                {st.unit ? <Text style={styles.summaryUnit}> {st.unit}</Text> : null}
+              </Text>
+            </View>
+          ))}
+        </LinearGradient>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayTabs}>
           {days.map((day, i) => (
@@ -266,12 +300,24 @@ export default function ProgramBuilderScreen() {
         </ScrollView>
 
         <View style={{ gap: 12 }}>
+          <SectionHeader
+            title={t('common.exercices')}
+            actionLabel={current.exercises.length > 1 ? (reordering ? t('member.reorder_done') : t('member.reorder_action')) : undefined}
+            onAction={() => setReordering((v) => !v)}
+          />
+          {reordering ? <Text style={styles.reorderHint}>{t('member.reorder_hint')}</Text> : null}
           {current.exercises.length === 0 ? (
             <EmptyState icon="playlist-add" title={t('common.aucun_exercice')} text={t('common.ajoutez_des_exercices_depuis_la')} tone="primary" />
+          ) : reordering ? (
+            <ReorderList
+              items={current.exercises.map((ex) => ({ key: ex.uid, title: ex.name, subtitle: t('member.serie_3', { length: ex.sets.length, v2: ex.sets.length > 1 ? 's' : '' }) }))}
+              onReorder={(from, to) => reorderExercise(activeDay, from, to)}
+            />
           ) : (
             current.exercises.map((ex, i) => (
               <ExerciseEditorCard
-                key={`${ex.exerciseId}-${i}`}
+                key={ex.uid}
+                mediaKey={mediaOf.get(ex.exerciseId) ?? null}
                 name={ex.name}
                 sets={ex.sets}
                 onChangeSet={(index, field, value) =>
@@ -284,7 +330,7 @@ export default function ProgramBuilderScreen() {
                   })
                 }
                 onRemoveSet={(index) => updateExercise(activeDay, i, (sets) => renumber(sets.filter((_, k) => k !== index)))}
-                onRemove={() => removeExercise(activeDay, i)}
+                onRemove={() => setPendingRemove({ day: activeDay, index: i })}
                 onPressHeader={() => router.push(`/(member)/exercises/${ex.exerciseId}`)}
               />
             ))
@@ -315,12 +361,33 @@ export default function ProgramBuilderScreen() {
         </Pressable>
       </View>
 
+      <BottomSheet visible={pendingRemove !== null} onClose={() => setPendingRemove(null)}>
+        <View style={styles.confirmIcon}>
+          <MaterialIcons name="delete-outline" size={30} color={colors.dangerInk} />
+        </View>
+        <Text style={styles.confirmTitle}>{t('member.remove_exercise_title')}</Text>
+        <Text style={styles.confirmText}>
+          {t('member.remove_exercise_text', { name: pendingRemove ? days[pendingRemove.day]?.exercises[pendingRemove.index]?.name ?? '' : '' })}
+        </Text>
+        <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+          <Button
+            label={t('member.remove_exercise_confirm')}
+            variant="danger"
+            onPress={() => {
+              if (pendingRemove) removeExercise(pendingRemove.day, pendingRemove.index);
+              setPendingRemove(null);
+            }}
+          />
+          <Button label={t('common.annuler')} onPress={() => setPendingRemove(null)} variant="outline" />
+        </View>
+      </BottomSheet>
+
       <BottomSheet visible={renamingDay} onClose={() => setRenamingDay(false)}>
         <Text style={styles.sheetTitle}>{t('member.nom_du_jour')}</Text>
         <TextInput
           value={dayNameDraft}
           onChangeText={setDayNameDraft}
-          style={styles.nameInput}
+          style={styles.sheetInput}
           placeholder={t('member.ex_poussee_tirage_jambes')}
           placeholderTextColor={colors.muted}
           autoFocus
@@ -342,19 +409,25 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 140 },
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    nameCard: { padding: 16, gap: 6, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
+    fieldLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: colors.muted },
+    nameRow: { flexDirection: 'row', alignItems: 'center', gap: 10, },
+    nameEditIcon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     nameInput: {
-      height: 52, borderRadius: 18, borderWidth: 1, borderColor: colors.border,
-      paddingHorizontal: 18, fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text, backgroundColor: colors.surface,
+      flex: 1, height: 46, paddingHorizontal: 0, fontFamily: fonts.display, fontSize: 24, letterSpacing: -0.5, color: colors.text,
     },
-    summary: {
-      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16,
-      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
-    },
-    summaryValue: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text },
-    summaryUnit: { fontFamily: fonts.bodySemiBold, fontSize: 15, color: colors.muted, letterSpacing: 0 },
-    summaryMeta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    summaryTag: { backgroundColor: colors.primarySoft, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
-    summaryTagText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk },
+    summary: { flexDirection: 'row', paddingVertical: 18, borderRadius: radii.xl, overflow: 'hidden' },
+    summaryDeco: { position: 'absolute', right: -40, top: -50, width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(255,255,255,0.08)' },
+    summaryCol: { flex: 1, minWidth: 0, paddingHorizontal: 18, gap: 6 },
+    summaryColDivider: { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: 'rgba(255,255,255,0.3)' },
+    summaryLabel: { fontFamily: fonts.bodyBold, fontSize: 10.5, letterSpacing: 1.3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)' },
+    summaryValue: { fontFamily: fonts.display, fontSize: 30, lineHeight: 34, letterSpacing: -1, color: '#FFFFFF' },
+    summaryUnit: { fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 0, color: 'rgba(255,255,255,0.7)' },
+    reorderHint: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: -4 },
+    confirmIcon: { width: 64, height: 64, borderRadius: 32, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.dangerSoft, marginBottom: 14 },
+    confirmTitle: { fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.3, color: colors.text, textAlign: 'center' },
+    confirmText: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, lineHeight: 20, textAlign: 'center', marginTop: 6 },
+    sheetInput: { height: 52, borderRadius: 18, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 18, fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text, backgroundColor: colors.surface },
     dayTabs: { gap: 8 },
     dayTab: {
       flexDirection: 'row', height: 38, paddingHorizontal: 16, borderRadius: 999, overflow: 'hidden', alignItems: 'center',

@@ -12,6 +12,7 @@ import { Button } from '../../../src/components/Button';
 import { ExerciseGif } from '../../../src/components/training/ExerciseGif';
 import { SetRow, type SetDraft } from '../../../src/components/training/SetRow';
 import { useTranslation } from 'react-i18next';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Détail d'un exercice avant assignation à un élève : chaque série se règle
  * individuellement (reps + poids), au lieu d'un réglage unique répété. */
@@ -84,7 +85,7 @@ export default function CoachConfigureExerciseScreen() {
         <Text style={styles.name}>{exercise.name}</Text>
         {exercise.muscleGroup ? <Text style={styles.muscleGroup}>{exercise.muscleGroup}</Text> : null}
 
-        <Text style={styles.sectionTitle}>{t('common.series')}</Text>
+        <SectionHeader title={t('common.series')} style={{ marginBottom: 10 }} />
         <View style={{ gap: spacing.sm }}>
           {sets.map((set, i) => (
             <SetRow

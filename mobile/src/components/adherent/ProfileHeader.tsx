@@ -3,7 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle } from 'react-native-svg';
-import { fonts, typography } from '../../theme/tokens';
+import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { Pill, type PillTone } from '../ui';
 import { useTranslation } from 'react-i18next';
@@ -52,7 +52,7 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, 
             cx={SIZE / 2}
             cy={SIZE / 2}
             r={R}
-            stroke={colors.primary}
+            stroke={colors.deep}
             strokeWidth={STROKE}
             strokeLinecap="round"
             fill="none"
@@ -64,7 +64,7 @@ export function ProfileHeader({ initials, photoUrl, name, subtitle, memberCode, 
           {localPhotoUri ?? photoUrl ? (
             <Image source={{ uri: (localPhotoUri ?? photoUrl)! }} style={styles.avatar} />
           ) : (
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
+            <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
               <Text style={styles.initials}>{initials}</Text>
             </LinearGradient>
           )}
@@ -103,21 +103,21 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     wrap: { alignItems: 'center', paddingTop: 8 },
     ringBox: { width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
     avatarShadow: {
-      width: 106, height: 106, borderRadius: 53, shadowColor: colors.primary,
+      width: 106, height: 106, borderRadius: 53, shadowColor: colors.deep,
       shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.35, shadowRadius: 14, elevation: 8,
     },
     avatar: { width: 106, height: 106, borderRadius: 53, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface2 },
     initials: { fontFamily: fonts.head, fontSize: 38, letterSpacing: -1.1, color: '#FFFFFF' },
     editBadge: {
       position: 'absolute', top: 6, right: 6, width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center',
-      backgroundColor: colors.primary, borderWidth: 3, borderColor: colors.bg,
+      backgroundColor: colors.deep, borderWidth: 3, borderColor: colors.bg,
     },
     pct: {
       position: 'absolute', bottom: 0, width: 52, alignItems: 'center', paddingVertical: 3, borderRadius: 999,
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     },
     pctText: { fontFamily: fonts.head, fontSize: 11, color: colors.primaryInk },
-    name: { ...typography.largeTitle, fontSize: 30, letterSpacing: -1, color: colors.text, marginTop: 14, textAlign: 'center' },
+    name: { fontFamily: fonts.display, fontSize: 22, letterSpacing: -0.2, textTransform: 'uppercase', color: colors.text, marginTop: 14, textAlign: 'center' },
     subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, marginTop: 2 },
     codeBadge: {
       flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 999,

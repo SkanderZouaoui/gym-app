@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { fonts, typography } from '../../theme/tokens';
+import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { Avatar } from '../ui';
 import { NotificationBell } from '../NotificationBell';
@@ -24,10 +24,12 @@ export function AppHeader({ greeting, firstName, lastName, photoUrl, hasUnreadNo
   const initials = `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || 'MU';
   return (
     <View style={styles.row}>
-      <Avatar initials={initials} size={44} background={colors.primarySoft} color={colors.primaryInk} photoUrl={photoUrl} />
+      <View style={styles.avatarRing}>
+        <Avatar initials={initials} size={46} background={colors.primarySoft} color={colors.primaryInk} photoUrl={photoUrl} />
+      </View>
       <View style={styles.text}>
         <Text style={styles.greeting}>{greeting}</Text>
-        <Text style={styles.name} numberOfLines={1}>{firstName ?? ''}</Text>
+        <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{firstName ?? ''}</Text>
       </View>
       <NotificationBell onPress={onPressNotifications ?? (() => undefined)} />
     </View>
@@ -36,10 +38,11 @@ export function AppHeader({ greeting, firstName, lastName, photoUrl, hasUnreadNo
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 6, paddingBottom: 6 },
-    text: { flex: 1 },
-    greeting: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-    name: { ...typography.title, fontSize: 21, color: colors.text },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingTop: 6, paddingBottom: 8 },
+    avatarRing: { padding: 3, borderRadius: 999, borderWidth: 2, borderColor: colors.deep },
+    text: { flex: 1, gap: 2 },
+    greeting: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, letterSpacing: 0.3, color: colors.muted },
+    name: { fontFamily: fonts.display, fontSize: 26, lineHeight: 30, letterSpacing: -0.6, textTransform: 'uppercase', color: colors.text },
   });
 }
 

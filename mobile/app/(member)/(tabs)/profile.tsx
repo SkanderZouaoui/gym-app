@@ -15,7 +15,8 @@ import { authApi } from '../../../src/api/endpoints';
 import { goalTarget } from '../../../src/hooks/useWeeklyGoal';
 import { useSessionStore } from '../../../src/store/session';
 import { rootRouteForRole } from '../../../src/navigation/roleRoutes';
-import { Banner, BottomSheet, Toast } from '../../../src/components/ui';
+import { Banner, BottomSheet, SectionHeader, SkeletonBlock, Toast } from '../../../src/components/ui';
+import { badgeLabel, useProfileBadges, type BadgeRule } from '../../../src/hooks/useProfileBadges';
 import { useNotificationPrefs } from '../../../src/hooks/useNotificationPrefs';
 import { useBiometricSetting } from '../../../src/hooks/useBiometricSetting';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
@@ -44,12 +45,12 @@ export default function ProfileScreen() {
   const { colors, preference, setScheme } = useTheme();
   const { t } = useTranslation();
   const prefs = usePreferencesStore();
-  const { data: workouts, refetch: refetchWorkouts } = useMyWorkouts();
+  const { data: workouts, isLoading: workoutsLoading, refetch: refetchWorkouts } = useMyWorkouts();
   const { isRtl, language } = useLanguage();
   const styles = useMemo(() => makeStyles(colors, isRtl), [colors, isRtl]);
-  const { data: user, refetch: refetchMe } = useMe();
-  const { data: memberships, refetch: refetchMemberships } = useMyMemberships();
-  const { data: bookings, refetch: refetchBookings } = useMyBookings();
+  const { data: user, isLoading: userLoading, refetch: refetchMe } = useMe();
+  const { data: memberships, isLoading: membershipsLoading, refetch: refetchMemberships } = useMyMemberships();
+  const { data: bookings, isLoading: bookingsLoading, refetch: refetchBookings } = useMyBookings();
   const { data: notifications, refetch: refetchNotifications } = useNotifications();
   const roles = useSessionStore((s) => s.roles);
   const isDegraded = useSessionStore((s) => s.isDegraded);
@@ -66,6 +67,9 @@ export default function ProfileScreen() {
       refetchWorkouts(),
     ]),
   );
+  // Premier chargement : squelettes plutôt que des compteurs à 0.
+  const headerLoading = (userLoading && !user) || (membershipsLoading && !memberships);
+  const statsLoading = (workoutsLoading && !workouts) || (bookingsLoading && !bookings);
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [languageVisible, setLanguageVisible] = useState(false);
 
@@ -124,14 +128,19 @@ export default function ProfileScreen() {
   const memberMonths = memberships?.length
     ? (nowMs - Math.min(...memberships.map((m) => new Date(m.startDate).getTime()))) / (30 * 86_400_000)
     : 0;
-  const badges: BadgeInfo[] = [
-    { icon: 'local-fire-department', label: t('member.serie_4_sem'), unlocked: streakWeeks >= 4 },
-    { icon: 'bolt', label: t('member.premier_cours'), unlocked: totalSessions >= 1 },
-    { icon: 'workspace-premium', label: t('common.3_mois'), unlocked: memberMonths >= 3 },
-    { icon: 'emoji-events', label: t('member.50_seances'), unlocked: totalSessions >= 50 },
-    { icon: 'diamond', label: t('member.100_seances'), unlocked: totalSessions >= 100 },
-    { icon: 'military-tech', label: t('member.assidu_90'), unlocked: assiduity >= 90 },
-  ];
+  const { data: badgeDefs } = useProfileBadges();
+  const progress: Record<BadgeRule, number> = { SESSIONS: totalSessions, STREAK_WEEKS: streakWeeks, MEMBER_MONTHS: memberMonths, ASSIDUITY: assiduity };
+  // Badges définis dans le back-office ; à défaut (premier chargement, hors ligne), les badges d'origine.
+  const badges: BadgeInfo[] = badgeDefs
+    ? badgeDefs.map((b) => ({ icon: b.icon as BadgeInfo['icon'], label: badgeLabel(b, language), unlocked: progress[b.rule] >= b.threshold }))
+    : [
+        { icon: 'local-fire-department', label: t('member.serie_4_sem'), unlocked: streakWeeks >= 4 },
+        { icon: 'bolt', label: t('member.premier_cours'), unlocked: totalSessions >= 1 },
+        { icon: 'workspace-premium', label: t('common.3_mois'), unlocked: memberMonths >= 3 },
+        { icon: 'emoji-events', label: t('member.50_seances'), unlocked: totalSessions >= 50 },
+        { icon: 'diamond', label: t('member.100_seances'), unlocked: totalSessions >= 100 },
+        { icon: 'military-tech', label: t('member.assidu_90'), unlocked: assiduity >= 90 },
+      ];
   const completion =
     [user?.firstName, user?.lastName, user?.email, user?.phone, user?.photoUrl].filter(Boolean).length / 5;
   const memberSince = user && memberships?.length
@@ -171,6 +180,13 @@ export default function ProfileScreen() {
           />
         ) : null}
 
+        {headerLoading ? (
+          <View style={{ alignItems: 'center', gap: 12, paddingVertical: 8 }}>
+            <SkeletonBlock height={106} width={106} radius={53} />
+            <SkeletonBlock height={26} width={180} radius={radii.xs} />
+            <SkeletonBlock height={16} width={120} radius={radii.xs} />
+          </View>
+        ) : (
         <ProfileHeader
           initials={initials}
           photoUrl={user?.photoUrl}
@@ -190,7 +206,23 @@ export default function ProfileScreen() {
               : [{ label: t('profile.none'), tone: 'muted' }]
           }
         />
+        )}
 
+        {statsLoading ? (
+          <View style={{ gap: spacing.md }}>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <SkeletonBlock height={92} radius={radii.lg} style={{ flex: 1 }} />
+              <SkeletonBlock height={92} radius={radii.lg} style={{ flex: 1 }} />
+              <SkeletonBlock height={92} radius={radii.lg} style={{ flex: 1 }} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <SkeletonBlock height={140} radius={radii.lg} style={{ flex: 1.35 }} />
+              <SkeletonBlock height={140} radius={radii.lg} style={{ flex: 1 }} />
+            </View>
+            <SkeletonBlock height={96} radius={radii.lg} />
+          </View>
+        ) : (
+          <>
         <ProfileStats
           stats={[
             { label: t('member.seances'), value: totalSessions },
@@ -199,14 +231,18 @@ export default function ProfileScreen() {
           ]}
         />
 
-        <ProfileActivity weeks={weekCounts} goalDone={weekSessions} goalTarget={GOAL_TARGET} onPressGoal={() => router.push('/(member)/weekly-goal' as any)} />
+        <ProfileActivity weeks={weekCounts} goalDone={weekSessions} goalTarget={GOAL_TARGET} onPressGoal={() => router.push('/(member)/weekly-goal' as any)} onPressActivity={() => router.push('/(member)/activity' as any)} />
 
+        {badges.length > 0 ? (
         <View>
-          <Text style={styles.sectionHeading}>{t('member.badges')}</Text>
+          <SectionHeader title={t('member.badges')} style={{ marginTop: spacing.sm, marginBottom: 12 }} />
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <ProfileBadges badges={badges} />
           </ScrollView>
         </View>
+        ) : null}
+          </>
+        )}
 
         <SettingsGroup
           title={t('common.apparence')}

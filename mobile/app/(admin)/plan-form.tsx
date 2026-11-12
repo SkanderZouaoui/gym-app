@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminPlans, useSavePlan } from '../../src/hooks/useAdmin';
-import { Banner, ScreenTitle } from '../../src/components/ui';
+import { Banner, ScreenTitle, DetailSkeleton } from '../../src/components/ui';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
 
@@ -24,7 +24,7 @@ export default function AdminPlanFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: plans } = useAdminPlans();
+  const { data: plans, isLoading: plansLoading } = useAdminPlans();
   const save = useSavePlan();
   const existing = id ? (plans ?? []).find((p) => p.id === id) : undefined;
 
@@ -70,6 +70,14 @@ export default function AdminPlanFormScreen() {
       { onSuccess: goBack, onError: () => setError(t('admin.impossible_denregistrer_le_forfait')) },
     );
   };
+
+  if (id && plansLoading && !plans) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DetailSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAllClassTypes, useDeleteClassType, useSaveClassType } from '../../src/hooks/useAdmin';
-import { Banner, BottomSheet, Toast } from '../../src/components/ui';
+import { Banner, BottomSheet, Toast, DetailSkeleton } from '../../src/components/ui';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { KeyboardAwareScreen } from '../../src/components/ui/KeyboardAwareScreen';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -31,7 +31,7 @@ export default function ClassTypeScreen() {
   const { id: paramId } = useLocalSearchParams<{ id?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: types, refetch } = useAllClassTypes();
+  const { data: types, isLoading: typesLoading, refetch } = useAllClassTypes();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const save = useSaveClassType();
   const remove = useDeleteClassType();
@@ -86,6 +86,15 @@ export default function ClassTypeScreen() {
       },
     });
   };
+
+  // Chargement de l'élément à modifier : squelette plutôt qu'un formulaire vide.
+  if (paramId && typesLoading && !types) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DetailSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

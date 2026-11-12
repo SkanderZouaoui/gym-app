@@ -44,6 +44,25 @@ export default function WorkoutDetailScreen() {
     return Array.from(groups.entries());
   }, [log]);
 
+  // Séries où un record de charge est battu dans cette séance : la plus lourde de l'exercice, si elle dépasse
+  // le meilleur poids de toutes les séances précédentes. Valeur = ancien record (0 = première fois).
+  const records = useMemo(() => {
+    const out = new Map<string, number>();
+    if (!log || !workouts) return out;
+    const before = new Map<string, number>();
+    for (const w of workouts) {
+      if (w.id === log.id || w.date >= log.date) continue;
+      for (const st of w.sets) before.set(st.exerciseId, Math.max(before.get(st.exerciseId) ?? 0, Number(st.weightKg) || 0));
+    }
+    for (const [exId, exSets] of exerciseGroups) {
+      let top: (typeof exSets)[number] | null = null;
+      for (const st of exSets) if ((Number(st.weightKg) || 0) > (top ? Number(top.weightKg) || 0 : 0)) top = st;
+      const prev = before.get(exId) ?? 0;
+      if (top && (Number(top.weightKg) || 0) > prev) out.set(top.id, prev);
+    }
+    return out;
+  }, [log, workouts, exerciseGroups]);
+
   if (isLoading || !log) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -122,18 +141,33 @@ export default function WorkoutDetailScreen() {
               <Text style={[styles.tableHeaderText, { width: 34 }]}>{t('member.serie_2')}</Text>
               <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{t('member.kg_2')}</Text>
               <Text style={[styles.tableHeaderText, { flex: 1, textAlign: 'center' }]}>{t('member.reps')}</Text>
-              <View style={{ width: 44 }} />
+              <View style={{ width: 56 }} />
             </View>
-            {exSets.map((st) => (
-              <View key={st.id} style={styles.row}>
-                <Text style={styles.setNumber}>{st.setNumber}</Text>
-                <Text style={styles.readValue}>{st.weightKg ? Number(st.weightKg).toString() : '—'}</Text>
-                <Text style={styles.readValue}>{st.reps ?? '—'}</Text>
-                <View style={styles.check}>
-                  <MaterialIcons name="check-circle" size={26} color={colors.successInk} />
+            {exSets.map((st) => {
+              const prev = records.get(st.id);
+              const isRecord = prev !== undefined;
+              const delta = isRecord && prev > 0 ? +((Number(st.weightKg) || 0) - prev).toFixed(2) : null;
+              return (
+                <View key={st.id} style={styles.row}>
+                  <Text style={styles.setNumber}>{st.setNumber}</Text>
+                  <Text style={styles.readValue}>{st.weightKg ? Number(st.weightKg).toString() : '—'}</Text>
+                  <Text style={styles.readValue}>{st.reps ?? '—'}</Text>
+                  <View style={styles.check}>
+                    {isRecord ? (
+                      <View
+                        style={styles.recordPill}
+                        accessibilityLabel={delta !== null ? t('member.record_set_hint', { delta, prev }) : t('member.record_set_first')}
+                      >
+                        <MaterialIcons name="emoji-events" size={13} color="#B45309" />
+                        {delta !== null ? <Text style={styles.recordPillText}>+{delta}</Text> : null}
+                      </View>
+                    ) : (
+                      <MaterialIcons name="check-circle" size={22} color={colors.successInk} />
+                    )}
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         ))}
       </ScrollView>
@@ -177,6 +211,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     row: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
     setNumber: { width: 34, fontFamily: fonts.head, fontSize: 15, color: colors.muted },
     readValue: { flex: 1, textAlign: 'center', fontFamily: fonts.bodyBold, fontSize: 17, color: colors.text },
-    check: { width: 44, alignItems: 'center' },
+    check: { width: 56, alignItems: 'center' },
+    recordPill: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 8, height: 26, borderRadius: radii.full, backgroundColor: 'rgba(217,119,6,0.12)' },
+    recordPillText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#B45309' },
   });
 }

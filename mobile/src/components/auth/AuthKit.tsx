@@ -56,7 +56,7 @@ function Hero({ compact, width, height, insetTop, dark }: { compact?: boolean; w
       {compact ? null : (
         <Animated.Text
           entering={FadeInDown.duration(600)}
-          style={{ position: 'absolute', left: 24, right: 24, top: insetTop + 96, fontFamily: fonts.display, fontSize: 58, lineHeight: 54, letterSpacing: 0.3, textTransform: 'uppercase', color: '#fff' }}
+          style={{ position: 'absolute', left: 24, right: 24, top: insetTop + 96, fontFamily: fonts.display, fontSize: 40, lineHeight: 42, letterSpacing: -0.8, textTransform: 'uppercase', color: '#fff' }}
         >
           {t('auth.login_headline')}
         </Animated.Text>

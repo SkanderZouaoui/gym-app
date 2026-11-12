@@ -13,6 +13,7 @@ import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { PROGRAM_STATUS_LABEL, estimateMinutes } from '../../../src/components/coach/programStatus';
 import { useTranslation } from 'react-i18next';
 import { goalLabel, levelLabel } from '../../../src/i18n/labels';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Détail d'un programme du coach : statut de validation, motif de refus, chiffres clés, exercices. */
 export default function CoachProgramDetailScreen() {
@@ -112,7 +113,7 @@ export default function CoachProgramDetailScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
+          <SectionHeader title={t('common.exercices')} style={{ marginBottom: 10 }} />
           <View style={{ gap: 10 }}>
             {exercises.map((ex, i) => {
               const weight = ex.setDetails[0]?.weightKg;

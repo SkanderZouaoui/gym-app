@@ -14,6 +14,7 @@ import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { estimateMinutes } from '../../../src/components/coach/programStatus';
 import { useTranslation } from 'react-i18next';
 import { goalLabel, levelLabel } from '../../../src/i18n/labels';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Détail d'un programme proposé par un coach : contenu, puis approbation (publication) ou refus avec motif. */
 export default function AdminProgramDetailScreen() {
@@ -107,7 +108,7 @@ export default function AdminProgramDetailScreen() {
 
         {muscles.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>{t('common.muscles_cibles')}</Text>
+            <SectionHeader title={t('common.muscles_cibles')} style={{ marginBottom: 10 }} />
             <View style={styles.chips}>
               {muscles.map((m) => (
                 <View key={m} style={styles.chip}>
@@ -119,7 +120,7 @@ export default function AdminProgramDetailScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>{t('common.exercices')}</Text>
+          <SectionHeader title={t('common.exercices')} style={{ marginBottom: 10 }} />
           <View style={{ gap: 10 }}>
             {exercises.map((ex, i) => (
               <Pressable

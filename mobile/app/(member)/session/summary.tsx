@@ -16,6 +16,7 @@ import { formatClock } from '../../../src/utils/duration';
 import { onlineManager } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 interface FinishedSet {
   exerciseId: string;
@@ -176,7 +177,7 @@ export default function SessionSummaryScreen() {
         ) : null}
 
         <View>
-          <Text style={styles.sectionTitle}>{t('member.ressenti')}</Text>
+          <SectionHeader title={t('member.ressenti')} style={{ marginBottom: 10 }} />
           <View style={styles.feelingRow}>
             {FEELINGS.map((f) => {
               const active = feeling === f.value;

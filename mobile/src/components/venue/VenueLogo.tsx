@@ -1,17 +1,18 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { fonts } from '../../theme/tokens';
+import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 
-/** Logo de la salle, ou sa première lettre sur fond de couleur quand aucun logo n'est importé. */
+/** Photo / logo de la salle : remplit tout le cadre (sans marge ni bordure), coins aux rayons de l'app ;
+ * sa première lettre sur fond de couleur quand aucune image n'est importée. */
 export function VenueLogo({ name, logoUrl, size = 52 }: { name: string; logoUrl: string | null; size?: number }) {
   const { colors } = useTheme();
-  const radius = size * 0.3;
+  const radius = size >= 90 ? radii.lg : size >= 56 ? radii.md : radii.sm;
   if (logoUrl) {
     return (
-      <View style={[styles.box, { width: size, height: size, borderRadius: radius, backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Image source={{ uri: logoUrl }} style={{ width: size * 0.8, height: size * 0.8 }} contentFit="contain" transition={200} />
+      <View style={[styles.box, { width: size, height: size, borderRadius: radius, backgroundColor: colors.surface2, borderWidth: 0 }]}>
+        <Image source={{ uri: logoUrl }} style={{ width: size, height: size }} contentFit="cover" transition={200} />
       </View>
     );
   }

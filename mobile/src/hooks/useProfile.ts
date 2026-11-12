@@ -17,6 +17,7 @@ export interface UpdateProfileInput {
   firstName?: string;
   lastName?: string;
   phone?: string;
+  gender?: 'female' | 'male';
   /** Clé de la nouvelle photo ; `null` supprime la photo de profil. */
   photoKey?: string | null;
 }
@@ -89,6 +90,18 @@ export function useDeleteNotification() {
     mutationFn: (id: string) => apiRequest(`/v1/me/notifications/${id}`, { method: 'DELETE' }),
     onMutate: (id: string) => {
       queryClient.setQueryData<NotificationItem[]>(['me', 'notifications'], (old) => old?.filter((n) => n.id !== id));
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
+  });
+}
+
+export function useDeleteAllNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['deleteAllNotifications'],
+    mutationFn: () => apiRequest('/v1/me/notifications', { method: 'DELETE' }),
+    onMutate: () => {
+      queryClient.setQueryData<NotificationItem[]>(['me', 'notifications'], []);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
   });

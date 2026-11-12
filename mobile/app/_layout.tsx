@@ -8,17 +8,13 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import NetInfo from '@react-native-community/netinfo';
 import {
   useFonts,
-  Sora_600SemiBold,
-  Sora_700Bold,
-  Sora_800ExtraBold,
-} from '@expo-google-fonts/sora';
-import {
-  DMSans_400Regular,
-  DMSans_500Medium,
-  DMSans_600SemiBold,
-  DMSans_700Bold,
-} from '@expo-google-fonts/dm-sans';
-import { BarlowCondensed_800ExtraBold } from '@expo-google-fonts/barlow-condensed';
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+  Inter_900Black,
+} from '@expo-google-fonts/inter';
 import { tokenStorage } from '../src/api/storage';
 import { meApi } from '../src/api/endpoints';
 import { ApiError } from '../src/api/client';
@@ -105,14 +101,12 @@ const persistOptions = {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Sora_600SemiBold,
-    Sora_700Bold,
-    Sora_800ExtraBold,
-    DMSans_400Regular,
-    DMSans_500Medium,
-    DMSans_600SemiBold,
-    DMSans_700Bold,
-    BarlowCondensed_800ExtraBold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Inter_800ExtraBold,
+    Inter_900Black,
   });
   const [bootstrapped, setBootstrapped] = useState(false);
   const [cacheRestored, setCacheRestored] = useState(false);

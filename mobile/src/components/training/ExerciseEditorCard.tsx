@@ -6,6 +6,7 @@ import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import type { SetDraft } from './SetRow';
 import { useTranslation } from 'react-i18next';
+import { ExerciseGif } from './ExerciseGif';
 
 interface ExerciseEditorCardProps {
   name: string;
@@ -17,11 +18,13 @@ interface ExerciseEditorCardProps {
   onRemove?: () => void;
   /** Appui sur l'en-tête (icône + nom) : ouvre la fiche de l'exercice. */
   onPressHeader?: () => void;
+  /** Démonstration de l'exercice affichée à la place de l'icône ; absent : icône haltère. */
+  mediaKey?: string | null;
 }
 
 /** Carte d'exercice du composeur de programme v2 : saisie directe des répétitions et de la charge
  * de chaque série, ajout/suppression de série, suppression de l'exercice. */
-export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemoveSet, onRemove, onPressHeader }: ExerciseEditorCardProps) {
+export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemoveSet, onRemove, onPressHeader, mediaKey }: ExerciseEditorCardProps) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -30,9 +33,15 @@ export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemove
     <View style={[styles.card, cardShadow]}>
       <View style={styles.header}>
         <Pressable style={styles.headerPress} onPress={onPressHeader} disabled={!onPressHeader}>
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.icon}>
-          <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
-        </LinearGradient>
+        {mediaKey !== undefined ? (
+          <View style={styles.thumb}>
+            <ExerciseGif uri={mediaKey} size={56} />
+          </View>
+        ) : (
+          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.icon}>
+            <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
+          </LinearGradient>
+        )}
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={styles.name} numberOfLines={1}>{name}</Text>
           <Text style={styles.meta}>{t('member.serie_3', { length: sets.length, v2: sets.length > 1 ? 's' : '' })}</Text>
@@ -105,6 +114,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     card: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 8 },
     header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 },
     headerPress: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0 },
+    thumb: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: colors.surface2 },
     icon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
     name: { fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text, textTransform: 'capitalize' },
     meta: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },

@@ -18,6 +18,7 @@ import { METHOD_ICON, METHOD_LABEL, formatMoney } from '../../src/components/sta
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 function describeError(e: unknown): { title: string; text: string; field?: 'email' | 'phone' } {
   if (!(e instanceof ApiError)) {
@@ -67,10 +68,7 @@ function Section({ icon, title, children }: { icon: keyof typeof MaterialIcons.g
   return (
     <View style={{ gap: 10 }}>
       <View style={styles.sectionHead}>
-        <View style={styles.sectionIcon}>
-          <MaterialIcons name={icon} size={16} color={colors.primaryInk} />
-        </View>
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <SectionHeader title={title} style={{ flex: 1 }} />
       </View>
       <View style={[styles.card, cardShadow]}>{children}</View>
     </View>

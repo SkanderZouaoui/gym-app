@@ -5,7 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../theme/tokens';
 import { useTheme } from '../../../theme/ThemeContext';
 import { useMyPrograms, useProposedPrograms } from '../../../hooks/useCoaching';
-import { EmptyState } from '../../ui';
+import { EmptyState, SkeletonBlock } from '../../ui';
 import { ProgramCard } from '../ProgramCard';
 import { useTranslation } from 'react-i18next';
 import { WEEKDAYS_LONG_SUN } from '../../../i18n/labels';
@@ -13,16 +13,28 @@ import { WEEKDAYS_LONG_SUN } from '../../../i18n/labels';
 const DAY_LABELS_FR = WEEKDAYS_LONG_SUN;
 
 /** Vue « Mes programmes » de l'onglet Entraînement : programme à la une en dégradé, bouton
- * pointillé de création, puis les autres programmes (assignés par le coach ou personnels). */
+ * pointillé de création, puis les autres programmes personnels. */
 export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed' }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const mine = useMyPrograms();
   const proposed = useProposedPrograms();
-  const { data: programs, isLoading, isError, refetch } = source === 'proposed' ? proposed : mine;
+  const active = source === 'proposed' ? proposed : mine;
+  const { data: rawPrograms, isLoading, isError, refetch } = active;
+  // Pas de programme assigné par un coach : « Mes programmes » ne liste que ceux que l'adhérent a créés lui-même ;
+  // les programmes de la salle sont dans « Proposés ».
+  const programs = source === 'mine' ? rawPrograms?.filter((p) => p.createdById === p.assignedToId) : rawPrograms;
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <View style={{ gap: spacing.sm }}>
+        <SkeletonBlock height={190} radius={radii.xl} />
+        <SkeletonBlock height={72} radius={radii.lg} />
+        <SkeletonBlock height={72} radius={radii.lg} />
+      </View>
+    );
+  }
 
   if (isError && !programs) {
     return (
@@ -58,7 +70,7 @@ export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed'
       {main ? (
         <ProgramCard
           highlighted
-          kicker={source === 'proposed' ? t('member.recommande_pour_vous') : isOwn(main) ? t('member.mon_programme') : t('member.assigne_par_votre_coach')}
+          kicker={source === 'proposed' ? t('member.recommande_pour_vous') : t('member.mon_programme')}
           name={main.name}
           isOwn={isOwn(main)}
           proposed={source === 'proposed'}

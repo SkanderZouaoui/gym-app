@@ -45,7 +45,8 @@ export function SessionGallery({ sections }: Props) {
     <View style={styles.wrap}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Text style={styles.title} numberOfLines={1}>{t('member.galerie')}</Text>
+          <View style={styles.mark} />
+          <Text style={styles.title} numberOfLines={1} accessibilityRole="header">{t('member.galerie')}</Text>
           <Text style={styles.count}>{visible.reduce((n, s) => n + s.photos.length, 0)}</Text>
         </View>
         <View style={styles.tools}>
@@ -113,10 +114,11 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     wrap: { gap: 12 },
     header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
-    titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, minWidth: 0 },
+    titleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 0 },
     count: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk, backgroundColor: colors.primarySoft, paddingHorizontal: 9, paddingVertical: 3, borderRadius: 10, overflow: 'hidden' },
     tabs: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
-    title: { flexShrink: 1, fontFamily: fonts.head, fontSize: 19, letterSpacing: -0.4, color: colors.text },
+    mark: { width: 4, height: 16, borderRadius: 2, backgroundColor: colors.primary },
+    title: { flexShrink: 1, fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 1.8, textTransform: 'uppercase', color: colors.text },
     tab: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingVertical: 6, paddingHorizontal: 14, borderRadius: 18, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexShrink: 1 },
     tabOn: { backgroundColor: colors.primary, borderColor: colors.primary },
     tabText: { flexShrink: 1, fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.text },

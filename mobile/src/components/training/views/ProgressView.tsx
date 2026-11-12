@@ -5,10 +5,11 @@ import { fonts, radii, spacing } from '../../../theme/tokens';
 import { useTheme } from '../../../theme/ThemeContext';
 import { useBodyMetrics } from '../../../hooks/useProgress';
 import { useMyWorkouts } from '../../../hooks/useCoaching';
-import { BarHistogram, EmptyState, LineChart } from '../../ui';
+import { BarHistogram, EmptyState, LineChart, SectionHeader, SkeletonBlock } from '../../ui';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../../i18n';
+import i18n, { dateLocale } from '../../../i18n';
 import { MONTHS_SHORT } from '../../../i18n/labels';
 
 const MONTH_LABELS = MONTHS_SHORT;
@@ -27,6 +28,7 @@ const MEASUREMENT_LABELS: Record<string, string> = {
   get arm() { return i18n.t('member.tour_de_bras'); },
 };
 const MEASUREMENT_UNITS: Record<string, string> = { waist: 'cm', bodyFat: '%', arm: 'cm' };
+const MEASUREMENT_ICONS: Record<'waist' | 'arm' | 'bodyFat', keyof typeof MaterialIcons.glyphMap> = { waist: 'straighten', arm: 'fitness-center', bodyFat: 'percent' };
 
 /** Vue "Progression" de l'onglet Entraînement — FitZone App Entraînement.dc.html, F1. */
 export function ProgressView() {
@@ -73,7 +75,17 @@ export function ProgressView() {
     return { streak: count };
   }, [weeklyRegularity]);
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <View style={{ gap: spacing.md }}>
+        <SkeletonBlock height={150} radius={radii.xl} />
+        <SkeletonBlock height={200} radius={radii.lg} />
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          {[0, 1, 2].map((i) => <SkeletonBlock key={i} height={110} radius={radii.lg} style={{ flex: 1 }} />)}
+        </View>
+      </View>
+    );
+  }
 
   if (isError && !metrics) {
     return (
@@ -88,13 +100,22 @@ export function ProgressView() {
     );
   }
 
-  const latest = metrics?.[0];
-  const previous = metrics?.[1];
-  const weightDelta = latest?.weightKg && previous?.weightKg ? Number(latest.weightKg) - Number(previous.weightKg) : null;
+  // Dernière valeur connue de chaque mesure (un enregistrement peut n'en contenir qu'une partie), et la précédente pour l'écart.
+  const lastTwo = (pick: (m: NonNullable<typeof metrics>[number]) => number | null) => {
+    const found: { value: number; date: string }[] = [];
+    for (const m of metrics ?? []) {
+      const v = pick(m);
+      if (v != null && !Number.isNaN(v)) found.push({ value: v, date: m.date });
+      if (found.length === 2) break;
+    }
+    return { latest: found[0], previous: found[1] };
+  };
+  const weight = lastTwo((m) => (m.weightKg ? Number(m.weightKg) : null));
+  const weightDelta = weight.latest && weight.previous ? weight.latest.value - weight.previous.value : null;
 
-  const secondaryMeasurements = latest?.measurements
-    ? Object.entries(latest.measurements).filter(([key]) => key in MEASUREMENT_LABELS)
-    : [];
+  const secondary = (['waist', 'arm', 'bodyFat'] as const)
+    .map((key) => ({ key, ...lastTwo((m) => m.measurements?.[key] ?? null) }))
+    .filter((x) => x.latest);
 
   if (!metrics || metrics.length === 0) {
     return (
@@ -112,94 +133,118 @@ export function ProgressView() {
     );
   }
 
+  const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${d.toFixed(1)}`;
+
   return (
     <View style={{ gap: spacing.md }}>
-      <View style={styles.weightCard}>
-        <View style={styles.weightHeaderRow}>
-          <View>
-            <Text style={styles.weightValue}>{t('member.kg_5', { v0: latest?.weightKg ?? '—' })}</Text>
+      {weight.latest ? (
+        <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <View style={styles.heroDeco} />
+          <Text style={styles.heroLabel}>{t('member.progress_current_weight')}</Text>
+          <View style={styles.heroRow}>
+            <Text style={styles.heroValue}>{weight.latest.value}<Text style={styles.heroUnit}> kg</Text></Text>
             {weightDelta !== null ? (
-              <Text style={[styles.weightDelta, { color: weightDelta <= 0 ? colors.successInk : colors.warningInk }]}>{t('member.kg_sur_la_periode', { v1: weightDelta > 0 ? '+' : '', v2: weightDelta.toFixed(1) })}</Text>
+              <View style={styles.deltaPill}>
+                <MaterialIcons name={weightDelta <= 0 ? 'trending-down' : 'trending-up'} size={16} color="#FFFFFF" />
+                <Text style={styles.deltaText}>{fmtDelta(weightDelta)} kg</Text>
+              </View>
             ) : null}
           </View>
-          <Pressable style={styles.addMeasureButton} onPress={() => router.push('/(member)/measure')}>
-            <MaterialIcons name="add" size={18} color={colors.primaryInk} />
-            <Text style={styles.addMeasureText}>{t('member.mesure')}</Text>
-          </Pressable>
-        </View>
-        {weightSeries.length >= 2 ? (
-          <LineChart
-            points={weightSeries.map((p) => p.weight)}
-            labels={weightSeries.length > 4
-              ? [weightSeries[0], weightSeries[Math.floor(weightSeries.length / 2)], weightSeries[weightSeries.length - 1]].map((p) => MONTH_LABELS[p.date.getMonth()])
-              : weightSeries.map((p) => MONTH_LABELS[p.date.getMonth()])}
-          />
-        ) : null}
-      </View>
+          <Text style={styles.heroDate}>{t('member.progress_updated', { date: new Date(weight.latest.date).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long' }) })}</Text>
+        </LinearGradient>
+      ) : null}
 
-      {secondaryMeasurements.length > 0 ? (
-        <View style={styles.measurementsRow}>
-          {secondaryMeasurements.map(([key, value]) => (
-            <View key={key} style={styles.measurementCard}>
-              <Text style={styles.measurementLabel}>{MEASUREMENT_LABELS[key]}</Text>
-              <Text style={styles.measurementValue}>{value} {MEASUREMENT_UNITS[key]}</Text>
-            </View>
-          ))}
+      {weightSeries.length >= 2 ? (
+        <View style={{ gap: 10 }}>
+          <SectionHeader title={t('member.progress_evolution')} />
+          <View style={styles.card}>
+            <LineChart
+              color={colors.deep}
+              points={weightSeries.map((p) => p.weight)}
+              labels={weightSeries.length > 4
+                ? [weightSeries[0], weightSeries[Math.floor(weightSeries.length / 2)], weightSeries[weightSeries.length - 1]].map((p) => MONTH_LABELS[p.date.getMonth()])
+                : weightSeries.map((p) => MONTH_LABELS[p.date.getMonth()])}
+            />
+          </View>
         </View>
       ) : null}
 
-      <View style={styles.regularityCard}>
-        <View style={styles.regularityHeaderRow}>
-          <View style={styles.streakBadge}>
-            <Text style={styles.streakBadgeText}>{streak?.streak ?? 0}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.regularityTitle}>{t('member.semaine_daffilee', { v0: streak?.streak ?? 0, v2: (streak?.streak ?? 0) > 1 ? 's' : '' })}</Text>
-            <Text style={styles.regularitySub}>{t('member.regularite_des_8_dernieres_semaines')}</Text>
+      {secondary.length > 0 ? (
+        <View style={{ gap: 10 }}>
+          <SectionHeader title={t('member.progress_measurements')} />
+          <View style={styles.tiles}>
+            {secondary.map(({ key, latest, previous }) => {
+              const d = latest && previous ? latest.value - previous.value : null;
+              return (
+                <View key={key} style={styles.tile}>
+                  <View style={styles.tileTop}>
+                    <View style={styles.tileIcon}>
+                      <MaterialIcons name={MEASUREMENT_ICONS[key]} size={22} color="#FFFFFF" />
+                    </View>
+                    {d !== null && d !== 0 ? (
+                      <View style={[styles.tileDeltaPill, { backgroundColor: d < 0 ? colors.successSoft : colors.warningSoft }]}>
+                        <MaterialIcons name={d < 0 ? 'arrow-downward' : 'arrow-upward'} size={11} color={d < 0 ? colors.successInk : colors.warningInk} />
+                        <Text style={[styles.tileDelta, { color: d < 0 ? colors.successInk : colors.warningInk }]}>{Math.abs(d).toFixed(1)}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text style={styles.tileValue}>{latest!.value}<Text style={styles.tileUnit}> {MEASUREMENT_UNITS[key]}</Text></Text>
+                  <Text style={styles.tileLabel} numberOfLines={2}>{MEASUREMENT_LABELS[key].replace(/ ([^ ]+)$/, '\n$1')}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
-        {weeklyRegularity.length > 0 ? (
-          <BarHistogram values={weeklyRegularity} highlightIndex={weeklyRegularity.length - 1} />
-        ) : null}
-      </View>
+      ) : null}
 
+      <View style={{ gap: 10 }}>
+        <SectionHeader title={t('member.progress_regularity')} />
+        <View style={[styles.card, { gap: spacing.md }]}>
+          <View style={styles.regularityHeaderRow}>
+            <LinearGradient colors={[colors.deep, colors.deepPressed]} style={styles.streakBadge}>
+              <Text style={styles.streakBadgeText}>{streak?.streak ?? 0}</Text>
+            </LinearGradient>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.regularityTitle}>{t('member.semaine_daffilee', { v0: streak?.streak ?? 0, v2: (streak?.streak ?? 0) > 1 ? 's' : '' })}</Text>
+              <Text style={styles.regularitySub}>{t('member.regularite_des_8_dernieres_semaines')}</Text>
+            </View>
+          </View>
+          {weeklyRegularity.length > 0 ? (
+            <BarHistogram values={weeklyRegularity} highlightIndex={weeklyRegularity.length - 1} color={colors.deepPressed} highlightColor={colors.deep} />
+          ) : null}
+        </View>
+      </View>
     </View>
   );
 }
 
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
-    weightCard: {
-      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
-      padding: spacing.md, gap: spacing.sm,
-    },
-    weightHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-    weightValue: { fontFamily: fonts.head, fontSize: 30, color: colors.text },
-    weightDelta: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, marginTop: 2 },
-    addMeasureButton: {
-      flexDirection: 'row', alignItems: 'center', gap: 4, height: 36, paddingHorizontal: 12,
-      borderRadius: 999, backgroundColor: colors.primarySoft,
-    },
-    addMeasureText: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.primaryInk },
-    measurementsRow: { flexDirection: 'row', gap: spacing.sm },
-    measurementCard: {
-      flex: 1, backgroundColor: colors.surface, borderRadius: radii.sm, borderWidth: 1, borderColor: colors.border,
-      padding: spacing.sm, gap: 2,
-    },
-    measurementLabel: { fontFamily: fonts.body, fontSize: 10.5, color: colors.muted },
-    measurementValue: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },
-    regularityCard: {
-      backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border,
-      padding: spacing.md, gap: spacing.md,
-    },
+    hero: { borderRadius: radii.xl, padding: 22, overflow: 'hidden', gap: 4 },
+    heroDeco: { position: 'absolute', right: -40, top: -40, width: 170, height: 170, borderRadius: 85, backgroundColor: 'rgba(255,255,255,0.08)' },
+    heroLabel: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1.6, textTransform: 'uppercase', color: 'rgba(255,255,255,0.75)' },
+    heroRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    heroValue: { fontFamily: fonts.display, fontSize: 52, lineHeight: 58, letterSpacing: -1.5, color: '#FFFFFF' },
+    heroUnit: { fontFamily: fonts.bodyBold, fontSize: 20, letterSpacing: 0, color: 'rgba(255,255,255,0.75)' },
+    deltaPill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.18)' },
+    deltaText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#FFFFFF' },
+    heroDate: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
+    card: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md },
+    tiles: { flexDirection: 'row', gap: 10 },
+    tile: { flex: 1, minWidth: 0, overflow: 'hidden', backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 12, gap: 3 },
+    tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 4, marginBottom: 6 },
+    tileIcon: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.deep },
+    tileValue: { fontFamily: fonts.head, fontSize: 22, letterSpacing: -0.6, color: colors.text },
+    tileUnit: { fontFamily: fonts.bodySemiBold, fontSize: 12, letterSpacing: 0, color: colors.muted },
+    tileLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, lineHeight: 15, color: colors.muted },
+    tileDeltaPill: { flexShrink: 0, flexDirection: 'row', alignItems: 'center', gap: 1, height: 22, paddingHorizontal: 5, borderRadius: 11 },
+    tileDelta: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
     regularityHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    streakBadge: {
-      width: 44, height: 44, borderRadius: 22, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center',
-    },
-    streakBadgeText: { fontFamily: fonts.headBold, fontSize: 17, color: colors.onAccent },
-    regularityTitle: { fontFamily: fonts.headSemiBold, fontSize: 14, color: colors.text },
-    regularitySub: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
-    addButton: { height: 48, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+    streakBadge: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+    streakBadgeText: { fontFamily: fonts.display, fontSize: 20, color: '#FFFFFF' },
+    regularityTitle: { fontFamily: fonts.headBold, fontSize: 15, color: colors.text },
+    regularitySub: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
+    addButton: { height: 52, borderRadius: radii.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
     addButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
   });
 }

@@ -62,6 +62,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       paddingBottom: spacing.sm,
     },
     backButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-    title: { fontFamily: fonts.headBold, fontSize: 18, letterSpacing: -0.3, color: colors.text },
+    title: { fontFamily: fonts.display, fontSize: 18, letterSpacing: 0.4, textTransform: 'uppercase', color: colors.text },
   });
 }

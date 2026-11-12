@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminRooms, useDeleteRoom, useSaveRoom } from '../../src/hooks/useAdmin';
-import { Banner, BottomSheet, Toast } from '../../src/components/ui';
+import { Banner, BottomSheet, Toast, DetailSkeleton } from '../../src/components/ui';
 import { KeyboardAwareScreen } from '../../src/components/ui/KeyboardAwareScreen';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { TextField } from '../../src/components/TextField';
@@ -29,7 +29,7 @@ export default function RoomScreen() {
   const { id: paramId } = useLocalSearchParams<{ id?: string }>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: rooms, refetch } = useAdminRooms();
+  const { data: rooms, isLoading: roomsLoading, refetch } = useAdminRooms();
   const { refreshing, offlineToastVisible, onRefresh } = useOfflineAwareRefresh(refetch);
   const save = useSaveRoom();
   const remove = useDeleteRoom();
@@ -81,6 +81,15 @@ export default function RoomScreen() {
       },
     });
   };
+
+  // Chargement de l'élément à modifier : squelette plutôt qu'un formulaire vide.
+  if (paramId && roomsLoading && !rooms) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DetailSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

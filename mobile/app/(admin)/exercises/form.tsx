@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { TextField } from '../../../src/components/TextField';
-import { Banner, ScreenTitle } from '../../../src/components/ui';
+import { Banner, ScreenTitle, DetailSkeleton } from '../../../src/components/ui';
 import { SelectField } from '../../../src/components/ui/SelectField';
 import { StickyActionBar, STICKY_BAR_SPACE } from '../../../src/components/ui/StickyActionBar';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
@@ -29,7 +29,7 @@ export default function AdminExerciseFormScreen() {
   const editing = !!id;
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: existing } = useAdminExercise(id);
+  const { data: existing, isLoading: existingLoading } = useAdminExercise(id);
   const { data: all } = useAdminExercises();
   const save = useSaveExercise();
 
@@ -68,6 +68,15 @@ export default function AdminExerciseFormScreen() {
       { onSuccess: goBack, onError: () => setError(i18n.t('admin.impossible_denregistrer_lexercice_reessayez')) },
     );
   };
+
+  // Chargement de l'élément à modifier : squelette plutôt qu'un formulaire vide.
+  if (id && existingLoading && !existing) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DetailSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

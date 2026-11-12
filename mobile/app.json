@@ -17,7 +17,8 @@
         "NSFaceIDUsageDescription": "MuscleUP utilise Face ID pour vous connecter rapidement et en toute sécurité.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "appleTeamId": "KCG4GUSTSW"
+      "appleTeamId": "KCG4GUSTSW",
+      "buildNumber": "2"
     },
     "android": {
       "package": "com.muscleup.app",

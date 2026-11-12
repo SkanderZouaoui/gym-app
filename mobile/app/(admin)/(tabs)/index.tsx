@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { useNow } from '../../../src/hooks/useNow';
 import { OccupancyCard } from '../../../src/components/staff/OccupancyCard';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 const nf = (n: number) => n.toLocaleString(dateLocale());
 const money = (n: number | string) => `${nf(Math.round(Number(n)))} DT`;
@@ -222,7 +223,7 @@ export default function AdminDashboardScreen() {
         {setupAlerts && setupAlerts.length > 0 ? (
           <View style={{ gap: 8 }}>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>{i18n.t('admin.configuration_a_completer')}</Text>
+              <SectionHeader title={i18n.t('admin.configuration_a_completer')} style={{ marginBottom: 10 }} />
               <Text style={styles.sectionCount}>{setupAlerts.length}</Text>
             </View>
             {setupAlerts.map((a) => {
@@ -250,7 +251,7 @@ export default function AdminDashboardScreen() {
         <OccupancyCard settingsHref="/(admin)/occupancy-settings" />
 
         <View style={[styles.shortcutsHead, styles.sectionRow]}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.shortcuts')}</Text>
+          <SectionHeader title={i18n.t('admin.shortcuts')} style={{ marginBottom: 10 }} />
           <Pressable onPress={() => setEditShortcuts(true)} hitSlop={8} style={styles.editPill}>
             <MaterialIcons name="tune" size={15} color={colors.primaryInk} />
             <Text style={styles.editPillText}>{i18n.t('admin.edit_shortcuts')}</Text>
@@ -279,7 +280,7 @@ export default function AdminDashboardScreen() {
         </View>
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.key_figures')}</Text>
+          <SectionHeader title={i18n.t('admin.key_figures')} style={{ marginBottom: 10 }} />
         </View>
         <View style={styles.kpiRow}>
           <Pressable
@@ -309,7 +310,7 @@ export default function AdminDashboardScreen() {
         </View>
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.activity_title')}</Text>
+          <SectionHeader title={i18n.t('admin.activity_title')} style={{ marginBottom: 10 }} />
           <Text style={styles.sectionDate}>{new Date().toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
         </View>
         <View style={styles.activityRow}>
@@ -329,7 +330,7 @@ export default function AdminDashboardScreen() {
         </View>
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.live_classes')}</Text>
+          <SectionHeader title={i18n.t('admin.live_classes')} style={{ marginBottom: 10 }} />
         </View>
         {todayLoading ? <SkeletonList count={1} height={96} /> : liveClasses.length === 0 ? (
           <View style={[styles.alert, cardShadow]}>
@@ -356,7 +357,7 @@ export default function AdminDashboardScreen() {
         )}
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.team_on_shift')}</Text>
+          <SectionHeader title={i18n.t('admin.team_on_shift')} style={{ marginBottom: 10 }} />
           <Pressable onPress={() => router.push('/(admin)/team')} hitSlop={8}>
             <Text style={styles.link}>{i18n.t('staff.voir_tout')}</Text>
           </Pressable>
@@ -390,7 +391,7 @@ export default function AdminDashboardScreen() {
         )}
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.renewals')}</Text>
+          <SectionHeader title={i18n.t('admin.renewals')} style={{ marginBottom: 10 }} />
           <Pressable onPress={() => router.push({ pathname: '/(admin)/(tabs)/members', params: { status: 'expiring' } })} hitSlop={8}>
             <Text style={styles.link}>{i18n.t('staff.voir_tout')}</Text>
           </Pressable>
@@ -435,7 +436,7 @@ export default function AdminDashboardScreen() {
         )}
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.recent_payments')}</Text>
+          <SectionHeader title={i18n.t('admin.recent_payments')} style={{ marginBottom: 10 }} />
           <Pressable onPress={() => router.push('/(admin)/cash')} hitSlop={8}>
             <Text style={styles.link}>{i18n.t('admin.see_history')}</Text>
           </Pressable>
@@ -465,7 +466,7 @@ export default function AdminDashboardScreen() {
         )}
 
         <View style={styles.sectionRow}>
-          <Text style={styles.sectionTitle}>{i18n.t('admin.alertes')}</Text>
+          <SectionHeader title={i18n.t('admin.alertes')} style={{ marginBottom: 10 }} />
           <Text style={styles.sectionCount}>{alerts.length}</Text>
         </View>
         {todayLoading || expiringLoading ? <SkeletonList count={1} height={64} /> : alerts.length === 0 ? (

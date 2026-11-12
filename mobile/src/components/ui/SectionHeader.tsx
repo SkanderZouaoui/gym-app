@@ -11,25 +11,25 @@ interface SectionHeaderProps {
   /** Lien à droite (« Voir le planning »…), avec chevron. */
   actionLabel?: string;
   onAction?: () => void;
+  /** Texte discret à droite quand il n'y a pas d'action (ex. « 12 séances »). */
+  meta?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-/** Titre de section : pastille colorée avec pictogramme, titre en gras, lien d'action discret à droite. */
-export function SectionHeader({ title, icon, actionLabel, onAction, style }: SectionHeaderProps) {
+/** Titre de section : repère violet, libellé en capitales espacées, filet discret, lien d'action à droite. */
+export function SectionHeader({ title, actionLabel, onAction, meta, style }: SectionHeaderProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={[styles.row, style]}>
-      {icon ? (
-        <View style={styles.icon}>
-          <MaterialIcons name={icon} size={16} color={colors.primaryInk} />
-        </View>
-      ) : null}
+      <View style={styles.mark} />
       <Text style={styles.title} numberOfLines={1} accessibilityRole="header">{title}</Text>
+      <View style={styles.rule} />
+      {meta ? <Text style={styles.meta}>{meta}</Text> : null}
       {actionLabel && onAction ? (
         <Pressable onPress={onAction} hitSlop={8} style={styles.action} accessibilityRole="link">
           <Text style={styles.actionText}>{actionLabel}</Text>
-          <MaterialIcons name="chevron-right" size={18} color={colors.primaryInk} />
+          <MaterialIcons name="arrow-forward" size={14} color={colors.primaryInk} />
         </Pressable>
       ) : null}
     </View>
@@ -39,9 +39,11 @@ export function SectionHeader({ title, icon, actionLabel, onAction, style }: Sec
 function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    icon: { width: 28, height: 28, borderRadius: 9, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-    title: { flex: 1, minWidth: 0, fontFamily: fonts.headBold, fontSize: 19, letterSpacing: -0.4, color: colors.text },
-    action: { flexDirection: 'row', alignItems: 'center', gap: 1 },
-    actionText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.primaryInk },
+    mark: { width: 4, height: 16, borderRadius: 2, backgroundColor: colors.primary },
+    title: { flexShrink: 1, fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 1.8, textTransform: 'uppercase', color: colors.text },
+    rule: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.borderStrong, minWidth: 12 },
+    meta: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: colors.muted },
+    action: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    actionText: { fontFamily: fonts.bodyBold, fontSize: 12.5, letterSpacing: 0.2, color: colors.primaryInk },
   });
 }

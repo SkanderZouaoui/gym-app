@@ -11,6 +11,7 @@ import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { ScreenTitle, SkeletonList } from '../../src/components/ui';
 import { formatMoney } from '../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 function durationLabel(days: number): string {
   if (days >= 360) return `${Math.round(days / 365)} an${days >= 730 ? 's' : ''}`;
@@ -122,7 +123,7 @@ export default function AdminPlansScreen() {
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>{t('admin.remises_par_duree_dengagement')}</Text>
+        <SectionHeader title={t('admin.remises_par_duree_dengagement')} style={{ marginBottom: 10 }} />
         <View style={[styles.card, cardShadow]}>
           {['3', '6', '12'].map((m, i) => (
             <View key={m}>

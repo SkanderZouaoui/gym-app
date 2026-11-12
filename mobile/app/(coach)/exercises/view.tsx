@@ -12,6 +12,7 @@ import { parseExerciseInstructions } from '../../../src/components/training/exer
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
  * vue coach (sans donnée d'adhérent). FitZone App Coach.dc.html. */
@@ -62,7 +63,7 @@ export default function CoachViewProgramExerciseScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('coach.series_du_programme')}</Text>
+          <SectionHeader title={t('coach.series_du_programme')} style={{ marginBottom: 10 }} />
           {parsedSetDetails.length > 0 ? (
             <View style={styles.setsList}>
               {parsedSetDetails.map((s) => (
@@ -81,7 +82,7 @@ export default function CoachViewProgramExerciseScreen() {
 
         {parsed.steps.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>{t('common.consignes')}</Text>
+            <SectionHeader title={t('common.consignes')} style={{ marginBottom: 10 }} />
             <View style={styles.stepsList}>
               {parsed.steps.map((step, i) => (
                 <View key={i} style={styles.stepRow}>

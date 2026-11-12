@@ -7,12 +7,13 @@ import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useMyMemberships } from '../../src/hooks/useMe';
 import { usePlans, type MembershipPlan } from '../../src/hooks/usePlans';
-import { EmptyState, ScreenTitle } from '../../src/components/ui';
+import { EmptyState, ScreenTitle, SkeletonBlock } from '../../src/components/ui';
 import { MembershipHeroCard } from '../../src/components/adherent/MembershipHeroCard';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
 import { dateLocale } from '../../src/i18n';
 import { useNow } from '../../src/hooks/useNow';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 function durationLabel(days: number): string {
   if (days >= 360) return `${Math.round(days / 365)} an${days >= 730 ? 's' : ''}`;
@@ -32,7 +33,7 @@ export default function SubscriptionScreen() {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: memberships, refetch: refetchMemberships } = useMyMemberships();
+  const { data: memberships, isLoading: membershipsLoading, refetch: refetchMemberships } = useMyMemberships();
   const { data: plans, isLoading, isError, refetch: refetchPlans } = usePlans();
   const { refreshing, onRefresh } = useOfflineAwareRefresh(() => Promise.all([refetchMemberships(), refetchPlans()]));
 
@@ -53,7 +54,9 @@ export default function SubscriptionScreen() {
         </Pressable>
         <ScreenTitle title={t('common.abonnement')} subtitle={t('member.votre_formule_et_les_autres')} />
 
-        {active ? (
+        {membershipsLoading && !memberships ? (
+          <SkeletonBlock height={150} radius={radii.xl} />
+        ) : active ? (
           <MembershipHeroCard
             planName={active.plan.name}
             periodLabel={periodLabel(active.startDate, active.endDate)}
@@ -73,7 +76,7 @@ export default function SubscriptionScreen() {
         )}
 
         <View>
-          <Text style={styles.sectionTitle}>{active ? t('member.autres_packs') : t('member.nos_packs')}</Text>
+          <SectionHeader title={active ? t('member.autres_packs') : t('member.nos_packs')} style={{ marginBottom: 10 }} />
           {isError ? (
             <EmptyState
               icon="cloud-off"
@@ -83,7 +86,12 @@ export default function SubscriptionScreen() {
               actionLabel={t('common.reessayer')}
               onAction={() => refetchPlans()}
             />
-          ) : !isLoading && otherPlans.length === 0 ? (
+          ) : isLoading ? (
+            <View style={{ gap: 10 }}>
+              <SkeletonBlock height={150} radius={radii.lg} />
+              <SkeletonBlock height={150} radius={radii.lg} />
+            </View>
+          ) : otherPlans.length === 0 ? (
             <View style={styles.empty}>
               <Text style={styles.emptyText}>{t('member.aucun_autre_pack_propose_pour')}</Text>
             </View>

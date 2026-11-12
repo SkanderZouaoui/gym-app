@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { Banner, BottomSheet, ScreenTitle } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, DetailSkeleton } from '../../src/components/ui';
 import { SelectField } from '../../src/components/ui/SelectField';
 import { DateTimeFields } from '../../src/components/ui/DateTimeFields';
 import { Button } from '../../src/components/Button';
@@ -41,7 +41,7 @@ export default function CourseFormScreen() {
   const editing = !!id;
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: session } = useSession(id);
+  const { data: session, isLoading: sessionLoading } = useSession(id);
   const { data: types } = useAllClassTypes();
   const { data: coaches } = useAdminCoaches();
   const { data: rooms } = useAdminRooms();
@@ -108,6 +108,15 @@ export default function CourseFormScreen() {
       },
     );
   };
+
+  // Chargement de l'élément à modifier : squelette plutôt qu'un formulaire vide.
+  if (id && sessionLoading && !session) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DetailSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

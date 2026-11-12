@@ -19,7 +19,7 @@ import { useSessionStore } from '../store/session';
 import { unregisterPush } from '../notifications/push';
 import { tokenStorage } from '../api/storage';
 import { authApi } from '../api/endpoints';
-import { BottomSheet, Toast } from './ui';
+import { BottomSheet, SkeletonBlock, Toast } from './ui';
 import { StickyActionBar, STICKY_BAR_SPACE } from './ui/StickyActionBar';
 import { Button } from './Button';
 import { rootRouteForRole } from '../navigation/roleRoutes';
@@ -40,7 +40,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   const { colors, cardShadow, preference, setScheme } = useTheme();
   const { language } = useLanguage();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: user, refetch: refetchMe } = useMe();
+  const { data: user, isLoading: userLoading, refetch: refetchMe } = useMe();
   const updateProfile = useUpdateProfile();
   const biometric = useBiometricSetting();
   const { data: mySchedule, refetch: refetchSchedule } = useMySchedule();
@@ -124,6 +124,13 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView {...tabBarScroll} contentContainerStyle={[styles.container, dirty && { paddingBottom: STICKY_BAR_SPACE + 40 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+        {userLoading && !user ? (
+          <View style={{ alignItems: 'center', gap: 12, paddingVertical: 8 }}>
+            <SkeletonBlock height={106} width={106} radius={53} />
+            <SkeletonBlock height={26} width={180} radius={radii.xs} />
+            <SkeletonBlock height={16} width={140} radius={radii.xs} />
+          </View>
+        ) : (
         <ProfileHeader
           initials={initials}
           photoUrl={user?.photoUrl}
@@ -135,6 +142,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
           completion={[user?.firstName, user?.email, user?.phone, user?.photoKey].filter(Boolean).length / 4}
           tags={[{ label: roleLabel, tone: 'primary' }, { label: t('common.compte_actif'), tone: 'success' }]}
         />
+        )}
 
         {workingDays.length > 0 ? (
           <View>

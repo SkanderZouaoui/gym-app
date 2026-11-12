@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { fonts, typography } from '../../theme/tokens';
+import { fonts } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 
 interface ScreenTitleProps {
@@ -10,14 +10,15 @@ interface ScreenTitleProps {
   right?: ReactNode;
 }
 
-/** Grand titre d'écran racine v2 (34 pt gras, interlettrage serré) + sous-titre optionnel. */
+/** Grand titre d'écran : Inter extra-gras en capitales, petite barre violette, sous-titre optionnel. */
 export function ScreenTitle({ title, subtitle, right }: ScreenTitleProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.row}>
       <View style={styles.text}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title} accessibilityRole="header">{title}</Text>
+        <View style={styles.bar} />
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
       {right}
@@ -29,7 +30,8 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   return StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, paddingTop: 10, paddingBottom: 6 },
     text: { flex: 1 },
-    title: { ...typography.largeTitle, lineHeight: 37, color: colors.text },
-    subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, marginTop: 4 },
+    title: { fontFamily: fonts.display, fontSize: 30, lineHeight: 34, letterSpacing: -0.6, textTransform: 'uppercase', color: colors.text },
+    bar: { width: 32, height: 4, borderRadius: 2, backgroundColor: colors.primary, marginTop: 8 },
+    subtitle: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, marginTop: 10 },
   });
 }

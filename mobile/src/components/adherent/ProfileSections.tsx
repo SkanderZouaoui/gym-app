@@ -6,6 +6,7 @@ import Svg, { Circle } from 'react-native-svg';
 import { fonts, radii } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { SectionHeader } from '../ui/SectionHeader';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
@@ -37,7 +38,7 @@ const GOAL_STROKE = 8;
 const GOAL_R = (GOAL_RING - GOAL_STROKE) / 2;
 const GOAL_CIRC = 2 * Math.PI * GOAL_R;
 
-export function ProfileActivity({ weeks, goalDone, goalTarget, onPressGoal }: { weeks: number[]; goalDone: number; goalTarget: number; onPressGoal?: () => void }) {
+export function ProfileActivity({ weeks, goalDone, goalTarget, onPressGoal, onPressActivity }: { weeks: number[]; goalDone: number; goalTarget: number; onPressGoal?: () => void; onPressActivity?: () => void }) {
   const { t } = useTranslation();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
@@ -45,8 +46,11 @@ export function ProfileActivity({ weeks, goalDone, goalTarget, onPressGoal }: { 
   const ratio = Math.min(1, goalDone / Math.max(1, goalTarget));
   return (
     <View style={styles.activityRow}>
-      <View style={[styles.activityCard, cardShadow, { flex: 1.35 }]}>
-        <Text style={styles.cardTitle}>{t('member.activite_8_sem')}</Text>
+      <Pressable onPress={onPressActivity} accessibilityRole="button" accessibilityLabel={t('member.activity_open')} style={({ pressed }) => [styles.activityCard, cardShadow, { flex: 1.35 }, pressed && { transform: [{ scale: 0.98 }] }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+          <Text style={[styles.cardTitle, { flex: 1 }]}>{t('member.activite_8_sem')}</Text>
+          <MaterialIcons name="chevron-right" size={18} color={colors.muted} />
+        </View>
         <View style={styles.bars}>
           {weeks.map((count, i) => {
             const last = i === weeks.length - 1;
@@ -54,13 +58,13 @@ export function ProfileActivity({ weeks, goalDone, goalTarget, onPressGoal }: { 
             return (
               <LinearGradient
                 key={i}
-                colors={last ? [colors.primaryInk, colors.primary] : [colors.primary, colors.primaryPressed]}
+                colors={last ? [colors.deepPressed, colors.deep] : [colors.deep, colors.deepPressed]}
                 style={{ flex: 1, height: h, borderRadius: 6, opacity: last ? 1 : 0.55 + i * 0.04 }}
               />
             );
           })}
         </View>
-      </View>
+      </Pressable>
       <Pressable onPress={onPressGoal} style={({ pressed }) => [styles.activityCard, cardShadow, { flex: 1, alignItems: 'center', gap: 6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', gap: 2 }}>
           <Text style={[styles.cardTitle, { flex: 1, fontSize: 12.5 }]} numberOfLines={2}>{t('member.weekly_goal')}</Text>
@@ -73,7 +77,7 @@ export function ProfileActivity({ weeks, goalDone, goalTarget, onPressGoal }: { 
               cx={GOAL_RING / 2}
               cy={GOAL_RING / 2}
               r={GOAL_R}
-              stroke={colors.primary}
+              stroke={colors.deep}
               strokeWidth={GOAL_STROKE}
               strokeLinecap="round"
               fill="none"
@@ -107,7 +111,7 @@ export function ProfileBadges({ badges }: { badges: BadgeInfo[] }) {
         <View key={b.label} style={styles.badge}>
           {b.unlocked ? (
             <View style={styles.badgeShadow}>
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.badgeTile}>
+              <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.badgeTile}>
                 <MaterialIcons name={b.icon} size={30} color="#FFFFFF" />
               </LinearGradient>
             </View>
@@ -135,7 +139,7 @@ export function SettingsGroup({ title, rows }: { title: string; rows: SettingsRo
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View>
-      <Text style={styles.groupTitle}>{title}</Text>
+      <SectionHeader title={title} style={{ marginBottom: 10 }} />
       <View style={[styles.groupCard, cardShadow]}>
         {rows.map((row, i) => (
           <SettingsRow key={row.title} row={row} last={i === rows.length - 1} />
@@ -217,7 +221,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     badgesRow: { flexDirection: 'row', gap: 10, paddingVertical: 2 },
     badge: { width: 84, alignItems: 'center', gap: 8 },
     badgeShadow: {
-      borderRadius: 22, shadowColor: colors.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5,
+      borderRadius: 22, shadowColor: colors.deep, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5,
     },
     badgeTile: { width: 68, height: 68, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
     badgeLocked: { backgroundColor: colors.surface2, borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border },

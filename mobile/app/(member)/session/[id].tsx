@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../src/i18n';
 import { levelLabel } from '../../../src/i18n/labels';
 import { useNow } from '../../../src/hooks/useNow';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Détail d'un cours — FitZone App Adherent.dc.html, C1. */
 export default function SessionDetailScreen() {
@@ -149,7 +150,7 @@ export default function SessionDetailScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('member.description_du_cours')}</Text>
+          <SectionHeader title={t('member.description_du_cours')} style={{ marginBottom: 10 }} />
           <View style={[styles.descriptionCard, cardShadow]}>
             {session.classType.description ? (
               <Text style={styles.description}>{session.classType.description}</Text>

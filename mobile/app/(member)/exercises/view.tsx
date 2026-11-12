@@ -12,6 +12,7 @@ import { ExerciseRecordCard } from '../../../src/components/training/ExerciseRec
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Détail en lecture seule d'un exercice déjà enregistré dans un programme —
  * accessible depuis la visualisation d'un programme. FitZone App Entraînement.dc.html, E3. */
@@ -111,7 +112,7 @@ export default function ViewProgramExerciseScreen() {
 
         {parsed.steps.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>{t('common.consignes')}</Text>
+            <SectionHeader title={t('common.consignes')} style={{ marginBottom: 10 }} />
             <View style={styles.stepsList}>
               {parsed.steps.map((step, i) => (
                 <View key={i} style={styles.stepRow}>

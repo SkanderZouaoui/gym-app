@@ -19,6 +19,7 @@ import { dateLocale } from '../../i18n';
 import { useNow } from '../../hooks/useNow';
 import { useSessionStore } from '../../store/session';
 import { MemberAdminSection } from './MemberAdminSection';
+import { SectionHeader } from '../ui/SectionHeader';
 
 const fmtDate = (d: string, year = true) =>
   new Date(d).toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', ...(year ? { year: 'numeric' } : {}) });
@@ -161,7 +162,7 @@ export function MemberProfileScreen() {
 
 
         <View>
-          <Text style={styles.sectionTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('common.coordonnees')}</Text>
+          <SectionHeader title={t('common.coordonnees')} style={{ marginBottom: 10 }} />
           <View style={[styles.contactCard, cardShadow]}>
             {rows.map((r, i) => (
               <MemberContactRow key={r.k} icon={r.icon} label={r.k} value={r.v} href={r.href} copyable={r.copyable} last={i === rows.length - 1} />
@@ -170,7 +171,7 @@ export function MemberProfileScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('staff.paiements')}</Text>
+          <SectionHeader title={t('staff.paiements')} style={{ marginBottom: 10 }} />
           <View style={[styles.listCard, cardShadow]}>
             {memberPayments.length === 0 ? (
               <Text style={styles.emptyRow}>{t('staff.aucun_paiement_enregistre')}</Text>

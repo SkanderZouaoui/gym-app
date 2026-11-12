@@ -8,7 +8,7 @@ import { fonts, spacing } from '../../src/theme/tokens';
 import { DateField } from '../../src/components/ui/DateTimeFields';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminHomeAlerts, useDeleteHomeAlert, useSaveHomeAlert, type AdminHomeAlert } from '../../src/hooks/useAdmin';
-import { Banner, ScreenTitle } from '../../src/components/ui';
+import { Banner, ScreenTitle, DetailSkeleton } from '../../src/components/ui';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
 import { audienceLabel } from '../../src/i18n/labels';
@@ -32,7 +32,7 @@ export default function AdminAlertFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const { data: alerts } = useAdminHomeAlerts();
+  const { data: alerts, isLoading: alertsLoading } = useAdminHomeAlerts();
   const save = useSaveHomeAlert();
   const remove = useDeleteHomeAlert();
   const existing = id ? (alerts ?? []).find((a) => a.id === id) : undefined;
@@ -75,6 +75,15 @@ export default function AdminAlertFormScreen() {
       { onSuccess: goBack, onError: () => setError(t('admin.impossible_denregistrer_lalerte')) },
     );
   };
+
+  // Chargement de l'élément à modifier : squelette plutôt qu'un formulaire vide.
+  if (id && alertsLoading && !alerts) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DetailSkeleton />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>

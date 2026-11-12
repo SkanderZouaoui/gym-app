@@ -5,6 +5,7 @@ import type { MeResponse } from '../api/types';
 import { useSessionStore } from '../store/session';
 import { useMe, useMyBookings } from './useMe';
 import { useMyWorkouts } from './useCoaching';
+import { workoutSeconds } from '../utils/duration';
 
 export const GOAL_OPTIONS = ['1-2', '3-4', '5+'] as const;
 
@@ -19,6 +20,10 @@ export interface LoggedSession {
   subtitle: string | null;
   /** Écran de détail de la séance. */
   href: string;
+  /** Durée en secondes (séance d'entraînement chronométrée, ou durée prévue du cours) ; null si inconnue. */
+  durationSeconds: number | null;
+  /** Séance où au moins un record de charge a été battu. */
+  isRecord: boolean;
 }
 
 export const weekStart = (d: Date): number => {
@@ -31,10 +36,25 @@ export const weekStart = (d: Date): number => {
 /** Séances enregistrées (entraînements + cours suivis), la plus récente d'abord, et progression de la semaine. */
 export function useWeeklyGoal() {
   const { data: user } = useMe();
-  const { data: workouts } = useMyWorkouts();
-  const { data: bookings } = useMyBookings();
+  const { data: workouts, isLoading: workoutsLoading } = useMyWorkouts();
+  const { data: bookings, isLoading: bookingsLoading } = useMyBookings();
   const perWeek = (user?.fitnessProfile as { sessionsPerWeek?: string } | null | undefined)?.sessionsPerWeek ?? '3-4';
   const sessions = useMemo<LoggedSession[]>(() => {
+    // Séances où une charge a dépassé le meilleur poids précédent sur un exercice (du plus ancien au plus récent).
+    const recordIds = new Set<string>();
+    const best = new Map<string, number>();
+    for (const log of [...(workouts ?? [])].sort((a, b) => (a.date < b.date ? -1 : 1))) {
+      let isRecord = false;
+      for (const set of log.sets) {
+        const w = Number(set.weightKg) || 0;
+        if (w <= 0) continue;
+        if (w > (best.get(set.exerciseId) ?? 0)) {
+          best.set(set.exerciseId, w);
+          isRecord = true;
+        }
+      }
+      if (isRecord) recordIds.add(log.id);
+    }
     const list: LoggedSession[] = (workouts ?? []).map((w) => ({
       id: `w:${w.id}`,
       date: new Date(w.date),
@@ -42,17 +62,21 @@ export function useWeeklyGoal() {
       title: w.program?.name ?? w.day?.label ?? '',
       subtitle: w.day?.label ?? null,
       href: `/(member)/workout/${w.id}`,
+      durationSeconds: workoutSeconds(w),
+      isRecord: recordIds.has(w.id),
     }));
     for (const b of bookings ?? []) {
       if (b.status === 'ATTENDED' && b.session) {
-        list.push({ id: `b:${b.id}`, date: new Date(b.session.startsAt), kind: 'class', title: b.session.classType.name, subtitle: b.session.room?.name ?? null, href: `/(member)/session/${b.sessionId}` });
+        list.push({ id: `b:${b.id}`, date: new Date(b.session.startsAt), kind: 'class', title: b.session.classType.name, subtitle: b.session.room?.name ?? null, href: `/(member)/session/${b.sessionId}`, durationSeconds: Math.max(0, Math.round((new Date(b.session.endsAt).getTime() - new Date(b.session.startsAt).getTime()) / 1000)) || null, isRecord: false });
       }
     }
     return list.sort((a, b) => b.date.getTime() - a.date.getTime());
   }, [workouts, bookings]);
   const thisWeek = weekStart(new Date());
   const done = sessions.filter((s) => weekStart(s.date) === thisWeek).length;
-  return { perWeek, target: goalTarget(perWeek), done, sessions };
+  // Premier chargement des séances : les écrans affichent un squelette plutôt qu'une liste vide.
+  const isLoading = workoutsLoading || bookingsLoading;
+  return { perWeek, target: goalTarget(perWeek), done, sessions, isLoading };
 }
 
 export function useUpdateWeeklyGoal() {

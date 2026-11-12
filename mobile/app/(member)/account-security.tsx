@@ -12,6 +12,7 @@ import { Banner, ScreenTitle } from '../../src/components/ui';
 import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 export default function AccountSecurityScreen() {
   const { t } = useTranslation();
@@ -64,7 +65,7 @@ export default function AccountSecurityScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('common.mot_de_passe')}</Text>
+          <SectionHeader title={t('common.mot_de_passe')} style={{ marginBottom: 10 }} />
           <View style={[styles.card, cardShadow]}>
             {success ? <Banner tone="success" icon="check-circle" text={t('member.mot_de_passe_mis_a')} /> : null}
             {error ? <Banner tone="danger" icon="error" text={error} /> : null}
@@ -82,7 +83,7 @@ export default function AccountSecurityScreen() {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>{t('member.donnees_du_compte')}</Text>
+          <SectionHeader title={t('member.donnees_du_compte')} style={{ marginBottom: 10 }} />
           <View style={[styles.card, cardShadow, { padding: 0, gap: 0 }]}>
             <Pressable style={styles.dangerRow} onPress={() => router.push('/(member)/account-delete')}>
               <View style={styles.dangerIcon}>

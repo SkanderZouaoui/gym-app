@@ -12,8 +12,11 @@ export const darkColors: ColorPalette = {
   border: '#262626',
   borderStrong: '#3A3A3A',
 
-  hero: '#1C1C1C',
-  hero2: '#0A0A0A',
+  hero: '#5B21B6',
+  hero2: '#2E1065',
+
+  deep: '#6D28D9',
+  deepPressed: '#4C1D95',
 
   primary: '#7C3AED',
   primaryHover: '#8A4FF0',

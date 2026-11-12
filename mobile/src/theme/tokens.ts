@@ -8,9 +8,13 @@ export const colors = {
   border: '#E4E4E7',
   borderStrong: '#CFCFD4',
 
-  /** Cartes héros : noir neutre (dégradé hero → hero2), indépendant du branding. */
-  hero: '#0A0A0A',
-  hero2: '#232323',
+  /** Cartes héros : violet foncé (dégradé hero → hero2). */
+  hero: '#5B21B6',
+  hero2: '#2E1065',
+
+  /** Violet foncé : graphiques, badges et anneau de profil. */
+  deep: '#5B21B6',
+  deepPressed: '#3B1764',
 
   primary: '#7C3AED',
   primaryHover: '#7033D6',
@@ -74,16 +78,17 @@ export const spacing = {
 /** Hauteur standard des contrôles (inputs, boutons pleine largeur) — cf. --ctl des maquettes */
 export const controlHeight = 52;
 
+/** Une seule famille (Inter), déclinée en graisses — voir le chargement dans app/_layout.tsx. */
 export const fonts = {
-  head: 'Sora_800ExtraBold',
-  headBold: 'Sora_700Bold',
-  headSemiBold: 'Sora_600SemiBold',
-  body: 'DMSans_400Regular',
-  bodyMedium: 'DMSans_500Medium',
-  bodySemiBold: 'DMSans_600SemiBold',
-  bodyBold: 'DMSans_700Bold',
-  /** Titres d'accroche condensés (écran de connexion). */
-  display: 'BarlowCondensed_800ExtraBold',
+  head: 'Inter_800ExtraBold',
+  headBold: 'Inter_700Bold',
+  headSemiBold: 'Inter_600SemiBold',
+  body: 'Inter_400Regular',
+  bodyMedium: 'Inter_500Medium',
+  bodySemiBold: 'Inter_600SemiBold',
+  bodyBold: 'Inter_700Bold',
+  /** Grands titres (pages, accroches) : Inter Black, capitales. */
+  display: 'Inter_900Black',
 } as const;
 
 /** Échelle typographique v2 (pt) — titres serrés, chiffres clés grands. */

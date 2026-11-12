@@ -14,6 +14,7 @@ import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { parseExerciseInstructions } from '../../../src/components/training/exerciseText';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useTranslation } from 'react-i18next';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 /** Fiche exercice — FitZone App Entraînement.dc.html, E3. */
 export default function ExerciseDetailScreen() {
@@ -114,7 +115,7 @@ export default function ExerciseDetailScreen() {
 
         {groupLabel || parsed.secondaryMuscles.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>{t('common.muscles_sollicites')}</Text>
+            <SectionHeader title={t('common.muscles_sollicites')} style={{ marginBottom: 10 }} />
             <View style={styles.chipsRow}>
               {groupLabel ? (
                 <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.musclePrimary}>
@@ -132,7 +133,7 @@ export default function ExerciseDetailScreen() {
 
         {parsed.steps.length > 0 ? (
           <View>
-            <Text style={styles.sectionTitle}>{t('common.execution')}</Text>
+            <SectionHeader title={t('common.execution')} style={{ marginBottom: 10 }} />
             <View style={[styles.stepsCard, cardShadow]}>
               {parsed.steps.map((step, i) => (
                 <View key={i} style={[styles.stepRow, i === parsed.steps.length - 1 && { borderBottomWidth: 0 }]}>

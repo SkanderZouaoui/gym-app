@@ -39,7 +39,7 @@ export default function HomeScreen() {
   const params = useLocalSearchParams<{ booked?: string }>();
   const { data: user, isLoading: userLoading } = useMe();
   const { data: memberships, isLoading: membershipsLoading } = useMyMemberships();
-  const { data: bookings } = useMyBookings();
+  const { data: bookings, isLoading: bookingsLoading } = useMyBookings();
   const { data: announcements } = useMyAnnouncements();
   const { data: homeAlerts } = useHomeAlerts();
   const { data: display } = useDisplayConfig();
@@ -145,10 +145,6 @@ export default function HomeScreen() {
         <SyncStatusCard />
 
         <NoticeList items={alertNotices} format={alertFormat === 'Pop-up' ? 'Bandeau' : alertFormat} onDismiss={dismissNotice} />
-        {announcementFormat === 'Bandeau' ? <NoticeList items={announcementNotices} format="Bandeau" onDismiss={dismissNotice} /> : null}
-
-        {/* « La salle » s'affiche juste sous les annonces : ici si elles sont en bandeau (ou absentes), sinon après la section Annonces. */}
-        {!announcementsAsCards ? <VenueTodayBanner href="/(member)/venue" /> : null}
 
         {isDegraded ? (
           <Banner
@@ -187,7 +183,12 @@ export default function HomeScreen() {
           />
         </View>
 
-        {expiredMembership ? null : nextBooking?.session ? (
+        {expiredMembership ? null : bookingsLoading && !bookings ? (
+          <View style={{ gap: spacing.sm }}>
+            <SkeletonBlock height={20} width={140} radius={radii.xs} />
+            <SkeletonBlock height={104} radius={radii.lg} />
+          </View>
+        ) : nextBooking?.session ? (
           <View style={{ gap: spacing.sm }}>
           <SectionHeader icon="event" title={t('home.nextCourseTitle')} actionLabel={t('home.viewPlanning')} onAction={() => router.push('/(member)/(tabs)/planning')} />
           <NextCourseCard
@@ -211,12 +212,16 @@ export default function HomeScreen() {
             </Pressable>
           </View>
         ) : (
-          <View style={styles.emptyCourseCard}>
-            <Text style={styles.cardLabel}>{t('home.noUpcomingCourse')}</Text>
-            <Pressable onPress={() => router.push('/(member)/(tabs)/planning')} style={{ marginTop: 8 }}>
+          <Pressable style={({ pressed }) => [styles.emptyCourseCard, pressed && { transform: [{ scale: 0.98 }] }]} onPress={() => router.push('/(member)/(tabs)/planning')}>
+            <View style={styles.emptyCourseIcon}>
+              <MaterialIcons name="event-available" size={24} color={colors.primaryInk} />
+            </View>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.emptyCourseTitle}>{t('home.noUpcomingCourse')}</Text>
               <Text style={styles.linkText}>{t('home.viewPlanning')}</Text>
-            </Pressable>
-          </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={20} color={colors.primaryInk} />
+          </Pressable>
         )}
 
         {isNewMember ? (
@@ -228,13 +233,16 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
+        {/* « La salle », puis les annonces : dernière section de l'écran. */}
+        <VenueTodayBanner href="/(member)/venue" />
+
         {announcementsAsCards ? (
           <View style={{ gap: spacing.sm }}>
             <SectionHeader icon="campaign" title={t('home.announcementsTitle')} />
             {(announcements ?? []).slice(0, 3).map((a) => (
               <View key={a.id} style={styles.newsCard}>
-                <LinearGradient colors={[colors.secondary, '#0B0B0F']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-                <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.8)']} style={StyleSheet.absoluteFill} />
+                <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                <LinearGradient colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.35)']} style={StyleSheet.absoluteFill} />
                 <View style={[styles.newsPill, NEWS_TONES[a.tone ?? 'info'].pill]}>
                   <Text style={[styles.newsPillText, { color: NEWS_TONES[a.tone ?? 'info'].ink }]}>{a.tone === 'danger' ? t('home.announcementImportant') : a.tone === 'accent' ? t('home.announcementNew') : t('home.announcementInfo')}</Text>
                 </View>
@@ -246,7 +254,7 @@ export default function HomeScreen() {
             ))}
           </View>
         ) : null}
-        {announcementsAsCards ? <VenueTodayBanner href="/(member)/venue" /> : null}
+        {announcementFormat === 'Bandeau' ? <NoticeList items={announcementNotices} format="Bandeau" onDismiss={dismissNotice} /> : null}
       </ScrollView>
 
       {toastVisible ? (
@@ -310,6 +318,7 @@ function OnboardRow({
     <Pressable style={styles.onboardRow} onPress={onPress}>
       <MaterialIcons name={done ? 'check-circle' : icon} size={22} color={done ? colors.successInk : colors.muted} />
       <Text style={styles.onboardRowLabel}>{label}</Text>
+      <MaterialIcons name="chevron-right" size={20} color={colors.muted} />
     </Pressable>
   );
 }
@@ -325,12 +334,13 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], _isRtl: boole
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
   skeletonHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   emptyCourseCard: {
-    backgroundColor: colors.surface, borderRadius: radii.lg,
-    padding: spacing.md,
-    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 14, shadowOffset: { width: 0, height: 5 }, elevation: 3,
+    flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border,
   },
+  emptyCourseIcon: { width: 48, height: 48, borderRadius: 16, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  emptyCourseTitle: { fontFamily: fonts.headBold, fontSize: 15, letterSpacing: -0.2, color: colors.text },
   cardLabel: { fontFamily: fonts.bodySemiBold, fontSize: 11, letterSpacing: 0.5, color: colors.muted },
-  linkText: { fontFamily: fonts.bodyBold, color: colors.primaryInk, fontSize: 13 },
+  linkText: { fontFamily: fonts.bodyBold, color: colors.primaryInk, fontSize: 13, marginTop: 2 },
   onboardCard: {
     backgroundColor: colors.surface, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.borderStrong,
     borderStyle: 'dashed', padding: 20, alignItems: 'center', gap: 10,
@@ -341,19 +351,19 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], _isRtl: boole
   onboardButton: { height: 44, paddingHorizontal: 18, borderRadius: radii.sm, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   onboardButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
   onboardList: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md, gap: 8 },
-  onboardListTitle: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text, marginBottom: 2 },
-  onboardRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
+  onboardListTitle: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1.6, textTransform: 'uppercase', color: colors.muted, marginBottom: 4 },
+  onboardRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 },
   onboardRowLabel: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.text, flex: 1 },
   newsCard: {
-    height: 176, borderRadius: 26, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: '#0B0B0F',
+    borderRadius: radii.xl, overflow: 'hidden', padding: 18, gap: 10, backgroundColor: colors.hero,
   },
   newsPill: {
-    position: 'absolute', top: 14, left: 14, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1,
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, borderWidth: 1,
     backgroundColor: 'rgba(255,255,255,0.2)',
   },
   newsPillText: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, letterSpacing: 0.2, color: '#FFFFFF' },
-  newsText: { padding: 18 },
-  newsTitle: { fontFamily: fonts.head, fontSize: 20, letterSpacing: -0.4, color: '#FFFFFF' },
-  newsBody: { fontFamily: fonts.body, fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 3 },
+  newsText: { gap: 3 },
+  newsTitle: { fontFamily: fonts.display, fontSize: 20, lineHeight: 24, letterSpacing: -0.3, textTransform: 'uppercase', color: '#FFFFFF' },
+  newsBody: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18, color: 'rgba(255,255,255,0.9)' },
   });
 }
