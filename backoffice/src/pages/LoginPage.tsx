@@ -19,7 +19,7 @@ function BrandPanel() {
         <img src={logoWord} alt="" className="mt-1 h-4 w-auto self-start" />
       </div>
 
-      <h2 className="relative max-w-[560px] font-display text-[104px] font-extrabold uppercase leading-[0.9] tracking-[0.005em]">
+      <h2 className="relative max-w-[560px] font-display text-[72px] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
         Prêt à dépasser tes limites ?
       </h2>
     </div>

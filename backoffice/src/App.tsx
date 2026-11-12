@@ -11,6 +11,7 @@ import { CatalogPage } from './pages/CatalogPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { CommunicationPage } from './pages/CommunicationPage'
 import { ProgramsPage } from './pages/ProgramsPage'
+import { BadgesPage } from './pages/BadgesPage'
 import { StatsPage } from './pages/StatsPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { NotificationsPage } from './pages/NotificationsPage'
@@ -38,6 +39,7 @@ function App() {
         <Route path="/settings" element={<RequireRole roles={['ADMIN']}><SettingsPage /></RequireRole>} />
         <Route path="/communication" element={<RequireRole roles={['ADMIN']}><CommunicationPage /></RequireRole>} />
         <Route path="/programs" element={<RequireRole roles={['ADMIN']}><ProgramsPage /></RequireRole>} />
+        <Route path="/badges" element={<RequireRole roles={['ADMIN']}><BadgesPage /></RequireRole>} />
         <Route path="/stats" element={<RequireRole roles={['ADMIN']}><StatsPage /></RequireRole>} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
