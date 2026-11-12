@@ -108,9 +108,15 @@ export class UsersService {
         ? await this.prisma.user.findUnique({ where: { id: userId }, select: { photoKey: true } })
         : null;
 
+    const { gender, ...userData } = dto;
+    let fitnessProfile: Prisma.InputJsonValue | undefined;
+    if (gender) {
+      const current = await this.prisma.user.findUnique({ where: { id: userId }, select: { fitnessProfile: true } });
+      fitnessProfile = { ...((current?.fitnessProfile as Record<string, unknown> | null) ?? {}), gender } as Prisma.InputJsonValue;
+    }
     const user = await this.prisma.user.update({
       where: { id: userId },
-      data: dto as Prisma.UserUpdateInput,
+      data: { ...(userData as Prisma.UserUpdateInput), ...(fitnessProfile ? { fitnessProfile } : {}) },
       select: PUBLIC_USER_SELECT,
     });
 

@@ -40,7 +40,7 @@ export class WorkoutsService {
       include: { sets: { include: { exercise: true } }, program: true, day: true },
     });
 
-    await this.detectAndNotifyPersonalRecords(userId, log.sets, previousBests);
+    await this.detectAndNotifyPersonalRecords(userId, log.id, log.sets, previousBests);
 
     return log;
   }
@@ -74,6 +74,7 @@ export class WorkoutsService {
    */
   private async detectAndNotifyPersonalRecords(
     userId: string,
+    workoutLogId: string,
     sets: { exerciseId: string; weightKg: unknown; exercise: { name: string } }[],
     previousBests: Map<string, number>,
   ) {
@@ -107,7 +108,7 @@ export class WorkoutsService {
           type: 'PERSONAL_RECORD',
           title,
           body: memberBody,
-          data: { exerciseName, weightKg },
+          data: { exerciseName, weightKg, workoutLogId },
         },
       });
 
@@ -119,7 +120,7 @@ export class WorkoutsService {
             type: 'PERSONAL_RECORD' as const,
             title,
             body: coachBody,
-            data: { exerciseName, weightKg, memberId: userId },
+            data: { exerciseName, weightKg, memberId: userId, workoutLogId },
           })),
         });
       }

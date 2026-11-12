@@ -27,6 +27,11 @@ export class NotificationsService {
     if (result.count === 0) throw new NotFoundException('NOTIFICATION_NOT_FOUND');
   }
 
+  /** Supprime toutes les notifications reçues de l'utilisateur. */
+  removeAll(userId: string) {
+    return this.prisma.notification.deleteMany({ where: { userId } });
+  }
+
   markAllRead(userId: string) {
     return this.prisma.notification.updateMany({
       where: { userId, readAt: null },

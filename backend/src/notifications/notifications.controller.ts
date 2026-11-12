@@ -49,6 +49,12 @@ export class NotificationsController {
     return this.notificationsService.markAllRead(user.userId);
   }
 
+  @Delete('me/notifications')
+  @HttpCode(204)
+  async removeAll(@CurrentUser() user: AuthenticatedUser) {
+    await this.notificationsService.removeAll(user.userId);
+  }
+
   @Delete('me/notifications/:id')
   remove(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.notificationsService.remove(user.userId, id);

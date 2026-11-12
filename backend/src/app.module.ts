@@ -23,6 +23,7 @@ import { BodyMetricsModule } from './body-metrics/body-metrics.module.js';
 import { RealtimeModule } from './realtime/realtime.module.js';
 import { StatsModule } from './stats/stats.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { BadgesModule } from './badges/badges.module.js';
 import { StorageModule } from './storage/storage.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
 import { MailModule } from './mail/mail.module.js';
@@ -55,6 +56,7 @@ import { OccupancyModule } from './occupancy/occupancy.module.js';
     StatsModule,
     StorageModule,
     NotificationsModule,
+    BadgesModule,
     AppConfigModule,
     CoachesModule,
     OccupancyModule,

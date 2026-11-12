@@ -918,3 +918,21 @@ model OccupancySnapshot {
   @@index([takenAt])
   @@map("occupancy_snapshots")
 }
+
+/// Badge de la section « Badges » du profil adhérent, personnalisable depuis le back-office.
+/// `rule` : SESSIONS (séances au total) | STREAK_WEEKS (série de semaines) | MEMBER_MONTHS (ancienneté en mois) | ASSIDUITY (assiduité en %).
+model ProfileBadge {
+  id        String   @id @default(uuid())
+  labelFr   String   @map("label_fr")
+  labelEn   String?  @map("label_en")
+  labelAr   String?  @map("label_ar")
+  /// Nom d'une icône Material (ex. emoji-events).
+  icon      String
+  rule      String
+  threshold Int
+  isActive  Boolean  @default(true) @map("is_active")
+  position  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("profile_badges")
+}

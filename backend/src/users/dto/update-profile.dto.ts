@@ -1,4 +1,4 @@
-import { IsObject, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -21,4 +21,9 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsObject()
   consents?: Record<string, unknown>;
+
+  /** Genre (accords des textes : « présent / présente »…) ; enregistré dans le profil sportif. */
+  @IsOptional()
+  @IsIn(['female', 'male'])
+  gender?: 'female' | 'male';
 }
