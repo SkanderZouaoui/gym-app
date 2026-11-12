@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import Constants from 'expo-constants';
-import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { Image, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +11,11 @@ import { ScreenTitle } from '../../src/components/ui';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
 import { useQueryClient } from '@tanstack/react-query';
+import { haptics } from '../../src/utils/haptics';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+
+const LOGO_MARK = require('../../assets/brand/logo-mark.png');
+const LOGO_WORD = require('../../assets/brand/logo-word.png');
 
 type IconName = keyof typeof MaterialIcons.glyphMap;
 
@@ -48,6 +52,12 @@ export default function AppInfoScreen() {
   const { colors, cardShadow } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const version = Constants.expoConfig?.version ?? '—';
+  const [open, setOpen] = useState<string | null>(null);
+  const toggle = (title: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.create(220, 'easeInEaseOut', 'opacity'));
+    haptics.selection();
+    setOpen((cur) => (cur === title ? null : title));
+  };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(member)/(tabs)/profile'));
 
@@ -61,30 +71,34 @@ export default function AppInfoScreen() {
         </Pressable>
         <ScreenTitle title={t('member.a_propos')} subtitle={t('member.informations_sur_lapplication_et_votre')} />
 
-        <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-            <View style={styles.heroDecor} />
-            <View style={styles.logo}>
-              <Text style={styles.logoText}>{t('common.mu')}</Text>
-            </View>
-            <Text style={styles.appName}>{t('member.muscleup')}</Text>
-            <View style={styles.versionPill}>
-              <Text style={styles.versionText}>{t('member.version', { version })}</Text>
-            </View>
-          </LinearGradient>
+        <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <View style={styles.heroDecor} />
+          <Image source={LOGO_MARK} resizeMode="contain" style={styles.heroMark} accessibilityLabel={t('member.muscleup')} />
+          <Image source={LOGO_WORD} resizeMode="contain" style={styles.heroWord} />
+          <View style={styles.versionPill}>
+            <Text style={styles.versionText}>{t('member.version', { version })}</Text>
+          </View>
+        </LinearGradient>
+
+        <View style={[styles.list, cardShadow]}>
+          {SECTIONS.map((s, i) => {
+            const isOpen = open === s.title;
+            return (
+              <View key={s.title} style={i > 0 && styles.rowDivider}>
+                <Pressable onPress={() => toggle(s.title)} accessibilityRole="button" accessibilityState={{ expanded: isOpen }} style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
+                  <View style={styles.iconTile}>
+                    <MaterialIcons name={s.icon} size={20} color="#FFFFFF" />
+                  </View>
+                  <Text style={styles.sectionTitle}>{s.title}</Text>
+                  <MaterialIcons name={isOpen ? 'expand-less' : 'expand-more'} size={24} color={colors.muted} />
+                </Pressable>
+                {isOpen ? <Text style={styles.sectionText}>{s.text}</Text> : null}
+              </View>
+            );
+          })}
         </View>
 
-        {SECTIONS.map((s) => (
-          <View key={s.title} style={[styles.card, cardShadow]}>
-            <View style={styles.cardHeader}>
-              <View style={styles.iconTile}>
-                <MaterialIcons name={s.icon} size={22} color={colors.primaryInk} />
-              </View>
-              <Text style={styles.sectionTitle}>{s.title}</Text>
-            </View>
-            <Text style={styles.sectionText}>{s.text}</Text>
-          </View>
-        ))}
+        <Text style={styles.footer}>© {new Date().getFullYear()} MuscleUP</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -96,20 +110,18 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 120 },
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
-    heroShadow: {
-      borderRadius: radii.xl, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8,
-    },
-    hero: { borderRadius: radii.xl, padding: 24, alignItems: 'center', gap: 10, overflow: 'hidden' },
-    heroDecor: { position: 'absolute', right: -40, top: -40, width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.12)' },
-    logo: { width: 64, height: 64, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.22)', alignItems: 'center', justifyContent: 'center' },
-    logoText: { fontFamily: fonts.head, fontSize: 24, letterSpacing: -0.5, color: '#FFFFFF' },
-    appName: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: '#FFFFFF' },
-    versionPill: { backgroundColor: 'rgba(255,255,255,0.22)', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5 },
-    versionText: { fontFamily: fonts.bodyBold, fontSize: 12, color: '#FFFFFF' },
-    card: { padding: 16, gap: 10, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
-    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    iconTile: { width: 36, height: 36, borderRadius: 11, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center' },
-    sectionTitle: { flex: 1, fontFamily: fonts.bodyBold, fontSize: 16, color: colors.text },
-    sectionText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 21, color: colors.muted },
+    hero: { borderRadius: radii.xl, paddingVertical: 28, paddingHorizontal: 24, alignItems: 'center', gap: 6, overflow: 'hidden' },
+    heroDecor: { position: 'absolute', right: -50, top: -50, width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(255,255,255,0.08)' },
+    heroMark: { width: 170, height: 58 },
+    heroWord: { width: 170, height: 16 },
+    versionPill: { backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 999, paddingHorizontal: 14, paddingVertical: 6, marginTop: 14 },
+    versionText: { fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 0.4, color: '#FFFFFF' },
+    list: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14 },
+    rowDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.borderStrong },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 64 },
+    iconTile: { width: 38, height: 38, borderRadius: 13, backgroundColor: colors.deep, alignItems: 'center', justifyContent: 'center' },
+    sectionTitle: { flex: 1, fontFamily: fonts.headBold, fontSize: 15.5, letterSpacing: -0.2, color: colors.text },
+    sectionText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 21, color: colors.muted, paddingBottom: 16, paddingStart: 52 },
+    footer: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted, textAlign: 'center', marginTop: 4 },
   });
 }
