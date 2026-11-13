@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
-import { BottomSheet, DetailSkeleton } from '../../../src/components/ui';
+import { BottomSheet, DetailSkeleton, SheetAlert } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercise, useDeactivateExercise } from '../../../src/hooks/useAdmin';
@@ -15,6 +15,7 @@ import i18n from '../../../src/i18n';
 import { levelLabel } from '../../../src/i18n/labels';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 const TYPE_LABEL = { get STRENGTH() { return i18n.t('admin.force'); }, get CARDIO() { return i18n.t('common.cardio'); }, get MOBILITY() { return i18n.t('admin.mobilite'); } } as const;
 
@@ -54,7 +55,7 @@ export default function AdminExerciseDetailScreen() {
         </Pressable>
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroIcon}>
               <MaterialIcons name={muscleIcon(ex.muscleGroup ?? '')} size={30} color="#FFFFFF" />
@@ -80,14 +81,14 @@ export default function AdminExerciseDetailScreen() {
           </View>
         </View>
 
-        <Text style={styles.section}>{i18n.t('common.muscles_sollicites')}</Text>
+        <SectionHeader title={i18n.t('common.muscles_sollicites')} />
         <View style={styles.chips}>
           {[ex.muscleGroup ? muscleGroupLabel(ex.muscleGroup) : null, TYPE_LABEL[ex.type]].filter(Boolean).map((m) => (
             <View key={m} style={styles.chip}><Text style={styles.chipText}>{m}</Text></View>
           ))}
         </View>
 
-        <Text style={styles.section}>{i18n.t('common.execution')}</Text>
+        <SectionHeader title={i18n.t('common.execution')} />
         <View style={[styles.card, cardShadow]}>
           {steps.length === 0 ? <Text style={styles.empty}>{i18n.t('admin.aucune_consigne_renseignee')}</Text> : null}
           {steps.map((t, i) => (
@@ -105,8 +106,7 @@ export default function AdminExerciseDetailScreen() {
       </ScrollView>
 
       <BottomSheet visible={confirm} onClose={() => setConfirm(false)}>
-        <Text style={styles.sheetTitle}>{i18n.t('admin.desactiver', { name: ex.name })}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.il_ne_sera_plus_propose')}</Text>
+        <SheetAlert icon="visibility-off" title={i18n.t('admin.desactiver', { name: ex.name })} text={i18n.t('admin.il_ne_sera_plus_propose')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button label={i18n.t('admin.oui_desactiver')} variant="danger" loading={deactivate.isPending} onPress={() => deactivate.mutate(ex.id, { onSuccess: () => { setConfirm(false); goBack(); } })} />
           <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setConfirm(false)} />

@@ -244,7 +244,7 @@ export default function StaffMemberCreateScreen() {
         <ScreenTitle title={t('common.nouveau_compte')} subtitle={t('staff.compte_abonnement_et_encaissement_en')} />
 
         <View style={styles.hero}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
+          <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
             {initials ? <Text style={styles.avatarText}>{initials}</Text> : <MaterialIcons name="person-add" size={34} color="#FFFFFF" />}
           </LinearGradient>
           <Text style={styles.heroName}>{`${firstName} ${lastName}`.trim() || t('staff.nouvel_adherent')}</Text>

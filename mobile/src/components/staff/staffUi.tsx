@@ -19,7 +19,7 @@ export function InitialsAvatar({ first, last, size = 44, photoUrl }: { first: st
   }
   return (
     <LinearGradient
-      colors={[colors.primary, colors.primaryPressed]}
+      colors={[colors.deep, colors.deepPressed]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.box, { width: size, height: size, borderRadius: size / 2 }]}

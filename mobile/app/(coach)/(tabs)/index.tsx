@@ -17,6 +17,7 @@ import { NotificationBell } from '../../../src/components/NotificationBell';
 import { RoleAnnouncements, RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
 import { useNow } from '../../../src/hooks/useNow';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
@@ -99,7 +100,7 @@ export default function CoachHomeScreen() {
             {user?.photoUrl ? (
               <Image source={{ uri: user.photoUrl }} style={[styles.avatar, { backgroundColor: colors.surface2 }]} />
             ) : (
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
+              <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
                 <Text style={styles.avatarText}>{initials}</Text>
               </LinearGradient>
             )}
@@ -109,7 +110,7 @@ export default function CoachHomeScreen() {
         <RoleNotices />
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             {next ? (
               <>
@@ -151,7 +152,7 @@ export default function CoachHomeScreen() {
           </View>
         </View>
 
-        <Text style={styles.section}>{t('coach.home_todo')}</Text>
+        <SectionHeader title={t('coach.home_todo')} />
         <View style={[styles.card, cardShadow]}>
           {todo.length === 0 ? (
             <View style={styles.todoEmpty}>
@@ -175,7 +176,7 @@ export default function CoachHomeScreen() {
         </View>
 
         <View style={styles.sectionRow}>
-          <Text style={[styles.section, { marginTop: 0 }]}>{t('coach.home_today')}</Text>
+          <SectionHeader title={t('coach.home_today')} style={{ flex: 1 }} />
           <Pressable onPress={() => router.push('/(coach)/(tabs)/planning')} hitSlop={8}>
             <Text style={styles.link}>{t('coach.home_planning')}</Text>
           </Pressable>
@@ -224,9 +225,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { padding: spacing.lg, gap: 12, paddingBottom: 120 },
     header: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, paddingTop: 20, paddingBottom: 6 },
     date: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.muted },
-    hello: { fontFamily: fonts.head, fontSize: 28, lineHeight: 34, letterSpacing: -1, color: colors.text, marginTop: 4 },
-    avatarShadow: { shadowColor: colors.primary, shadowOpacity: 0.35, shadowRadius: 9, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
-    avatar: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
+    hello: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, textTransform: 'uppercase', color: colors.text, marginTop: 4 },
+    avatarShadow: { padding: 3, borderRadius: 999, borderWidth: 2, borderColor: colors.deep, shadowColor: colors.deep, shadowOpacity: 0.35, shadowRadius: 9, shadowOffset: { width: 0, height: 6 }, elevation: 5 },
+    avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
     avatarText: { fontFamily: fonts.head, fontSize: 17, color: colors.primaryContrast },
     heroShadow: { borderRadius: 30, shadowColor: colors.primary, shadowOpacity: 0.3, shadowRadius: 18, shadowOffset: { width: 0, height: 14 }, elevation: 8 },
     hero: { borderRadius: 30, padding: 22, overflow: 'hidden' },

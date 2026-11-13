@@ -72,7 +72,7 @@ export default function AdminPlansScreen() {
         />
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTop}>
               <Text style={styles.heroKicker}>{t('admin.revenu_mensuel_recurrent')}</Text>

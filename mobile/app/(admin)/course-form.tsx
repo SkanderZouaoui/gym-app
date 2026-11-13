@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { Banner, BottomSheet, ScreenTitle, DetailSkeleton } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, DetailSkeleton, SheetAlert } from '../../src/components/ui';
 import { SelectField } from '../../src/components/ui/SelectField';
 import { DateTimeFields } from '../../src/components/ui/DateTimeFields';
 import { Button } from '../../src/components/Button';
@@ -25,6 +25,7 @@ import { ApiError } from '../../src/api/client';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../src/i18n';
 import { useNow } from '../../src/hooks/useNow';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 function defaultStart(): Date {
   const d = new Date();
@@ -128,7 +129,7 @@ export default function CourseFormScreen() {
         <ScreenTitle title={editing ? i18n.t('admin.modifier_le_cours') : i18n.t('admin.nouveau_cours')} subtitle={i18n.t('admin.horaire_coach_salle_et_capacite')} />
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <Text style={styles.heroKicker}>{i18n.t('admin.apercu')}</Text>
             <Text style={styles.heroTitle} numberOfLines={1}>{typeName ?? i18n.t('admin.choisissez_un_type_de_cours')}</Text>
@@ -143,7 +144,7 @@ export default function CourseFormScreen() {
         {locked ? <Banner tone="info" icon="lock-outline" text={i18n.t('admin.cours_non_modifiable')} /> : null}
 
         <View pointerEvents={locked ? 'none' : 'auto'} style={[{ gap: 10 }, locked && { opacity: 0.5 }]}>
-        <Text style={styles.section}>{i18n.t('common.cours_2')}</Text>
+        <SectionHeader title={i18n.t('common.cours_2')} />
         <SelectField
           label={i18n.t('admin.type_de_cours')}
           icon="fitness-center"
@@ -159,7 +160,7 @@ export default function CourseFormScreen() {
           }}
         />
 
-        <Text style={styles.section}>{i18n.t('admin.horaire')}</Text>
+        <SectionHeader title={i18n.t('admin.horaire')} />
         <DateTimeFields value={start} onChange={setStart} minimumDate={editing ? undefined : new Date()} />
         <View style={[styles.stepCard, cardShadow]}>
           <View>
@@ -171,14 +172,14 @@ export default function CourseFormScreen() {
               <MaterialIcons name="remove" size={24} color={colors.text} />
             </Pressable>
             <Pressable accessibilityLabel={i18n.t('common.plus')} onPress={() => setDuration((d) => Math.min(240, d + 5))}>
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.plus}>
+              <LinearGradient colors={[colors.deep, colors.deepPressed]} style={styles.plus}>
                 <MaterialIcons name="add" size={24} color="#FFFFFF" />
               </LinearGradient>
             </Pressable>
           </View>
         </View>
 
-        <Text style={styles.section}>{i18n.t('admin.encadrement')}</Text>
+        <SectionHeader title={i18n.t('admin.encadrement')} />
         <SelectField
           label={i18n.t('common.coach')}
           icon="sports"
@@ -206,7 +207,7 @@ export default function CourseFormScreen() {
           }}
         />
 
-        <Text style={styles.section}>{i18n.t('admin.capacite')}</Text>
+        <SectionHeader title={i18n.t('admin.capacite')} />
         <View style={[styles.stepCard, cardShadow]}>
           <View>
             <Text style={styles.stepValue}>{capacity}</Text>
@@ -217,7 +218,7 @@ export default function CourseFormScreen() {
               <MaterialIcons name="remove" size={24} color={colors.text} />
             </Pressable>
             <Pressable accessibilityLabel={i18n.t('common.plus')} onPress={() => setCapacity((c) => c + 1)}>
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.plus}>
+              <LinearGradient colors={[colors.deep, colors.deepPressed]} style={styles.plus}>
                 <MaterialIcons name="add" size={24} color="#FFFFFF" />
               </LinearGradient>
             </Pressable>
@@ -237,12 +238,11 @@ export default function CourseFormScreen() {
       <StickyActionBar visible={(!editing || hydrated) && !locked} label={editing ? i18n.t('member.enregistrer') : i18n.t('admin.creer_le_cours')} loading={save.isPending} disabled={!valid} onPress={submit} />
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
-        <Text style={styles.sheetTitle}>{i18n.t('admin.supprimer_ce_cours')}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.sil_y_a_des_inscrits')}</Text>
+        <SheetAlert title={i18n.t('admin.supprimer_ce_cours')} text={i18n.t('admin.sil_y_a_des_inscrits')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
             label={i18n.t('admin.oui_supprimer')}
-            variant="secondary"
+            variant="danger"
             loading={remove.isPending}
             onPress={() => id && remove.mutate(id, { onSuccess: () => { setConfirmDelete(false); goBack(); } })}
           />

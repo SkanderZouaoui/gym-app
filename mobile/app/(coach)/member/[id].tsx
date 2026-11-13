@@ -14,6 +14,7 @@ import { Avatar, DetailSkeleton, EmptyState } from '../../../src/components/ui';
 import { StatusTag } from '../../../src/components/staff/staffUi';
 import { Pagination } from '../../../src/components/ui/Pagination';
 import { dateLocale } from '../../../src/i18n';
+import { SectionHeader } from '../../../src/components/ui/SectionHeader';
 
 type Course = CoachMemberView['courses'][number];
 
@@ -115,7 +116,7 @@ export default function CoachMemberScreen() {
 
         {upcoming.length > 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={styles.section} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('coach.member_upcoming')} · {upcoming.length}</Text>
+            <SectionHeader title={`${t('coach.member_upcoming')} · ${upcoming.length}`} />
             {upcoming.slice(upcomingCurrent * PAGE_SIZE, (upcomingCurrent + 1) * PAGE_SIZE).map(courseCard)}
             <Pagination page={upcomingCurrent} pageCount={upcomingPages} pageSize={PAGE_SIZE} total={upcoming.length} onChange={setUpcomingPage} unit={t('coach.member_courses_unit')} />
           </View>
@@ -123,7 +124,7 @@ export default function CoachMemberScreen() {
 
         {past.length > 0 ? (
           <View style={{ gap: 10 }}>
-            <Text style={styles.section} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{t('coach.member_past')} · {past.length}</Text>
+            <SectionHeader title={`${t('coach.member_past')} · ${past.length}`} />
             {past.slice(pastCurrent * PAGE_SIZE, (pastCurrent + 1) * PAGE_SIZE).map(courseCard)}
             <Pagination page={pastCurrent} pageCount={pastPages} pageSize={PAGE_SIZE} total={past.length} onChange={setPastPage} unit={t('coach.member_courses_unit')} />
           </View>

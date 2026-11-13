@@ -95,7 +95,7 @@ export default function CoachProgramsScreen() {
               style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
               onPress={() => router.push(`/(coach)/program/${p.id}`)}
             >
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardIcon}>
+              <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardIcon}>
                 <MaterialIcons name="fitness-center" size={26} color="#FFFFFF" />
               </LinearGradient>
               <View style={{ flex: 1, minWidth: 0 }}>

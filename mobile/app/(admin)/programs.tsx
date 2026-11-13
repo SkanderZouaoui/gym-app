@@ -9,11 +9,10 @@ import { useTheme } from '../../src/theme/ThemeContext';
 import { muscleGroupLabel } from '../../src/constants/muscleGroups';
 import { muscleIcon, useAdminExercises, useReviewPrograms } from '../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
-import { ScreenTitle, SkeletonList } from '../../src/components/ui';
+import { ScreenTitle, SegmentedControl, SkeletonList } from '../../src/components/ui';
 import type { ProgramStatus } from '../../src/hooks/useCoachSessions';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
-import { HScroll } from '../../src/components/ui/HScroll';
 
 type Segment = 'PENDING' | 'APPROVED' | 'REJECTED';
 const SEGMENTS: { value: Segment; label: string }[] = [
@@ -70,20 +69,11 @@ export default function AdminProgramsScreen() {
           }
         />
 
-        <HScroll contentContainerStyle={styles.segments}>
-          {SEGMENTS.map((s) => {
-            const active = s.value === segment;
-            const count = (programs ?? []).filter((p) => p.status === s.value).length;
-            return (
-              <Pressable key={s.value} onPress={() => setSegment(s.value)} style={styles.pill}>
-                {active ? (
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-                ) : null}
-                <Text style={[styles.pillText, active && styles.pillTextActive]}>{`${s.label} (${count})`}</Text>
-              </Pressable>
-            );
-          })}
-        </HScroll>
+        <SegmentedControl
+          options={SEGMENTS.map((s) => ({ value: s.value, label: s.label, count: (programs ?? []).filter((p) => p.status === s.value).length }))}
+          value={segment}
+          onChange={setSegment}
+        />
 
         <View style={{ gap: 10 }}>
             {list.map((p) => {
@@ -95,7 +85,7 @@ export default function AdminProgramsScreen() {
                   style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]}
                   onPress={() => router.push(`/(admin)/program/${p.id}`)}
                 >
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardIcon}>
+                  <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cardIcon}>
                     <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
                   </LinearGradient>
                   <View style={{ flex: 1, minWidth: 0 }}>

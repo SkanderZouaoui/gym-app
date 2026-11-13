@@ -8,7 +8,7 @@ import { fonts, radii, spacing } from '../../../src/theme/tokens';
 import { useTheme } from '../../../src/theme/ThemeContext';
 import { useApproveProgram, useRejectProgram, useReviewPrograms } from '../../../src/hooks/useAdmin';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
-import { BottomSheet, EmptyState, DetailSkeleton } from '../../../src/components/ui';
+import { BottomSheet, EmptyState, DetailSkeleton, SheetAlert } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { muscleGroupLabel } from '../../../src/constants/muscleGroups';
 import { estimateMinutes } from '../../../src/components/coach/programStatus';
@@ -67,7 +67,7 @@ export default function AdminProgramDetailScreen() {
         </Pressable>
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
               <Text style={styles.heroTagText}>{t('admin.par', { firstName: program.createdBy.firstName, lastName: program.createdBy.lastName })}</Text>
@@ -171,8 +171,7 @@ export default function AdminProgramDetailScreen() {
       </ScrollView>
 
       <BottomSheet visible={rejecting} onClose={() => setRejecting(false)}>
-        <Text style={styles.sheetTitle}>{t('admin.refuser_2', { name: program.name })}</Text>
-        <Text style={styles.sheetText}>{t('admin.le_coach_verra_le_motif')}</Text>
+        <SheetAlert icon="block" title={t('admin.refuser_2', { name: program.name })} text={t('admin.le_coach_verra_le_motif')} />
         <TextInput
           value={note}
           onChangeText={setNote}

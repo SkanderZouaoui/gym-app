@@ -22,11 +22,11 @@ export function Chip({ label, active, icon, trailingIcon, onPress }: ChipProps) 
       style={[styles.chip, active ? styles.active : styles.inactive]}
     >
       {icon ? (
-        <MaterialIcons name={icon} size={16} color={active ? colors.primaryInk : colors.text} />
+        <MaterialIcons name={icon} size={16} color={active ? '#FFFFFF' : colors.muted} />
       ) : null}
-      <Text style={[styles.label, { color: active ? colors.primaryInk : colors.text }]}>{label}</Text>
+      <Text style={[styles.label, { color: active ? '#FFFFFF' : colors.text }]}>{label}</Text>
       {trailingIcon ? (
-        <MaterialIcons name={trailingIcon} size={16} color={active ? colors.primaryInk : colors.muted} />
+        <MaterialIcons name={trailingIcon} size={16} color={active ? '#FFFFFF' : colors.muted} />
       ) : null}
     </Pressable>
   );
@@ -41,10 +41,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       height: 38,
       paddingHorizontal: 14,
       borderRadius: 999,
-      borderWidth: 1,
     },
-    active: { backgroundColor: colors.primarySoft, borderColor: colors.primaryBorder },
-    inactive: { backgroundColor: colors.surface, borderColor: colors.border },
+    active: { backgroundColor: colors.deep },
+    inactive: { backgroundColor: colors.surface2 },
     label: { fontFamily: fonts.bodySemiBold, fontSize: 13 },
   });
 }

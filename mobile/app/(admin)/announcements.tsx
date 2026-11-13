@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
-import { Banner, BottomSheet, ScreenTitle, SkeletonList } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, SkeletonList, SheetAlert } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
 import { announcementAudienceLabel } from '../../src/i18n/labels';
 import { DateField } from '../../src/components/ui/DateTimeFields';
@@ -191,8 +191,7 @@ export default function AdminAnnouncementsScreen() {
       <StickyActionBar visible={open} label={editingId ? i18n.t('common.enregistrer_les_modifications') : i18n.t('admin.publier')} icon={editingId ? 'check' : 'send'} loading={send.isPending || updateAnn.isPending} disabled={!valid} onPress={publish} />
 
       <BottomSheet visible={!!toDelete} onClose={() => setToDelete(null)}>
-        <Text style={styles.sheetTitle}>{i18n.t('admin.supprimer', { title: toDelete?.title })}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.lannonce_disparaitra_de_laccueil_des')}</Text>
+        <SheetAlert title={i18n.t('admin.supprimer', { title: toDelete?.title })} text={i18n.t('admin.lannonce_disparaitra_de_laccueil_des')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button label={i18n.t('admin.oui_supprimer')} variant="danger" loading={deleteAnn.isPending} onPress={() => toDelete && deleteAnn.mutate(toDelete.id, { onSettled: () => setToDelete(null) })} />
           <Button label={i18n.t('common.annuler')} variant="outline" onPress={() => setToDelete(null)} />

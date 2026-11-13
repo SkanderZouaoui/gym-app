@@ -49,7 +49,7 @@ export function MemberContactRow({ icon, label, value, href, copyable = false, l
   const body = (
     <>
       {hasValue ? (
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.tile}>
+        <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.tile}>
           <MaterialIcons name={icon} size={22} color="#FFFFFF" />
         </LinearGradient>
       ) : (

@@ -6,7 +6,6 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
-import { Banner, ScreenTitle } from '../../src/components/ui';
 import { ExerciseEditorCard } from '../../src/components/training/ExerciseEditorCard';
 import type { SetDraft } from '../../src/components/training/SetRow';
 import {
@@ -15,6 +14,10 @@ import {
   type AssignProgramExerciseInput,
 } from '../../src/hooks/useCoachSessions';
 import { useExercisePickStore } from '../../src/store/exercisePick';
+import { useExercises } from '../../src/hooks/useCoaching';
+import { ReorderList } from '../../src/components/training/ReorderList';
+import { Banner, BottomSheet, ScreenTitle, SectionHeader, SheetAlert } from '../../src/components/ui';
+import { Button } from '../../src/components/Button';
 import { estimateMinutes } from '../../src/components/coach/programStatus';
 import { ApiError } from '../../src/api/client';
 import { useSessionStore } from '../../src/store/session';
@@ -30,7 +33,9 @@ const GOALS: { value: string; icon: keyof typeof MaterialIcons.glyphMap; sub: st
   { value: 'Mobilité', icon: 'self-improvement', get sub() { return i18n.t('coach.gagner_en_souplesse'); } },
 ];
 
-type DraftExercise = { exerciseId: string; name: string; sets: SetDraft[] };
+type DraftExercise = { uid: string; exerciseId: string; name: string; sets: SetDraft[] };
+let uidCounter = 0;
+const newUid = () => `cx-${++uidCounter}`;
 
 function summarizeReps(sets: SetDraft[]): string {
   const reps = sets.map((s) => s.reps).filter(Boolean);
@@ -51,6 +56,10 @@ export default function CoachProgramNewScreen() {
   const [goal, setGoal] = useState<string>('Perte de poids');
   const [exercises, setExercises] = useState<DraftExercise[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<number | null>(null);
+  const { data: library } = useExercises();
+  const mediaOf = useMemo(() => new Map((library ?? []).map((e) => [e.id, e.mediaKey])), [library]);
 
   const isAdmin = useSessionStore((st) => st.activeRole === 'ADMIN');
   const assignProgram = useAssignProgram(isAdmin);
@@ -68,6 +77,7 @@ export default function CoachProgramNewScreen() {
     setExercises(
       source.days.flatMap((d) =>
         d.exercises.map((ex) => ({
+          uid: newUid(),
           exerciseId: ex.exercise.id,
           name: ex.exercise.name,
           sets:
@@ -82,7 +92,7 @@ export default function CoachProgramNewScreen() {
   // Exercice choisi dans la bibliothèque (via le store, l'écran est resté monté).
   useEffect(() => {
     if (!pick || pick.target !== 'builder') return;
-    setExercises((prev) => [...prev, { exerciseId: pick.exerciseId, name: pick.name, sets: pick.sets }]);
+    setExercises((prev) => [...prev, { uid: newUid(), exerciseId: pick.exerciseId, name: pick.name, sets: pick.sets }]);
     clearPick();
   }, [pick, clearPick]);
 
@@ -168,7 +178,7 @@ export default function CoachProgramNewScreen() {
               return (
                 <Pressable key={g.value} onPress={() => setGoal(g.value)} style={[styles.goalCard, active && styles.goalCardActive]}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.goalTile}>
+                    <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.goalTile}>
                       <MaterialIcons name={g.icon} size={22} color="#FFFFFF" />
                     </LinearGradient>
                   ) : (
@@ -204,23 +214,46 @@ export default function CoachProgramNewScreen() {
         </View>
 
         <View style={{ gap: 12 }}>
-          {exercises.map((e, i) => (
-            <ExerciseEditorCard
-              key={`${e.exerciseId}-${i}`}
-              name={e.name}
-              sets={e.sets}
-              onChangeSet={(index, field, value) => updateSets(i, (sets) => sets.map((s, k) => (k === index ? { ...s, [field]: value } : s)))}
-              onAddSet={() =>
-                updateSets(i, (sets) => {
-                  const last = sets[sets.length - 1];
-                  return renumber([...sets, { setNumber: sets.length + 1, reps: last?.reps ?? '10', weightKg: last?.weightKg ?? '' }]);
-                })
-              }
-              onRemoveSet={(index) => updateSets(i, (sets) => renumber(sets.filter((_, k) => k !== index)))}
-              onRemove={() => setExercises((prev) => prev.filter((_, k) => k !== i))}
-              onPressHeader={() => router.push(`/(member)/exercises/${e.exerciseId}`)}
-            />
-          ))}
+          <SectionHeader
+            title={t('common.exercices')}
+            actionLabel={exercises.length > 1 ? (reordering ? t('member.reorder_done') : t('member.reorder_action')) : undefined}
+            onAction={() => setReordering((v) => !v)}
+          />
+          {reordering && exercises.length > 1 ? (
+            <>
+              <Text style={styles.reorderHint}>{t('member.reorder_hint')}</Text>
+              <ReorderList
+                items={exercises.map((e) => ({ key: e.uid, title: e.name, subtitle: t('member.serie_3', { length: e.sets.length, v2: e.sets.length > 1 ? 's' : '' }) }))}
+                onReorder={(from, to) =>
+                  setExercises((prev) => {
+                    const next = [...prev];
+                    const [moved] = next.splice(from, 1);
+                    next.splice(to, 0, moved);
+                    return next;
+                  })
+                }
+              />
+            </>
+          ) : (
+            exercises.map((e, i) => (
+              <ExerciseEditorCard
+                key={e.uid}
+                mediaKey={mediaOf.get(e.exerciseId) ?? null}
+                name={e.name}
+                sets={e.sets}
+                onChangeSet={(index, field, value) => updateSets(i, (sets) => sets.map((s, k) => (k === index ? { ...s, [field]: value } : s)))}
+                onAddSet={() =>
+                  updateSets(i, (sets) => {
+                    const last = sets[sets.length - 1];
+                    return renumber([...sets, { setNumber: sets.length + 1, reps: last?.reps ?? '10', weightKg: last?.weightKg ?? '' }]);
+                  })
+                }
+                onRemoveSet={(index) => updateSets(i, (sets) => renumber(sets.filter((_, k) => k !== index)))}
+                onRemove={() => setPendingRemove(i)}
+                onPressHeader={() => router.push(`/(member)/exercises/${e.exerciseId}`)}
+              />
+            ))
+          )}
 
           <Pressable
             style={({ pressed }) => [styles.addExercise, pressed && { transform: [{ scale: 0.98 }] }]}
@@ -231,6 +264,21 @@ export default function CoachProgramNewScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      <BottomSheet visible={pendingRemove !== null} onClose={() => setPendingRemove(null)}>
+        <SheetAlert title={t('member.remove_exercise_title')} text={t('member.remove_exercise_text', { name: pendingRemove !== null ? exercises[pendingRemove]?.name ?? '' : '' })} />
+        <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
+          <Button
+            label={t('member.remove_exercise_confirm')}
+            variant="danger"
+            onPress={() => {
+              if (pendingRemove !== null) setExercises((prev) => prev.filter((_, k) => k !== pendingRemove));
+              setPendingRemove(null);
+            }}
+          />
+          <Button label={t('common.annuler')} onPress={() => setPendingRemove(null)} variant="outline" />
+        </View>
+      </BottomSheet>
 
       <View style={styles.footer}>
         <Pressable
@@ -254,6 +302,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { paddingHorizontal: spacing.lg, gap: spacing.md, paddingBottom: 150 },
     back: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, alignSelf: 'flex-start' },
     backText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    reorderHint: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: -4 },
     nameInput: {
       height: 52, borderRadius: 18, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 18,
       fontFamily: fonts.bodySemiBold, fontSize: 16, color: colors.text, backgroundColor: colors.surface,

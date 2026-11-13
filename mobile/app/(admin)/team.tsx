@@ -9,7 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { TextField } from '../../src/components/TextField';
-import { Banner, BottomSheet, ScreenTitle, SkeletonList } from '../../src/components/ui';
+import { Banner, BottomSheet, ScreenTitle, SkeletonList, SheetAlert } from '../../src/components/ui';
 import { Button } from '../../src/components/Button';
 import { ResetPasswordButton } from '../../src/components/ResetPasswordButton';
 import { TimeButton } from '../../src/components/ui/DateTimeFields';
@@ -359,8 +359,7 @@ export default function AdminTeamScreen() {
       </BottomSheet>
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
-        <Text style={styles.sheetTitle}>{t('admin.supprimer_3', { firstName: detail?.firstName, lastName: detail?.lastName })}</Text>
-        <Text style={styles.sheetText}>{t('admin.le_compte_sera_desactive_et', { v1: detail && hasRole(detail, 'COACH') ? t('admin.les_cours_deja_planifies_resteront') : '' })}</Text>
+        <SheetAlert title={t('admin.supprimer_3', { firstName: detail?.firstName, lastName: detail?.lastName })} text={t('admin.le_compte_sera_desactive_et', { v1: detail && hasRole(detail, 'COACH') ? t('admin.les_cours_deja_planifies_resteront') : '' })} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
             label={t('admin.oui_supprimer')}
@@ -404,8 +403,7 @@ export default function AdminTeamScreen() {
       </BottomSheet>
 
       <BottomSheet visible={!!created} onClose={() => setCreated(null)}>
-        <Text style={styles.sheetTitle}>{t('admin.compte_cree', { v1: created ? roleLabel(created.role).toLowerCase() : '', name: created?.name })}</Text>
-        <Text style={styles.sheetText}>{t('admin.communiquez_ces_acces_le_mot')}</Text>
+        <SheetAlert icon="check-circle" tone="success" title={t('admin.compte_cree', { v1: created ? roleLabel(created.role).toLowerCase() : '', name: created?.name })} text={t('admin.communiquez_ces_acces_le_mot')} />
         <View style={styles.credBox}>
           <Text style={styles.credLabel}>{t('common.e_mail')}</Text>
           <Text style={styles.credValue}>{created?.email}</Text>

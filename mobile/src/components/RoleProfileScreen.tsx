@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { fonts, radii, spacing } from '../theme/tokens';
 import { useTheme } from '../theme/ThemeContext';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -19,7 +18,8 @@ import { useSessionStore } from '../store/session';
 import { unregisterPush } from '../notifications/push';
 import { tokenStorage } from '../api/storage';
 import { authApi } from '../api/endpoints';
-import { BottomSheet, SkeletonBlock, Toast } from './ui';
+import { BottomSheet, SectionHeader, SkeletonBlock, Toast } from './ui';
+import { ProfileField } from './ProfileField';
 import { StickyActionBar, STICKY_BAR_SPACE } from './ui/StickyActionBar';
 import { Button } from './Button';
 import { rootRouteForRole } from '../navigation/roleRoutes';
@@ -68,7 +68,18 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
     }
   }
 
-  const dirty = !!user && (fullName.trim() !== `${user.firstName} ${user.lastName}`.trim() || phone.trim() !== (user.phone ?? ''));
+  const [editing, setEditing] = useState(false);
+  const startEdit = () => {
+    setFullName(user ? `${user.firstName} ${user.lastName}`.trim() : '');
+    setPhone(user?.phone ?? '');
+    setEditing(true);
+  };
+  const cancelEdit = () => {
+    setFullName(user ? `${user.firstName} ${user.lastName}`.trim() : '');
+    setPhone(user?.phone ?? '');
+    setEditing(false);
+  };
+  const dirty = editing && !!user && (fullName.trim() !== `${user.firstName} ${user.lastName}`.trim() || phone.trim() !== (user.phone ?? ''));
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
   const hasMemberRole = roles.some((r) => r === 'MEMBER');
   const specialties = user?.specialties ?? [];
@@ -88,7 +99,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
     updateProfile.mutate(
       { firstName, lastName: rest.join(' ') || user?.lastName || '', phone: phone.trim() || undefined },
       {
-        onSuccess: () => showToast(t('common.profil_enregistre')),
+        onSuccess: () => { showToast(t('common.profil_enregistre')); setEditing(false); },
         onError: (e) =>
           showToast(
             e instanceof ApiError && e.code === 'PHONE_ALREADY_USED'
@@ -153,7 +164,7 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
 
         {specialties.length > 0 ? (
           <View>
-            <Text style={styles.groupTitle}>{t('common.specialites')}</Text>
+            <SectionHeader title={t('common.specialites')} style={{ marginBottom: 10 }} />
             <View style={styles.chips}>
               {specialties.map((s) => (
                 <View key={s} style={styles.chip}>
@@ -165,44 +176,48 @@ export function RoleProfileScreen({ roleLabel }: { roleLabel: string }) {
         ) : null}
 
         <View>
-          <Text style={styles.groupTitle}>{t('common.coordonnees')}</Text>
-          <View style={[styles.card, cardShadow, { padding: 6 }]}>
-            {contactRows.map((r, i) => (
-              <View key={r.label} style={[styles.contactRow, i < contactRows.length - 1 && styles.rowBorder]}>
-                {r.value.trim() ? (
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.contactIcon}>
-                    <MaterialIcons name={r.icon} size={24} color="#FFFFFF" />
-                  </LinearGradient>
-                ) : (
-                  <View style={[styles.contactIcon, { backgroundColor: colors.primarySoft }]}>
-                    <MaterialIcons name={r.icon} size={24} color={colors.primaryInk} style={{ opacity: 0.7 }} />
-                  </View>
-                )}
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <View style={styles.contactLabelRow}>
-                    <Text style={styles.contactLabel}>{r.label.toUpperCase()}</Text>
-                    {r.verified ? (
-                      <View style={styles.verified}>
-                        <MaterialIcons name="check" size={12} color={colors.successInk} />
-                        <Text style={styles.verifiedText}>{t('common.verifie')}</Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  <TextInput
-                    value={r.value}
-                    onChangeText={r.onChange}
-                    editable={!!r.onChange}
-                    placeholder={r.placeholder}
-                    placeholderTextColor={colors.muted}
-                    keyboardType={r.keyboardType}
-                    autoCapitalize={r.keyboardType ? 'none' : 'words'}
-                    style={[styles.contactInput, !r.onChange && { color: colors.muted }]}
-                  />
+          <SectionHeader
+            title={t('common.coordonnees')}
+            style={{ marginBottom: 10 }}
+            actionLabel={editing ? t('member.profile_edit_cancel') : t('member.profile_edit_action')}
+            onAction={editing ? cancelEdit : startEdit}
+          />
+          {editing ? (
+            <View style={[styles.card, cardShadow, { padding: spacing.md, gap: 16 }]}>
+              <ProfileField label={t('common.nom_complet')} value={fullName} onChangeText={setFullName} autoCapitalize="words" autoComplete="name" returnKeyType="next" />
+              <ProfileField label={t('common.telephone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder={PHONE_PLACEHOLDER} />
+              <View style={styles.infoRow}>
+                <View style={styles.infoIcon}>
+                  <MaterialIcons name="mail-outline" size={19} color="#FFFFFF" />
                 </View>
-                <MaterialIcons name={r.onChange ? 'edit' : 'lock-outline'} size={18} color={r.onChange && r.value.trim() ? colors.primary : colors.muted} style={{ opacity: 0.8 }} />
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={styles.infoLabel}>{t('common.email')}</Text>
+                  <Text style={styles.infoValue} numberOfLines={1}>{user?.email ?? '—'}</Text>
+                </View>
+                <MaterialIcons name="lock-outline" size={18} color={colors.muted} />
               </View>
-            ))}
-          </View>
+            </View>
+          ) : (
+            <View style={[styles.infoCard, cardShadow]}>
+              {contactRows.map((r, i) => (
+                <View key={r.label} style={[styles.infoRow, i > 0 && styles.infoRowDivider]}>
+                  <View style={styles.infoIcon}>
+                    <MaterialIcons name={r.icon} size={19} color="#FFFFFF" />
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.infoLabel}>{r.label}</Text>
+                    <Text style={[styles.infoValue, !r.value.trim() && styles.infoValueEmpty]} numberOfLines={1}>{r.value.trim() || t('member.profile_not_set')}</Text>
+                  </View>
+                  {r.verified ? (
+                    <View style={styles.verified}>
+                      <MaterialIcons name="check" size={12} color={colors.successInk} />
+                      <Text style={styles.verifiedText}>{t('common.verifie')}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          )}
           <Text style={styles.hint}>{t('common.ces_informations_servent_a_vous')}</Text>
         </View>
 
@@ -280,6 +295,13 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     name: { fontFamily: fonts.head, fontSize: 28, letterSpacing: -1, color: colors.text, marginTop: 10, textAlign: 'center' },
     rolePill: { backgroundColor: colors.primarySoft, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5 },
     rolePillText: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.primaryInk },
+    infoCard: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 16 },
+    infoRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
+    infoRowDivider: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.borderStrong },
+    infoIcon: { width: 38, height: 38, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.deep },
+    infoLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+    infoValue: { fontFamily: fonts.headBold, fontSize: 16, letterSpacing: -0.2, color: colors.text, marginTop: 1 },
+    infoValueEmpty: { fontFamily: fonts.body, color: colors.muted },
     groupTitle: {
       fontFamily: fonts.bodyBold, fontSize: 12, letterSpacing: 1, color: colors.muted, textTransform: 'uppercase', marginLeft: 4, marginBottom: 8,
     },

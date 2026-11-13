@@ -10,7 +10,7 @@ import { tokenStorage } from '../../../src/api/storage';
 import { authApi } from '../../../src/api/endpoints';
 import { useSessionStore } from '../../../src/store/session';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
-import { BottomSheet, ScreenTitle } from '../../../src/components/ui';
+import { BottomSheet, ScreenTitle, SheetAlert } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../src/i18n';
@@ -116,8 +116,7 @@ export default function AdminMoreScreen() {
       </ScrollView>
 
       <BottomSheet visible={logoutVisible} onClose={() => setLogoutVisible(false)}>
-        <Text style={styles.sheetTitle}>{t('common.se_deconnecter_2')}</Text>
-        <Text style={styles.sheetText}>{t('common.vous_devrez_vous_reconnecter_pour')}</Text>
+        <SheetAlert icon="logout" title={t('common.se_deconnecter_2')} text={t('common.vous_devrez_vous_reconnecter_pour')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button label={t('common.se_deconnecter')} onPress={handleLogout} variant="danger" />
           <Button label={t('common.annuler')} onPress={() => setLogoutVisible(false)} variant="outline" />

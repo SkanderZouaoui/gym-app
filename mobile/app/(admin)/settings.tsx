@@ -29,6 +29,7 @@ import { WEEKDAYS_LONG_MON } from '../../src/i18n/labels';
 import { useLanguage } from '../../src/i18n/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 function Stepper({
   label, hint, value, unit, min = 0, max = 240, step = 5, onChange,
@@ -89,7 +90,7 @@ function ConfigField({ icon, label, value, onChange, kb, placeholder }: { icon: 
   return (
     <View style={styles.row}>
       {value.trim() ? (
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fieldIcon}>
+        <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fieldIcon}>
           <MaterialIcons name={icon} size={22} color="#FFFFFF" />
         </LinearGradient>
       ) : (
@@ -120,7 +121,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
     <>
       {parts.includes('contact') ? (
         <>
-      <Text style={styles.section}>{t('admin.venue_identity')}</Text>
+      <SectionHeader title={t('admin.venue_identity')} />
       <VenueIdentityCard name={cfg.contact.name} onName={(v) => patch({ contact: { ...cfg.contact, name: v } })} />
 
       <VenueLocationCard
@@ -129,7 +130,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
         onChange={(pos) => patch({ contact: { ...cfg.contact, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null } })}
       />
 
-      <Text style={styles.section}>{t('admin.venue_contact')}</Text>
+      <SectionHeader title={t('admin.venue_contact')} />
       <View style={[styles.card, cardShadow]}>
         <ConfigField icon="call" label={t('common.telephone')} value={cfg.contact.phone} onChange={(v) => patch({ contact: { ...cfg.contact, phone: v } })} kb="phone-pad" placeholder={PHONE_PLACEHOLDER} />
         <View style={styles.sep} />
@@ -141,7 +142,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
       ) : null}
       {parts.includes('hours') ? (
         <>
-      <Text style={styles.section}>{t('admin.horaires_douverture')}</Text>
+      <SectionHeader title={t('admin.horaires_douverture')} />
       <View style={[styles.card, cardShadow]}>
         {cfg.hours.map((h, i) => (
           <View key={i}>
@@ -171,7 +172,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
       {parts.includes('contact') ? <VenueMediaSection /> : null}
       {parts.includes('payments') ? (
         <>
-      <Text style={styles.section}>{t('admin.moyens_de_paiement_acceptes')}</Text>
+      <SectionHeader title={t('admin.moyens_de_paiement_acceptes')} />
       <View style={[styles.card, cardShadow]}>
         {PAYMENTS.map((p, i) => (
           <View key={p.key}>
@@ -189,7 +190,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
           </View>
         ))}
       </View>
-      <Text style={styles.section}>{t('admin.abonnements')}</Text>
+      <SectionHeader title={t('admin.abonnements')} />
       <Pressable style={[styles.card, cardShadow, styles.linkRow]} onPress={() => router.push('/(admin)/plans')}>
         <MaterialIcons name="card-membership" size={24} color={colors.primaryInk} />
         <View style={{ flex: 1 }}>
@@ -202,7 +203,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
       ) : null}
       {parts.includes('comms') ? (
         <>
-      <Text style={styles.section}>{t('admin.alertes_et_annonces')}</Text>
+      <SectionHeader title={t('admin.alertes_et_annonces')} />
       <View style={[styles.card, cardShadow]}>
         <Stepper label={t('admin.rappel_dexpiration')} hint={t('admin.prevenir_avant_la_fin_de')} value={cfg.announcements.expiryReminderDays} unit="j" min={1} max={60} step={1} onChange={(v) => patch({ announcements: { ...cfg.announcements, expiryReminderDays: v } })} />
         <View style={styles.sep} />
@@ -236,7 +237,7 @@ function SalleConfig({ cfg, patch, parts }: { cfg: OrganizationConfig; patch: (p
       ) : null}
       {parts.includes('booking') ? (
         <>
-      <Text style={styles.section}>{t('admin.reservation')}</Text>
+      <SectionHeader title={t('admin.reservation')} />
       <View style={[styles.card, cardShadow]}>
         <Stepper label={t('admin.annulation_possible')} hint={t('admin.jusqua_avant_le_cours')} value={cfg.booking.cancelHoursBefore} unit="h" min={0} max={72} step={1} onChange={(v) => patch({ booking: { ...cfg.booking, cancelHoursBefore: v } })} />
         <View style={styles.sep} />
@@ -263,7 +264,7 @@ function Catalog() {
   return (
     <>
       <View style={styles.catHead}>
-        <Text style={styles.section}>{i18n.t('admin.types_de_cours')}</Text>
+        <SectionHeader title={i18n.t('admin.types_de_cours')} />
         <Pressable style={styles.addPill} onPress={() => openType()}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
           <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
@@ -283,7 +284,7 @@ function Catalog() {
                 {cover ? (
                   <Image source={{ uri: cover }} style={styles.coverImg} />
                 ) : (
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.coverImg, styles.coverFallback]}>
+                  <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.coverImg, styles.coverFallback]}>
                     <MaterialIcons name="fitness-center" size={26} color="#FFFFFF" />
                   </LinearGradient>
                 )}
@@ -320,7 +321,7 @@ function Catalog() {
       </View>
 
       <View style={styles.catHead}>
-        <Text style={styles.section}>{i18n.t('admin.salles')}</Text>
+        <SectionHeader title={i18n.t('admin.salles')} />
         <Pressable style={styles.addPill} onPress={() => openRoom()}>
           <MaterialIcons name="add" size={18} color={colors.primaryInk} />
           <Text style={styles.addPillText}>{i18n.t('admin.ajouter')}</Text>
@@ -478,7 +479,7 @@ export default function AdminSettingsScreen() {
 
         {show('booking') ? (
           <>
-        <Text style={styles.section}>{t('admin.periode_de_scan')}</Text>
+        <SectionHeader title={t('admin.periode_de_scan')} />
         <View style={[styles.card, cardShadow]}>
           <Stepper
             label={t('admin.ouverture_avant_le_cours')}
@@ -498,7 +499,7 @@ export default function AdminSettingsScreen() {
         </View>
         <Text style={styles.preview}>{t('admin.exemple_pour_un_cours_a', { v1: clock(18 * 60 - policy.scanOpensMinutesBefore), v3: ' ', v5: clock(18 * 60 + policy.scanClosesMinutesAfterStart) })}</Text>
 
-        <Text style={styles.section}>{t('admin.presence')}</Text>
+        <SectionHeader title={t('admin.presence')} />
         <View style={[styles.card, cardShadow]}>
           <ToggleRow
             label={t('admin.accepter_sans_reservation')}
@@ -523,7 +524,7 @@ export default function AdminSettingsScreen() {
           />
         </View>
 
-        <Text style={styles.section}>{t('admin.penalite_dabsence')}</Text>
+        <SectionHeader title={t('admin.penalite_dabsence')} />
         <View style={[styles.card, cardShadow]}>
           <ToggleRow
             label={t('admin.bloquer_les_reservations')}
@@ -574,7 +575,7 @@ function LanguageSection() {
   const { language, setLanguage } = useLanguage();
   return (
     <>
-      <Text style={styles.section}>{t('common.langue')}</Text>
+      <SectionHeader title={t('common.langue')} />
       <View style={[styles.card, cardShadow]}>
         {SUPPORTED_LANGUAGES.map((code, i) => (
           <View key={code}>

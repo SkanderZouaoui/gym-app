@@ -10,7 +10,7 @@ import { useSessions } from '../../../src/hooks/useClasses';
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { DaySelector } from '../../../src/components/adherent/DaySelector';
-import { BottomSheet, ScreenTitle, SkeletonList } from '../../../src/components/ui';
+import { BottomSheet, ScreenTitle, SkeletonList, SheetAlert } from '../../../src/components/ui';
 import { Button } from '../../../src/components/Button';
 import { useCancelSession } from '../../../src/hooks/useAdmin';
 import { SessionPlanningCard, sessionState } from '../../../src/components/staff/SessionPlanningCard';
@@ -121,12 +121,11 @@ export default function AdminPlanningScreen() {
       </ScrollView>
 
       <BottomSheet visible={!!toCancel} onClose={() => setToCancel(null)}>
-        <Text style={styles.sheetTitle}>{i18n.t('admin.annuler_ce_cours')}</Text>
-        <Text style={styles.sheetText}>{i18n.t('admin.annuler_cours_en_cours_texte')}</Text>
+        <SheetAlert icon="event-busy" title={i18n.t('admin.annuler_ce_cours')} text={i18n.t('admin.annuler_cours_en_cours_texte')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button
             label={i18n.t('admin.oui_annuler_le_cours')}
-            variant="secondary"
+            variant="danger"
             loading={cancelSession.isPending}
             onPress={() => toCancel && cancelSession.mutate(toCancel, { onSuccess: () => setToCancel(null) })}
           />

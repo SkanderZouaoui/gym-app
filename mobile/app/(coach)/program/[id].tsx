@@ -63,7 +63,7 @@ export default function CoachProgramDetailScreen() {
         </Pressable>
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
               <Text style={styles.heroTagText}>{PROGRAM_STATUS_LABEL[status]}</Text>
@@ -88,7 +88,7 @@ export default function CoachProgramDetailScreen() {
             { icon: 'flag' as const, label: t('common.objectif'), value: program.goal ? goalLabel(program.goal) : '—' },
           ].map((c) => (
             <View key={c.label} style={[styles.infoCard, cardShadow]}>
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.infoIcon}>
+              <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.infoIcon}>
                 <MaterialIcons name={c.icon} size={24} color="#FFFFFF" />
               </LinearGradient>
               <View style={{ minWidth: 0, flex: 1 }}>

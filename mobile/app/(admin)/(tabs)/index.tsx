@@ -201,7 +201,7 @@ export default function AdminDashboardScreen() {
           accessibilityRole="button"
           accessibilityLabel={i18n.t('common.encaissements')}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTop}>
               <Text style={[styles.heroKicker, { flex: 1 }]}>{i18n.t('admin.encaisse_en', { v1: monthName.toUpperCase() })}</Text>
@@ -525,9 +525,9 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     container: { paddingHorizontal: spacing.lg, gap: 10, paddingBottom: 140 },
     header: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 6, paddingBottom: 4 },
     date: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-    title: { fontFamily: fonts.head, fontSize: 26, letterSpacing: -0.7, color: colors.text },
-    avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
-    avatarImage: { width: 44, height: 44, borderRadius: 22 },
+    title: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, textTransform: 'uppercase', color: colors.text },
+    avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft, borderWidth: 2, borderColor: colors.deep },
+    avatarImage: { width: 40, height: 40, borderRadius: 20 },
     avatarText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
     heroShadow: { borderRadius: 28, shadowColor: colors.primary, shadowOffset: { width: 0, height: 16 }, shadowOpacity: 0.35, shadowRadius: 18, elevation: 8, marginTop: 4 },
     hero: { borderRadius: 28, padding: 22, overflow: 'hidden' },

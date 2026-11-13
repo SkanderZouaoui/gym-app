@@ -87,7 +87,7 @@ export default function StaffCashSellScreen() {
               return (
                 <Pressable key={p.id} onPress={() => setPlanId(p.id)} style={[styles.optionRow, active && styles.optionRowActive]}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.optionTile}>
+                    <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.optionTile}>
                       <MaterialIcons name="card-membership" size={22} color="#FFFFFF" />
                     </LinearGradient>
                   ) : (
@@ -115,7 +115,7 @@ export default function StaffCashSellScreen() {
               return (
                 <Pressable key={m} onPress={() => setMethod(m)} style={[styles.methodCard, active && styles.methodCardActive]}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.methodTile}>
+                    <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.methodTile}>
                       <MaterialIcons name={METHOD_ICON[m]} size={22} color="#FFFFFF" />
                     </LinearGradient>
                   ) : (

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../theme/tokens';
 import { useTheme } from '../../theme/ThemeContext';
 import { dateLocale } from '../../i18n';
-import { Banner, BottomSheet } from '../ui';
+import { Banner, BottomSheet, SheetAlert } from '../ui';
 import { Button } from '../Button';
 import { haptics } from '../../utils/haptics';
 import { useCancelMembership, useDeleteMember, useExtendMembership, useSetMemberStatus, useSetMembershipSuspended, type MemberDetail, type StaffMembership } from '../../hooks/useStaff';
@@ -104,8 +104,7 @@ export function MemberAdminSection({ member, current, isAdmin, onDeleted }: { me
       </BottomSheet>
 
       <BottomSheet visible={sheet === 'cancel'} onClose={() => setSheet(null)}>
-        <Text style={styles.sheetTitle}>{t('staff.adm_cancel_title')}</Text>
-        <Text style={styles.sheetText}>{t('staff.adm_cancel_text', { plan: current?.plan.name ?? '', name })}</Text>
+        <SheetAlert icon="event-busy" title={t('staff.adm_cancel_title')} text={t('staff.adm_cancel_text', { plan: current?.plan.name ?? '', name })} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button label={t('staff.adm_cancel_membership')} variant="danger" loading={cancel.isPending} onPress={() => current && cancel.mutate(current.id, { onSuccess: () => ok(t('staff.adm_membership_cancelled')), onError: fail })} />
           <Button label={t('staff.adm_keep')} variant="outline" onPress={() => setSheet(null)} />
@@ -113,8 +112,7 @@ export function MemberAdminSection({ member, current, isAdmin, onDeleted }: { me
       </BottomSheet>
 
       <BottomSheet visible={sheet === 'delete'} onClose={() => setSheet(null)}>
-        <Text style={styles.sheetTitle}>{t('staff.adm_delete_title', { name })}</Text>
-        <Text style={styles.sheetText}>{t('staff.adm_delete_text')}</Text>
+        <SheetAlert title={t('staff.adm_delete_title', { name })} text={t('staff.adm_delete_text')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button label={t('staff.adm_delete')} variant="danger" loading={remove.isPending} onPress={() => remove.mutate(member.id, { onSuccess: () => { setSheet(null); void haptics.success(); onDeleted(); }, onError: fail })} />
           <Button label={t('common.annuler')} variant="outline" onPress={() => setSheet(null)} />

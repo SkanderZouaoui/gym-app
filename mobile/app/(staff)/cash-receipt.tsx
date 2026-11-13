@@ -88,7 +88,7 @@ export default function StaffCashReceiptScreen() {
         )}
 
         <View style={[styles.receipt, cardShadow]}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.receiptTop}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.receiptTop}>
             <View style={styles.mono}>
               <Text style={styles.monoText}>{config.branding.brand.slice(0, 2).toUpperCase()}</Text>
             </View>

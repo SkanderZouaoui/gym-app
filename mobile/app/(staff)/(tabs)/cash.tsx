@@ -99,7 +99,7 @@ export default function StaffCashScreen() {
         <ScreenTitle title={isAdmin ? t('common.encaissements') : t('staff.ma_caisse')} subtitle={isAdmin ? t('staff.historique_de_la_caisse_de') : t('staff.les_encaissements_que_vous_avez')} />
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <Text style={styles.heroKicker}>{isAdmin ? periodKicker : t('staff.vous_avez_encaisse_ce_mois')}</Text>
             <Text style={styles.heroValue}>{formatMoney(monthTotal)}</Text>

@@ -8,13 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useAdminRooms, useDeleteRoom, useSaveRoom } from '../../src/hooks/useAdmin';
-import { Banner, BottomSheet, Toast, DetailSkeleton } from '../../src/components/ui';
+import { Banner, BottomSheet, Toast, DetailSkeleton, SheetAlert } from '../../src/components/ui';
 import { KeyboardAwareScreen } from '../../src/components/ui/KeyboardAwareScreen';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
 import { TextField } from '../../src/components/TextField';
 import { Button } from '../../src/components/Button';
 import { RoomMediaSection } from '../../src/components/RoomMediaSection';
 import { useOfflineAwareRefresh } from '../../src/hooks/useOfflineAwareRefresh';
+import { SectionHeader } from '../../src/components/ui/SectionHeader';
 
 interface Form {
   name: string;
@@ -129,7 +130,7 @@ export default function RoomScreen() {
 
         {message ? <Banner tone={message.tone} icon={message.tone === 'success' ? 'check-circle' : message.tone === 'danger' ? 'error' : 'info-outline'} text={message.text} /> : null}
 
-        <Text style={styles.section}>{t('common.class_type_infos')}</Text>
+        <SectionHeader title={t('common.class_type_infos')} />
         <TextField
           label={t('common.nom')}
           icon="meeting-room"
@@ -164,8 +165,7 @@ export default function RoomScreen() {
       {offlineToastVisible ? <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} /> : null}
 
       <BottomSheet visible={confirmDelete} onClose={() => setConfirmDelete(false)}>
-        <Text style={styles.sheetTitle}>{t('common.supprimer_2', { name: form.name })}</Text>
-        <Text style={styles.sheetText}>{t('admin.une_salle_utilisee_par_des')}</Text>
+        <SheetAlert title={t('common.supprimer_2', { name: form.name })} text={t('admin.une_salle_utilisee_par_des')} />
         <View style={{ gap: spacing.sm, marginTop: spacing.sm }}>
           <Button label={t('admin.oui_supprimer')} variant="danger" loading={remove.isPending} onPress={doDelete} />
           <Button label={t('common.annuler')} variant="outline" onPress={() => setConfirmDelete(false)} />

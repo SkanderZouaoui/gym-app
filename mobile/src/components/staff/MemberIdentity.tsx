@@ -53,7 +53,7 @@ export function MemberIdentity({ firstName, lastName, photoUrl, memberCode, rati
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={[styles.avatar, { backgroundColor: colors.surface2 }]} />
         ) : (
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
+          <LinearGradient colors={[colors.deep, colors.deepPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
           </LinearGradient>
         )}

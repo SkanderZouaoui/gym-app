@@ -12,11 +12,11 @@ import { usePayments, useStaffToday, type StaffTodaySession } from '../../../src
 import { useHideTabBarOnScroll } from '../../../src/hooks/useHideTabBarOnScroll';
 import { useOfflineAwareRefresh } from '../../../src/hooks/useOfflineAwareRefresh';
 import { useStaffRoutes } from '../../../src/navigation/staffRoutes';
-import { Avatar, SectionHeader, SkeletonList } from '../../../src/components/ui';
+import { SectionHeader, SkeletonList } from '../../../src/components/ui';
 import { useSessionStore } from '../../../src/store/session';
 import { InitialsAvatar, METHOD_LABEL, StatusTag, formatMoney } from '../../../src/components/staff/staffUi';
 import { useTranslation } from 'react-i18next';
-import { NotificationBell } from '../../../src/components/NotificationBell';
+import { AppHeader } from '../../../src/components/adherent/AppHeader';
 import { RoleAnnouncements, RoleNotices } from '../../../src/components/adherent/Notices';
 import { dateLocale } from '../../../src/i18n';
 import { LockedAccountsCard } from '../../../src/components/staff/LockedAccountsCard';
@@ -56,14 +56,13 @@ export default function StaffHomeScreen() {
         contentContainerStyle={styles.container}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View style={styles.header}>
-          <Avatar initials={`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase() || 'AC'} size={44} background={colors.primarySoft} color={colors.primaryInk} photoUrl={user?.photoUrl} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.hello}>{t('staff.bonjour')}</Text>
-            <Text style={styles.name} numberOfLines={1}>{user?.firstName ?? ''}</Text>
-          </View>
-          <NotificationBell onPress={() => router.push('/(staff)/notifications')} />
-        </View>
+        <AppHeader
+          greeting={t('staff.bonjour')}
+          firstName={user?.firstName}
+          lastName={user?.lastName}
+          photoUrl={user?.photoUrl}
+          onPressNotifications={() => router.push('/(staff)/notifications')}
+        />
 
         <LockedAccountsCard variant="alert" />
 
@@ -72,7 +71,7 @@ export default function StaffHomeScreen() {
         <VenueTodayBanner href="/(staff)/venue" />
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <Text style={styles.heroKicker}>{dateLabel.toUpperCase()}</Text>
             <Text style={styles.heroValue}>{formatMoney(collectedToday)}</Text>
