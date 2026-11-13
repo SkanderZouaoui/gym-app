@@ -26,7 +26,10 @@ const SECTIONS: { title: string; rows: Row[] }[] = [
   },
   {
     get title() { return i18n.t('admin.contenu'); },
-    rows: [{ icon: 'fitness-center', get title() { return i18n.t('common.programmes'); }, get sub() { return i18n.t('admin.validation_et_exercices'); }, href: '/(admin)/programs' }],
+    rows: [
+      { icon: 'fitness-center', get title() { return i18n.t('common.programmes'); }, get sub() { return i18n.t('admin.validation_et_exercices'); }, href: '/(admin)/programs' },
+      { icon: 'military-tech', get title() { return i18n.t('admin.badges_title'); }, get sub() { return i18n.t('admin.badges_more_sub'); }, href: '/(admin)/badges' },
+    ],
   },
   {
     get title() { return i18n.t('admin.communication'); },

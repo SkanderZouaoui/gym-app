@@ -119,7 +119,7 @@ export function ProfilePage() {
       <Button variant="danger" icon="logout" onClick={() => setConfirmLogout(true)}>Se déconnecter</Button>
 
       {editingPhoto ? <ImageEditor source={editingPhoto} fileName="profil" title="Photo de profil" confirmLabel="Enregistrer" defaultRatio={1} onCancel={() => setEditingPhoto(null)} onDone={(file) => void savePhoto(file)} /> : null}
-      {confirmLogout ? <ConfirmDialog title="Se déconnecter ?" message="Vous devrez vous reconnecter pour accéder au back-office." confirmLabel="Se déconnecter" onClose={() => setConfirmLogout(false)} onConfirm={async () => { await logout(); navigate('/login', { replace: true }) }} /> : null}
+      {confirmLogout ? <ConfirmDialog title="Se déconnecter ?" message="Vous devrez vous reconnecter pour accéder à votre espace." confirmLabel="Se déconnecter" onClose={() => setConfirmLogout(false)} onConfirm={async () => { await logout(); navigate('/login', { replace: true }) }} /> : null}
     </div>
   )
 }

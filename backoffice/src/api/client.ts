@@ -48,7 +48,7 @@ api.interceptors.response.use(
 /** Codes d'erreur de l'API → messages lisibles (le reste retombe sur `fallback`). */
 const MESSAGES: Record<string, string> = {
   INVALID_CREDENTIALS: 'E-mail ou mot de passe incorrect.',
-  ROLE_NOT_AUTHORIZED: "Ce compte n'a pas accès au back-office.",
+  ROLE_NOT_AUTHORIZED: "Ce compte n’a pas accès à cet espace.",
   EMAIL_TAKEN: 'Cette adresse e-mail est déjà utilisée.',
   PHONE_TAKEN: 'Ce numéro de téléphone est déjà utilisé.',
   SESSION_NOT_EDITABLE: 'Un cours passé ou en cours ne peut plus être modifié.',

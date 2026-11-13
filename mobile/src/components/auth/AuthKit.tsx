@@ -28,7 +28,7 @@ export function useAuthPalette() {
 export type AuthPalette = ReturnType<typeof useAuthPalette>;
 
 /** Hauteur du haut de page (logo + accroche) avant le formulaire, en plus de la zone de la barre d'état. */
-const FORM_TOP = 290;
+const FORM_TOP = 310;
 
 /** Photo d'ambiance : en attendant `athlete.jpg`, rayures violettes sombres comme dans la maquette, puis dégradé vers le noir. */
 function Hero({ compact, width, height, insetTop, dark }: { compact?: boolean; width: number; height: number; insetTop: number; dark: boolean }) {
@@ -56,7 +56,11 @@ function Hero({ compact, width, height, insetTop, dark }: { compact?: boolean; w
       {compact ? null : (
         <Animated.Text
           entering={FadeInDown.duration(600)}
-          style={{ position: 'absolute', left: 24, right: 24, top: insetTop + 96, fontFamily: fonts.display, fontSize: 40, lineHeight: 42, letterSpacing: -0.8, textTransform: 'uppercase', color: '#fff' }}
+          // Deux lignes exactement (le texte contient un saut de ligne) : la taille se réduit si une ligne est trop large pour l'écran.
+          numberOfLines={2}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}
+          style={{ position: 'absolute', left: 24, right: 24, top: insetTop + 186, fontFamily: fonts.display, fontSize: 34, lineHeight: 44, paddingTop: 6, letterSpacing: -0.6, textTransform: 'uppercase', color: '#fff' }}
         >
           {t('auth.login_headline')}
         </Animated.Text>

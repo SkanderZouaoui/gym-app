@@ -149,3 +149,59 @@ button:disabled {
 .fade-in {
   animation: fade-in 160ms ease-out;
 }
+
+/* Bouton de connexion animé : le bouton se contracte en cercle, puis la coche (succès) ou la croix (échec) se dessine. */
+@keyframes draw-stroke {
+  from {
+    stroke-dashoffset: 80;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes btn-bounce {
+  0% {
+    transform: scale(0.78);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes btn-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.draw-stroke {
+  stroke-dasharray: 80;
+  animation: draw-stroke 0.45s 0.12s ease-out both;
+}
+.btn-bounce {
+  animation: btn-bounce 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.btn-shake {
+  animation: btn-shake 0.32s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .draw-stroke,
+  .btn-bounce,
+  .btn-shake {
+    animation-duration: 0.01ms;
+  }
+}

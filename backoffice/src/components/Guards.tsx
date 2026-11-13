@@ -1,16 +1,17 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth, type WebRole } from '../store/auth'
-import { LogoMark } from './ui'
+import logoMark from '../assets/logo-mark.png'
+import logoWord from '../assets/logo-word.png'
 
 export function Splash() {
   return (
     <div className="grid min-h-svh place-items-center bg-bg">
       <div className="flex flex-col items-center gap-4">
-        <span className="grid size-14 animate-pulse place-items-center rounded-2xl bg-gradient-to-br from-primary to-primary-pressed text-white shadow-primary">
-          <LogoMark size={28} />
+        <span className="flex animate-pulse flex-col items-center gap-2 rounded-3xl bg-[#1b1432] px-8 py-6">
+          <img src={logoMark} alt="MuscleUP" className="h-12 w-auto" />
+          <img src={logoWord} alt="" className="h-3 w-auto" />
         </span>
-        <span className="font-head text-lg font-extrabold">MuscleUP</span>
       </div>
     </div>
   )

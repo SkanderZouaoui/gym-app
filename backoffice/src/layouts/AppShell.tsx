@@ -4,7 +4,9 @@ import { useAuth } from '../store/auth'
 import { navFor } from '../nav'
 import { ROLE_LABEL } from '../lib/roles'
 import { useMyNotifications } from '../api/me'
-import { Avatar, Icon, LogoMark, cn } from '../components/ui'
+import { Avatar, Icon, cn } from '../components/ui'
+import logoMark from '../assets/logo-mark.png'
+import logoWord from '../assets/logo-word.png'
 import { useToast } from '../components/ui'
 
 
@@ -33,7 +35,7 @@ function UserMenu() {
         <Icon name="unfold_more" size={18} className="text-white/50" />
       </button>
       {open ? (
-        <div className="pop-in absolute bottom-full left-0 right-0 z-20 mb-2 overflow-hidden rounded-2xl border border-border bg-surface p-1.5 shadow-pop">
+        <div className="pop-in absolute bottom-full left-0 right-0 z-20 mb-2 overflow-hidden rounded-2xl border border-border bg-surface p-1.5 text-text shadow-pop">
           {roles.length > 1 ? (
             <div className="border-b border-border pb-1.5">
               <div className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wider text-muted">Utiliser en tant que</div>
@@ -78,14 +80,10 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const unread = (useMyNotifications().data ?? []).filter((n) => !n.readAt).length
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-[#3b1764] to-[#2a0f4a] px-4 py-5 text-white">
-      <div className="mb-6 flex items-center gap-3 px-2">
-        <span className="grid size-10 place-items-center rounded-2xl bg-gradient-to-br from-primary to-[#5b21b6] shadow-primary">
-          <LogoMark size={22} />
-        </span>
-        <div>
-          <div className="font-head text-lg font-extrabold leading-none">MuscleUP</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-widest text-white/50">Back-office</div>
-        </div>
+      <div className="mb-7 px-3">
+        <img src={logoMark} alt="MuscleUP" className="h-11 w-auto" />
+        <img src={logoWord} alt="" className="mt-1.5 h-3 w-auto opacity-90" />
+        <div className="mt-3 text-[10.5px] font-bold uppercase tracking-[0.2em] text-white/45">Espace de gestion</div>
       </div>
 
       <nav className="flex-1 space-y-5 overflow-y-auto">

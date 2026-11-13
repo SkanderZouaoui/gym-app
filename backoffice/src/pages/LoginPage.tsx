@@ -2,7 +2,8 @@ import { useState, type FormEvent, type InputHTMLAttributes, type ReactNode } fr
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { api, apiErrorCode, apiErrorMessage } from '../api/client'
 import { NotTeamError, useAuth } from '../store/auth'
-import { Button, Icon } from '../components/ui'
+import { Icon } from '../components/ui'
+import { AuthSubmitButton, type SubmitStatus } from '../components/AuthSubmitButton'
 import logoMark from '../assets/logo-mark.png'
 import logoWord from '../assets/logo-word.png'
 
@@ -19,7 +20,7 @@ function BrandPanel() {
         <img src={logoWord} alt="" className="mt-1 h-4 w-auto self-start" />
       </div>
 
-      <h2 className="relative max-w-[560px] font-display text-[72px] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
+      <h2 className="relative max-w-[560px] font-display text-[72px] font-extrabold uppercase leading-[1.1] tracking-[-0.02em]">
         Prêt à dépasser tes limites ?
       </h2>
     </div>
@@ -55,11 +56,12 @@ export function LoginPage() {
   const [code, setCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState<SubmitStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
 
-  if (user) return <Navigate to={from} replace />
+  // Pendant l'animation de succès, on reste sur la page : la redirection se fait à la fin du mouvement.
+  if (user && status === 'idle') return <Navigate to={from} replace />
 
   const go = (next: Step) => {
     setStep(next)
@@ -69,31 +71,42 @@ export function LoginPage() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    setBusy(true)
+    if (status !== 'idle') return
+    setStatus('loading')
     setError(null)
     try {
       if (step === 'login') {
         await login(email.trim(), password)
+        // Le bouton passe en succès (cercle vert, coche) un court instant avant d'ouvrir l'application.
+        setStatus('success')
+        await new Promise((r) => setTimeout(r, 1100))
         navigate(from, { replace: true })
+        return
       } else if (step === 'forgot') {
         await api.post('/v1/auth/forgot-password', { email: email.trim(), lang: 'fr' })
+        setStatus('success')
+        await new Promise((r) => setTimeout(r, 900))
         setInfo('Si ce compte existe, un code à 6 chiffres vient d’être envoyé par e-mail.')
         setStep('reset')
       } else {
         await api.post('/v1/auth/reset-password', { email: email.trim(), code: code.trim(), newPassword })
+        setStatus('success')
+        await new Promise((r) => setTimeout(r, 900))
         setPassword('')
         setCode('')
         setNewPassword('')
         setStep('login')
         setInfo('Mot de passe modifié. Vous pouvez vous connecter.')
       }
+      setStatus('idle')
     } catch (err) {
-      if (err instanceof NotTeamError) setError('Ce compte n’a pas accès au back-office. L’accès est réservé à l’accueil et à l’administration.')
+      // Échec : le bouton devient un cercle rouge avec une croix, puis reprend sa forme.
+      setStatus('error')
+      setTimeout(() => setStatus('idle'), 2400)
+      if (err instanceof NotTeamError) setError('Ce compte n’a pas accès à cet espace. Connectez-vous avec un compte de l’équipe (accueil ou administration).')
       else if (apiErrorCode(err) === 'OTP_RATE_LIMITED') setError('Trop de codes demandés. Patientez quelques minutes avant de réessayer.')
       else if (step === 'reset') setError(apiErrorMessage(err, 'Code invalide ou expiré.'))
       else setError(apiErrorMessage(err))
-    } finally {
-      setBusy(false)
     }
   }
 
@@ -169,19 +182,15 @@ export function LoginPage() {
             )}
           </div>
 
-          <Button
-            type="submit"
-            size="lg"
-            loading={busy}
-            disabled={!email.trim() || (step === 'login' && password.length < 8) || (step === 'reset' && (code.length !== 6 || newPassword.length < 8))}
+          <AuthSubmitButton
+            status={status}
             icon={step === 'login' ? 'login' : step === 'forgot' ? 'send' : 'check'}
-            className="h-[60px] w-full !rounded-2xl text-base font-extrabold uppercase tracking-wider shadow-[0_10px_30px_rgba(124,58,237,0.45)]"
-          >
-            {step === 'login' ? 'Se connecter' : step === 'forgot' ? 'Envoyer le code' : 'Modifier le mot de passe'}
-          </Button>
+            label={step === 'login' ? 'Se connecter' : step === 'forgot' ? 'Envoyer le code' : 'Modifier le mot de passe'}
+            disabled={!email.trim() || (step === 'login' && password.length < 8) || (step === 'reset' && (code.length !== 6 || newPassword.length < 8))}
+          />
         </form>
 
-        <p className="mt-10 text-xs text-muted">© {YEAR} MuscleUP · Back-office</p>
+        <p className="mt-10 text-xs text-muted">© {YEAR} MuscleUP</p>
       </main>
     </div>
   )
