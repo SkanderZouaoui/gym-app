@@ -155,7 +155,7 @@ export function FloatingTabBar({ state, descriptors, emitter, navigateToTab, act
           style={({ pressed }) => [styles.actionShadow, pressed && { transform: [{ scale: 0.95 }] }]}
         >
           <LinearGradient
-            colors={[colors.primary, colors.primaryPressed]}
+            colors={[colors.hero, colors.hero2]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.action}

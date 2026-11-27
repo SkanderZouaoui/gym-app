@@ -137,7 +137,7 @@ export default function StaffCashSellScreen() {
           disabled={!plan || !member || sell.isPending}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, (!plan || sell.isPending) && { opacity: 0.5 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="point-of-sale" size={22} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{sell.isPending ? t('staff.encaissement_3') : plan ? t('staff.encaisser_2', { v0: formatMoney(plan.price) }) : t('staff.encaisser')}</Text>
           </LinearGradient>

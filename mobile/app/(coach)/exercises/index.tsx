@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View, } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -112,7 +113,7 @@ export default function CoachExercisesLibraryScreen() {
         </View>
       ) : (
         <FlatList
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />}
           data={exercises ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}

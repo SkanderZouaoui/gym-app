@@ -1,6 +1,7 @@
 import { VenueStatusLine } from '../../../src/components/venue/VenueStatusLine';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
@@ -88,7 +89,7 @@ export default function QrScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <ScreenTitle title={t('qr.title')} subtitle={t('qr.subtitle')} />
         <VenueStatusLine />
 

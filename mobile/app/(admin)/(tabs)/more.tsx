@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../../src/theme/tokens';
@@ -84,7 +85,7 @@ export default function AdminMoreScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} {...tabBarScroll} contentContainerStyle={styles.container}>
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} {...tabBarScroll} contentContainerStyle={styles.container}>
         <ScreenTitle title={t('common.plus')} subtitle={t('admin.fonctions_daccueil_et_dadministration')} />
         {SECTIONS.map((section) => (
           <View key={section.title} style={{ gap: 8 }}>

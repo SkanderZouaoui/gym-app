@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import Constants from 'expo-constants';
-import { Image, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { Image, LayoutAnimation, Pressable, ScrollView, StyleSheet, Text, View, } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,7 +42,6 @@ const SECTIONS: { icon: IconName; title: string; text: string }[] = [
     get title() { return i18n.t('common.contact'); },
     get text() { return i18n.t('member.pour_toute_question_contactez_laccueil'); },
   },
-  { icon: 'favorite-border', get title() { return i18n.t('member.credits'); }, get text() { return i18n.t('member.donnees_des_exercices_fournies_par'); } },
 ];
 
 /** À propos : identité de l'application, règlement, mentions légales, confidentialité, contact, crédits. */
@@ -64,7 +64,7 @@ export default function AppInfoScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>{t('common.profil')}</Text>
@@ -98,7 +98,7 @@ export default function AppInfoScreen() {
           })}
         </View>
 
-        <Text style={styles.footer}>© {new Date().getFullYear()} MuscleUP</Text>
+        <Text style={styles.footer}>© {new Date().getFullYear()} MuscleUP · ToReal&Co</Text>
       </ScrollView>
     </SafeAreaView>
   );

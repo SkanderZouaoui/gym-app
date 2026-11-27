@@ -9,7 +9,7 @@ const TRACK = 56;
  * une fine barre dont le curseur montre la position et la part visible du contenu.
  * Rien ne recouvre les éléments ; la barre n'apparaît que s'il y a du contenu caché.
  */
-export function HScroll({ children, contentContainerStyle, onScroll, ...rest }: ScrollViewProps) {
+export function HScroll({ children, contentContainerStyle, onScroll, ...rest }: ScrollViewProps & { ref?: React.Ref<React.ComponentRef<typeof ScrollView>> }) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const [box, setBox] = useState(0);

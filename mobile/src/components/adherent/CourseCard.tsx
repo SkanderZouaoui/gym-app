@@ -40,7 +40,7 @@ export function CourseCard({
     <Pressable style={({ pressed }) => [styles.card, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]} onPress={onPress}>
       <View style={styles.top}>
         <LinearGradient
-          colors={booked ? [colors.success, colors.successInk] : closed ? [colors.muted, colors.muted] : [colors.primary, colors.primaryPressed]}
+          colors={booked ? [colors.success, colors.successInk] : closed ? [colors.muted, colors.muted] : [colors.hero, colors.hero2]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.timeBlock}
@@ -75,7 +75,7 @@ export function CourseCard({
         style={({ pressed }) => [styles.cta, (booked || closed) && styles.ctaOutline, closed && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.97 }] }]}
       >
         {!booked && !closed ? (
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
         ) : null}
         {booked ? <MaterialIcons name="check-circle" size={18} color={colors.successInk} /> : null}
         <Text style={[styles.ctaText, (booked || closed) && styles.ctaTextOutline]}>{ctaLabel}</Text>
@@ -112,7 +112,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     fillLabel: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
     fillValue: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.text },
     cta: {
-      height: 48, borderRadius: 16, overflow: 'hidden', backgroundColor: colors.primary, alignItems: 'center',
+      height: 48, borderRadius: 16, overflow: 'hidden', backgroundColor: colors.hero, alignItems: 'center',
       justifyContent: 'center', flexDirection: 'row', gap: 6,
     },
     ctaOutline: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },

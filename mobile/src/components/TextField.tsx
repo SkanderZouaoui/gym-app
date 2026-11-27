@@ -55,7 +55,7 @@ export function TextField({ label, error, hint, icon, style, isPassword, secureT
               <MaterialIcons name={icon} size={20} color={colors.dangerInk} />
             </View>
           ) : hasValue || focused ? (
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.tile, readOnly && { opacity: 0.55 }]}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.tile, readOnly && { opacity: 0.55 }]}>
               <MaterialIcons name={icon} size={20} color="#FFFFFF" />
             </LinearGradient>
           ) : (

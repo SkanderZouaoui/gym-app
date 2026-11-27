@@ -60,7 +60,7 @@ export function ProgramCard({ name, isOwn, dayCount, todayLabel, todayExerciseCo
 
   return (
     <Pressable style={({ pressed }) => [styles.compactCard, cardShadow, pressed && { transform: [{ scale: 0.98 }] }]} onPress={onPress}>
-      <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.compactIcon}>
+      <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.compactIcon}>
         <MaterialIcons name="fitness-center" size={26} color="#FFFFFF" />
       </LinearGradient>
       <View style={{ flex: 1, minWidth: 0 }}>

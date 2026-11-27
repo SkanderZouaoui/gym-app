@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -86,7 +87,7 @@ export default function SessionDetailScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
@@ -94,7 +95,7 @@ export default function SessionDetailScreen() {
         </Pressable>
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
               <Text style={styles.heroTagText}>{t('member.cours_collectif')}</Text>
@@ -207,7 +208,7 @@ export default function SessionDetailScreen() {
             style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
           >
             <LinearGradient
-              colors={isFull ? [colors.secondary, colors.secondary] : [colors.primary, colors.primaryPressed]}
+              colors={isFull ? [colors.secondary, colors.secondary] : [colors.hero, colors.hero2]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.cta}

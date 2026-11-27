@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,7 +35,7 @@ export default function AdminExercisesScreen() {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         initialNumToRender={14}
         windowSize={9}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
@@ -53,7 +54,7 @@ export default function AdminExercisesScreen() {
                   onPress={() => router.push({ pathname: '/(admin)/exercises/form', params: group ? { group } : {} })}
                   style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
                 >
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
+                  <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
                     <MaterialIcons name="add" size={26} color={colors.primaryContrast} />
                   </LinearGradient>
                 </Pressable>

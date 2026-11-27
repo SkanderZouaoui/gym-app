@@ -161,7 +161,7 @@ export default function CoachProgramNewScreen() {
               return (
                 <Pressable key={l} onPress={() => setLevel(l)} style={styles.pill}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                    <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
                   <Text style={[styles.pillText, active && styles.pillTextActive]}>{levelLabel(l)}</Text>
                 </Pressable>
@@ -286,7 +286,7 @@ export default function CoachProgramNewScreen() {
           disabled={assignProgram.isPending}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, assignProgram.isPending && { opacity: 0.7 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name={isAdmin ? 'check' : 'send'} size={22} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{assignProgram.isPending ? (isAdmin ? t('common.publication') : t('common.envoi')) : isAdmin ? t('coach.publier_le_programme') : t('coach.soumettre_a_validation')}</Text>
           </LinearGradient>

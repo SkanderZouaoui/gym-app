@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActionRowButton } from '../../ui/ActionRowButton';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
@@ -172,10 +173,7 @@ export function HistoryView() {
     </View>
 
     {filtered.length > shown ? (
-      <Pressable onPress={() => setShown((n) => n + PAGE)} accessibilityRole="button" style={({ pressed }) => [styles.more, pressed && { opacity: 0.7 }]}>
-        <Text style={styles.moreText}>{t('member.history_more')}</Text>
-        <MaterialIcons name="expand-more" size={20} color={colors.primaryInk} />
-      </Pressable>
+      <ActionRowButton icon="expand-circle-down" trailingIcon="expand-more" label={t('member.history_more')} onPress={() => setShown((n) => n + PAGE)} />
     ) : null}
     </View>
   );
@@ -213,7 +211,5 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     rowMeta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
     kindPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 5, paddingHorizontal: 9, paddingVertical: 3, borderRadius: radii.full, backgroundColor: colors.primarySoft, marginTop: 2 },
     kindText: { fontFamily: fonts.bodyBold, fontSize: 11, color: colors.primaryInk },
-    more: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 50, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.primaryBorder, backgroundColor: colors.primarySoft },
-    moreText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
   });
 }

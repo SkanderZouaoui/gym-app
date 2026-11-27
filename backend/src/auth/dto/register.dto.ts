@@ -1,11 +1,11 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsCompliantPassword } from '../../common/validators/password-policy.js';
 
 export class RegisterDto {
   @IsEmail()
   email!: string;
 
-  @IsString()
-  @MinLength(8)
+  @IsCompliantPassword()
   password!: string;
 
   @IsString()

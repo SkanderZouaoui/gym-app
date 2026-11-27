@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -60,7 +61,7 @@ export default function AdminPlanningScreen() {
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenTitle
           title={i18n.t('common.planning')}
@@ -71,7 +72,7 @@ export default function AdminPlanningScreen() {
               onPress={() => router.push('/(admin)/course-form')}
               style={({ pressed }) => [styles.addShadow, pressed && { transform: [{ scale: 0.96 }] }]}
             >
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
+              <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
                 <MaterialIcons name="add" size={28} color={colors.primaryContrast} />
               </LinearGradient>
             </Pressable>

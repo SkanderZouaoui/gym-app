@@ -286,7 +286,7 @@ export default function ProgramBuilderScreen() {
               style={styles.dayTab}
             >
               {i === activeDay ? (
-                <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
               ) : null}
               <Text style={[styles.dayTabText, i === activeDay && styles.dayTabTextActive]}>
                 {day.label || DAY_LABELS[day.dayOfWeek]}
@@ -352,7 +352,7 @@ export default function ProgramBuilderScreen() {
           disabled={saving}
           style={({ pressed }) => [styles.saveShadow, pressed && { transform: [{ scale: 0.98 }] }, saving && { opacity: 0.7 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButton}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButton}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
             <Text style={styles.saveText}>
               {saving ? t('common.enregistrement') : isEditing ? t('common.enregistrer_les_modifications') : t('member.enregistrer_le_programme')}

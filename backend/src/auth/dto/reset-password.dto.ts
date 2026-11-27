@@ -1,4 +1,5 @@
-import { IsEmail, IsString, Length, MinLength } from 'class-validator';
+import { IsEmail, IsString, Length } from 'class-validator';
+import { IsCompliantPassword } from '../../common/validators/password-policy.js';
 
 export class ResetPasswordDto {
   @IsEmail()
@@ -8,7 +9,6 @@ export class ResetPasswordDto {
   @Length(6, 6)
   code!: string;
 
-  @IsString()
-  @MinLength(8)
+  @IsCompliantPassword()
   newPassword!: string;
 }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -86,7 +87,7 @@ export default function CoachPlanningScreen() {
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <ScreenTitle
           title={i18n.t('common.planning')}
@@ -141,7 +142,7 @@ export default function CoachPlanningScreen() {
               >
                 <View style={styles.cardTop}>
                   <LinearGradient
-                    colors={st.key === 'live' ? [colors.success, colors.successInk] : [colors.primary, colors.primaryPressed]}
+                    colors={st.key === 'live' ? [colors.success, colors.successInk] : [colors.hero, colors.hero2]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.timeBlock}

@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSessionStore } from '../../src/store/session';
 import { ApiError } from '../../src/api/client';
 import { Banner } from '../../src/components/ui';
+import { PasswordRules, passwordChecks } from '../../src/components/auth/AuthKit';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../src/i18n';
 
@@ -111,8 +112,9 @@ export default function RegisterScreen() {
               value={password}
               onChangeText={setPassword}
               isPassword
-              placeholder={t('auth.8_caracteres_minimum_dont_un')}
+              autoComplete="new-password"
             />
+            {password.length > 0 ? <PasswordRules password={password} /> : null}
 
             <Pressable style={styles.cguRow} onPress={() => setAgreed((a) => !a)}>
               <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
@@ -121,7 +123,7 @@ export default function RegisterScreen() {
               <Text style={styles.cguText}>{t('auth.jaccepte_les_conditions_dutilisation_et')}</Text>
             </Pressable>
 
-            <Button label={loading ? t('common.creation') : t('auth.creer_mon_compte')} onPress={handleRegister} loading={loading} />
+            <Button label={loading ? t('common.creation') : t('auth.creer_mon_compte')} onPress={handleRegister} loading={loading} disabled={passwordChecks(password).count < 4} />
           </View>
 
           <View style={styles.footer}>
@@ -136,6 +138,8 @@ export default function RegisterScreen() {
 
 function traduireErreur(code: string): string {
   switch (code) {
+    case 'WEAK_PASSWORD':
+      return i18n.t('auth.weak_password');
     case 'EMAIL_OR_PHONE_ALREADY_USED':
       return i18n.t('auth.cette_adresse_est_deja_utilisee');
     default:

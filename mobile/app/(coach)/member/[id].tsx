@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -104,7 +105,7 @@ export default function CoachMemberScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref="/(coach)/(tabs)/planning" />
-      <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <ScrollView contentContainerStyle={styles.container} refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={styles.identity}>
           <Avatar initials={initials} size={96} background={colors.primarySoft} color={colors.primaryInk} photoUrl={member.photoUrl} />
           <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>{member.firstName} {member.lastName}</Text>

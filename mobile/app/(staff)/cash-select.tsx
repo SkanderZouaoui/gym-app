@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View, RefreshControl } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View, } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
@@ -47,7 +48,7 @@ export default function StaffCashSelectScreen() {
       </View>
 
       <FlatList
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />}
         data={members ?? []}
         keyExtractor={(m) => m.id}
         keyboardShouldPersistTaps="handled"

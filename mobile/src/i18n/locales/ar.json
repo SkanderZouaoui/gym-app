@@ -412,9 +412,15 @@
     "waitlist": "قائمة الانتظار",
     "booking": "...",
     "subtitle": "الحصص الجماعية · {{month}}",
-    "all": "الكل"
+    "all": "الكل",
+    "morning": "الصباح",
+    "afternoon": "بعد الظهر",
+    "evening": "المساء",
+    "upcomingCount": "{{count}} قادمة",
+    "noUpcoming": "لا توجد حجوزات قادمة"
   },
   "training": {
+    "tabPrograms": "برامجي",
     "title": "التدريب",
     "measure": "القياس",
     "library": "المكتبة"
@@ -477,7 +483,13 @@
     "statDaysLeft": "الأيام المتبقية"
   },
   "progress": {
-    "title": "التقدّم"
+    "title": "التقدّم",
+    "start": "البداية",
+    "now": "الحالي",
+    "change": "الفرق",
+    "since_start": "منذ البداية",
+    "vs_previous": "مقارنة بالقياس السابق",
+    "first": "أول قياس"
   },
   "admin": {
     "pilotage": "لوحة القيادة",
@@ -1048,6 +1060,7 @@
     "show_password": "إظهار كلمة المرور",
     "hide_password": "إخفاء كلمة المرور",
     "rule_length": "8 أحرف على الأقل",
+    "weak_password": "كلمة المرور ضعيفة: 8 أحرف على الأقل مع حرف كبير ورقم ورمز.",
     "rule_upper": "حرف كبير",
     "rule_digit": "رقم",
     "rule_symbol": "رمز",
@@ -1230,6 +1243,7 @@
     "vos_photos_de_profil_et_2": "صورة ملفك الشخصي خاصة ولا تُشارَك علنًا أبدًا. يمكنك طلب حذف حسابك في أي وقت من الملف الشخصي › المزيد › الخصوصية.",
     "pour_toute_question_contactez_laccueil": "لأي استفسار، تواصل مع استقبال النادي أو مدرّبك.",
     "credits": "الشكر والتقدير",
+    "credits_built_by": "تصميم وتطوير",
     "donnees_des_exercices_fournies_par": "بيانات التمارين مقدَّمة من RepDB (repdb.co).",
     "a_propos": "حول",
     "informations_sur_lapplication_et_votre": "معلومات عن التطبيق ونادي",
@@ -1590,6 +1604,9 @@
     "absente_n": "غائب",
     "profile_edit_action": "تعديل",
     "profile_edit_cancel": "إلغاء",
+    "pw_strength": "القوة",
+    "pw_match": "كلمتا المرور متطابقتان",
+    "profile_editing": "قيد التعديل",
     "profile_not_set": "غير محدد"
   },
   "staff": {

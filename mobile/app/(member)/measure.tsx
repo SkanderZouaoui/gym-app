@@ -6,24 +6,23 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fonts, radii, spacing } from '../../src/theme/tokens';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { useBodyMetrics, useCreateBodyMetric } from '../../src/hooks/useProgress';
-import { Banner, BottomSheet } from '../../src/components/ui';
+import { Banner } from '../../src/components/ui';
+import { LinearGradient } from 'expo-linear-gradient';
+import { haptics } from '../../src/utils/haptics';
 import { Button } from '../../src/components/Button';
 import { useTranslation } from 'react-i18next';
-import i18n, { dateLocale } from '../../src/i18n';
+import i18n from '../../src/i18n';
 
-type MeasureType = 'weight' | 'waist' | 'arm' | 'bodyFat';
+type MeasureType = 'weight' | 'waist' | 'bodyFat';
 
-const TYPES: { value: MeasureType; label: string; unit: string; icon: keyof typeof MaterialIcons.glyphMap; min: number; max: number }[] = [
-  { value: 'weight', get label() { return i18n.t('member.poids'); }, unit: 'kg', icon: 'monitor-weight', min: 30, max: 250 },
-  { value: 'waist', get label() { return i18n.t('member.taille'); }, unit: 'cm', icon: 'straighten', min: 40, max: 200 },
-  { value: 'arm', get label() { return i18n.t('member.bras'); }, unit: 'cm', icon: 'fitness-center', min: 15, max: 70 },
-  { value: 'bodyFat', get label() { return i18n.t('member.masse_grasse'); }, unit: '%', icon: 'percent', min: 3, max: 60 },
+const TYPES: { value: MeasureType; label: string; unit: string; icon: keyof typeof MaterialIcons.glyphMap; min: number; max: number; step: number; start: number }[] = [
+  { value: 'weight', get label() { return i18n.t('member.poids'); }, unit: 'kg', icon: 'monitor-weight', min: 30, max: 250, step: 0.1, start: 70 },
+  { value: 'waist', get label() { return i18n.t('member.taille'); }, unit: 'cm', icon: 'straighten', min: 40, max: 200, step: 0.5, start: 80 },
+  { value: 'bodyFat', get label() { return i18n.t('member.masse_grasse'); }, unit: '%', icon: 'percent', min: 3, max: 60, step: 0.1, start: 20 },
 ];
 
-function formatDateLabel(date: Date, isToday: boolean) {
-  const formatted = date.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long' });
-  return i18n.t(isToday ? 'member.today_date' : 'member.yesterday_date', { date: formatted });
-}
+const round1 = (n: number) => Math.round(n * 10) / 10;
+const fmt = (n: number) => String(round1(n)).replace('.', ',');
 
 /** Saisie d’une mesure — FitZone App Entraînement.dc.html, F2.
  * Présentée en bottom-sheet modale par-dessus l’écran Progression, comme la maquette. */
@@ -34,15 +33,14 @@ export default function MeasureScreen() {
   const { data: metrics } = useBodyMetrics();
   const createMetric = useCreateBodyMetric();
   const [isToday, setIsToday] = useState(true);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Dernière valeur connue de chaque mesure (les enregistrements peuvent n'en contenir qu'une partie).
   const last = useMemo(() => {
-    const out: Record<MeasureType, string> = { weight: '', waist: '', arm: '', bodyFat: '' };
+    const out: Record<MeasureType, string> = { weight: '', waist: '', bodyFat: '' };
     for (const m of metrics ?? []) {
       if (!out.weight && m.weightKg) out.weight = String(Number(m.weightKg));
-      for (const k of ['waist', 'arm', 'bodyFat'] as const) if (!out[k] && m.measurements?.[k] != null) out[k] = String(m.measurements[k]);
+      for (const k of ['waist', 'bodyFat'] as const) if (!out[k] && m.measurements?.[k] != null) out[k] = String(m.measurements[k]);
     }
     return out;
   }, [metrics]);
@@ -53,6 +51,22 @@ export default function MeasureScreen() {
 
   const selectedDate = new Date();
   if (!isToday) selectedDate.setDate(selectedDate.getDate() - 1);
+
+  const stepValue = (cfg: (typeof TYPES)[number], dir: 1 | -1) => {
+    const current = Number(valueOf(cfg.value).replace(',', '.'));
+    const base = Number.isFinite(current) && current > 0 ? current : cfg.start;
+    const next = Math.min(cfg.max, Math.max(cfg.min, round1(base + dir * cfg.step)));
+    haptics.selection();
+    setEdited((e) => ({ ...e, [cfg.value]: String(next) }));
+    setError(null);
+  };
+  const deltaOf = (cfg: (typeof TYPES)[number]) => {
+    const now = Number(valueOf(cfg.value).replace(',', '.'));
+    const before = Number(last[cfg.value]);
+    if (!now || !before || edited[cfg.value] === undefined) return null;
+    const d = round1(now - before);
+    return d === 0 ? null : d;
+  };
 
   const handleClose = () => router.navigate('/(member)/(tabs)/progress');
 
@@ -106,39 +120,67 @@ export default function MeasureScreen() {
 
             {error ? <Banner tone="danger" icon="error" text={error} /> : null}
 
-            <View style={styles.fields}>
+            <View style={styles.grid}>
               {TYPES.map((cfg) => {
-                const value = valueOf(cfg.value);
+                const delta = deltaOf(cfg);
                 const changed = edited[cfg.value] !== undefined && edited[cfg.value] !== last[cfg.value];
                 return (
-                  <View key={cfg.value} style={[styles.field, changed && styles.fieldChanged]}>
-                    <View style={styles.fieldIcon}>
-                      <MaterialIcons name={cfg.icon} size={20} color="#FFFFFF" />
+                  <View key={cfg.value} style={[styles.card, changed && styles.cardChanged]}>
+                    <View style={styles.cardTop}>
+                      <View style={styles.fieldIcon}>
+                        <MaterialIcons name={cfg.icon} size={18} color="#FFFFFF" />
+                      </View>
+                      {delta !== null ? (
+                        <View style={[styles.deltaPill, { backgroundColor: delta < 0 ? colors.successSoft : colors.warningSoft }]}>
+                          <MaterialIcons name={delta < 0 ? 'arrow-downward' : 'arrow-upward'} size={11} color={delta < 0 ? colors.successInk : colors.warningInk} />
+                          <Text style={[styles.deltaText, { color: delta < 0 ? colors.successInk : colors.warningInk }]}>{fmt(Math.abs(delta))}</Text>
+                        </View>
+                      ) : null}
                     </View>
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={styles.fieldLabel}>{cfg.label}</Text>
-                      {last[cfg.value] ? <Text style={styles.fieldPrev}>{i18n.t('member.measure_prev', { value: last[cfg.value], unit: cfg.unit })}</Text> : null}
+                    <Text style={styles.fieldLabel} numberOfLines={1}>{cfg.label}</Text>
+                    <Text style={styles.fieldPrev} numberOfLines={1}>
+                      {last[cfg.value] ? i18n.t('member.measure_prev', { value: last[cfg.value], unit: cfg.unit }) : ' '}
+                    </Text>
+                    <View style={styles.stepper}>
+                      <Pressable style={styles.stepBtn} onPress={() => stepValue(cfg, -1)} hitSlop={6} accessibilityLabel={cfg.label}>
+                        <MaterialIcons name="remove" size={20} color={colors.text} />
+                      </Pressable>
+                      <View style={styles.valueBox}>
+                        <TextInput
+                          value={valueOf(cfg.value)}
+                          onChangeText={(v) => { setEdited((e) => ({ ...e, [cfg.value]: v })); setError(null); }}
+                          keyboardType="decimal-pad"
+                          placeholder="—"
+                          placeholderTextColor={colors.muted}
+                          selectTextOnFocus
+                          style={styles.fieldInput}
+                        />
+                        <Text style={styles.unit}>{cfg.unit}</Text>
+                      </View>
+                      <Pressable style={styles.stepBtnPlus} onPress={() => stepValue(cfg, 1)} hitSlop={6} accessibilityLabel={cfg.label}>
+                        <MaterialIcons name="add" size={20} color={colors.primaryInk} />
+                      </Pressable>
                     </View>
-                    <TextInput
-                      value={value}
-                      onChangeText={(v) => { setEdited((e) => ({ ...e, [cfg.value]: v })); setError(null); }}
-                      keyboardType="decimal-pad"
-                      placeholder="—"
-                      placeholderTextColor={colors.muted}
-                      selectTextOnFocus
-                      style={styles.fieldInput}
-                    />
-                    <Text style={styles.unit}>{cfg.unit}</Text>
                   </View>
                 );
               })}
             </View>
 
-            <Pressable style={styles.dateRow} onPress={() => setShowDatePicker(true)}>
-              <MaterialIcons name="calendar-today" size={16} color={colors.text} />
-              <Text style={styles.dateText}>{formatDateLabel(selectedDate, isToday)}</Text>
-              <MaterialIcons name="expand-more" size={18} color={colors.muted} />
-            </Pressable>
+            <View style={styles.dateBlock}>
+              <Text style={styles.dateTitle}>{i18n.t('member.date_de_la_mesure')}</Text>
+              <View style={styles.dateChips}>
+                {([[true, i18n.t('member.aujourdhui')], [false, i18n.t('member.hier')]] as const).map(([today, label]) => {
+                  const active = isToday === today;
+                  return (
+                    <Pressable key={label} style={styles.dateChip} onPress={() => setIsToday(today)}>
+                      {active ? <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} /> : null}
+                      <MaterialIcons name={today ? 'today' : 'history'} size={16} color={active ? colors.primaryContrast : colors.muted} />
+                      <Text style={[styles.dateChipText, active && { color: colors.primaryContrast }]}>{label}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
 
             <View style={styles.tipRow}>
               <MaterialIcons name="lightbulb" size={16} color={colors.muted} />
@@ -150,17 +192,6 @@ export default function MeasureScreen() {
         </View>
       </SafeAreaView>
 
-      <BottomSheet visible={showDatePicker} onClose={() => setShowDatePicker(false)}>
-        <Text style={styles.pickerTitle}>{i18n.t('member.date_de_la_mesure')}</Text>
-        <Pressable style={styles.pickerOption} onPress={() => { setIsToday(true); setShowDatePicker(false); }}>
-          <Text style={styles.pickerOptionText}>{i18n.t('member.aujourdhui')}</Text>
-          {isToday ? <MaterialIcons name="check" size={18} color={colors.primaryInk} /> : null}
-        </Pressable>
-        <Pressable style={styles.pickerOption} onPress={() => { setIsToday(false); setShowDatePicker(false); }}>
-          <Text style={styles.pickerOptionText}>{i18n.t('member.hier')}</Text>
-          {!isToday ? <MaterialIcons name="check" size={18} color={colors.primaryInk} /> : null}
-        </Pressable>
-      </BottomSheet>
     </KeyboardAvoidingView>
   );
 }
@@ -175,30 +206,34 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
   title: { fontFamily: fonts.headSemiBold, fontSize: 19, color: colors.text },
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, gap: spacing.md },
-  fields: { gap: 10 },
-  field: {
-    flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radii.lg,
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  card: {
+    width: '48.4%', flexGrow: 1, padding: 12, gap: 2, borderRadius: radii.lg,
     borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.surface,
   },
-  fieldChanged: { borderColor: colors.deep },
-  fieldIcon: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.deep },
-  fieldLabel: { fontFamily: fonts.bodyBold, fontSize: 14.5, color: colors.text },
-  fieldPrev: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, marginTop: 1 },
-  fieldInput: { minWidth: 70, maxWidth: 110, height: 46, textAlign: 'right', fontFamily: fonts.head, fontSize: 24, color: colors.text, paddingHorizontal: 4 },
-  unit: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.muted, width: 24 },
-  helpText: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
-  dateRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingHorizontal: 14,
-    borderRadius: radii.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, alignSelf: 'flex-start',
+  cardChanged: { borderColor: colors.deep },
+  cardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 36, marginBottom: 4 },
+  fieldIcon: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.deep },
+  deltaPill: { flexDirection: 'row', alignItems: 'center', gap: 1, height: 22, paddingHorizontal: 6, borderRadius: 11 },
+  deltaText: { fontFamily: fonts.bodyBold, fontSize: 11.5 },
+  fieldLabel: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.text },
+  fieldPrev: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
+  stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8, gap: 4 },
+  stepBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.borderStrong, backgroundColor: colors.surface },
+  stepBtnPlus: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
+  valueBox: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'center', gap: 2 },
+  fieldInput: { minWidth: 44, paddingVertical: 0, paddingHorizontal: 0, textAlign: 'center', fontFamily: fonts.head, fontSize: 22, letterSpacing: -0.5, color: colors.text },
+  unit: { fontFamily: fonts.bodySemiBold, fontSize: 12, color: colors.muted },
+  dateBlock: { gap: 8 },
+  dateTitle: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.muted },
+  dateChips: { flexDirection: 'row', gap: 8 },
+  dateChip: {
+    flex: 1, height: 44, borderRadius: radii.sm, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
   },
-  dateText: { fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.text },
+  dateChipText: { fontFamily: fonts.bodySemiBold, fontSize: 13.5, color: colors.text },
+  helpText: { fontFamily: fonts.body, fontSize: 13, color: colors.muted },
   tipRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   tipText: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, flex: 1 },
-  pickerTitle: { fontFamily: fonts.headSemiBold, fontSize: 16, color: colors.text, marginBottom: spacing.sm },
-  pickerOption: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', height: 48,
-    paddingHorizontal: spacing.sm,
-  },
-  pickerOptionText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: colors.text },
   });
 }

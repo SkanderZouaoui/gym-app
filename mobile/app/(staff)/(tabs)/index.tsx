@@ -1,7 +1,8 @@
 import { VenueTodayBanner } from '../../../src/components/venue/VenueTodayBanner';
 import { useMemo } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -54,7 +55,7 @@ export default function StaffHomeScreen() {
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <AppHeader
           greeting={t('staff.bonjour')}

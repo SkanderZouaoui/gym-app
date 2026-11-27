@@ -599,7 +599,7 @@ export default function LiveSessionScreen() {
                     router.push(`/(member)/exercises/${exId}`);
                   }}
                 >
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
+                  <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
                     <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
                   </LinearGradient>
                   <View style={{ flex: 1, minWidth: 0 }}>
@@ -671,7 +671,7 @@ export default function LiveSessionScreen() {
           onPress={currentSetIndex >= 0 ? handleValidate : handleFinish}
           style={({ pressed }) => [styles.validateShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.validateButton}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.validateButton}>
             <MaterialIcons name={currentSetIndex >= 0 ? 'check' : 'flag'} size={24} color={colors.primaryContrast} />
             <Text style={styles.validateButtonText}>
               {currentSetIndex >= 0 ? i18n.t('member.valider_la_serie', { setNumber: currentSets[currentSetIndex]?.setNumber }) : i18n.t('member.terminer_la_seance')}

@@ -412,9 +412,15 @@
     "waitlist": "Liste d'attente",
     "booking": "...",
     "subtitle": "Cours collectifs · {{month}}",
-    "all": "Tous"
+    "all": "Tous",
+    "morning": "Matin",
+    "afternoon": "Après-midi",
+    "evening": "Soir",
+    "upcomingCount": "{{count}} à venir",
+    "noUpcoming": "Aucune à venir"
   },
   "training": {
+    "tabPrograms": "Programmes",
     "title": "Entraînement",
     "measure": "Mesure",
     "library": "Bibliothèque"
@@ -477,7 +483,13 @@
     "statDaysLeft": "Jours restants"
   },
   "progress": {
-    "title": "Progrès"
+    "title": "Progrès",
+    "start": "Début",
+    "now": "Actuel",
+    "change": "Écart",
+    "since_start": "Depuis le début",
+    "vs_previous": "vs mesure précédente",
+    "first": "Première mesure"
   },
   "admin": {
     "pilotage": "Pilotage",
@@ -1048,6 +1060,7 @@
     "show_password": "Afficher le mot de passe",
     "hide_password": "Masquer le mot de passe",
     "rule_length": "8 caractères min.",
+    "weak_password": "Mot de passe trop faible : 8 caractères minimum, avec une majuscule, un chiffre et un symbole.",
     "rule_upper": "1 majuscule",
     "rule_digit": "1 chiffre",
     "rule_symbol": "1 symbole",
@@ -1230,6 +1243,7 @@
     "vos_photos_de_profil_et_2": "Votre photo de profil est privée et n'est jamais partagée publiquement. Vous pouvez demander la suppression de votre compte à tout moment depuis Profil › Plus › Confidentialité.",
     "pour_toute_question_contactez_laccueil": "Pour toute question, contactez l’accueil de votre salle ou votre coach.",
     "credits": "Crédits",
+    "credits_built_by": "Conçu et développé par",
     "donnees_des_exercices_fournies_par": "Données des exercices fournies par RepDB (repdb.co).",
     "a_propos": "À propos",
     "informations_sur_lapplication_et_votre": "Informations sur l’application et votre salle",
@@ -1255,7 +1269,7 @@
     "poids": "Poids",
     "taille": "Taille",
     "bras": "Bras",
-    "masse_grasse": "Masse grasse",
+    "masse_grasse": "Indice de graisse",
     "valeur_hors_plage_a": "Valeur hors plage : {{min}} à {{max}} {{unit}}.",
     "tout_lire": "Tout lire",
     "rappel_de_cours": "Rappel de cours",
@@ -1555,7 +1569,7 @@
     "exercises_total_other": "{{count}} exercices",
     "progress_current_weight": "Poids actuel",
     "progress_evolution": "Évolution",
-    "progress_measurements": "Mensurations",
+    "progress_measurements": "Mesures",
     "progress_regularity": "Régularité",
     "progress_updated": "Mis à jour le {{date}}",
     "measure_prev": "Avant : {{value}} {{unit}}",
@@ -1590,6 +1604,9 @@
     "absente_n": "Absent·e",
     "profile_edit_action": "Modifier",
     "profile_edit_cancel": "Annuler",
+    "pw_strength": "Sécurité",
+    "pw_match": "Les mots de passe correspondent",
+    "profile_editing": "Modification en cours",
     "profile_not_set": "Non renseigné"
   },
   "staff": {

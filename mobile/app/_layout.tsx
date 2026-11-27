@@ -23,6 +23,7 @@ import { usePreferencesStore } from '../src/store/preferences';
 import { NetworkStatusProvider } from '../src/hooks/NetworkStatusContext';
 import { createWorkoutLogRequest, updateOwnProgramRequest } from '../src/hooks/useCoaching';
 import { OfflineIndicator } from '../src/components/OfflineIndicator';
+import { GymRefreshOverlay } from '../src/components/ui/GymRefreshControl';
 import { useSessionStore } from '../src/store/session';
 import { Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -216,6 +217,7 @@ function RootLayoutInner() {
         <Stack screenOptions={{ headerShown: false }} />
       </AndroidInsetsFrame>
       <OfflineIndicator />
+      <GymRefreshOverlay />
     </NetworkStatusProvider>
   );
 }

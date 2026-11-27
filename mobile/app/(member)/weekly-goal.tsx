@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActionRowButton } from '../../src/components/ui/ActionRowButton';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { ScreenHeader } from '../../src/components/ScreenHeader';
@@ -52,7 +54,7 @@ export default function WeeklyGoalScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title={t('member.weekly_goal')} fallbackHref="/(member)/(tabs)/profile" />
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={styles.container}>
+      <ScrollView refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={styles.container}>
         {isLoading && sessions.length === 0 ? (
           <SkeletonBlock height={132} radius={radii.lg} />
         ) : (
@@ -103,10 +105,7 @@ export default function WeeklyGoalScreen() {
         {weekSessions.length ? weekSessions.map(row) : <EmptyState icon="event-busy" title={t('member.goal_none_title')} text={t('member.goal_none_text')} tone="muted" />}
           </>
         )}
-        <Pressable onPress={() => router.push('/(member)/history' as never)} accessibilityRole="button" style={({ pressed }) => [styles.historyButton, pressed && { opacity: 0.7 }]}>
-          <Text style={styles.historyButtonText}>{t('member.activity_history_all')}</Text>
-          <MaterialIcons name="arrow-forward" size={18} color={colors.primaryInk} />
-        </Pressable>
+        <ActionRowButton icon="history" label={t('member.activity_history_all')} onPress={() => router.push('/(member)/history' as never)} />
       </ScrollView>
       {offlineToastVisible ? <Toast icon="cloud-off" text={t('member.pas_de_connexion_impossible_dactualiser')} iconColor={colors.warningInk} /> : null}
     </SafeAreaView>
@@ -131,8 +130,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     chipValue: { fontFamily: fonts.head, fontSize: 18, color: colors.text },
     chipHint: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
     savedText: { fontFamily: fonts.bodyBold, fontSize: 13, color: colors.successInk, textAlign: 'center' },
-    historyButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.primaryBorder, backgroundColor: colors.primarySoft },
-    historyButtonText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     rowIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primarySoft },
     rowTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text },

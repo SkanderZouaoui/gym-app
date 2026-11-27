@@ -29,7 +29,7 @@ function useTone() {
       ? { icon: 'error' as const, bg: colors.dangerSoft, ink: colors.dangerInk, solid: colors.danger, grad: ['#F87171', '#DC2626'] as [string, string] }
       : level === 'warn'
         ? { icon: 'warning' as const, bg: colors.warningSoft, ink: colors.warningInk, solid: colors.warning, grad: ['#FBBF24', '#D97706'] as [string, string] }
-        : { icon: 'info' as const, bg: colors.primarySoft, ink: colors.primaryInk, solid: colors.primary, grad: [colors.primary, colors.primaryPressed] as [string, string] };
+        : { icon: 'info' as const, bg: colors.primarySoft, ink: colors.primaryInk, solid: colors.primary, grad: [colors.hero, colors.hero2] as [string, string] };
 }
 
 /** Liste de messages affichés dans la page : « Bandeau » (compact) ou « Encart » (grande carte). Le pop-up est géré par NoticePopups. */

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -56,7 +57,7 @@ export default function CoachProgramDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <ScrollView contentContainerStyle={styles.container} refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>{t('common.programmes')}</Text>
@@ -140,7 +141,7 @@ export default function CoachProgramDetailScreen() {
           onPress={() => router.push({ pathname: '/(coach)/program-new', params: { duplicateFrom: program.id } })}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="content-copy" size={22} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{t('coach.dupliquer_comme_nouveau_programme')}</Text>
           </LinearGradient>

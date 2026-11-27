@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View, } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -71,7 +72,7 @@ export default function StaffCashReceiptScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         {isFresh ? (
           <View style={styles.success}>
             <View style={styles.successCircle}>
@@ -123,7 +124,7 @@ export default function StaffCashReceiptScreen() {
 
         <View style={{ gap: 10 }}>
           <Pressable onPress={close} style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
               <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
               <Text style={styles.ctaText}>{t('staff.terminer')}</Text>
             </LinearGradient>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import { ActionRowButton } from '../../ui/ActionRowButton';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -82,7 +83,7 @@ function SideToggle({ value, onChange }: { value: BodyView; onChange: (v: BodyVi
   return (
     <View style={styles.toggle} onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}>
       <Animated.View style={[styles.thumb, { width: thumbWidth }, thumbStyle]}>
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={StyleSheet.absoluteFill} />
+        <LinearGradient colors={[colors.hero, colors.hero2]} style={StyleSheet.absoluteFill} />
       </Animated.View>
       {SIDES.map((s) => {
         const active = s.value === value;
@@ -245,10 +246,7 @@ function AllExercises({ onBack }: { onBack: () => void }) {
             ))}
           </View>
           {filtered.length > shown ? (
-            <Pressable onPress={() => setShown((n) => n + PAGE)} accessibilityRole="button" style={({ pressed }) => [styles.allButton, { marginTop: 12 }, pressed && { opacity: 0.7 }]}>
-              <Text style={styles.allButtonText}>{t('member.exercises_more')}</Text>
-              <MaterialIcons name="expand-more" size={20} color={colors.primaryInk} />
-            </Pressable>
+            <ActionRowButton icon="expand-circle-down" trailingIcon="expand-more" label={t('member.exercises_more')} style={{ marginTop: 12 }} onPress={() => setShown((n) => n + PAGE)} />
           ) : null}
         </>
       )}
@@ -273,8 +271,6 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
       marginTop: 12, paddingTop: 14, paddingBottom: 12, alignItems: 'center',
       backgroundColor: colors.surface, borderRadius: radii.xl, borderWidth: 1, borderColor: colors.border,
     },
-    allButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 52, marginTop: 14, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.primaryBorder, backgroundColor: colors.primarySoft },
-    allButtonText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
     allCard: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: radii.xl, overflow: 'hidden', marginTop: 4 },
     allDeco: { position: 'absolute', right: -30, top: -40, width: 130, height: 130, borderRadius: 65, backgroundColor: 'rgba(255,255,255,0.08)' },
     allIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.18)' },

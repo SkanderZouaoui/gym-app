@@ -37,7 +37,7 @@ export function StickyActionBar({ visible, label, loading, disabled, icon = 'che
   return (
     <View style={styles.bar}>
       <Pressable onPress={onPress} disabled={off} style={({ pressed }) => [styles.shadow, off && { opacity: 0.55 }, pressed && { transform: [{ scale: 0.98 }] }]}>
-        <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+        <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
           <MaterialIcons name={icon} size={22} color={colors.primaryContrast} />
           <Text style={styles.text}>{loading ? t('common.enregistrement') : label}</Text>
         </LinearGradient>

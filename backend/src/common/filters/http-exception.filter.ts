@@ -36,7 +36,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   /** Les `new XxxException('SOME_CODE')` n'ont pas de champ code : le message en UPPER_SNAKE_CASE en tient lieu. */
   private codeFromMessage(message: unknown): string | undefined {
-    return typeof message === 'string' && /^[A-Z][A-Z0-9_]+$/.test(message) ? message : undefined;
+    const isCode = (m: unknown): m is string => typeof m === 'string' && /^[A-Z][A-Z0-9_]+$/.test(m);
+    // Erreurs de validation (class-validator) : tableau de messages, dont un code explicite (ex. WEAK_PASSWORD).
+    if (Array.isArray(message)) return message.find(isCode);
+    return isCode(message) ? message : undefined;
   }
 
   private codeFromStatus(status: number): string {

@@ -1,6 +1,7 @@
 import { useMemo, useState , useCallback } from 'react';
 import { router, useFocusEffect } from 'expo-router';
-import { Image, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -181,7 +182,7 @@ export default function AdminDashboardScreen() {
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
