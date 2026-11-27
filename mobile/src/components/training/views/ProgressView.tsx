@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { fonts, radii, spacing } from '../../../theme/tokens';
@@ -8,6 +8,7 @@ import { useMyWorkouts } from '../../../hooks/useCoaching';
 import { BarHistogram, EmptyState, LineChart, SectionHeader, SkeletonBlock } from '../../ui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
+import { HScroll } from '../../ui/HScroll';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../i18n';
 import { MONTHS_SHORT } from '../../../i18n/labels';
@@ -23,12 +24,20 @@ function startOfWeek(date: Date) {
 }
 
 const MEASUREMENT_LABELS: Record<string, string> = {
+  get weight() { return i18n.t('member.poids'); },
   get waist() { return i18n.t('member.tour_de_taille'); },
   get bodyFat() { return i18n.t('member.masse_grasse'); },
-  get arm() { return i18n.t('member.tour_de_bras'); },
 };
-const MEASUREMENT_UNITS: Record<string, string> = { waist: 'cm', bodyFat: '%', arm: 'cm' };
-const MEASUREMENT_ICONS: Record<'waist' | 'arm' | 'bodyFat', keyof typeof MaterialIcons.glyphMap> = { waist: 'straighten', arm: 'fitness-center', bodyFat: 'percent' };
+type ChartKey = 'weight' | 'waist' | 'bodyFat';
+const CHART_KEYS: ChartKey[] = ['weight', 'waist', 'bodyFat'];
+const CHART_LABELS: Record<ChartKey, () => string> = {
+  weight: () => i18n.t('member.poids'),
+  waist: () => i18n.t('member.taille'),
+  bodyFat: () => i18n.t('member.masse_grasse'),
+};
+const CHART_UNITS: Record<ChartKey, string> = { weight: 'kg', waist: 'cm', bodyFat: '%' };
+const MEASUREMENT_UNITS: Record<string, string> = { weight: 'kg', waist: 'cm', bodyFat: '%' };
+const MEASUREMENT_ICONS: Record<'weight' | 'waist' | 'bodyFat', keyof typeof MaterialIcons.glyphMap> = { weight: 'monitor-weight', waist: 'straighten', bodyFat: 'percent' };
 
 /** Vue "Progression" de l'onglet Entraînement — FitZone App Entraînement.dc.html, F1. */
 export function ProgressView() {
@@ -41,14 +50,19 @@ export function ProgressView() {
   const { data: workouts } = useMyWorkouts();
   const attendanceDates = useMemo(() => workouts?.map((w) => w.date), [workouts]);
 
-  const weightSeries = useMemo(() => {
-    if (!metrics) return [];
-    return metrics
-      .filter((m) => m.weightKg)
-      .slice()
-      .reverse()
-      .map((m) => ({ date: new Date(m.date), weight: Number(m.weightKg) }));
+  // Courbe : une mesure au choix (poids par défaut), de la plus ancienne à la plus récente.
+  const [chartKey, setChartKey] = useState<ChartKey>('weight');
+  const seriesOf = useMemo(() => {
+    const build = (key: ChartKey) =>
+      (metrics ?? [])
+        .map((m) => ({ date: new Date(m.date), value: key === 'weight' ? (m.weightKg ? Number(m.weightKg) : null) : (m.measurements?.[key] ?? null) }))
+        .filter((p): p is { date: Date; value: number } => p.value != null && !Number.isNaN(p.value))
+        .reverse();
+    return Object.fromEntries(CHART_KEYS.map((k) => [k, build(k)])) as Record<ChartKey, { date: Date; value: number }[]>;
   }, [metrics]);
+  const availableKeys = CHART_KEYS.filter((k) => seriesOf[k].length > 0);
+  const activeKey = availableKeys.includes(chartKey) ? chartKey : availableKeys[0] ?? 'weight';
+  const weightSeries = seriesOf[activeKey];
 
   const weeklyRegularity = useMemo(() => {
     if (!attendanceDates) return [];
@@ -113,9 +127,10 @@ export function ProgressView() {
   const weight = lastTwo((m) => (m.weightKg ? Number(m.weightKg) : null));
   const weightDelta = weight.latest && weight.previous ? weight.latest.value - weight.previous.value : null;
 
-  const secondary = (['waist', 'arm', 'bodyFat'] as const)
-    .map((key) => ({ key, ...lastTwo((m) => m.measurements?.[key] ?? null) }))
-    .filter((x) => x.latest);
+  const secondary = [
+    { key: 'weight' as const, ...weight },
+    ...(['waist', 'bodyFat'] as const).map((key) => ({ key, ...lastTwo((m) => m.measurements?.[key] ?? null) })),
+  ].filter((x) => x.latest);
 
   if (!metrics || metrics.length === 0) {
     return (
@@ -154,18 +169,55 @@ export function ProgressView() {
         </LinearGradient>
       ) : null}
 
-      {weightSeries.length >= 2 ? (
+      {availableKeys.length > 0 ? (
         <View style={{ gap: 10 }}>
           <SectionHeader title={t('member.progress_evolution')} />
-          <View style={styles.card}>
-            <LineChart
-              color={colors.deep}
-              points={weightSeries.map((p) => p.weight)}
-              labels={weightSeries.length > 4
-                ? [weightSeries[0], weightSeries[Math.floor(weightSeries.length / 2)], weightSeries[weightSeries.length - 1]].map((p) => MONTH_LABELS[p.date.getMonth()])
-                : weightSeries.map((p) => MONTH_LABELS[p.date.getMonth()])}
-            />
-          </View>
+          {availableKeys.length > 1 ? (
+            <HScroll contentContainerStyle={styles.chipsRow}>
+              {availableKeys.map((k) => {
+                const active = k === activeKey;
+                return (
+                  <Pressable key={k} style={styles.chip} onPress={() => setChartKey(k)}>
+                    {active ? <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} /> : null}
+                    <Text style={[styles.chipText, active && { color: colors.primaryContrast }]}>{CHART_LABELS[k]()}</Text>
+                  </Pressable>
+                );
+              })}
+            </HScroll>
+          ) : null}
+          {weightSeries.length >= 2 ? (
+            <View style={styles.card}>
+              <LineChart
+                color={colors.deep}
+                points={weightSeries.map((p) => p.value)}
+                labels={weightSeries.length > 4
+                  ? [weightSeries[0], weightSeries[Math.floor(weightSeries.length / 2)], weightSeries[weightSeries.length - 1]].map((p) => MONTH_LABELS[p.date.getMonth()])
+                  : weightSeries.map((p) => MONTH_LABELS[p.date.getMonth()])}
+              />
+              <View style={styles.statsRow}>
+                {[
+                  [t('progress.start'), weightSeries[0].value, null],
+                  [t('progress.now'), weightSeries[weightSeries.length - 1].value, null],
+                  [t('progress.change'), weightSeries[weightSeries.length - 1].value - weightSeries[0].value, true],
+                ].map(([label, v, isDelta]) => {
+                  const n = v as number;
+                  const good = isDelta ? n <= 0 : true;
+                  return (
+                    <View key={label as string} style={styles.stat}>
+                      <Text style={styles.statLabel}>{label as string}</Text>
+                      <Text style={[styles.statValue, !!isDelta && n !== 0 && { color: good ? colors.successInk : colors.warningInk }]}>
+                        {isDelta ? fmtDelta(n) : Math.round(n * 10) / 10} <Text style={styles.statUnit}>{CHART_UNITS[activeKey]}</Text>
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.card}>
+              <Text style={styles.regularitySub}>{t('member.ajoutez_une_premiere_mesure_poids')}</Text>
+            </View>
+          )}
         </View>
       ) : null}
 
@@ -230,6 +282,14 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     deltaText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#FFFFFF' },
     heroDate: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
     card: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md },
+    chipsRow: { gap: 8 },
+    chip: { height: 34, paddingHorizontal: 14, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+    chipText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    statsRow: { flexDirection: 'row', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
+    stat: { flex: 1, alignItems: 'center', gap: 2 },
+    statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, color: colors.muted },
+    statValue: { fontFamily: fonts.headBold, fontSize: 16, color: colors.text },
+    statUnit: { fontFamily: fonts.bodySemiBold, fontSize: 11, color: colors.muted },
     tiles: { flexDirection: 'row', gap: 10 },
     tile: { flex: 1, minWidth: 0, overflow: 'hidden', backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: 12, gap: 3 },
     tileTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 4, marginBottom: 6 },
@@ -244,7 +304,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     streakBadgeText: { fontFamily: fonts.display, fontSize: 20, color: '#FFFFFF' },
     regularityTitle: { fontFamily: fonts.headBold, fontSize: 15, color: colors.text },
     regularitySub: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted },
-    addButton: { height: 52, borderRadius: radii.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+    addButton: { height: 52, borderRadius: radii.md, backgroundColor: colors.hero, alignItems: 'center', justifyContent: 'center' },
     addButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryContrast },
   });
 }

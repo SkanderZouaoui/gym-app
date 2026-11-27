@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -48,7 +49,7 @@ export default function CoachViewProgramExerciseScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title="" fallbackHref="/(coach)/(tabs)/programs" />
       <ScrollView
-        refreshControl={<RefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
+        refreshControl={<GymRefreshControl refreshing={pullRefreshing} onRefresh={pullOnRefresh} />} contentContainerStyle={styles.container}>
         <View style={styles.mediaWrap}>
           <ExerciseGif uri={exercise.mediaKey} size={200} />
         </View>

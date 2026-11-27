@@ -412,9 +412,15 @@
     "waitlist": "Waiting list",
     "booking": "...",
     "subtitle": "Group classes · {{month}}",
-    "all": "All"
+    "all": "All",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "upcomingCount": "{{count}} upcoming",
+    "noUpcoming": "None upcoming"
   },
   "training": {
+    "tabPrograms": "Programs",
     "title": "Training",
     "measure": "Measurement",
     "library": "Library"
@@ -477,7 +483,10 @@
     "statDaysLeft": "Days left"
   },
   "progress": {
-    "title": "Progress"
+    "title": "Progress",
+    "start": "Start",
+    "now": "Current",
+    "change": "Change"
   },
   "admin": {
     "pilotage": "Dashboard",
@@ -1048,6 +1057,7 @@
     "show_password": "Show password",
     "hide_password": "Hide password",
     "rule_length": "8 characters min.",
+    "weak_password": "Password too weak: at least 8 characters, with an uppercase letter, a digit and a symbol.",
     "rule_upper": "1 uppercase",
     "rule_digit": "1 digit",
     "rule_symbol": "1 symbol",
@@ -1230,6 +1240,7 @@
     "vos_photos_de_profil_et_2": "Your profile photo is private and never shared publicly. You can request deletion of your account at any time from Profile › More › Privacy.",
     "pour_toute_question_contactez_laccueil": "For any question, contact your gym's front desk or your coach.",
     "credits": "Credits",
+    "credits_built_by": "Designed and developed by",
     "donnees_des_exercices_fournies_par": "Exercise data provided by RepDB (repdb.co).",
     "a_propos": "About",
     "informations_sur_lapplication_et_votre": "Information about the app and your gym",
@@ -1590,6 +1601,9 @@
     "absente_n": "No-show",
     "profile_edit_action": "Edit",
     "profile_edit_cancel": "Cancel",
+    "pw_strength": "Strength",
+    "pw_match": "Passwords match",
+    "profile_editing": "Editing",
     "profile_not_set": "Not set"
   },
   "staff": {

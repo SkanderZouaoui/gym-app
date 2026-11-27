@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -88,7 +89,7 @@ export default function StaffCashScreen() {
       <ScrollView
         {...tabBarScroll}
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {isAdmin ? (
           <Pressable style={styles.back} onPress={() => (router.canGoBack() ? router.back() : router.replace('/(admin)/(tabs)/more'))} hitSlop={8}>
@@ -140,7 +141,7 @@ export default function StaffCashScreen() {
           onPress={() => router.push(routes.cashSelect)}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="add" size={24} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{t('staff.nouvel_encaissement')}</Text>
           </LinearGradient>
@@ -152,7 +153,7 @@ export default function StaffCashScreen() {
             return (
               <Pressable key={f.value} onPress={() => setFilter(f.value)} style={styles.filterPill}>
                 {active ? (
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                  <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                 ) : null}
                 <Text style={[styles.filterText, active && styles.filterTextActive]}>{f.label}</Text>
               </Pressable>

@@ -82,7 +82,7 @@ export function ProgramsView({ source = 'mine' }: { source?: 'mine' | 'proposed'
         />
       ) : source === 'proposed' ? (
         <EmptyState
-          icon="auto-awesome"
+          icon="bookmark"
           title={t('member.aucun_programme_propose')}
           text={t('member.les_programmes_valides_par_la')}
           tone="primary"

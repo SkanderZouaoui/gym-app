@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../src/components/ScreenHeader';
@@ -85,7 +86,7 @@ export default function ProgramDetailScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.topBar}>
           <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
@@ -100,7 +101,7 @@ export default function ProgramDetailScreen() {
         </View>
 
         <View style={styles.heroShadow}>
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <View style={styles.heroDecor} />
             <View style={styles.heroTag}>
               <Text style={styles.heroTagText}>{isOwn ? t('member.perso') : program.isPublic ? t('member.propose') : t('common.coach')}</Text>
@@ -115,7 +116,7 @@ export default function ProgramDetailScreen() {
             {program.days.map((d, i) => (
               <Pressable key={d.id} onPress={() => setActiveDayIndex(i)} style={styles.dayTab}>
                 {i === activeDayIndex ? (
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                  <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                 ) : null}
                 <Text style={[styles.dayTabText, i === activeDayIndex && styles.dayTabTextActive]}>
                   {d.label ?? DAY_LABELS[d.dayOfWeek]}
@@ -199,7 +200,7 @@ export default function ProgramDetailScreen() {
           onPress={() => day && router.push(`/(member)/session/live/${program.id}/${day.id}`)}
           style={({ pressed }) => [styles.startShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.startButton}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.startButton}>
             <MaterialIcons name="play-arrow" size={24} color={colors.primaryContrast} />
             <Text style={styles.startButtonText}>{t('member.demarrer_la_seance')}</Text>
           </LinearGradient>

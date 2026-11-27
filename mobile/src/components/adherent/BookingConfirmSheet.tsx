@@ -41,7 +41,7 @@ export function BookingConfirmSheet({ session, pending, onConfirm, onClose }: Pr
       {session ? (
         <View style={{ gap: 14 }}>
           <View style={styles.head}>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.icon}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.icon}>
               <MaterialIcons name={full ? 'hourglass-top' : 'event-available'} size={26} color="#FFFFFF" />
             </LinearGradient>
             <View style={{ flex: 1 }}>
@@ -66,7 +66,7 @@ export function BookingConfirmSheet({ session, pending, onConfirm, onClose }: Pr
           </Text>
 
           <Pressable onPress={onConfirm} disabled={pending} style={({ pressed }) => [pending && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirm}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirm}>
               <Text style={styles.confirmText}>{pending ? t('member.reservation') : full ? t('member.rejoindre_la_liste_dattente') : t('member.confirmer_la_reservation_2')}</Text>
             </LinearGradient>
           </Pressable>

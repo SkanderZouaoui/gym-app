@@ -4,7 +4,8 @@ import { VenueIdentityCard, VenueLocationCard } from '../../src/components/Venue
 import { VenueMediaSection } from '../../src/components/VenueMediaSection';
 import { ScrollLockContext } from '../../src/components/ui/KeyboardAwareScreen';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -460,7 +461,7 @@ export default function AdminSettingsScreen() {
         contentContainerStyle={[styles.container, anyDirty && { paddingBottom: 130 }]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
@@ -557,7 +558,7 @@ export default function AdminSettingsScreen() {
       {anyDirty ? (
         <View style={styles.stickyBar}>
           <Pressable onPress={save} disabled={saving} style={({ pressed }) => [saving && { opacity: 0.6 }, pressed && { transform: [{ scale: 0.98 }] }]}>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.save}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.save}>
               <Text style={styles.saveText}>{saving ? t('common.enregistrement') : t('common.enregistrer_les_modifications')}</Text>
             </LinearGradient>
           </Pressable>

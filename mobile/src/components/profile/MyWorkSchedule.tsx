@@ -37,7 +37,7 @@ export function MyWorkSchedule({ days }: { days: Shift[] }) {
         <Text style={styles.weekPill}>{t('staff.ws_week_hours', { hours: weekHours(days) })}</Text>
       </View>
 
-      <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+      <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <View style={styles.decor} pointerEvents="none" />
         <Text style={styles.kicker}>{t('venue.today').toUpperCase()} · {WEEKDAYS_LONG_MON[todayIndex].toUpperCase()}</Text>
         {today?.working ? (

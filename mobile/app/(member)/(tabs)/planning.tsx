@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl, useRefreshOverlayTop } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -25,10 +26,15 @@ import { useNow } from '../../../src/hooks/useNow';
 
 const WEEKDAY_LABELS = WEEKDAYS_SHORT_SUN;
 
+type Period = 'morning' | 'afternoon' | 'evening';
+type Row = { kind: 'header'; period: Period; count: number } | { kind: 'session'; session: ClassSessionSummary };
+const PERIOD_ICON: Record<Period, keyof typeof MaterialIcons.glyphMap> = { morning: 'wb-twilight', afternoon: 'wb-sunny', evening: 'nights-stay' };
+const periodOf = (d: Date): Period => (d.getHours() < 12 ? 'morning' : d.getHours() < 18 ? 'afternoon' : 'evening');
+
 function buildWeek() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return Array.from({ length: 7 }, (_, i) => {
+  return Array.from({ length: 14 }, (_, i) => {
     const date = new Date(today);
     date.setDate(today.getDate() + i);
     return { label: WEEKDAY_LABELS[date.getDay()], dayNumber: String(date.getDate()), date };
@@ -51,6 +57,16 @@ export default function PlanningScreen() {
   const [toBook, setToBook] = useState<ClassSessionSummary | null>(null);
   const days = useMemo(() => buildWeek(), []);
 
+  const daysWithCount = useMemo(() => {
+    const perDay = new Map<string, number>();
+    for (const s of sessions ?? []) {
+      const k = new Date(s.startsAt).toDateString();
+      perDay.set(k, (perDay.get(k) ?? 0) + 1);
+    }
+    return days.map((d) => ({ ...d, count: perDay.get(d.date.toDateString()) ?? 0 }));
+  }, [sessions, days]);
+
+  const listTop = useRefreshOverlayTop();
   const [classTypeFilter, setClassTypeFilter] = useState<string | null>(null);
 
   // Types de cours proposés en filtre : uniquement ceux programmés le jour sélectionné.
@@ -98,6 +114,20 @@ export default function PlanningScreen() {
     });
   }, [sessions, days, selectedDay, activeType]);
 
+  const rows = useMemo<Row[]>(() => {
+    const out: Row[] = [];
+    let last: Period | null = null;
+    for (const session of daySessions) {
+      const period = periodOf(new Date(session.startsAt));
+      if (period !== last) {
+        out.push({ kind: 'header', period, count: daySessions.filter((x) => periodOf(new Date(x.startsAt)) === period).length });
+        last = period;
+      }
+      out.push({ kind: 'session', session });
+    }
+    return out;
+  }, [daySessions]);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
 
@@ -107,23 +137,34 @@ export default function PlanningScreen() {
           subtitle={t('planning.subtitle', { month: (days[selectedDay]?.date ?? new Date()).toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' }) })}
         />
         <Pressable
-          style={({ pressed }) => [styles.bookingsButton, pressed && { transform: [{ scale: 0.98 }] }]}
+          style={({ pressed }) => [styles.bookingsButton, pressed && { transform: [{ scale: 0.98 }], opacity: 0.95 }]}
           onPress={() => router.push('/(member)/reservations')}
+          accessibilityRole="button"
         >
-          <MaterialIcons name="event-available" size={20} color={colors.primaryInk} />
-          <Text style={styles.bookingsButtonText}>{t('planning.myBookings')} · {upcomingCount}</Text>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          <View style={styles.bookingsIcon}>
+            <MaterialIcons name="event-available" size={20} color={colors.primaryContrast} />
+          </View>
+          <View style={styles.bookingsTexts}>
+            <Text style={styles.bookingsButtonText}>{t('planning.myBookings')}</Text>
+            <Text style={styles.bookingsSub}>{upcomingCount > 0 ? t('planning.upcomingCount', { count: upcomingCount }) : t('planning.noUpcoming')}</Text>
+          </View>
+          <View style={styles.bookingsBadge}>
+            <Text style={styles.bookingsBadgeText}>{upcomingCount}</Text>
+          </View>
+          <MaterialIcons name={isRtl ? 'chevron-left' : 'chevron-right'} size={22} color={colors.primaryContrast} />
         </Pressable>
       </View>
 
       <View style={styles.sticky}>
-        <DaySelector days={days} selectedIndex={selectedDay} onSelect={setSelectedDay} />
+        <DaySelector days={daysWithCount} selectedIndex={selectedDay} onSelect={setSelectedDay} />
         <HScroll contentContainerStyle={styles.filterRow}>
           {[null, ...classTypeOptions].map((name) => {
             const active = activeType === name;
             return (
               <Pressable key={name ?? 'all'} onPress={() => setClassTypeFilter(name)} style={styles.filterPill}>
                 {active ? (
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                  <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                 ) : null}
                 <Text style={[styles.filterText, active && styles.filterTextActive]}>{name ?? t('planning.all')}</Text>
               </Pressable>
@@ -156,19 +197,29 @@ export default function PlanningScreen() {
           onAction={() => refetch()}
         />
       ) : (
+        <View ref={listTop.ref} onLayout={listTop.onLayout} style={styles.listBox}>
         <FlatList {...tabBarScroll}
-          data={daySessions}
-          keyExtractor={(item) => item.id}
+          data={rows}
+          keyExtractor={(item) => (item.kind === 'header' ? `h-${item.period}` : item.session.id)}
           contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          renderItem={({ item }) => (
-            <SessionCard
-              session={item}
-              bookedAs={bookedStatus.get(item.id)}
-              onBook={() => setToBook(item)}
-              onPress={() => router.push(`/(member)/session/${item.id}`)}
-            />
-          )}
+          refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} overlayTop={listTop.top} />}
+          renderItem={({ item }) =>
+            item.kind === 'header' ? (
+              <View style={styles.periodRow}>
+                <MaterialIcons name={PERIOD_ICON[item.period]} size={18} color={colors.primaryInk} />
+                <Text style={styles.periodText}>{t(`planning.${item.period}`)}</Text>
+                <View style={styles.periodLine} />
+                <Text style={styles.periodCount}>{item.count}</Text>
+              </View>
+            ) : (
+              <SessionCard
+                session={item.session}
+                bookedAs={bookedStatus.get(item.session.id)}
+                onBook={() => setToBook(item.session)}
+                onPress={() => router.push(`/(member)/session/${item.session.id}`)}
+              />
+            )
+          }
           ListEmptyComponent={
             <EmptyState
               icon="event-busy"
@@ -178,6 +229,7 @@ export default function PlanningScreen() {
             />
           }
         />
+        </View>
       )}
 
       <BookingConfirmSheet
@@ -239,12 +291,19 @@ function SessionCard({
 function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolean) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.bg },
+    listBox: { flex: 1 },
     header: { paddingHorizontal: spacing.lg, paddingBottom: spacing.sm },
     bookingsButton: {
-      height: 46, borderRadius: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-      backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primaryBorder, marginTop: spacing.sm,
+      minHeight: 60, borderRadius: 18, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 12,
+      paddingHorizontal: 14, marginTop: spacing.sm,
+      shadowColor: colors.hero2, shadowOpacity: 0.28, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4,
     },
-    bookingsButtonText: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.primaryInk },
+    bookingsIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)' },
+    bookingsTexts: { flex: 1 },
+    bookingsButtonText: { fontFamily: fonts.headBold, fontSize: 15, color: colors.primaryContrast },
+    bookingsSub: { fontFamily: fonts.body, fontSize: 12, color: colors.primaryContrast, opacity: 0.85 },
+    bookingsBadge: { minWidth: 30, height: 30, paddingHorizontal: 8, borderRadius: 15, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primaryContrast },
+    bookingsBadgeText: { fontFamily: fonts.headBold, fontSize: 14, color: colors.primaryInk },
     filterPill: {
       height: 36, paddingHorizontal: 16, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center',
       backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
@@ -254,6 +313,10 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors'], isRtl: boolea
     sticky: { paddingHorizontal: spacing.lg, gap: spacing.sm, marginBottom: spacing.sm },
     filterRow: { gap: 8 },
     bannerWrap: { paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
+    periodRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.sm, marginBottom: 2 },
+    periodText: { fontFamily: fonts.headBold, fontSize: 15, color: colors.text },
+    periodLine: { flex: 1, height: 1, backgroundColor: colors.border },
+    periodCount: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.muted },
     list: { paddingHorizontal: spacing.lg, gap: spacing.sm, paddingBottom: 120 },
     sheetTitle: { fontFamily: fonts.headBold, fontSize: 19, color: colors.text, marginBottom: spacing.sm },
     optionsWrap: { gap: 8, marginBottom: spacing.sm },

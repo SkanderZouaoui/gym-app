@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -83,7 +84,7 @@ export default function ActivityScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScreenHeader title={t('member.activity_title')} fallbackHref="/(member)/(tabs)/profile" />
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {isLoading && total === 0 ? (
           <View style={{ gap: 12 }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
@@ -173,9 +174,13 @@ export default function ActivityScreen() {
                   <MaterialIcons name="chevron-right" size={22} color={colors.muted} />
                 </Pressable>
               ))}
-              <Pressable onPress={() => router.push('/(member)/history' as never)} accessibilityRole="button" style={({ pressed }) => [styles.allButton, pressed && { opacity: 0.7 }]}>
+              <Pressable onPress={() => router.push('/(member)/history' as never)} accessibilityRole="button" style={({ pressed }) => [styles.allButton, pressed && { transform: [{ scale: 0.98 }], opacity: 0.95 }]}>
+                <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                <View style={styles.allIcon}>
+                  <MaterialIcons name="history" size={20} color={colors.primaryContrast} />
+                </View>
                 <Text style={styles.allButtonText}>{t('member.activity_history_all')}</Text>
-                <MaterialIcons name="arrow-forward" size={18} color={colors.primaryInk} />
+                <MaterialIcons name="chevron-right" size={22} color={colors.primaryContrast} />
               </Pressable>
             </View>
           </>
@@ -214,8 +219,12 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     dayLabel: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.muted },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border },
     rowIcon: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.deep },
-    allButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 50, borderRadius: radii.md, borderWidth: 1.5, borderColor: colors.primaryBorder, backgroundColor: colors.primarySoft },
-    allButtonText: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.primaryInk },
+    allButton: {
+      minHeight: 60, borderRadius: 18, overflow: 'hidden', flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14,
+      shadowColor: colors.hero2, shadowOpacity: 0.28, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4,
+    },
+    allIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)' },
+    allButtonText: { flex: 1, fontFamily: fonts.headBold, fontSize: 15, color: colors.primaryContrast },
     rowTitle: { fontFamily: fonts.bodyBold, fontSize: 15, color: colors.text },
     rowMeta: { fontFamily: fonts.body, fontSize: 12.5, color: colors.muted, marginTop: 2 },
   });

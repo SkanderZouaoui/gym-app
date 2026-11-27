@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +90,7 @@ export default function OccupancySettingsScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <KeyboardAwareScreen
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         footer={
           <View style={styles.footer}>
             <Button label={t('member.enregistrer')} onPress={submit} loading={save.isPending} disabled={!dirty} />

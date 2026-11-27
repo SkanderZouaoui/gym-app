@@ -108,7 +108,7 @@ export function ScanResultOverlay({
       <View style={styles.actions}>
         <Pressable onPress={onDismiss} style={({ pressed }) => [pressed && { transform: [{ scale: 0.98 }] }]}>
           <LinearGradient
-            colors={[colors.primary, colors.primaryPressed]}
+            colors={[colors.hero, colors.hero2]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.primaryBtn}

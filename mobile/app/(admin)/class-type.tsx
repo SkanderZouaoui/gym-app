@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Image, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
+import { Image, StyleSheet, Switch, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -101,7 +102,7 @@ export default function ClassTypeScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <KeyboardAwareScreen
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         footer={
           <View style={styles.footer}>
             <Button
@@ -119,7 +120,7 @@ export default function ClassTypeScreen() {
           <View style={styles.hero}>
             {cover ? <Image source={{ uri: cover }} style={StyleSheet.absoluteFill} /> : null}
             <LinearGradient
-              colors={cover ? ['rgba(46,16,101,0.35)', 'rgba(46,16,101,0.9)'] : [colors.primary, colors.primaryPressed]}
+              colors={cover ? ['rgba(46,16,101,0.35)', 'rgba(46,16,101,0.9)'] : [colors.hero, colors.hero2]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}

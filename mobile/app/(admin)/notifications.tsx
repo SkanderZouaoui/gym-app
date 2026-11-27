@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -139,7 +140,7 @@ export default function AdminNotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={[styles.container, seg === 0 && { paddingBottom: STICKY_BAR_SPACE + 30 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <ScrollView contentContainerStyle={[styles.container, seg === 0 && { paddingBottom: STICKY_BAR_SPACE + 30 }]} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
           <Text style={styles.backText}>{t('common.plus')}</Text>
@@ -248,7 +249,7 @@ export default function AdminNotificationsScreen() {
         {seg === 3 ? (
           <View style={{ gap: 10 }}>
             <Pressable onPress={() => setRuleOpen((o) => !o)} style={({ pressed }) => [pressed && { transform: [{ scale: 0.98 }] }]}>
-              <LinearGradient colors={ruleOpen ? [colors.surface, colors.surface] : [colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.cta, ruleOpen && { borderWidth: 1, borderColor: colors.border }]}>
+              <LinearGradient colors={ruleOpen ? [colors.surface, colors.surface] : [colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.cta, ruleOpen && { borderWidth: 1, borderColor: colors.border }]}>
                 <MaterialIcons name={ruleOpen ? 'close' : 'add'} size={22} color={ruleOpen ? colors.text : colors.primaryContrast} />
                 <Text style={[styles.ctaText, ruleOpen && { color: colors.text }]}>{ruleOpen ? t('common.close') : t('admin.nouvelle_regle')}</Text>
               </LinearGradient>
@@ -301,7 +302,7 @@ export default function AdminNotificationsScreen() {
                   }
                   style={(!ruleValid || createRule.isPending) && { opacity: 0.5 }}
                 >
-                  <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+                  <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                     <MaterialIcons name="repeat" size={22} color={colors.primaryContrast} />
                     <Text style={styles.ctaText}>{t('admin.creer_la_regle')}</Text>
                   </LinearGradient>

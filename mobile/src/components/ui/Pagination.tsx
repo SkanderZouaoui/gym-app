@@ -62,7 +62,7 @@ export function Pagination({ page, pageCount, pageSize, total, onChange, unit }:
             typeof p === 'string' ? (
               <Text key={p} style={styles.gap}>…</Text>
             ) : p === page ? (
-              <LinearGradient key={p} colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pageActive}>
+              <LinearGradient key={p} colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pageActive}>
                 <Text style={styles.pageActiveText}>{p + 1}</Text>
               </LinearGradient>
             ) : (

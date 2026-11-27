@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 
 /** Appelé par TextField quand un champ prend le focus : l'écran fait remonter ce champ au-dessus du clavier. */
-export const KeyboardScrollContext = createContext<() => void>(() => undefined);
+/** `extraBelow` : hauteur supplémentaire à garder visible sous le champ (ex. indicateurs de sécurité du mot de passe). */
+export const KeyboardScrollContext = createContext<(extraBelow?: number) => void>(() => undefined);
 
 /** Permet à un enfant (ex. galerie réordonnable) de suspendre le défilement de l'écran pendant un glissement. */
 export const ScrollLockContext = createContext<(enabled: boolean) => void>(() => undefined);
@@ -35,6 +36,7 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
   const scrollRef = useRef<ScrollViewInstance>(null);
   const scrollY = useRef(0);
   const keyboardTop = useRef(0);
+  const extraBelow = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [scrollEnabled, setScrollEnabled] = useState(true);
@@ -44,7 +46,7 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
     const input = (TextInput as unknown as { State?: { currentlyFocusedInput?: () => FocusedInput | null } }).State?.currentlyFocusedInput?.();
     if (!top || !input) return;
     input.measureInWindow((_x, y, _w, h) => {
-      const overflow = y + h + 28 - (top - 8); // 28 : place pour l'aide / l'erreur sous le champ
+      const overflow = y + h + 28 + extraBelow.current - (top - 8); // 28 : place pour l'aide / l'erreur sous le champ
       if (overflow > 0) scrollRef.current?.scrollTo({ y: scrollY.current + overflow, animated: true });
     });
   }, []);
@@ -76,7 +78,7 @@ export function KeyboardAwareScreen({ children, footer, onScroll, ...scrollProps
   }, [schedule]);
 
   // Changement de champ clavier ouvert : pas d'évènement clavier, c'est TextField qui nous prévient.
-  const onFieldFocus = useCallback(() => schedule(90), [schedule]);
+  const onFieldFocus = useCallback((extra?: number) => { extraBelow.current = extra ?? 0; schedule(90); }, [schedule]);
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollY.current = e.nativeEvent.contentOffset.y;

@@ -38,7 +38,7 @@ export function ExerciseEditorCard({ name, sets, onChangeSet, onAddSet, onRemove
             <ExerciseGif uri={mediaKey} size={56} />
           </View>
         ) : (
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.icon}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.icon}>
             <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
           </LinearGradient>
         )}

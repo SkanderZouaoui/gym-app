@@ -26,14 +26,14 @@ export function Button({ label, onPress, variant = 'primary', loading, disabled 
       style={({ pressed }) => [
         styles.base,
         variantStyles[variant],
-        gradient && !disabled && { shadowColor: colors.primary, shadowOpacity: scheme === 'dark' ? 0.45 : 0.3, ...styles.glow },
+        gradient && !disabled && { shadowColor: colors.hero2, shadowOpacity: scheme === 'dark' ? 0.45 : 0.3, ...styles.glow },
         disabled && styles.disabled,
         pressed && !isDisabled && styles.pressed,
       ]}
     >
       {gradient && !disabled ? (
         <LinearGradient
-          colors={[colors.primary, colors.primaryPressed]}
+          colors={[colors.hero, colors.hero2]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
@@ -74,7 +74,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
   });
 
   const variantStyles = StyleSheet.create({
-    primary: { backgroundColor: colors.primary },
+    primary: { backgroundColor: colors.hero },
     secondary: { backgroundColor: colors.secondary },
     outline: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     ghost: { backgroundColor: 'transparent' },

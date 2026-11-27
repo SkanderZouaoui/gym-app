@@ -126,7 +126,7 @@ export default function ConfigureExerciseScreen() {
           disabled={sets.length === 0}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, sets.length === 0 && { opacity: 0.5 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{editingIndex !== undefined ? t('member.enregistrer_les_series') : t('common.ajouter_au_programme')}</Text>
           </LinearGradient>

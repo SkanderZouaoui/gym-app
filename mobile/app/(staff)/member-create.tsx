@@ -200,7 +200,7 @@ export default function StaffMemberCreateScreen() {
           </View>
 
           <Pressable onPress={() => Share.share({ message: shareText })} style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}>
-            <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+            <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
               <MaterialIcons name="ios-share" size={22} color={colors.primaryContrast} />
               <Text style={styles.ctaText}>{t('common.partager_les_acces')}</Text>
             </LinearGradient>
@@ -323,7 +323,7 @@ export default function StaffMemberCreateScreen() {
           disabled={!valid || createMember.isPending}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, (!valid || createMember.isPending) && { opacity: 0.5 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="point-of-sale" size={22} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{createMember.isPending ? t('common.creation') : plan ? t('staff.creer_et_encaisser', { v0: formatMoney(plan.price) }) : t('staff.choisir_un_abonnement')}</Text>
           </LinearGradient>

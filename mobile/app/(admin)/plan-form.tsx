@@ -114,7 +114,7 @@ export default function AdminPlanFormScreen() {
               return (
                 <Pressable key={d.days} onPress={() => setDays(String(d.days))} style={styles.pill}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                    <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
                   <Text style={[styles.pillText, active && styles.pillTextActive]}>{d.label}</Text>
                 </Pressable>
@@ -163,7 +163,7 @@ export default function AdminPlanFormScreen() {
           disabled={!valid || save.isPending}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, (!valid || save.isPending) && { opacity: 0.5 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{save.isPending ? t('common.enregistrement') : t('member.enregistrer')}</Text>
           </LinearGradient>

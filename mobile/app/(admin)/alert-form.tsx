@@ -104,7 +104,7 @@ export default function AdminAlertFormScreen() {
               return (
                 <Pressable key={l.value} onPress={() => setLevel(l.value)} style={styles.pill}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                    <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
                   <MaterialIcons name={l.icon} size={16} color={active ? '#FFFFFF' : colors.muted} />
                   <Text style={[styles.pillText, active && styles.pillTextActive]}>{l.label}</Text>
@@ -138,7 +138,7 @@ export default function AdminAlertFormScreen() {
               return (
                 <Pressable key={a} onPress={() => setAudience(a)} style={styles.pill}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                    <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
                   <Text style={[styles.pillText, active && styles.pillTextActive]}>{audienceLabel(a)}</Text>
                 </Pressable>
@@ -182,7 +182,7 @@ export default function AdminAlertFormScreen() {
           disabled={!valid || save.isPending}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, (!valid || save.isPending) && { opacity: 0.5 }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{save.isPending ? t('common.enregistrement') : existing ? t('member.enregistrer') : t('admin.publier_lalerte')}</Text>
           </LinearGradient>

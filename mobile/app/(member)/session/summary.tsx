@@ -184,7 +184,7 @@ export default function SessionSummaryScreen() {
               return (
                 <Pressable key={f.value} style={styles.feelingChip} onPress={() => setFeeling(f.value)}>
                   {active ? (
-                    <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                    <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                   ) : null}
                   <Text style={[styles.feelingText, active && styles.feelingTextActive]}>{f.label}</Text>
                 </Pressable>
@@ -196,7 +196,7 @@ export default function SessionSummaryScreen() {
         {exerciseGroups.map(([exId, exSets]) => (
           <View key={exId} style={[styles.exerciseCard, cardShadow]}>
             <View style={styles.exerciseHeaderRow}>
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
+              <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
                 <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
               </LinearGradient>
               <View style={{ flex: 1, minWidth: 0 }}>
@@ -242,7 +242,7 @@ export default function SessionSummaryScreen() {
           status={saved ? 'success' : errorFlash ? 'error' : createWorkout.isPending ? 'loading' : 'idle'}
           onPress={handleSave}
           icon="check"
-          colors={[colors.primary, colors.primaryPressed]}
+          colors={[colors.hero, colors.hero2]}
           glowColor={colors.primary}
         />
       </View>

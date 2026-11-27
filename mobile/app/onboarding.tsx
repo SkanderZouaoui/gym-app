@@ -370,7 +370,7 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     stepperCard: { flex: 1, minWidth: 0, padding: 12, gap: 8, alignItems: 'center', borderRadius: radii.md ?? radii.lg, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
     stepLabel: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: colors.muted },
     stepValueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
-    stepInput: { minWidth: 44, paddingVertical: 0, paddingHorizontal: 0, textAlign: 'center', fontFamily: fonts.head, fontSize: 30, letterSpacing: -0.9, color: colors.text },
+    stepInput: { width: 62, flexShrink: 0, paddingVertical: 0, paddingHorizontal: 0, textAlign: 'center', fontFamily: fonts.head, fontSize: 28, letterSpacing: -0.9, color: colors.text },
     stepValue: { fontFamily: fonts.head, fontSize: 30, letterSpacing: -0.9, color: colors.text },
     stepUnit: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.muted },
     stepBtns: { flexDirection: 'row', gap: 8 },

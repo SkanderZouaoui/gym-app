@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -81,7 +82,7 @@ export default function WorkoutDetailScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.topBar}>
           <Pressable
@@ -125,7 +126,7 @@ export default function WorkoutDetailScreen() {
         {exerciseGroups.map(([exId, exSets]) => (
           <View key={exId} style={[styles.exerciseCard, cardShadow]}>
             <Pressable style={styles.exerciseHeaderRow} onPress={() => router.push(`/(member)/exercises/${exId}`)}>
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
+              <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.exerciseThumb}>
                 <MaterialIcons name="fitness-center" size={24} color="#FFFFFF" />
               </LinearGradient>
               <View style={{ flex: 1, minWidth: 0 }}>

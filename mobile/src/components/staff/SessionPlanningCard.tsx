@@ -40,7 +40,7 @@ export function SessionPlanningCard({ session: s, now, onPress, action }: Props)
     >
       <View style={styles.cardTop}>
         <LinearGradient
-          colors={st.key === 'live' ? [colors.success, colors.successInk] : st.key === 'cancelled' ? [colors.muted, colors.muted] : [colors.primary, colors.primaryPressed]}
+          colors={st.key === 'live' ? [colors.success, colors.successInk] : st.key === 'cancelled' ? [colors.muted, colors.muted] : [colors.hero, colors.hero2]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.timeBlock}

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { GymRefreshControl } from '../../../src/components/ui/GymRefreshControl';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -81,7 +82,7 @@ export default function ExerciseDetailScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.container}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<GymRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <Pressable style={styles.back} onPress={goBack} hitSlop={8}>
           <MaterialIcons name="arrow-back" size={20} color={colors.primaryInk} />
@@ -118,7 +119,7 @@ export default function ExerciseDetailScreen() {
             <SectionHeader title={t('common.muscles_sollicites')} style={{ marginBottom: 10 }} />
             <View style={styles.chipsRow}>
               {groupLabel ? (
-                <LinearGradient colors={[colors.primary, colors.primaryPressed]} style={styles.musclePrimary}>
+                <LinearGradient colors={[colors.hero, colors.hero2]} style={styles.musclePrimary}>
                   <Text style={styles.musclePrimaryText}>{groupLabel}</Text>
                 </LinearGradient>
               ) : null}
@@ -159,7 +160,7 @@ export default function ExerciseDetailScreen() {
           onPress={() => router.push({ pathname: '/(member)/exercises/configure', params: { exerciseId: exercise.id, dayIndex: '0' } })}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="playlist-add" size={24} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{t('member.ajouter_a_un_programme')}</Text>
           </LinearGradient>

@@ -138,7 +138,7 @@ export function MemberProfileScreen() {
               onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
               style={({ pressed }) => [styles.ctaShadow, { alignSelf: 'stretch' }, pressed && { transform: [{ scale: 0.98 }] }]}
             >
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+              <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                 <Text style={styles.ctaText}>{t('staff.souscrire_un_abonnement')}</Text>
               </LinearGradient>
             </Pressable>
@@ -199,7 +199,7 @@ export function MemberProfileScreen() {
           onPress={() => router.push({ pathname: routes.cashSell, params: { memberId: member.id } })}
           style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }]}
         >
-          <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+          <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
             <MaterialIcons name="payments" size={24} color={colors.primaryContrast} />
             <Text style={styles.ctaText}>{t('staff.renouveler_labonnement')}</Text>
           </LinearGradient>

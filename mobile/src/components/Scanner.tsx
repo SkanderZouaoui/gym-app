@@ -274,7 +274,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
                 return (
                   <Pressable key={s.id} onPress={() => onSelectSession?.(s.id)} style={({ pressed }) => [styles.sessionCard, active && styles.sessionCardActive, pressed && { opacity: 0.9 }]}>
                     {active ? (
-                      <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                      <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                     ) : null}
                     <View style={styles.sessionTop}>
                       <View style={[styles.liveDot, { backgroundColor: live ? '#34D399' : active ? 'rgba(255,255,255,0.6)' : colors.muted }]} />
@@ -297,7 +297,7 @@ export function Scanner({ sessionId, sessions, onSelectSession }: ScannerProps) 
               disabled={code.length !== 6 || manualCheckin.isPending}
               style={({ pressed }) => [styles.ctaShadow, pressed && { transform: [{ scale: 0.98 }] }, (code.length !== 6 || manualCheckin.isPending) && { opacity: 0.5 }]}
             >
-              <LinearGradient colors={[colors.primary, colors.primaryPressed]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+              <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                 <MaterialIcons name="check" size={24} color={colors.primaryContrast} />
                 <Text style={styles.ctaText}>{manualCheckin.isPending ? i18n.t('common.validation') : i18n.t('common.valider_la_presence')}</Text>
               </LinearGradient>
