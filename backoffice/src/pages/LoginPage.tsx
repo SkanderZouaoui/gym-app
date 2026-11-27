@@ -1,3 +1,4 @@
+import { isCompliantPassword } from '../lib/password'
 import { useState, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { api, apiErrorCode, apiErrorMessage } from '../api/client'
@@ -165,7 +166,7 @@ export function LoginPage() {
             {step === 'reset' ? (
               <>
                 <LoginField icon="pin" label="Code à 6 chiffres" inputMode="numeric" maxLength={6} autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
-                <LoginField icon="lock" label="Nouveau mot de passe (8 caractères minimum)" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <LoginField icon="lock" label="Nouveau mot de passe (8 car., majuscule, chiffre, symbole)" type="password" autoComplete="new-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </>
             ) : null}
           </div>
@@ -186,7 +187,7 @@ export function LoginPage() {
             status={status}
             icon={step === 'login' ? 'login' : step === 'forgot' ? 'send' : 'check'}
             label={step === 'login' ? 'Se connecter' : step === 'forgot' ? 'Envoyer le code' : 'Modifier le mot de passe'}
-            disabled={!email.trim() || (step === 'login' && password.length < 8) || (step === 'reset' && (code.length !== 6 || newPassword.length < 8))}
+            disabled={!email.trim() || (step === 'login' && password.length < 8) || (step === 'reset' && (code.length !== 6 || !isCompliantPassword(newPassword)))}
           />
         </form>
 

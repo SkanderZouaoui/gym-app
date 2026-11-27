@@ -1,3 +1,4 @@
+import { isCompliantPassword, PASSWORD_HINT } from '../lib/password'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiErrorMessage } from '../api/client'
@@ -88,12 +89,12 @@ export function ProfilePage() {
           {pwdError ? <div role="alert" className="rounded-2xl bg-danger-soft px-4 py-3 text-sm font-semibold text-danger-ink">{pwdError}</div> : null}
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Mot de passe actuel" icon="lock" type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} />
-            <Field label="Nouveau mot de passe" icon="key" type="password" autoComplete="new-password" hint="8 caractères minimum" value={next} onChange={(e) => setNext(e.target.value)} />
+            <Field label="Nouveau mot de passe" icon="key" type="password" autoComplete="new-password" hint={PASSWORD_HINT} value={next} onChange={(e) => setNext(e.target.value)} />
           </div>
           <div className="flex justify-end">
             <Button
               icon="lock_reset"
-              disabled={current.length < 8 || next.length < 8}
+              disabled={current.length < 8 || !isCompliantPassword(next)}
               loading={pwdBusy}
               onClick={async () => {
                 setPwdBusy(true)
