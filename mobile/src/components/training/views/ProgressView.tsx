@@ -8,7 +8,7 @@ import { useMyWorkouts } from '../../../hooks/useCoaching';
 import { BarHistogram, EmptyState, LineChart, SectionHeader, SkeletonBlock } from '../../ui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
-import { HScroll } from '../../ui/HScroll';
+import { SegmentedTabs } from '../../ui/SegmentedTabs';
 import { useTranslation } from 'react-i18next';
 import i18n, { dateLocale } from '../../../i18n';
 import { MONTHS_SHORT } from '../../../i18n/labels';
@@ -35,6 +35,7 @@ const CHART_LABELS: Record<ChartKey, () => string> = {
   waist: () => i18n.t('member.taille'),
   bodyFat: () => i18n.t('member.masse_grasse'),
 };
+const CHART_ICONS: Record<ChartKey, keyof typeof MaterialIcons.glyphMap> = { weight: 'monitor-weight', waist: 'straighten', bodyFat: 'percent' };
 const CHART_UNITS: Record<ChartKey, string> = { weight: 'kg', waist: 'cm', bodyFat: '%' };
 const MEASUREMENT_UNITS: Record<string, string> = { weight: 'kg', waist: 'cm', bodyFat: '%' };
 const MEASUREMENT_ICONS: Record<'weight' | 'waist' | 'bodyFat', keyof typeof MaterialIcons.glyphMap> = { weight: 'monitor-weight', waist: 'straighten', bodyFat: 'percent' };
@@ -52,6 +53,7 @@ export function ProgressView() {
 
   // Courbe : une mesure au choix (poids par défaut), de la plus ancienne à la plus récente.
   const [chartKey, setChartKey] = useState<ChartKey>('weight');
+  const [picked, setPicked] = useState<{ key: ChartKey; index: number } | null>(null);
   const seriesOf = useMemo(() => {
     const build = (key: ChartKey) =>
       (metrics ?? [])
@@ -149,6 +151,12 @@ export function ProgressView() {
   }
 
   const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${d.toFixed(1)}`;
+  const selIndex = picked && picked.key === activeKey && picked.index < weightSeries.length ? picked.index : weightSeries.length - 1;
+  const selPoint = weightSeries[selIndex];
+  const selPrev = selIndex > 0 ? weightSeries[selIndex - 1] : null;
+  const selVsPrev = selPoint && selPrev ? selPoint.value - selPrev.value : null;
+  const selVsStart = selPoint && weightSeries.length > 0 ? selPoint.value - weightSeries[0].value : null;
+  const deltaColor = (d: number) => (d < 0 ? colors.successInk : d > 0 ? colors.warningInk : colors.muted);
 
   return (
     <View style={{ gap: spacing.md }}>
@@ -173,21 +181,35 @@ export function ProgressView() {
         <View style={{ gap: 10 }}>
           <SectionHeader title={t('member.progress_evolution')} />
           {availableKeys.length > 1 ? (
-            <HScroll contentContainerStyle={styles.chipsRow}>
-              {availableKeys.map((k) => {
-                const active = k === activeKey;
-                return (
-                  <Pressable key={k} style={styles.chip} onPress={() => setChartKey(k)}>
-                    {active ? <LinearGradient colors={[colors.hero, colors.hero2]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} /> : null}
-                    <Text style={[styles.chipText, active && { color: colors.primaryContrast }]}>{CHART_LABELS[k]()}</Text>
-                  </Pressable>
-                );
-              })}
-            </HScroll>
+            <SegmentedTabs items={availableKeys.map((k) => ({ value: k, icon: CHART_ICONS[k], label: CHART_LABELS[k]() }))} value={activeKey} onChange={setChartKey} />
           ) : null}
           {weightSeries.length >= 2 ? (
             <View style={styles.card}>
+              {selPoint ? (
+                <View style={styles.callout}>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.calloutDate}>{selPoint.date.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
+                    <Text style={styles.calloutValue}>{Math.round(selPoint.value * 10) / 10}<Text style={styles.statUnit}> {CHART_UNITS[activeKey]}</Text></Text>
+                  </View>
+                  <View style={styles.calloutRight}>
+                    {selVsPrev !== null ? (
+                      <View style={[styles.deltaChip, { backgroundColor: selVsPrev < 0 ? colors.successSoft : selVsPrev > 0 ? colors.warningSoft : colors.surface2 }]}>
+                        <MaterialIcons name={selVsPrev < 0 ? 'trending-down' : selVsPrev > 0 ? 'trending-up' : 'trending-flat'} size={16} color={deltaColor(selVsPrev)} />
+                        <Text style={[styles.deltaChipText, { color: deltaColor(selVsPrev) }]}>{fmtDelta(selVsPrev)} {CHART_UNITS[activeKey]}</Text>
+                      </View>
+                    ) : (
+                      <Text style={styles.calloutHint}>{t('progress.first')}</Text>
+                    )}
+                    <Text style={styles.calloutHint}>{selVsPrev !== null ? t('progress.vs_previous') : ' '}</Text>
+                    {selVsStart !== null && selIndex > 0 ? (
+                      <Text style={[styles.calloutStart, { color: deltaColor(selVsStart) }]}>{t('progress.since_start')} : {fmtDelta(selVsStart)} {CHART_UNITS[activeKey]}</Text>
+                    ) : null}
+                  </View>
+                </View>
+              ) : null}
               <LineChart
+                selectedIndex={selIndex}
+                onSelect={(index) => setPicked({ key: activeKey, index })}
                 color={colors.deep}
                 points={weightSeries.map((p) => p.value)}
                 labels={weightSeries.length > 4
@@ -282,9 +304,14 @@ function makeStyles(colors: ReturnType<typeof useTheme>['colors']) {
     deltaText: { fontFamily: fonts.bodyBold, fontSize: 13, color: '#FFFFFF' },
     heroDate: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
     card: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.md },
-    chipsRow: { gap: 8 },
-    chip: { height: 34, paddingHorizontal: 14, borderRadius: 999, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-    chipText: { fontFamily: fonts.bodySemiBold, fontSize: 13, color: colors.text },
+    callout: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: spacing.sm },
+    calloutDate: { fontFamily: fonts.bodySemiBold, fontSize: 12.5, color: colors.muted },
+    calloutValue: { fontFamily: fonts.display, fontSize: 30, lineHeight: 34, letterSpacing: -0.8, color: colors.text },
+    calloutRight: { alignItems: 'flex-end', gap: 3 },
+    deltaChip: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 28, paddingHorizontal: 10, borderRadius: 14 },
+    deltaChipText: { fontFamily: fonts.bodyBold, fontSize: 13 },
+    calloutHint: { fontFamily: fonts.body, fontSize: 11.5, color: colors.muted },
+    calloutStart: { fontFamily: fonts.bodySemiBold, fontSize: 12 },
     statsRow: { flexDirection: 'row', marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: colors.border },
     stat: { flex: 1, alignItems: 'center', gap: 2 },
     statLabel: { fontFamily: fonts.bodySemiBold, fontSize: 11.5, color: colors.muted },

@@ -486,7 +486,10 @@
     "title": "Progrès",
     "start": "Début",
     "now": "Actuel",
-    "change": "Écart"
+    "change": "Écart",
+    "since_start": "Depuis le début",
+    "vs_previous": "vs mesure précédente",
+    "first": "Première mesure"
   },
   "admin": {
     "pilotage": "Pilotage",

@@ -486,7 +486,10 @@
     "title": "Progress",
     "start": "Start",
     "now": "Current",
-    "change": "Change"
+    "change": "Change",
+    "since_start": "Since the start",
+    "vs_previous": "vs previous measure",
+    "first": "First measure"
   },
   "admin": {
     "pilotage": "Dashboard",

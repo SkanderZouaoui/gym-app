@@ -19,3 +19,4 @@ export * from './SectionHeader';
 export * from './SheetAlert';
 export * from './GymRefreshControl';
 export * from './ActionRowButton';
+export * from './SegmentedTabs';
